@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">SANBAI Team</string>
+    <string name="athletes_list_title">Спортсмены</string>
+    <string name="athletes_search_placeholder">Поиск спорстсменов</string>
+    <string name="athletes_search_no_results">Никого не найдено по запросу: %1$s</string>
+    <string name="athletes_no_athletes">Нет спортсменов</string>
+    <string name="athletes_add_someone_to_team">Добавь кого-нибудь в команду</string>
+    <string name="athletes_add_athlete">Добавить спортсмена</string>
+    <string name="athletes_add_athlete_name_label">ФИО спортсмена</string>
+    <string name="athletes_add_athlete_name_placeholder">Иванов Иван Иванович</string>
+    <string name="athletes_add_athlete_birth_date_label">Дата рождения</string>
+    <string name="athletes_add_athlete_birth_date_placeholder">дд.мм.гггг</string>
+    <string name="athletes_add_athlete_birth_date_supporting_text">Формат: дд.мм.гггг</string>
+    <string name="athletes_add_athlete_gender_male">Мужской</string>
+    <string name="athletes_add_athlete_gender_female">Женский</string>
+</resources>
