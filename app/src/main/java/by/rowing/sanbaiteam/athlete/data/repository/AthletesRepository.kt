@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -29,5 +30,14 @@ internal class AthletesRepository(private val dao: AthleteDao) {
 
     fun addAthlete(athlete: AthleteEntity) = CoroutineScope(Dispatchers.IO).launch {
         dao.addAthlete(athlete = athlete)
+    }
+
+    suspend fun getAthleteNames(athleteIds: List<Long>): List<String> = withContext(Dispatchers.IO) {
+        dao.getAthleteNames(athleteIds = athleteIds)
+    }
+
+    suspend fun getAthleteNameMap(athleteIds: List<Long>): Map<Long, String> = withContext(Dispatchers.IO) {
+        if (athleteIds.isEmpty()) emptyMap()
+        else dao.getAthletesByIds(athleteIds).associate { it.id to it.name }
     }
 }

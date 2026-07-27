@@ -7,6 +7,10 @@ import by.rowing.sanbaiteam.athlete.presentation.list.AthletesViewModel
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.main.presentation.MainViewModel
 import by.rowing.sanbaiteam.main.presentation.navigation.MainNavigator
+import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
+import by.rowing.sanbaiteam.training.presentation.add.AddTrainingViewModel
+import by.rowing.sanbaiteam.training.presentation.detail.TrainingDetailViewModel
+import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import com.checker.uikit3.modifier.ClickableState
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -23,6 +27,7 @@ val appModule = module {
 
     // Repository
     singleOf(::AthletesRepository)
+    singleOf(::TrainingRepository)
 
     singleOf(::ClickableState)
 
@@ -32,4 +37,7 @@ val appModule = module {
     viewModelOf(::AthletesViewModel)
     viewModelOf(::MainViewModel)
     viewModelOf(::AddAthleteViewModel)
+    viewModelOf(::AddTrainingViewModel)
+    viewModelOf(::ListTrainingViewModel)
+    viewModelOf(::TrainingDetailViewModel)
 }

@@ -15,8 +15,13 @@ internal interface AthleteDao {
     @Insert
     suspend fun addAthlete(athlete: AthleteEntity)
 
-    companion object {
+    @Query("SELECT name FROM $TABLE_NAME WHERE id IN (:athleteIds)")
+    suspend fun getAthleteNames(athleteIds: List<Long>): List<String>
 
+    @Query("SELECT * FROM $TABLE_NAME WHERE id IN (:athleteIds)")
+    suspend fun getAthletesByIds(athleteIds: List<Long>): List<AthleteEntity>
+
+    companion object {
         const val TABLE_NAME = "athlete_entity"
     }
 }

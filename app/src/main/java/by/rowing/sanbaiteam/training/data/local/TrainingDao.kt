@@ -1,42 +1,56 @@
 package by.rowing.sanbaiteam.training.data.local
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
+import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
+import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 
 @Dao
 internal interface TrainingDao {
 
-    data class TrainingListRawResult(
-        val trainingId: Long,
-        val trainingType: String,
-        val workDescriptions: String,
-        val maxPulseList: String,
-        val pieceCount: Int
-    )
+    @Insert
+    suspend fun insertTraining(training: TrainingEntity): Long
 
-    @Query("""
-        SELECT 
-            tp.trainingId as trainingId,
-            tp.type as trainingType,
-            GROUP_CONCAT(
-                CASE 
-                    WHEN tp.type = 'REST' THEN 'Отдых ' || (tp.duration / 60000) || 'мин'
-                    WHEN tp.length IS NOT NULL THEN tp.length || 'м ' || (tp.duration / 60000) || 'мин'
-                    ELSE (tp.duration / 60000) || 'мин'
-                END
-            ) as workDescriptions,
-            GROUP_CONCAT(DISTINCT taw.maxPulse) as maxPulseList,
-            COUNT(DISTINCT tp.id) as pieceCount
-        FROM $TABLE_TRAINING_PIECE tp
-        LEFT JOIN $TABLE_ATHLETE_WORK taw ON tp.id = taw.trainingPieceId
-        WHERE tp.trainingId = :trainingId
-        GROUP BY tp.trainingId, tp.type
-    """)
-    suspend fun getTrainingListRawResults(trainingId: Long): List<TrainingListRawResult>
+    @Insert
+    suspend fun insertPieces(pieces: List<TrainingAthletePieceEntity>)
+
+    @Transaction
+    suspend fun saveTrainingWithPieces(
+        training: TrainingEntity,
+        pieces: List<TrainingAthletePieceEntity>
+    ): Long {
+        val trainingId = insertTraining(training)
+        insertPieces(pieces.map { it.copy(trainingId = trainingId) })
+        return trainingId
+    }
+
+    @Query("SELECT * FROM $TABLE_TRAINING ORDER BY dateMillis DESC")
+    suspend fun getAllTrainingEntities(): List<TrainingEntity>
+
+    @Query("SELECT * FROM $TABLE_TRAINING WHERE id = :trainingId")
+    suspend fun getTrainingById(trainingId: Long): TrainingEntity?
+
+    @Query(
+        """
+        SELECT * FROM $TABLE_TRAINING_ATHLETE_PIECE
+        WHERE trainingId = :trainingId
+        ORDER BY athleteId, `order`
+        """
+    )
+    suspend fun getPiecesForTraining(trainingId: Long): List<TrainingAthletePieceEntity>
+
+    @Query(
+        """
+        SELECT DISTINCT athleteId FROM $TABLE_TRAINING_ATHLETE_PIECE
+        WHERE trainingId = :trainingId
+        """
+    )
+    suspend fun getAthleteIdsInTraining(trainingId: Long): List<Long>
 
     companion object {
-
-        const val TABLE_TRAINING_PIECE = "table_training_piece"
-        const val TABLE_ATHLETE_WORK = "table_athlete_work"
+        const val TABLE_TRAINING = "table_training"
+        const val TABLE_TRAINING_ATHLETE_PIECE = "table_training_athlete_piece"
     }
 }

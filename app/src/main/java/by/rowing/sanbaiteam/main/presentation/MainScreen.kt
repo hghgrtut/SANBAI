@@ -67,7 +67,6 @@ private fun MainScreenContent(
             ) {
                 WelcomeSection()
                 SpacerXL()
-                QuickStatsSection()
                 SpacerXL()
                 NavigationGrid(actions = actions)
             }
@@ -226,24 +225,7 @@ private fun NavigationGrid(
             icon = Icons.Default.FitnessCenter,
             iconBackgroundColor = ColorPalette.Green50,
             textColor = ColorPalette.Grey10,
-            onClick = {}
-        )
-        NavigationCard(
-            title = "Statistics",
-            subtitle = "Analyze performance data",
-            icon = Icons.Default.Analytics,
-            iconBackgroundColor = ColorPalette.Orange50,
-            textColor = ColorPalette.Grey10,
-            onClick = {}
-        )
-        NavigationCard(
-            title = "Training Plans",
-            subtitle = "Create workout schedules",
-            icon = Icons.Default.CalendarMonth,
-            iconBackgroundColor = ColorPalette.Grey85,
-            textColor = ColorPalette.Grey30,
-            onClick = {},
-            enabled = false
+            onClick = actions::navigateToTrainingsScreen
         )
     }
 }

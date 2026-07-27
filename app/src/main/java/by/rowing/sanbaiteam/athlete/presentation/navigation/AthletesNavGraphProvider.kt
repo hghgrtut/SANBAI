@@ -17,8 +17,7 @@ internal object AthletesNavGraphProvider {
 
     fun athletesNavGraph(
         builder: NavGraphBuilder,
-        navigator: ComposeNavigator,
-        navHostController: NavHostController
+        navigator: ComposeNavigator
     ) {
         builder.apply {
             composable<AthletesNavigation.AthletesList> {

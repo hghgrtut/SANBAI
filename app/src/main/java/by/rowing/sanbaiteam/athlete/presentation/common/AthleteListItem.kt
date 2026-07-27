@@ -33,21 +33,7 @@ internal fun AthleteListItem(
     athlete: AthleteItemModel,
     onAthleteClick: (AthleteItemModel) -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = Spacing.M,
-                vertical = Spacing.S
-            ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        shape = MaterialTheme.shapes.medium,
-        onClick = { onAthleteClick(athlete) }
-    ) {
+    ItemCard(onClick = { onAthleteClick(athlete) }) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

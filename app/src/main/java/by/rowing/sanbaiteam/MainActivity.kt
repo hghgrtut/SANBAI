@@ -16,6 +16,7 @@ import by.rowing.sanbaiteam.core.presentation.runWithCompose
 import by.rowing.sanbaiteam.main.presentation.MainScreen
 import by.rowing.sanbaiteam.main.presentation.MainViewModel
 import by.rowing.sanbaiteam.main.presentation.navigation.MainNavigation
+import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavGraphProvider
 import by.rowing.sanbaiteam.uikit.theme.SANBAITeamTheme
 import com.checker.uikit3.modifier.ClickableState
 import org.koin.android.ext.android.inject
@@ -51,8 +52,11 @@ class MainActivity : ComponentActivity() {
                             }
                             AthletesNavGraphProvider.athletesNavGraph(
                                 builder = this,
-                                navigator = composeNavigator,
-                                navHostController = navController,
+                                navigator = composeNavigator
+                            )
+                            TrainingNavGraphProvider.trainingNavGraph(
+                                builder = this,
+                                navigator = composeNavigator
                             )
                         }
                     }

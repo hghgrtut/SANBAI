@@ -65,6 +65,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.material.icons.extended)
     implementation(libs.kotlin.parcelize.runtime)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.foundation.layout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
