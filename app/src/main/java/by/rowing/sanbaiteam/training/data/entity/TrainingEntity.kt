@@ -10,4 +10,7 @@ internal data class TrainingEntity(
     val id: Long = 0,
     val dateMillis: Long,
     val type: TrainingPieceType = TrainingPieceType.SINGLE,
+    val sourceCsvRelativePath: String? = null,
+    val sourceDeviceSerial: String? = null,
+    val sourceSessionName: String? = null,
 )

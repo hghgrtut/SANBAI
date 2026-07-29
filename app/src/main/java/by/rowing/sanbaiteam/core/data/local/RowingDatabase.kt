@@ -32,7 +32,7 @@ internal abstract class RowingDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: RowingDatabase? = null
 
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
 
         fun getInstance(context: Context): RowingDatabase {
             return INSTANCE ?: synchronized(this) {

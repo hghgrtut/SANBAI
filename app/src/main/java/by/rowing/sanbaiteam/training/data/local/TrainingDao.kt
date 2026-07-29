@@ -34,6 +34,22 @@ internal interface TrainingDao {
 
     @Query(
         """
+        UPDATE $TABLE_TRAINING
+        SET sourceCsvRelativePath = :relativePath,
+            sourceDeviceSerial = :deviceSerial,
+            sourceSessionName = :sessionName
+        WHERE id = :trainingId
+        """
+    )
+    suspend fun updateImportMetadata(
+        trainingId: Long,
+        relativePath: String?,
+        deviceSerial: String?,
+        sessionName: String?,
+    )
+
+    @Query(
+        """
         SELECT * FROM $TABLE_TRAINING_ATHLETE_PIECE
         WHERE trainingId = :trainingId
         ORDER BY athleteId, `order`

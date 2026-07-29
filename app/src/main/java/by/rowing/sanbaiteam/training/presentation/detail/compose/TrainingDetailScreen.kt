@@ -17,16 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import by.rowing.sanbaiteam.R
 import by.rowing.sanbaiteam.training.presentation.detail.TrainingDetailViewModel
-import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailAthlete
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailState
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerM
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -100,31 +97,41 @@ private fun TrainingDetailContent(
                             style = TypographyPaletteSp.H2
                         )
                     }
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
+                        ) {
+                            Column(modifier = Modifier.padding(Spacing.M)) {
+                                Text(
+                                    text = stringResource(R.string.training_detail_crew_header),
+                                    style = TypographyPalette.H4
+                                )
+                                SpacerS()
+                                state.athleteNames.forEach { name ->
+                                    Text(
+                                        text = name,
+                                        style = TypographyPaletteSp.Body1Regular
+                                    )
+                                    SpacerXS()
+                                }
+                            }
+                        }
+                    }
                     items(
-                        state.athletes,
-                        key = { it.athleteId }
-                    ) { athlete -> AthleteResultsCard(athlete) }
+                        state.pieces,
+                        key = { it.order }
+                    ) { piece ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
+                        ) {
+                            Column(modifier = Modifier.padding(Spacing.M)) {
+                                PieceResultRow(piece)
+                            }
+                        }
+                    }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AthleteResultsCard(athlete: TrainingDetailAthlete) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
-    ) {
-        Column(modifier = Modifier.padding(Spacing.M)) {
-            Text(
-                text = athlete.athleteName,
-                style = TypographyPalette.H4
-            )
-            SpacerS()
-            athlete.pieces.forEach { piece ->
-                PieceResultRow(piece)
-                SpacerXS()
             }
         }
     }

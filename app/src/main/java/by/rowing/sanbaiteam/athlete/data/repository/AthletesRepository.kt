@@ -24,6 +24,7 @@ internal class AthletesRepository(private val dao: AthleteDao) {
                     Locale.getDefault()
                 ).format(athlete.dateOfBirth),
                 isMale = athlete.isMale,
+                speedCoachSerial = athlete.speedCoachSerial,
             )
         }
     }
@@ -32,12 +33,12 @@ internal class AthletesRepository(private val dao: AthleteDao) {
         dao.addAthlete(athlete = athlete)
     }
 
-    suspend fun getAthleteNames(athleteIds: List<Long>): List<String> = withContext(Dispatchers.IO) {
-        dao.getAthleteNames(athleteIds = athleteIds)
-    }
-
     suspend fun getAthleteNameMap(athleteIds: List<Long>): Map<Long, String> = withContext(Dispatchers.IO) {
         if (athleteIds.isEmpty()) emptyMap()
         else dao.getAthletesByIds(athleteIds).associate { it.id to it.name }
+    }
+
+    suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long? = withContext(Dispatchers.IO) {
+        dao.getAthleteBySpeedCoachSerial(serial)?.id
     }
 }

@@ -129,6 +129,20 @@ private fun AddAthleteForm(
             ),
             visualTransformation = DateTransformation()
         )
+        TextField(
+            value = state.speedCoachSerial,
+            onValueChange = actions::changeSpeedCoachSerial,
+            label = stringResource(R.string.athletes_add_athlete_speedcoach_serial_label),
+            placeholder = stringResource(R.string.athletes_add_athlete_speedcoach_serial_placeholder),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TypographyPaletteSp.Body1Regular,
+            keyboardOptions = KeyboardOptions(
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done,
+            )
+        )
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
@@ -165,6 +179,7 @@ private fun AddAthleteForm(
                 name = state.name,
                 dateOfBirth = state.dateOfBirth,
                 isMale = state.isMale,
+                speedCoachSerial = state.speedCoachSerial.ifBlank { null },
             )
         ) {}
     }

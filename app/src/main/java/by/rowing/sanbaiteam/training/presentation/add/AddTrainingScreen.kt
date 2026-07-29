@@ -1,6 +1,8 @@
 package by.rowing.sanbaiteam.training.presentation.add
 
 import android.app.DatePickerDialog
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.net.toUri
 import by.rowing.sanbaiteam.R
+import by.rowing.sanbaiteam.athlete.presentation.common.AthleteItemModel
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.component.TextField
@@ -51,6 +56,22 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
     var showSaveDialog by remember { mutableStateOf(false) }
     val state = viewModel.state
     val context = LocalContext.current
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { selectedUri ->
+            runCatching {
+                context.contentResolver.openInputStream(selectedUri)?.bufferedReader()?.use { it.readText() }
+            }.getOrNull()?.let(viewModel::importCsv)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val initialUri = viewModel.consumeInitialImportUri() ?: return@LaunchedEffect
+        runCatching {
+            context.contentResolver.openInputStream(initialUri.toUri())?.bufferedReader()?.use { it.readText() }
+        }.getOrNull()?.let(viewModel::importCsv)
+    }
 
     Scaffold(
         topBar = {
@@ -110,35 +131,69 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
             }
             SpacerM()
 
-            state.athleteSessions.forEachIndexed { index, session ->
-                AthleteSessionCard(
-                    index = index,
-                    session = session,
-                    state = state,
-                    canRemove = state.athleteSessions.size > 1,
-                    onAthleteSelected = { viewModel.changeAthleteId(session.localId, it) },
-                    onRemoveSession = { viewModel.removeAthleteSession(session.localId) },
-                    onAddPiece = { viewModel.addPiece(session.localId) },
-                    onRemovePiece = { pieceLocalId ->
-                        viewModel.removePiece(session.localId, pieceLocalId)
+            Text(
+                text = stringResource(R.string.add_training_crew_header),
+                style = TypographyPalette.H4
+            )
+            SpacerS()
+            state.crewAthletes.forEachIndexed { index, crewAthlete ->
+                val selectedIds = state.crewAthletes.map { it.athleteId }.filter { it > 0 }.toSet()
+                AthleteDropdown(
+                    athletes = state.athletesCatalog.filter { athlete ->
+                        athlete.id == crewAthlete.athleteId || athlete.id !in selectedIds
                     },
-                    onDistanceChange = { pieceLocalId, text ->
-                        viewModel.changePieceDistance(session.localId, pieceLocalId, text)
-                    },
-                    onTimeChange = { pieceLocalId, text ->
-                        viewModel.changePieceTime(session.localId, pieceLocalId, text)
-                    },
-                    onStrokeRateChange = { pieceLocalId, text ->
-                        viewModel.changePieceStrokeRate(session.localId, pieceLocalId, text)
-                    }
+                    selectedAthleteId = crewAthlete.athleteId,
+                    label = stringResource(R.string.add_training_athlete_header, index + 1),
+                    onAthleteSelected = { viewModel.changeAthleteId(crewAthlete.localId, it) }
+                )
+                if (state.crewAthletes.size > 1) {
+                    SpacerXS()
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(R.string.add_training_delete_piece_work),
+                        buttonColors = ButtonColors.text(),
+                        debounceClick = { viewModel.removeCrewAthlete(crewAthlete.localId) }
+                    )
+                }
+                SpacerS()
+            }
+            if (state.crewAthletes.size < AddTrainingState.MAX_CREW_SIZE) {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(R.string.add_training_piece_athlete),
+                    debounceClick = viewModel::addCrewAthlete
                 )
                 SpacerM()
             }
 
+            Text(
+                text = stringResource(R.string.add_training_pieces_header),
+                style = TypographyPalette.H4
+            )
+            SpacerS()
+            state.pieces.forEachIndexed { pieceIndex, piece ->
+                PieceForm(
+                    index = pieceIndex,
+                    piece = piece,
+                    canRemove = state.pieces.size > 1,
+                    onDistanceChange = { viewModel.changePieceDistance(piece.localId, it) },
+                    onTimeChange = { viewModel.changePieceTime(piece.localId, it) },
+                    onStrokeRateChange = { viewModel.changePieceStrokeRate(piece.localId, it) },
+                    onRemove = { viewModel.removePiece(piece.localId) }
+                )
+                SpacerS()
+            }
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.add_training_piece_athlete),
-                debounceClick = viewModel::addAthleteSession
+                text = stringResource(R.string.add_training_piece),
+                debounceClick = viewModel::addPiece
+            )
+            SpacerM()
+
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.add_training_import_csv),
+                debounceClick = { importLauncher.launch("*/*") }
             )
             SpacerS()
             Button(
@@ -180,64 +235,24 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
                 }
             )
         }
-    }
-}
-
-@Composable
-private fun AthleteSessionCard(
-    index: Int,
-    session: AddAthleteSession,
-    state: AddTrainingState,
-    canRemove: Boolean,
-    onAthleteSelected: (Long) -> Unit,
-    onRemoveSession: () -> Unit,
-    onAddPiece: () -> Unit,
-    onRemovePiece: (Long) -> Unit,
-    onDistanceChange: (Long, String) -> Unit,
-    onTimeChange: (Long, String) -> Unit,
-    onStrokeRateChange: (Long, String) -> Unit,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
-    ) {
-        Column(modifier = Modifier.padding(Spacing.M)) {
-            Text(
-                text = stringResource(R.string.add_training_athlete_header, index + 1),
-                style = TypographyPalette.H4
+        state.importNotice?.let { notice ->
+            AlertDialog(
+                onDismissRequest = viewModel::clearValidationError,
+                title = {
+                    Text(
+                        text = stringResource(R.string.add_training_import_notice_title),
+                        style = TypographyPalette.H4
+                    )
+                },
+                text = { Text(text = notice, style = TypographyPalette.Body1Regular) },
+                confirmButton = {
+                    Button(
+                        text = stringResource(R.string.cancel),
+                        buttonColors = ButtonColors.text(),
+                        debounceClick = viewModel::clearValidationError
+                    )
+                }
             )
-            SpacerS()
-            AthleteDropdown(
-                athletes = state.athletesCatalog,
-                selectedAthleteId = session.athleteId,
-                onAthleteSelected = onAthleteSelected
-            )
-            SpacerM()
-            session.pieces.forEachIndexed { pieceIndex, piece ->
-                PieceForm(
-                    index = pieceIndex,
-                    piece = piece,
-                    canRemove = session.pieces.size > 1,
-                    onDistanceChange = { onDistanceChange(piece.localId, it) },
-                    onTimeChange = { onTimeChange(piece.localId, it) },
-                    onStrokeRateChange = { onStrokeRateChange(piece.localId, it) },
-                    onRemove = { onRemovePiece(piece.localId) }
-                )
-                SpacerS()
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.add_training_piece),
-                debounceClick = onAddPiece
-            )
-            if (canRemove) {
-                SpacerS()
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.add_training_delete_piece_work),
-                    debounceClick = onRemoveSession
-                )
-            }
         }
     }
 }
@@ -315,8 +330,9 @@ private fun PieceForm(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AthleteDropdown(
-    athletes: List<by.rowing.sanbaiteam.athlete.presentation.common.AthleteItemModel>,
+    athletes: List<AthleteItemModel>,
     selectedAthleteId: Long,
+    label: String,
     onAthleteSelected: (Long) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -331,7 +347,7 @@ private fun AthleteDropdown(
             value = selectedName,
             onValueChange = {},
             readOnly = true,
-            label = stringResource(R.string.add_training_athlete_label),
+            label = label,
             textStyle = TypographyPalette.Body1Regular,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier

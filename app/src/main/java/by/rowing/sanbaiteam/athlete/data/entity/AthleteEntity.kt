@@ -11,5 +11,6 @@ internal data class AthleteEntity(
     val id: Long = 0,
     val name: String,
     val dateOfBirth: Date,
-    val isMale: Boolean
+    val isMale: Boolean,
+    val speedCoachSerial: String?,
 )

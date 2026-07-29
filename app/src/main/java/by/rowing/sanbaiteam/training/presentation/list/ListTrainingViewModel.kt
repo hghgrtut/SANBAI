@@ -45,7 +45,7 @@ internal class ListTrainingViewModel(
     }
 
     override fun onAddTrainingClick() {
-        TrainingNavigation.TrainingAdd(System.currentTimeMillis()).navigateTo(
+        TrainingNavigation.TrainingAdd().navigateTo(
             composeNavigator = composeNavigator,
             navOptions = getReturnToScreenNavOptions<TrainingNavigation.TrainingList>()
         )

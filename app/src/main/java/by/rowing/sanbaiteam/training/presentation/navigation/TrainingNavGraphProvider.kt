@@ -25,9 +25,11 @@ internal object TrainingNavGraphProvider {
             ListTrainingScreen(viewModel = koinViewModel<ListTrainingViewModel> { parametersOf(navigator) })
         }
         builder.composable<TrainingNavigation.TrainingAdd> { backStackEntry ->
-            val trainingDateMillis = backStackEntry.toRoute<TrainingNavigation.TrainingAdd>().trainingDateMillis
+            val route = backStackEntry.toRoute<TrainingNavigation.TrainingAdd>()
             AddTrainingScreen(
-                viewModel = koinViewModel<AddTrainingViewModel> { parametersOf(navigator, trainingDateMillis) }
+                viewModel = koinViewModel<AddTrainingViewModel> {
+                    parametersOf(navigator, route.importUri)
+                }
             )
         }
         builder.composable<TrainingNavigation.TrainingDetail> { backStackEntry ->

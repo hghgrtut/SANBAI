@@ -21,6 +21,9 @@ internal interface AthleteDao {
     @Query("SELECT * FROM $TABLE_NAME WHERE id IN (:athleteIds)")
     suspend fun getAthletesByIds(athleteIds: List<Long>): List<AthleteEntity>
 
+    @Query("SELECT * FROM $TABLE_NAME WHERE speedCoachSerial = :serial LIMIT 1")
+    suspend fun getAthleteBySpeedCoachSerial(serial: String): AthleteEntity?
+
     companion object {
         const val TABLE_NAME = "athlete_entity"
     }

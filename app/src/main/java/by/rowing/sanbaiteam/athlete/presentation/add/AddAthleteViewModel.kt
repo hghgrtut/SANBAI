@@ -17,6 +17,7 @@ internal class AddAthleteViewModel(
     initialState = AddAthleteState(
         name = "",
         dateOfBirth = "",
+        speedCoachSerial = "",
         isMale = true,
         nameError = null,
         dateError = null
@@ -65,29 +66,19 @@ internal class AddAthleteViewModel(
         changeState { copy(isMale = isMale) }
     }
 
+    override fun changeSpeedCoachSerial(newSerial: String) {
+        changeState {
+            copy(speedCoachSerial = newSerial.filter { it.isLetterOrDigit() })
+        }
+    }
+
     private fun isValidDate(dateString: String): Boolean {
         return try {
             val format = SimpleDateFormat(DATE_PATTERN, Locale.getDefault())
             format.isLenient = false
             format.parse(dateString) != null
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
-        }
-    }
-
-    private fun calculateAge(dateString: String): Int {
-        return try {
-            val birthDate = getBirthDate(dateString) ?: return 0
-            val today = Calendar.getInstance()
-            val birthCalendar = Calendar.getInstance().apply { time = birthDate }
-
-            var age = today.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR)
-            if (today.get(Calendar.DAY_OF_YEAR) < birthCalendar.get(Calendar.DAY_OF_YEAR)) {
-                age--
-            }
-            age
-        } catch (e: Exception) {
-            0
         }
     }
 
@@ -97,7 +88,8 @@ internal class AddAthleteViewModel(
         return AthleteEntity(
             name = state.name,
             dateOfBirth = getBirthDate(state.dateOfBirth) ?: return null,
-            isMale = state.isMale
+            isMale = state.isMale,
+            speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null }
         )
     }
 

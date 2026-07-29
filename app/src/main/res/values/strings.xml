@@ -13,6 +13,8 @@
     <string name="athletes_add_athlete_birth_date_label">Дата рождения</string>
     <string name="athletes_add_athlete_birth_date_placeholder">дд.мм.гггг</string>
     <string name="athletes_add_athlete_birth_date_supporting_text">Формат: дд.мм.гггг</string>
+    <string name="athletes_add_athlete_speedcoach_serial_label">Серийный номер выданного SpeedCoach</string>
+    <string name="athletes_add_athlete_speedcoach_serial_placeholder">Например, 2693559</string>
     <string name="athletes_add_athlete_gender_male">Мужской</string>
     <string name="athletes_add_athlete_gender_female">Женский</string>
     <string name="training_list_title">Тренировки</string>
@@ -34,6 +36,8 @@
     <string name="add_training_date_label">Дата тренировки</string>
     <string name="add_training_athlete_label">Спортсмен</string>
     <string name="add_training_athlete_header">Спортсмен %1$d</string>
+    <string name="add_training_crew_header">Экипаж</string>
+    <string name="add_training_pieces_header">Куски</string>
     <string name="add_training_select_athlete">Выберите спортсмена</string>
     <string name="add_training_piece">Добавить кусок</string>
     <string name="add_training_piece_header">Кусок %1$d</string>
@@ -48,7 +52,14 @@
     <string name="add_training_piece_stroke_rate_label">Частота гребков</string>
     <string name="add_training_piece_pace_label">Темп: %1$s</string>
     <string name="add_training_pace_placeholder">—</string>
+    <string name="add_training_import_csv">Импорт из SpeedCoach (CSV)</string>
+    <string name="add_training_import_notice_title">Импорт SpeedCoach</string>
+    <string name="add_training_import_ready">Готов к импорту из выбранного файла.</string>
+    <string name="add_training_import_parse_error">Не удалось разобрать CSV файл.</string>
+    <string name="add_training_import_not_found_by_serial">Спортсмен со спидкоучем %1$s не найден. Выберите вручную.</string>
+    <string name="add_training_import_success">CSV импортирован.</string>
     <string name="training_detail_title">Тренировка</string>
+    <string name="training_detail_crew_header">Экипаж</string>
     <string name="training_detail_not_found">Тренировка не найдена</string>
     <string name="training_detail_piece_number">Кусок %1$d</string>
     <string name="training_detail_distance">%1$d м</string>

@@ -4,15 +4,10 @@ internal data class TrainingDetailState(
     val trainingId: Long = 0,
     val dateFormatted: String = "",
     val typeResId: Int = 0,
-    val athletes: List<TrainingDetailAthlete> = emptyList(),
+    val athleteNames: List<String> = emptyList(),
+    val pieces: List<TrainingDetailPiece> = emptyList(),
     val isLoading: Boolean = true,
     val notFound: Boolean = false,
-)
-
-internal data class TrainingDetailAthlete(
-    val athleteId: Long,
-    val athleteName: String,
-    val pieces: List<TrainingDetailPiece>,
 )
 
 internal data class TrainingDetailPiece(

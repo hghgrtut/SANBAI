@@ -6,14 +6,22 @@ internal data class AddTrainingState(
     val dateMillis: Long,
     val dateFormatted: String,
     val athletesCatalog: List<AthleteItemModel> = emptyList(),
-    val athleteSessions: List<AddAthleteSession> = listOf(AddAthleteSession()),
+    val crewAthletes: List<AddCrewAthlete> = listOf(AddCrewAthlete()),
+    val pieces: List<AddPieceDraft> = listOf(AddPieceDraft()),
     val validationError: String? = null,
-)
+    val pendingRawCsv: String? = null,
+    val pendingSourceSerial: String? = null,
+    val pendingSourceSessionName: String? = null,
+    val importNotice: String? = null,
+) {
+    companion object {
+        const val MAX_CREW_SIZE = 9
+    }
+}
 
-internal data class AddAthleteSession(
+internal data class AddCrewAthlete(
     val localId: Long = nextLocalId(),
     val athleteId: Long = 0,
-    val pieces: List<AddPieceDraft> = listOf(AddPieceDraft()),
 ) {
     companion object {
         private var localIdSeq = 1L

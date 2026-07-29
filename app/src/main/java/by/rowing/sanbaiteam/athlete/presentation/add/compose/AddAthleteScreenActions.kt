@@ -10,6 +10,8 @@ internal interface AddAthleteScreenActions {
 
     fun changeBirthDate(newDate: String)
 
+    fun changeSpeedCoachSerial(newSerial: String)
+
     fun changeGender(isMale: Boolean)
 
     companion object {
@@ -20,6 +22,7 @@ internal interface AddAthleteScreenActions {
             override fun onSaveClick() {}
             override fun changeName(newName: String) {}
             override fun changeBirthDate(newDate: String) {}
+            override fun changeSpeedCoachSerial(newSerial: String) {}
             override fun changeGender(isMale: Boolean) {}
         }
     }

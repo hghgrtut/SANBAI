@@ -5,6 +5,7 @@ internal data class AthleteItemModel(
     val name: String,
     val dateOfBirth: String,
     val isMale: Boolean,
+    val speedCoachSerial: String?,
 ) {
 
     val gender: String = if (isMale) "M" else "W"

@@ -9,7 +9,9 @@ internal sealed interface TrainingNavigation {
     data object TrainingList : NavigationDestination<Unit>
 
     @Serializable
-    data class TrainingAdd(val trainingDateMillis: Long) : NavigationDestination<Unit>
+    data class TrainingAdd(
+        val importUri: String? = null,
+    ) : NavigationDestination<Unit>
 
     @Serializable
     data class TrainingDetail(val trainingId: Long) : NavigationDestination<Unit>

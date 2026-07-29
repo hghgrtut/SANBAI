@@ -1,9 +1,14 @@
 package by.rowing.sanbaiteam
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -17,6 +22,7 @@ import by.rowing.sanbaiteam.main.presentation.MainScreen
 import by.rowing.sanbaiteam.main.presentation.MainViewModel
 import by.rowing.sanbaiteam.main.presentation.navigation.MainNavigation
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavGraphProvider
+import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavigation
 import by.rowing.sanbaiteam.uikit.theme.SANBAITeamTheme
 import com.checker.uikit3.modifier.ClickableState
 import org.koin.android.ext.android.inject
@@ -27,9 +33,11 @@ class MainActivity : ComponentActivity() {
 
     private val clickableState by inject<ClickableState>()
     private val composeNavigator by inject<ComposeNavigator>()
+    private var pendingImportUri by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pendingImportUri = extractImportUri(intent)
         enableEdgeToEdge()
         setContentView(
             ComposeView(this).apply {
@@ -38,8 +46,15 @@ class MainActivity : ComponentActivity() {
                         val navController = rememberNavController()
                         LaunchedEffect(null) {
                             composeNavigator.sharedFlow.collect { navigation ->
-                                handleNavigationEvent(navigation, navController, composeNavigator)
+                                handleNavigationEvent(navigation, navController)
                             }
+                        }
+                        LaunchedEffect(pendingImportUri) {
+                            val importUri = pendingImportUri ?: return@LaunchedEffect
+                            navController.navigate(
+                                route = TrainingNavigation.TrainingAdd(importUri = importUri)
+                            )
+                            pendingImportUri = null
                         }
                         NavHost(
                             navController = navController,
@@ -64,13 +79,23 @@ class MainActivity : ComponentActivity() {
             }
         )
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        pendingImportUri = extractImportUri(intent)
+    }
+
+    private fun extractImportUri(intent: Intent?): String? = when (intent?.action) {
+        Intent.ACTION_VIEW -> intent.data?.toString()
+        Intent.ACTION_SEND -> intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)?.toString()
+        else -> null
+    }
 }
 
-private suspend fun handleNavigationEvent(
+private fun handleNavigationEvent(
     navigation: NavigationEvent,
     navController: NavHostController,
-    //lastNavBottomSheet: MutableState<NavigationEvent?>,
-    composeNavigator: ComposeNavigator,
 ) {
     when (navigation) {
         is NavigationEvent.ClearBackStack -> {
@@ -81,7 +106,7 @@ private suspend fun handleNavigationEvent(
         }
 
         is NavigationEvent.NavigateBack -> {
-            navigateBack(navigation, navController, composeNavigator)
+            navigateBack(navigation, navController)
         }
 
         is NavigationEvent.NavigateForward -> {
@@ -93,16 +118,11 @@ private suspend fun handleNavigationEvent(
 
 private fun navigateForward(
     navigation: NavigationEvent.NavigateForward,
-//    lastNavBottomSheet: MutableState<NavigationEvent?>,
     navController: NavHostController,
 ) {
-//    if (navigation.shouldRememberBottomSheet) lastNavBottomSheet.value = navigation
     if (navigation.removeCurrentScreen) navController.popBackStack()
 
     navigation.args?.let { args ->
-//        if (navController.currentBackStackEntry?.destination is BottomSheetNavigator.Destination) {
-//            navController.popBackStack()
-//        }
         navController.currentBackStackEntry?.savedStateHandle?.set(
             args.key, args.value
         )
@@ -123,11 +143,9 @@ private fun navigateForward(
     }
 }
 
-private suspend fun navigateBack(
+private fun navigateBack(
     navigation: NavigationEvent.NavigateBack,
     navController: NavHostController,
-   // lastNavBottomSheet: MutableState<NavigationEvent?>,
-    composeNavigator: ComposeNavigator,
 ) {
     when (val navTarget = navigation.navTarget) {
         null -> {
@@ -164,5 +182,4 @@ private suspend fun navigateBack(
             }
         }
     }
-//    restoreBottomSheetDialog(lastNavBottomSheet, navigation, composeNavigator, navController)
 }

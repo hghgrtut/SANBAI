@@ -9,6 +9,10 @@ object RowingTimeFormat {
     private const val MILLIS_PER_TENTH = 100L
     private const val MILLIS_PER_SECOND = 1_000L
     private const val MILLIS_PER_MINUTE = 60_000L
+    private const val MILLIS_PER_HOUR = 3_600_000L
+    private const val TENTH_PER_SECOND = 10L
+    private const val TENTH_PER_MINUTE = 600L
+    private const val TENTH_PER_HOUR = 36_000L
     private const val PACE_DISTANCE_METERS = 500
 
     /**
@@ -48,6 +52,19 @@ object RowingTimeFormat {
         }
 
         return null
+    }
+
+    fun parseDurationHhMmSsTenths(input: String): Long? {
+        val trimmed = input.trim()
+        if (trimmed.isEmpty()) return null
+        val match = Regex("""^(\d{1,2}):(\d{1,2}):(\d{1,2})(?:\.(\d))?$""").matchEntire(trimmed)
+            ?: return null
+        val hours = match.groupValues[1].toLong()
+        val minutes = match.groupValues[2].toLong()
+        val seconds = match.groupValues[3].toLong()
+        val tenths = match.groupValues[4].takeIf { it.isNotEmpty() }?.toLong() ?: 0L
+        if (minutes >= 60 || seconds >= 60) return null
+        return hours * MILLIS_PER_HOUR + minutes * MILLIS_PER_MINUTE + seconds * MILLIS_PER_SECOND + tenths * MILLIS_PER_TENTH
     }
 
     fun paceMillis(timeMillis: Long, distanceMeters: Int): Long? {
