@@ -57,12 +57,15 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
     val state = viewModel.state
     val context = LocalContext.current
     val importLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let { selectedUri ->
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
+        val csvTexts = uris.mapNotNull { selectedUri ->
             runCatching {
                 context.contentResolver.openInputStream(selectedUri)?.bufferedReader()?.use { it.readText() }
-            }.getOrNull()?.let(viewModel::importCsv)
+            }.getOrNull()
+        }
+        if (csvTexts.isNotEmpty()) {
+            viewModel.importCsvBatch(csvTexts)
         }
     }
 

@@ -16,4 +16,5 @@ internal data class TrainingDetailPiece(
     val timeFormatted: String,
     val paceFormatted: String,
     val strokeRateFormatted: String,
+    val percentOfPbFormatted: String,
 )

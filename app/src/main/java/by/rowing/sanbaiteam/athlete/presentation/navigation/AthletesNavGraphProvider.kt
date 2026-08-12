@@ -1,10 +1,12 @@
 package by.rowing.sanbaiteam.athlete.presentation.navigation
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import by.rowing.sanbaiteam.athlete.presentation.add.AddAthleteViewModel
 import by.rowing.sanbaiteam.athlete.presentation.add.compose.AddAthleteScreen
+import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailViewModel
+import by.rowing.sanbaiteam.athlete.presentation.detail.compose.AthleteDetailScreen
 import by.rowing.sanbaiteam.athlete.presentation.list.AthletesViewModel
 import by.rowing.sanbaiteam.athlete.presentation.list.compose.AthleteListScreen
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
@@ -25,6 +27,12 @@ internal object AthletesNavGraphProvider {
             }
             composable<AthletesNavigation.AthletesAdd> {
                 AddAthleteScreen(viewModel = koinViewModel<AddAthleteViewModel> { parametersOf(navigator) })
+            }
+            composable<AthletesNavigation.AthleteDetail> { backStackEntry ->
+                val athleteId = backStackEntry.toRoute<AthletesNavigation.AthleteDetail>().athleteId
+                AthleteDetailScreen(
+                    viewModel = koinViewModel<AthleteDetailViewModel> { parametersOf(navigator, athleteId) }
+                )
             }
         }
     }

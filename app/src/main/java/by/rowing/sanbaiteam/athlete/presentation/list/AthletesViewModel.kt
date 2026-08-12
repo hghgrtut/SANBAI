@@ -1,7 +1,6 @@
 package by.rowing.sanbaiteam.athlete.presentation.list
 
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.query
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.athlete.presentation.list.compose.AthletesListActions
 import by.rowing.sanbaiteam.athlete.presentation.navigation.AthletesNavigation
@@ -42,6 +41,13 @@ internal class AthletesViewModel(
 
     override fun onAddAthleteClick() {
         AthletesNavigation.AthletesAdd.navigateTo(
+            composeNavigator = composeNavigator,
+            navOptions = getReturnToScreenNavOptions<AthletesNavigation.AthletesList>()
+        )
+    }
+
+    override fun onAthleteClick(athleteId: Long) {
+        AthletesNavigation.AthleteDetail(athleteId).navigateTo(
             composeNavigator = composeNavigator,
             navOptions = getReturnToScreenNavOptions<AthletesNavigation.AthletesList>()
         )

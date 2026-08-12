@@ -1,15 +1,18 @@
 package by.rowing.sanbaiteam.training.presentation.add
 
 import androidx.lifecycle.viewModelScope
+import by.rowing.sanbaiteam.R
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
+import by.rowing.sanbaiteam.core.util.AndroidResourceUtils
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachCsvImport
+import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachCsvMerger
 import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachCsvParser
 import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachImportStorage
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +22,7 @@ import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 internal class AddTrainingViewModel(
+    private val resourceUtils: AndroidResourceUtils,
     private val athleteRepository: AthletesRepository,
     private val trainingRepository: TrainingRepository,
     private val speedCoachImportStorage: SpeedCoachImportStorage,
@@ -42,9 +46,7 @@ internal class AddTrainingViewModel(
             }
         }
         if (!importUri.isNullOrBlank()) {
-            changeState {
-                copy(importNotice = "Готов к импорту из выбранного файла.")
-            }
+            changeState { copy(importNotice = resourceUtils.getString(R.string.add_training_import_ready)) }
         }
     }
 
@@ -74,7 +76,12 @@ internal class AddTrainingViewModel(
     fun addCrewAthlete() {
         changeState {
             if (crewAthletes.size >= AddTrainingState.MAX_CREW_SIZE) {
-                copy(validationError = "В экипаже максимум ${AddTrainingState.MAX_CREW_SIZE} спортсменов")
+                copy(
+                    validationError = resourceUtils.getString(
+                        R.string.add_training_crew_max_size,
+                        AddTrainingState.MAX_CREW_SIZE
+                    )
+                )
             } else {
                 copy(
                     crewAthletes = crewAthletes + AddCrewAthlete(),
@@ -177,11 +184,12 @@ internal class AddTrainingViewModel(
                     sourceDeviceSerial = state.pendingSourceSerial,
                     sourceSessionName = state.pendingSourceSessionName,
                 )
-                if (state.pendingRawCsv != null) {
+                if (state.pendingRawCsvs.isNotEmpty()) {
+                    val mergedCsv = SpeedCoachCsvMerger.merge(state.pendingRawCsvs)
                     val relativePath = speedCoachImportStorage.saveCsv(
                         trainingId = trainingId,
                         serial = state.pendingSourceSerial,
-                        csvText = state.pendingRawCsv
+                        csvText = mergedCsv
                     )
                     trainingRepository.updateTrainingImportMetadata(
                         trainingId = trainingId,
@@ -204,21 +212,26 @@ internal class AddTrainingViewModel(
     }
 
     fun importCsv(csvText: String) {
+        importCsvBatch(listOf(csvText))
+    }
+
+    fun importCsvBatch(csvTexts: List<String>) {
+        if (csvTexts.isEmpty()) return
         viewModelScope.launch {
-            applyParsedImport(
-                parsed = runCatching { SpeedCoachCsvParser.parse(csvText) }.getOrElse {
-                    changeState { copy(importNotice = "Не удалось разобрать CSV файл.") }
+            for (csvText in csvTexts) {
+                val parsed = runCatching { SpeedCoachCsvParser.parse(csvText) }.getOrElse {
+                    changeState {
+                        copy(importNotice = resourceUtils.getString(R.string.add_training_import_parse_error))
+                    }
                     return@launch
                 }
-            )
+                applyParsedImport(parsed)
+            }
         }
     }
 
     private suspend fun applyParsedImport(parsed: SpeedCoachCsvImport) {
-        val parsedAthleteId = parsed.deviceSerial
-            ?.let { athleteRepository.findAthleteIdBySpeedCoachSerial(it) }
-            ?: 0L
-        val pieces = parsed.intervals.map { interval ->
+        val newPieces = parsed.intervals.map { interval ->
             AddPieceDraft(
                 distanceMeters = interval.distanceMeters,
                 timeMillis = interval.timeMillis,
@@ -228,23 +241,70 @@ internal class AddTrainingViewModel(
                 strokeRateText = RowingTimeFormat.formatStrokeRate(interval.strokeRate),
             )
         }
-        val trainingDateMillis = parsed.startTimeMillis?.let(::toTrainingDateMillis) ?: state.dateMillis
-        changeState {
-            copy(
-                dateMillis = trainingDateMillis,
-                dateFormatted = TimeUtils.formatMillisToString(trainingDateMillis),
-                crewAthletes = listOf(AddCrewAthlete(athleteId = parsedAthleteId)),
-                pieces = pieces.ifEmpty { listOf(AddPieceDraft()) },
-                pendingRawCsv = parsed.rawCsv,
-                pendingSourceSerial = parsed.deviceSerial,
-                pendingSourceSessionName = parsed.sessionName,
-                importNotice = if (parsedAthleteId == 0L && !parsed.deviceSerial.isNullOrBlank()) {
-                    "Спортсмен со спидкоучем ${parsed.deviceSerial} не найден. Выберите вручную."
-                } else {
-                    "CSV импортирован."
-                },
-                validationError = null
+        val isFirstImport = state.pendingRawCsvs.isEmpty()
+
+        if (isFirstImport) {
+            val parsedAthleteId = parsed.deviceSerial
+                ?.let { athleteRepository.findAthleteIdBySpeedCoachSerial(it) }
+                ?: 0L
+            val trainingDateMillis = parsed.startTimeMillis?.let(::toTrainingDateMillis) ?: state.dateMillis
+            changeState {
+                copy(
+                    dateMillis = trainingDateMillis,
+                    dateFormatted = TimeUtils.formatMillisToString(trainingDateMillis),
+                    crewAthletes = listOf(AddCrewAthlete(athleteId = parsedAthleteId)),
+                    pieces = newPieces.ifEmpty { listOf(AddPieceDraft()) },
+                    pendingRawCsvs = listOf(parsed.rawCsv),
+                    pendingSourceSerial = parsed.deviceSerial,
+                    pendingSourceSessionName = parsed.sessionName,
+                    importNotice = buildImportNotice(
+                        fileCount = 1,
+                        pieceCount = newPieces.size,
+                        serialNotFound = parsedAthleteId == 0L && !parsed.deviceSerial.isNullOrBlank(),
+                        deviceSerial = parsed.deviceSerial,
+                    ),
+                    validationError = null
+                )
+            }
+        } else {
+            val fileCount = state.pendingRawCsvs.size + 1
+            val pieceCount = state.pieces.size + newPieces.size
+            changeState {
+                copy(
+                    pieces = pieces + newPieces,
+                    pendingRawCsvs = pendingRawCsvs + parsed.rawCsv,
+                    importNotice = buildImportNotice(
+                        fileCount = fileCount,
+                        pieceCount = pieceCount,
+                        serialNotFound = false,
+                        deviceSerial = null,
+                    ),
+                    validationError = null
+                )
+            }
+        }
+    }
+
+    private fun buildImportNotice(
+        fileCount: Int,
+        pieceCount: Int,
+        serialNotFound: Boolean,
+        deviceSerial: String?,
+    ): String {
+        if (serialNotFound && deviceSerial != null) {
+            return resourceUtils.getString(
+                R.string.add_training_import_not_found_by_serial,
+                deviceSerial
             )
+        }
+        return if (fileCount > 1) {
+            resourceUtils.getString(
+                R.string.add_training_import_multi_success,
+                fileCount,
+                pieceCount
+            )
+        } else {
+            resourceUtils.getString(R.string.add_training_import_success)
         }
     }
 
@@ -273,22 +333,36 @@ internal class AddTrainingViewModel(
     }
 
     private fun validate(): String? {
-        if (state.crewAthletes.isEmpty()) return "Добавьте хотя бы одного спортсмена"
+        if (state.crewAthletes.isEmpty()) {
+            return resourceUtils.getString(R.string.add_training_validation_need_athlete)
+        }
         if (state.crewAthletes.size > AddTrainingState.MAX_CREW_SIZE) {
-            return "В экипаже максимум ${AddTrainingState.MAX_CREW_SIZE} спортсменов"
+            return resourceUtils.getString(
+                R.string.add_training_crew_max_size,
+                AddTrainingState.MAX_CREW_SIZE
+            )
         }
         val usedAthletes = mutableSetOf<Long>()
         for (athlete in state.crewAthletes) {
-            if (athlete.athleteId <= 0) return "Выберите спортсмена"
-            if (!usedAthletes.add(athlete.athleteId)) return "Спортсмен уже добавлен в экипаж"
+            if (athlete.athleteId <= 0) {
+                return resourceUtils.getString(R.string.add_training_validation_select_athlete)
+            }
+            if (!usedAthletes.add(athlete.athleteId)) {
+                return resourceUtils.getString(R.string.add_training_validation_athlete_duplicate)
+            }
         }
-        if (state.pieces.isEmpty()) return "Добавьте хотя бы один кусок"
+        if (state.pieces.isEmpty()) {
+            return resourceUtils.getString(R.string.add_training_validation_need_piece)
+        }
         for (piece in state.pieces) {
             val time = RowingTimeFormat.parseDuration(piece.timeText) ?: piece.timeMillis
             val rate = RowingTimeFormat.parseStrokeRate(piece.strokeRateText) ?: piece.strokeRate
-            if (piece.distanceMeters <= 0) return "Укажите дистанцию куска"
-            if (time <= 0) return "Укажите время куска (м:сс.д)"
-            if (rate <= 0) return "Укажите частоту гребков"
+            when {
+                piece.distanceMeters <= 0 ->
+                    return resourceUtils.getString(R.string.add_training_validation_piece_distance)
+                time <= 0 -> return resourceUtils.getString(R.string.add_training_validation_piece_time)
+                rate <= 0 -> return resourceUtils.getString(R.string.add_training_validation_piece_stroke_rate)
+            }
         }
         return null
     }
