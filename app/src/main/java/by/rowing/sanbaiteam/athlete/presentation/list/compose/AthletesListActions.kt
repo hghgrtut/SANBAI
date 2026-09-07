@@ -10,6 +10,8 @@ internal interface AthletesListActions {
 
     fun onAddAthleteClick()
 
+    fun onAthleteClick(athleteId: Long)
+
     companion object {
 
         fun empty() = object : AthletesListActions {
@@ -18,6 +20,7 @@ internal interface AthletesListActions {
             override fun onSearchQueryChange(newQuery: String) {}
             override fun onShowFiltersChange(showFilters: Boolean) {}
             override fun onAddAthleteClick() {}
+            override fun onAthleteClick(athleteId: Long) {}
         }
     }
 }

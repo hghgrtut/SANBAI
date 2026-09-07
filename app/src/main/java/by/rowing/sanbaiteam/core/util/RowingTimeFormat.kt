@@ -67,6 +67,16 @@ object RowingTimeFormat {
         return hours * MILLIS_PER_HOUR + minutes * MILLIS_PER_MINUTE + seconds * MILLIS_PER_SECOND + tenths * MILLIS_PER_TENTH
     }
 
+    fun formatDurationHhMmSsTenths(timeMillis: Long): String {
+        if (timeMillis < 0) return "00:00:00.0"
+        val totalTenths = (timeMillis + MILLIS_PER_TENTH / 2) / MILLIS_PER_TENTH
+        val hours = totalTenths / TENTH_PER_HOUR
+        val minutes = (totalTenths % TENTH_PER_HOUR) / TENTH_PER_MINUTE
+        val seconds = (totalTenths % TENTH_PER_MINUTE) / TENTH_PER_SECOND
+        val tenths = totalTenths % TENTH_PER_SECOND
+        return String.format(Locale.US, "%02d:%02d:%02d.%d", hours, minutes, seconds, tenths)
+    }
+
     fun paceMillis(timeMillis: Long, distanceMeters: Int): Long? {
         if (distanceMeters <= 0 || timeMillis <= 0) return null
         return (timeMillis.toDouble() * PACE_DISTANCE_METERS / distanceMeters).roundToLong().roundToTenths()

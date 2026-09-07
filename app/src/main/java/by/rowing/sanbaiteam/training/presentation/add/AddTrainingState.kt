@@ -9,7 +9,7 @@ internal data class AddTrainingState(
     val crewAthletes: List<AddCrewAthlete> = listOf(AddCrewAthlete()),
     val pieces: List<AddPieceDraft> = listOf(AddPieceDraft()),
     val validationError: String? = null,
-    val pendingRawCsv: String? = null,
+    val pendingRawCsvs: List<String> = emptyList(),
     val pendingSourceSerial: String? = null,
     val pendingSourceSessionName: String? = null,
     val importNotice: String? = null,

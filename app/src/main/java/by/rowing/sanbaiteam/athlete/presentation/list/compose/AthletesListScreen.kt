@@ -109,7 +109,7 @@ private fun AthleteListScreenContent(
                     items(filteredAthletes, key = { it.id }) { athlete ->
                         AthleteListItem(
                             athlete = athlete,
-                            onAthleteClick = {}
+                            onAthleteClick = { actions.onAthleteClick(athlete.id) }
                         )
                     }
                 }

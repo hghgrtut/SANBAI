@@ -1,16 +1,18 @@
 package by.rowing.sanbaiteam.athlete.presentation.add
 
+import by.rowing.sanbaiteam.R
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.athlete.presentation.add.compose.AddAthleteScreenActions
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
+import by.rowing.sanbaiteam.core.util.AndroidResourceUtils
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 internal class AddAthleteViewModel(
+    private val resourceUtils: AndroidResourceUtils,
     private val athleteRepository: AthletesRepository,
     private val composeNavigator: ComposeNavigator
 ) : ComposeBaseViewModel<AddAthleteState>(
@@ -35,8 +37,10 @@ internal class AddAthleteViewModel(
         } else {
             changeState {
                 copy(
-                    nameError = "Введите ФИО спортсмена".takeIf { name.isBlank() },
-                    dateError = "Введите корректную дату".takeIf { !isValidDate(dateOfBirth) }
+                    nameError = resourceUtils.getString(R.string.athletes_add_athlete_name_error)
+                        .takeIf { name.isBlank() },
+                    dateError = resourceUtils.getString(R.string.athletes_add_athlete_date_error)
+                        .takeIf { !isValidDate(dateOfBirth) }
                 )
             }
         }

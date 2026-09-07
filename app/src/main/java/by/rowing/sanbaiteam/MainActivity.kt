@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import by.rowing.sanbaiteam.athlete.presentation.navigation.AthletesNavGraphProvider
+import by.rowing.sanbaiteam.calculator.presentation.navigation.CalculatorNavGraphProvider
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigationEvent
 import by.rowing.sanbaiteam.core.presentation.runWithCompose
@@ -70,6 +71,10 @@ class MainActivity : ComponentActivity() {
                                 navigator = composeNavigator
                             )
                             TrainingNavGraphProvider.trainingNavGraph(
+                                builder = this,
+                                navigator = composeNavigator
+                            )
+                            CalculatorNavGraphProvider.calculatorNavGraph(
                                 builder = this,
                                 navigator = composeNavigator
                             )

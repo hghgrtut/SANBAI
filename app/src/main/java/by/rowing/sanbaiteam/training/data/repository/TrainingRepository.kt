@@ -1,6 +1,7 @@
 package by.rowing.sanbaiteam.training.data.repository
 
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
@@ -85,12 +86,27 @@ internal class TrainingRepository(
             .filter { it.athleteId == athleteIds.firstOrNull() }
             .sortedBy { it.order }
 
+        val personalBests = athletesRepository.getPersonalBestsForAthletes(
+            athleteIds = athleteIds,
+            boatType = TrainingPieceType.SINGLE,
+            distanceMeters = PersonalBestPercent.DEFAULT_PB_DISTANCE_METERS,
+        )
+
         TrainingDetailState(
             trainingId = training.id,
             dateFormatted = TimeUtils.formatMillisToString(training.dateMillis),
             typeResId = training.type.uiResId,
             athleteNames = athleteIds.mapNotNull { nameMap[it] },
             pieces = crewPieces.map { piece ->
+                val crewPercents = athleteIds.mapNotNull { athleteId ->
+                    val pb = personalBests[athleteId] ?: return@mapNotNull null
+                    PersonalBestPercent.calculate(
+                        pieceDistanceMeters = piece.distanceMeters,
+                        pieceTimeMillis = piece.timeMillis,
+                        pbDistanceMeters = pb.distanceMeters,
+                        pbTimeMillis = pb.timeMillis,
+                    )
+                }
                 TrainingDetailPiece(
                     order = piece.order + 1,
                     distanceMeters = piece.distanceMeters,
@@ -99,7 +115,10 @@ internal class TrainingRepository(
                         timeMillis = piece.timeMillis,
                         distanceMeters = piece.distanceMeters
                     ).orEmpty(),
-                    strokeRateFormatted = RowingTimeFormat.formatStrokeRate(piece.strokeRate)
+                    strokeRateFormatted = RowingTimeFormat.formatStrokeRate(piece.strokeRate),
+                    percentOfPbFormatted = PersonalBestPercent.format(
+                        PersonalBestPercent.average(crewPercents)
+                    ),
                 )
             },
             isLoading = false,

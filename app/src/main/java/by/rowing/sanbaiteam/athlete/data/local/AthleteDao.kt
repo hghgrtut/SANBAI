@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.athlete.data.local
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -23,6 +24,12 @@ internal interface AthleteDao {
 
     @Query("SELECT * FROM $TABLE_NAME WHERE speedCoachSerial = :serial LIMIT 1")
     suspend fun getAthleteBySpeedCoachSerial(serial: String): AthleteEntity?
+
+    @Query("SELECT * FROM $TABLE_NAME WHERE id = :athleteId LIMIT 1")
+    suspend fun getById(athleteId: Long): AthleteEntity?
+
+    @Update
+    suspend fun updateAthlete(athlete: AthleteEntity)
 
     companion object {
         const val TABLE_NAME = "athlete_entity"

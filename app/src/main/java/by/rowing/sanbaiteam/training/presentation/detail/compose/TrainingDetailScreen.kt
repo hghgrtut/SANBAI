@@ -181,5 +181,15 @@ private fun PieceResultRow(piece: TrainingDetailPiece) {
                 )
             )
         }
+        SpacerXS()
+        Text(
+            text = stringResource(
+                R.string.training_detail_percent_of_pb,
+                piece.percentOfPbFormatted
+            ),
+            style = TypographyPaletteSp.Body2Regular.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
     }
 }

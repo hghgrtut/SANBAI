@@ -10,4 +10,7 @@ internal sealed interface AthletesNavigation {
 
     @Serializable
     data object AthletesAdd : NavigationDestination<Unit>
+
+    @Serializable
+    data class AthleteDetail(val athleteId: Long) : NavigationDestination<Unit>
 }

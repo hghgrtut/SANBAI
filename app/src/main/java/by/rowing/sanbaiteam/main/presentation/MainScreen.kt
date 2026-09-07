@@ -12,8 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DirectionsBoat
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -33,9 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.R
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
@@ -132,77 +133,6 @@ private fun WelcomeSection() {
 }
 
 @Composable
-private fun QuickStatsSection() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = ColorPalette.White,
-            contentColor = ColorPalette.Grey10
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS),
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.M),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            StatItem(
-                value = "12",
-                label = "Athletes",
-                icon = Icons.Default.People,
-                iconColor = ColorPalette.Blue50
-            )
-
-            StatItem(
-                value = "24",
-                label = "Sessions",
-                icon = Icons.Default.FitnessCenter,
-                iconColor = ColorPalette.Green50
-            )
-
-            StatItem(
-                value = "85km",
-                label = "Distance",
-                icon = Icons.Default.Speed,
-                iconColor = ColorPalette.Orange50
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatItem(
-    value: String,
-    label: String,
-    icon: ImageVector,
-    iconColor: Color
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            modifier = Modifier.size(24.dp),
-            tint = iconColor
-        )
-        SpacerXS()
-        Text(
-            text = value,
-            style = TypographyPalette.H3,
-            color = ColorPalette.Grey20
-        )
-        Text(
-            text = label,
-            style = TypographyPalette.Body2Regular,
-            color = ColorPalette.Grey50
-        )
-    }
-}
-
-@Composable
 private fun NavigationGrid(
     actions: MainScreenActions
 ) {
@@ -226,6 +156,14 @@ private fun NavigationGrid(
             iconBackgroundColor = ColorPalette.Green50,
             textColor = ColorPalette.Grey10,
             onClick = actions::navigateToTrainingsScreen
+        )
+        NavigationCard(
+            title = stringResource(R.string.calculator_title),
+            subtitle = stringResource(R.string.calculator_main_subtitle),
+            icon = Icons.Default.Calculate,
+            iconBackgroundColor = ColorPalette.Orange50,
+            textColor = ColorPalette.Grey10,
+            onClick = actions::navigateToCalculatorScreen
         )
     }
 }
