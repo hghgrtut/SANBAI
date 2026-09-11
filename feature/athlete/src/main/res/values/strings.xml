@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="athletes_list_title">Спортсмены</string>
+    <string name="athletes_search_placeholder">Поиск спорстсменов</string>
+    <string name="athletes_search_no_results">Никого не найдено по запросу: %1$s</string>
+    <string name="athletes_no_athletes">Нет спортсменов</string>
+    <string name="athletes_add_someone_to_team">Добавь кого-нибудь в команду</string>
+    <string name="athletes_add_athlete">Добавить спортсмена</string>
+    <string name="athletes_add_athlete_name_label">ФИО спортсмена</string>
+    <string name="athletes_add_athlete_name_placeholder">Иванов Иван Иванович</string>
+    <string name="athletes_add_athlete_birth_date_label">Дата рождения</string>
+    <string name="athletes_add_athlete_birth_date_placeholder">дд.мм.гггг</string>
+    <string name="athletes_add_athlete_birth_date_supporting_text">Формат: дд.мм.гггг</string>
+    <string name="athletes_add_athlete_speedcoach_serial_label">Серийный номер выданного SpeedCoach</string>
+    <string name="athletes_add_athlete_speedcoach_serial_placeholder">Например, 2693559</string>
+    <string name="athletes_add_athlete_gender_male">Мужской</string>
+    <string name="athletes_add_athlete_gender_female">Женский</string>
+    <string name="athletes_detail_title">Спортсмен</string>
+    <string name="athletes_detail_records_header">Рекорды (одиночка)</string>
+    <string name="athletes_detail_record_distance_label">Дистанция (метры)</string>
+    <string name="athletes_detail_record_time_label">Время (м:сс.д)</string>
+    <string name="athletes_detail_add_record">Добавить рекорд</string>
+    <string name="athletes_detail_delete_record">Удалить рекорд</string>
+    <string name="athletes_detail_not_found">Спортсмен не найден</string>
+    <string name="athletes_add_athlete_name_error">Введите ФИО спортсмена</string>
+    <string name="athletes_add_athlete_date_error">Введите корректную дату</string>
+    <string name="athletes_detail_record_distance_error">Укажите дистанцию рекорда</string>
+    <string name="athletes_detail_record_time_error">Укажите время рекорда (м:сс.д)</string>
+    <string name="athletes_detail_duplicate_distance">Дистанция уже добавлена</string>
+    <string name="athletes_detail_save_error">Проверьте данные рекордов</string>
+    <string name="athletes_detail_gender_label">Пол спортсмена</string>
+</resources>

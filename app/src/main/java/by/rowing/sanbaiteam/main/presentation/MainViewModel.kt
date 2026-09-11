@@ -11,21 +11,21 @@ import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavGraphPro
 internal class MainViewModel(private val composeNavigator: ComposeNavigator) : BaseViewModel(), MainScreenActions {
 
     override fun navigateToAthletesScreen() {
-        AthletesNavGraphProvider.root.navigateTo(
+        AthletesNavGraphProvider.navigateToRoot(
             composeNavigator = composeNavigator,
             navOptions = getReturnToScreenNavOptions<MainNavigation.Root>()
         )
     }
 
     override fun navigateToTrainingsScreen() {
-        TrainingNavGraphProvider.root.navigateTo(
+        TrainingNavGraphProvider.navigateToRoot(
             composeNavigator = composeNavigator,
             navOptions = getReturnToScreenNavOptions<MainNavigation.Root>()
         )
     }
 
     override fun navigateToCalculatorScreen() {
-        CalculatorNavGraphProvider.root.navigateTo(
+        CalculatorNavGraphProvider.navigateToRoot(
             composeNavigator = composeNavigator,
             navOptions = getReturnToScreenNavOptions<MainNavigation.Root>()
         )
