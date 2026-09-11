@@ -40,7 +40,15 @@ android {
 
 dependencies {
 
-    ksp(libs.room.compiler)
+    implementation(project(":uikit"))
+    implementation(project(":core:util"))
+    implementation(project(":core:navigation"))
+    implementation(project(":core:base"))
+    implementation(project(":data:local"))
+    implementation(project(":feature:calculator"))
+    implementation(project(":feature:athlete"))
+    implementation(project(":feature:training"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -51,8 +59,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     implementation(libs.coroutines.android)
     implementation(libs.koin.core)
     implementation(libs.koin.android)

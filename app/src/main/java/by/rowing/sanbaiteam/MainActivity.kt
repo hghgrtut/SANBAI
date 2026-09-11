@@ -5,11 +5,15 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,14 +22,13 @@ import by.rowing.sanbaiteam.athlete.presentation.navigation.AthletesNavGraphProv
 import by.rowing.sanbaiteam.calculator.presentation.navigation.CalculatorNavGraphProvider
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigationEvent
-import by.rowing.sanbaiteam.core.presentation.runWithCompose
 import by.rowing.sanbaiteam.main.presentation.MainScreen
 import by.rowing.sanbaiteam.main.presentation.MainViewModel
 import by.rowing.sanbaiteam.main.presentation.navigation.MainNavigation
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavGraphProvider
-import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavigation
 import by.rowing.sanbaiteam.uikit.theme.SANBAITeamTheme
 import com.checker.uikit3.modifier.ClickableState
+import com.checker.uikit3.modifier.LocalClickableState
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -36,51 +39,57 @@ class MainActivity : ComponentActivity() {
     private val composeNavigator by inject<ComposeNavigator>()
     private var pendingImportUri by mutableStateOf<String?>(null)
 
+
+    private val mainActivityContent: @Composable () -> Unit = {
+        CompositionLocalProvider(LocalClickableState provides clickableState) {
+            SANBAITeamTheme {
+                val navController = rememberNavController()
+                LaunchedEffect(null) {
+                    composeNavigator.sharedFlow.collect { navigation ->
+                        handleNavigationEvent(navigation = navigation, navController = navController)
+                    }
+                }
+                LaunchedEffect(pendingImportUri) {
+                    val importUri = pendingImportUri ?: return@LaunchedEffect
+                    navController.navigate(route = TrainingNavGraphProvider.getAddTrainingRoute(importUri = importUri))
+                    pendingImportUri = null
+                }
+                NavHost(
+                    navController = navController,
+                    startDestination = MainNavigation.Root,
+                    builder = navigationBuilder
+                )
+            }
+        }
+    }
+
+    private val navigationBuilder: NavGraphBuilder.() -> Unit = {
+        composable<MainNavigation.Root> {
+            MainScreen(viewModel = koinViewModel<MainViewModel> { parametersOf(composeNavigator) })
+        }
+        AthletesNavGraphProvider.athletesNavGraph(
+            builder = this,
+            navigator = composeNavigator
+        )
+        TrainingNavGraphProvider.trainingNavGraph(
+            builder = this,
+            navigator = composeNavigator
+        )
+        CalculatorNavGraphProvider.calculatorNavGraph(
+            builder = this,
+            navigator = composeNavigator
+        )
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pendingImportUri = extractImportUri(intent)
         enableEdgeToEdge()
         setContentView(
             ComposeView(this).apply {
-                runWithCompose(clickableState = clickableState) {
-                    SANBAITeamTheme {
-                        val navController = rememberNavController()
-                        LaunchedEffect(null) {
-                            composeNavigator.sharedFlow.collect { navigation ->
-                                handleNavigationEvent(navigation, navController)
-                            }
-                        }
-                        LaunchedEffect(pendingImportUri) {
-                            val importUri = pendingImportUri ?: return@LaunchedEffect
-                            navController.navigate(
-                                route = TrainingNavigation.TrainingAdd(importUri = importUri)
-                            )
-                            pendingImportUri = null
-                        }
-                        NavHost(
-                            navController = navController,
-                            startDestination = MainNavigation.Root
-                        ) {
-                            composable<MainNavigation.Root> {
-                                MainScreen(
-                                    viewModel = koinViewModel<MainViewModel> { parametersOf(composeNavigator) }
-                                )
-                            }
-                            AthletesNavGraphProvider.athletesNavGraph(
-                                builder = this,
-                                navigator = composeNavigator
-                            )
-                            TrainingNavGraphProvider.trainingNavGraph(
-                                builder = this,
-                                navigator = composeNavigator
-                            )
-                            CalculatorNavGraphProvider.calculatorNavGraph(
-                                builder = this,
-                                navigator = composeNavigator
-                            )
-                        }
-                    }
-                }
+                setViewCompositionStrategy(strategy = ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                setContent(mainActivityContent)
             }
         )
     }
@@ -155,9 +164,7 @@ private fun navigateBack(
     when (val navTarget = navigation.navTarget) {
         null -> {
             navigation.args?.let { args ->
-                navController.previousBackStackEntry?.savedStateHandle?.set(
-                    args.key, args.value
-                )
+                navController.previousBackStackEntry?.savedStateHandle?.set(args.key, args.value)
             }
             navController.popBackStack()
         }
@@ -169,9 +176,7 @@ private fun navigateBack(
                 inclusive = false
             )
             navigation.args?.let { args ->
-                navController.currentBackStackEntry?.savedStateHandle?.set(
-                    args.key, args.value
-                )
+                navController.currentBackStackEntry?.savedStateHandle?.set(args.key, args.value)
             }
         }
 
@@ -181,9 +186,7 @@ private fun navigateBack(
                 inclusive = false
             )
             navigation.args?.let { args ->
-                navController.currentBackStackEntry?.savedStateHandle?.set(
-                    args.key, args.value
-                )
+                navController.currentBackStackEntry?.savedStateHandle?.set(args.key, args.value)
             }
         }
     }

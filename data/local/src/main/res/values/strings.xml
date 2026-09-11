@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="training_piece_type_rest">Отдых</string>
+    <string name="training_piece_type_ergo">Концепт</string>
+    <string name="training_piece_type_bike">Велик</string>
+    <string name="training_piece_type_single">Одиночка</string>
+    <string name="training_piece_type_double">Двойка парная</string>
+    <string name="training_piece_type_quadruple">Четвёрка парная</string>
+    <string name="training_piece_type_pair">Двойка распашная</string>
+    <string name="training_piece_type_four">Четвёрка распашная</string>
+    <string name="training_piece_type_eight">Восьмёрка</string>
+</resources>

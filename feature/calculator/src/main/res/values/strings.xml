@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cancel">Отмена</string>
+    <string name="calculator_title">Калькулятор</string>
+    <string name="calculator_subtitle">Темп указывается как время на 500 м (м:сс.д)</string>
+    <string name="calculator_mode_percent">Темп → %</string>
+    <string name="calculator_mode_pace">% → темп</string>
+    <string name="calculator_record_pace_label">Темп рекорда (/500 м)</string>
+    <string name="calculator_pace_label">Темп (/500 м)</string>
+    <string name="calculator_pace_placeholder">1:45.0</string>
+    <string name="calculator_percent_label">Процент</string>
+    <string name="calculator_percent_placeholder">95.0</string>
+    <string name="calculator_calculate">Рассчитать</string>
+    <string name="calculator_result_label">Результат</string>
+    <string name="calculator_error_title">Проверьте данные</string>
+    <string name="calculator_error_record_pace">Укажите темп рекорда (м:сс.д)</string>
+    <string name="calculator_error_pace">Укажите темп (м:сс.д)</string>
+    <string name="calculator_error_percent">Укажите процент</string>
+</resources>
