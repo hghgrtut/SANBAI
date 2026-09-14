@@ -18,7 +18,7 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
 
 @Composable
-inline fun <reified T> NavHostController.CollectArgResult(
+internal inline fun <reified T> NavHostController.CollectArgResult(
     argName: String,
     initialValue: T,
     crossinline onResult: (T) -> Unit,
@@ -49,4 +49,4 @@ inline fun <reified T> NavHostController.CollectArgResult(
 }
 
 @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
-fun NavigationDestination<*>.getClassName(): String = this::class.serializer().descriptor.serialName
+internal fun NavigationDestination<*>.getClassName(): String = this::class.serializer().descriptor.serialName

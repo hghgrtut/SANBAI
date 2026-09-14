@@ -1,5 +1,7 @@
 package by.rowing.sanbaiteam.training.presentation.add
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
@@ -41,7 +43,7 @@ internal class AddTrainingViewModel(
     init {
         viewModelScope.launch {
             athleteRepository.allAthletes.collectLatest { athletes ->
-                changeState { copy(athletesCatalog = athletes) }
+                changeState { copy(rowersCatalog = athletes) }
             }
         }
         if (!importUri.isNullOrBlank()) {
@@ -53,7 +55,11 @@ internal class AddTrainingViewModel(
 
     fun consumeInitialImportUri(): String? = pendingInitialImportUri.also { pendingInitialImportUri = null }
 
-    fun onDatePicked(year: Int, month: Int, dayOfMonth: Int) {
+    fun onDatePicked(
+        year: Int,
+        month: Int,
+        dayOfMonth: Int
+    ) {
         val millis = toTrainingDateMillis(year, month, dayOfMonth)
         changeState {
             copy(
@@ -63,11 +69,14 @@ internal class AddTrainingViewModel(
         }
     }
 
-    fun changeAthleteId(crewLocalId: Long, athleteId: Long) {
+    fun changeAthleteId(
+        crewLocalId: Long,
+        athleteId: Long
+    ) {
         changeState {
             copy(
                 crewAthletes = crewAthletes.map { athlete ->
-                    if (athlete.localId == crewLocalId) athlete.copy(athleteId = athleteId) else athlete
+                    if (athlete.crewId == crewLocalId) athlete.copy(rowerId = athleteId) else athlete
                 },
                 validationError = null
             )
@@ -94,22 +103,34 @@ internal class AddTrainingViewModel(
 
     fun removeCrewAthlete(crewLocalId: Long) {
         changeState {
-            if (crewAthletes.size <= 1) this
-            else copy(
-                crewAthletes = crewAthletes.filterNot { it.localId == crewLocalId },
+            if (crewAthletes.size <= 1) {
+                this
+            } else {
+                copy(
+                    crewAthletes = crewAthletes.filterNot { it.crewId == crewLocalId },
                 validationError = null
+            )
+            }
+        }
+    }
+
+    fun changePieceDistance(
+        pieceLocalId: Long,
+        text: String
+    ) {
+        updatePiece(pieceLocalId) { piece ->
+            val distance = text.filter { it.isDigit() }.toIntOrNull() ?: 0
+            piece.copy(
+                distanceText = text.filter { it.isDigit() },
+                distanceMeters = distance
             )
         }
     }
 
-    fun changePieceDistance(pieceLocalId: Long, text: String) {
-        updatePiece(pieceLocalId) { piece ->
-            val distance = text.filter { it.isDigit() }.toIntOrNull() ?: 0
-            piece.copy(distanceText = text.filter { it.isDigit() }, distanceMeters = distance)
-        }
-    }
-
-    fun changePieceTime(pieceLocalId: Long, text: String) {
+    fun changePieceTime(
+        pieceLocalId: Long,
+        text: String
+    ) {
         updatePiece(pieceLocalId) { piece ->
             piece.copy(
                 timeText = text,
@@ -118,7 +139,10 @@ internal class AddTrainingViewModel(
         }
     }
 
-    fun changePieceStrokeRate(pieceLocalId: Long, text: String) {
+    fun changePieceStrokeRate(
+        pieceLocalId: Long,
+        text: String
+    ) {
         updatePiece(pieceLocalId) { piece ->
             piece.copy(
                 strokeRateText = text,
@@ -142,17 +166,21 @@ internal class AddTrainingViewModel(
             } else {
                 AddPieceDraft()
             }
-            copy(pieces = pieces + newPiece, validationError = null)
+            copy(
+                pieces = pieces + newPiece,
+                validationError = null
+            )
         }
     }
 
     fun removePiece(pieceLocalId: Long) {
-        changeState {
-            if (pieces.size <= 1) this
-            else copy(
-                pieces = pieces.filterNot { it.localId == pieceLocalId },
-                validationError = null
-            )
+        if (state.pieces.size > 1) {
+            changeState {
+                copy(
+                    pieces = pieces.filterNot { it.localId == pieceLocalId },
+                    validationError = null
+                )
+            }
         }
     }
 
@@ -167,7 +195,7 @@ internal class AddTrainingViewModel(
                 state.pieces.mapIndexed { index, piece ->
                     TrainingAthletePieceEntity(
                         trainingId = 0,
-                        athleteId = crewAthlete.athleteId,
+                        athleteId = crewAthlete.rowerId,
                         order = index,
                         distanceMeters = piece.distanceMeters,
                         timeMillis = RowingTimeFormat.parseDuration(piece.timeText)
@@ -209,15 +237,31 @@ internal class AddTrainingViewModel(
     }
 
     fun clearValidationError() {
-        changeState { copy(validationError = null, importNotice = null) }
+        changeState {
+            copy(
+                validationError = null,
+                importNotice = null
+            )
+        }
     }
 
-    fun importCsv(csvText: String) {
-        importCsvBatch(listOf(csvText))
+    fun showSaveTrainingDialog() {
+        changeState { copy(showSaveDialog = true) }
     }
 
-    fun importCsvBatch(csvTexts: List<String>) {
-        if (csvTexts.isEmpty()) return
+    fun hideSaveTrainingDialog() {
+        changeState { copy(showSaveDialog = false) }
+    }
+
+    fun importCsvBatchFromUris(
+        uris: List<Uri>,
+        context: Context
+    ) {
+        val csvTexts = uris.mapNotNull { selectedUri ->
+            runCatching {
+                context.contentResolver.openInputStream(selectedUri)?.bufferedReader()?.use { it.readText() }
+            }.getOrNull()
+        }
         viewModelScope.launch {
             for (csvText in csvTexts) {
                 val parsed = runCatching { SpeedCoachCsvParser.parse(csvText) }.getOrElse {
@@ -253,7 +297,7 @@ internal class AddTrainingViewModel(
                 copy(
                     dateMillis = trainingDateMillis,
                     dateFormatted = TimeUtils.formatMillisToString(trainingDateMillis),
-                    crewAthletes = listOf(AddCrewAthlete(athleteId = parsedAthleteId)),
+                    crewAthletes = listOf(AddCrewAthlete(rowerId = parsedAthleteId)),
                     pieces = newPieces.ifEmpty { listOf(AddPieceDraft()) },
                     pendingRawCsvs = listOf(parsed.rawCsv),
                     pendingSourceSerial = parsed.deviceSerial,
@@ -320,7 +364,11 @@ internal class AddTrainingViewModel(
         return calendar.timeInMillis
     }
 
-    private fun toTrainingDateMillis(year: Int, month: Int, dayOfMonth: Int): Long {
+    private fun toTrainingDateMillis(
+        year: Int,
+        month: Int,
+        dayOfMonth: Int
+    ): Long {
         val calendar = Calendar.getInstance().apply {
             set(Calendar.YEAR, year)
             set(Calendar.MONTH, month)
@@ -333,25 +381,32 @@ internal class AddTrainingViewModel(
         return calendar.timeInMillis
     }
 
-    private fun validate(): String? {
-        if (state.crewAthletes.isEmpty()) {
-            return resourceUtils.getString(R.string.add_training_validation_need_athlete)
-        }
-        if (state.crewAthletes.size > AddTrainingState.MAX_CREW_SIZE) {
-            return resourceUtils.getString(
-                R.string.add_training_crew_max_size,
-                AddTrainingState.MAX_CREW_SIZE
-            )
-        }
+    private fun validate(): String? = validateCrewSize() ?: validateRowerIds() ?: validatePieces()
+
+    private fun validateCrewSize(): String? = when {
+        state.crewAthletes.isEmpty() -> resourceUtils.getString(R.string.add_training_validation_need_athlete)
+        state.crewAthletes.size > AddTrainingState.MAX_CREW_SIZE -> resourceUtils.getString(
+            R.string.add_training_crew_max_size,
+            AddTrainingState.MAX_CREW_SIZE
+        )
+
+        else -> null
+    }
+
+    private fun validateRowerIds(): String? {
         val usedAthletes = mutableSetOf<Long>()
         for (athlete in state.crewAthletes) {
-            if (athlete.athleteId <= 0) {
+            if (athlete.rowerId <= 0) {
                 return resourceUtils.getString(R.string.add_training_validation_select_athlete)
             }
-            if (!usedAthletes.add(athlete.athleteId)) {
+            if (!usedAthletes.add(athlete.rowerId)) {
                 return resourceUtils.getString(R.string.add_training_validation_athlete_duplicate)
             }
         }
+        return null
+    }
+
+    private fun validatePieces(): String? {
         if (state.pieces.isEmpty()) {
             return resourceUtils.getString(R.string.add_training_validation_need_piece)
         }

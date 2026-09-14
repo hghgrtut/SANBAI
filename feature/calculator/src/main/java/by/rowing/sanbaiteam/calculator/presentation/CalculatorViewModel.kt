@@ -19,25 +19,23 @@ internal class CalculatorViewModel(
     }
 
     fun changeMode(mode: CalculatorMode) {
-        changeState {
-            copy(
-                mode = mode,
-                resultText = "",
-                error = null,
-            )
-        }
+        clearResult()
+        changeState { copy(mode = mode) }
     }
 
     fun changeRecordPace(text: String) {
-        changeState { copy(recordPaceText = text, resultText = "", error = null) }
+        clearResult()
+        changeState { copy(recordPaceText = text) }
     }
 
     fun changePace(text: String) {
-        changeState { copy(paceText = text, resultText = "", error = null) }
+        clearResult()
+        changeState { copy(paceText = text) }
     }
 
     fun changePercent(text: String) {
-        changeState { copy(percentText = text, resultText = "", error = null) }
+        clearResult()
+        changeState { copy(percentText = text) }
     }
 
     fun calculate() {
@@ -47,26 +45,30 @@ internal class CalculatorViewModel(
         }
     }
 
-    fun clearError() {
-        changeState { copy(error = null) }
+    fun clearResult() {
+        changeState {
+            copy(
+                resultText = "",
+                error = null,
+            )
+        }
     }
 
     private fun calculatePercent() {
         val recordPace = RowingTimeFormat.parseDuration(state.recordPaceText)
         val pace = RowingTimeFormat.parseDuration(state.paceText)
         if (recordPace == null || recordPace <= 0) {
-            changeState {
-                copy(error = resourceUtils.getString(R.string.calculator_error_record_pace))
-            }
+            changeState { copy(error = resourceUtils.getString(R.string.calculator_error_record_pace)) }
             return
         }
         if (pace == null || pace <= 0) {
-            changeState {
-                copy(error = resourceUtils.getString(R.string.calculator_error_pace))
-            }
+            changeState { copy(error = resourceUtils.getString(R.string.calculator_error_pace)) }
             return
         }
-        val percent = PersonalBestPercent.percentFromPaces(recordPace, pace)
+        val percent = PersonalBestPercent.percentFromPaces(
+            recordPaceMillis = recordPace,
+            paceMillis = pace
+        )
         changeState {
             copy(
                 resultText = PersonalBestPercent.format(percent),
@@ -76,21 +78,23 @@ internal class CalculatorViewModel(
     }
 
     private fun calculatePace() {
-        val recordPace = RowingTimeFormat.parseDuration(state.recordPaceText)
-        val percent = state.percentText.trim().replace(',', '.').toDoubleOrNull()
+        val recordPace = RowingTimeFormat.parseDuration(input = state.recordPaceText)
+        val percent = state.percentText.trim().replace(
+            oldChar = ',',
+            newChar = '.'
+        ).toDoubleOrNull()
         if (recordPace == null || recordPace <= 0) {
-            changeState {
-                copy(error = resourceUtils.getString(R.string.calculator_error_record_pace))
-            }
+            changeState { copy(error = resourceUtils.getString(R.string.calculator_error_record_pace)) }
             return
         }
         if (percent == null || percent <= 0) {
-            changeState {
-                copy(error = resourceUtils.getString(R.string.calculator_error_percent))
-            }
+            changeState { copy(error = resourceUtils.getString(R.string.calculator_error_percent)) }
             return
         }
-        val pace = PersonalBestPercent.paceFromPercent(recordPace, percent)
+        val pace = PersonalBestPercent.paceFromPercent(
+            recordPaceMillis = recordPace,
+            percent = percent
+        )
         changeState {
             copy(
                 resultText = pace?.let { "${RowingTimeFormat.formatDuration(it)} /500м" }.orEmpty(),

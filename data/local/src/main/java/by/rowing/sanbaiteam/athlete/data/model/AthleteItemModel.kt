@@ -1,5 +1,8 @@
 package by.rowing.sanbaiteam.athlete.data.model
 
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
+
+@AllowDetektPublic
 data class AthleteItemModel(
     val id: Long,
     val name: String,

@@ -1,7 +1,9 @@
 package by.rowing.sanbaiteam.uikit.theme
 
 import androidx.compose.ui.graphics.Color
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
+@AllowDetektPublic
 object ColorPalette {
     val White = Color(color = 0xFFFFFFFF)
     val Transparent = Color(color = 0x00000000)

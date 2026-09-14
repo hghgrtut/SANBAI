@@ -1,15 +1,17 @@
-package com.checker.uikit3.modifier
+package by.rowing.sanbaiteam.uikit.modifier
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
-const val DEBOUNCE_DELAY_MILLIS = 300L
+internal const val DEBOUNCE_DELAY_MILLIS = 300L
 
+@AllowDetektPublic
 class ClickableState {
 
     var enabled: MutableState<Boolean> = mutableStateOf(true)

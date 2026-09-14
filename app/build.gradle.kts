@@ -42,6 +42,7 @@ dependencies {
 
     implementation(project(":uikit"))
     implementation(project(":core:util"))
+    implementation(project(":core:annotation"))
     implementation(project(":core:navigation"))
     implementation(project(":core:base"))
     implementation(project(":data:local"))

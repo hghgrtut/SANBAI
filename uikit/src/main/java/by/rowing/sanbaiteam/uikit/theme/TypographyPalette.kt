@@ -18,12 +18,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.InterFontFamily
 import kotlin.math.roundToInt
 
 /**
  * figma: https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=2-11&p=f&t=Cwyq7FbrKyH7r243-0
  */
+@AllowDetektPublic
 object TypographyPalette {
 
     /**

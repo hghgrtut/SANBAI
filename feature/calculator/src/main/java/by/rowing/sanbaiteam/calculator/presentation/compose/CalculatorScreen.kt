@@ -2,6 +2,7 @@ package by.rowing.sanbaiteam.calculator.presentation.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,7 +31,6 @@ import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerM
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 
@@ -44,7 +44,7 @@ internal fun CalculatorScreen(viewModel: CalculatorViewModel) {
         onPaceChange = viewModel::changePace,
         onPercentChange = viewModel::changePercent,
         onCalculate = viewModel::calculate,
-        onClearError = viewModel::clearError,
+        onClearError = viewModel::clearResult,
     )
 }
 
@@ -60,117 +60,187 @@ private fun CalculatorScreenContent(
     onCalculate: () -> Unit,
     onClearError: () -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            SimpleTopAppBar(
-                title = stringResource(R.string.calculator_title),
-                onNavIconClick = onBackClick
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(Spacing.M),
-            verticalArrangement = Arrangement.spacedBy(Spacing.M)
-        ) {
-            Text(
-                text = stringResource(R.string.calculator_subtitle),
-                style = TypographyPalette.Body2Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    selected = state.mode == CalculatorMode.PaceToPercent,
-                    onClick = { onModeChange(CalculatorMode.PaceToPercent) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                    label = { Text(stringResource(R.string.calculator_mode_percent)) }
-                )
-                SegmentedButton(
-                    selected = state.mode == CalculatorMode.PercentToPace,
-                    onClick = { onModeChange(CalculatorMode.PercentToPace) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                    label = { Text(stringResource(R.string.calculator_mode_pace)) }
-                )
-            }
-
-            TextField(
-                value = state.recordPaceText,
-                onValueChange = onRecordPaceChange,
-                label = stringResource(R.string.calculator_record_pace_label),
-                placeholder = stringResource(R.string.calculator_pace_placeholder),
-                textStyle = TypographyPaletteSp.Body1Regular,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            when (state.mode) {
-                CalculatorMode.PaceToPercent -> {
-                    TextField(
-                        value = state.paceText,
-                        onValueChange = onPaceChange,
-                        label = stringResource(R.string.calculator_pace_label),
-                        placeholder = stringResource(R.string.calculator_pace_placeholder),
-                        textStyle = TypographyPaletteSp.Body1Regular,
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                CalculatorMode.PercentToPace -> {
-                    TextField(
-                        value = state.percentText,
-                        onValueChange = onPercentChange,
-                        label = stringResource(R.string.calculator_percent_label),
-                        placeholder = stringResource(R.string.calculator_percent_placeholder),
-                        textStyle = TypographyPaletteSp.Body1Regular,
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.calculator_calculate),
-                debounceClick = onCalculate
-            )
-
-            if (state.resultText.isNotBlank()) {
-                SpacerS()
-                Text(
-                    text = stringResource(R.string.calculator_result_label),
-                    style = TypographyPalette.Body2Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = state.resultText,
-                    style = TypographyPaletteSp.H2
-                )
-            }
-            SpacerM()
-        }
+    Scaffold(topBar = calculatorScreenTopBar(onBackClick = onBackClick)) { paddingValues ->
+        CalculatorScreenContent(
+            paddingValues = paddingValues,
+            state = state,
+            onModeChange = onModeChange,
+            onRecordPaceChange = onRecordPaceChange,
+            onPaceChange = onPaceChange,
+            onPercentChange = onPercentChange,
+            onCalculate = onCalculate
+        )
     }
 
     state.error?.let { error ->
-        AlertDialog(
-            onDismissRequest = onClearError,
-            title = {
-                Text(
-                    text = stringResource(R.string.calculator_error_title),
-                    style = TypographyPalette.H4
-                )
-            },
-            text = { Text(text = error, style = TypographyPalette.Body1Regular) },
-            confirmButton = {
-                Button(
-                    text = stringResource(R.string.cancel),
-                    buttonColors = ButtonColors.text(),
-                    debounceClick = onClearError
-                )
-            }
+        InputErrorAlert(
+            onClearError = onClearError,
+            error = error
         )
     }
+}
+
+private fun calculatorScreenTopBar(onBackClick: () -> Unit) = @Composable {
+    SimpleTopAppBar(
+        title = stringResource(R.string.calculator_title),
+        onNavIconClick = onBackClick
+    )
+}
+
+@Composable
+private fun CalculatorScreenContent(
+    paddingValues: PaddingValues,
+    state: CalculatorState,
+    onModeChange: (CalculatorMode) -> Unit,
+    onRecordPaceChange: (String) -> Unit,
+    onPaceChange: (String) -> Unit,
+    onPercentChange: (String) -> Unit,
+    onCalculate: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .verticalScroll(rememberScrollState())
+            .padding(Spacing.M),
+        verticalArrangement = Arrangement.spacedBy(Spacing.M)
+    ) {
+        Text(
+            text = stringResource(R.string.calculator_subtitle),
+            style = TypographyPalette.Body2Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        CalculatorModeSelector(
+            state = state,
+            onModeChange = onModeChange
+        )
+
+        TextField(
+            value = state.recordPaceText,
+            onValueChange = onRecordPaceChange,
+            label = stringResource(R.string.calculator_record_pace_label),
+            placeholder = stringResource(R.string.calculator_pace_placeholder),
+            textStyle = TypographyPaletteSp.Body1Regular,
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        CalculatorInputField(
+            state = state,
+            onPaceChange = onPaceChange,
+            onPercentChange = onPercentChange
+        )
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.calculator_calculate),
+            debounceClick = onCalculate
+        )
+
+        if (state.resultText.isNotBlank()) {
+            CalculatorResult(state = state)
+        }
+
+        SpacerM()
+    }
+}
+
+@Composable
+private fun CalculatorModeSelector(
+    state: CalculatorState,
+    onModeChange: (CalculatorMode) -> Unit
+) {
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        val calculatorModes = listOf(
+            CalculatorMode.PaceToPercent to R.string.calculator_mode_percent,
+            CalculatorMode.PercentToPace to R.string.calculator_mode_pace
+        )
+        val calculatorModesCount = calculatorModes.size
+        calculatorModes.forEachIndexed { index, (mode, titleResId) ->
+            SegmentedButton(
+                selected = state.mode == mode,
+                onClick = { onModeChange(mode) },
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = calculatorModesCount
+                ),
+                label = { Text(stringResource(titleResId)) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun CalculatorInputField(
+    state: CalculatorState,
+    onPaceChange: (String) -> Unit,
+    onPercentChange: (String) -> Unit
+) {
+    when (state.mode) {
+        CalculatorMode.PaceToPercent -> {
+            TextField(
+                value = state.paceText,
+                onValueChange = onPaceChange,
+                label = stringResource(R.string.calculator_pace_label),
+                placeholder = stringResource(R.string.calculator_pace_placeholder),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        CalculatorMode.PercentToPace -> {
+            TextField(
+                value = state.percentText,
+                onValueChange = onPercentChange,
+                label = stringResource(R.string.calculator_percent_label),
+                placeholder = stringResource(R.string.calculator_percent_placeholder),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun CalculatorResult(state: CalculatorState) {
+    Column {
+        Text(
+            modifier = Modifier.padding(top = Spacing.S),
+            text = stringResource(R.string.calculator_result_label),
+            style = TypographyPalette.Body2Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = state.resultText,
+            style = TypographyPaletteSp.H2
+        )
+    }
+}
+
+@Composable
+private fun InputErrorAlert(
+    onClearError: () -> Unit,
+    error: String
+) {
+    AlertDialog(
+        onDismissRequest = onClearError,
+        title = {
+            Text(
+                text = stringResource(R.string.calculator_error_title),
+                style = TypographyPalette.H4
+            )
+        },
+        text = {
+            Text(
+                text = error,
+                style = TypographyPalette.Body1Regular
+            )
+        },
+        confirmButton = {
+            Button(
+                text = stringResource(R.string.cancel),
+                buttonColors = ButtonColors.text(),
+                debounceClick = onClearError
+            )
+        }
+    )
 }

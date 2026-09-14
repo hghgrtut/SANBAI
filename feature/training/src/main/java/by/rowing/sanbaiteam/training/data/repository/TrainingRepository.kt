@@ -76,8 +76,10 @@ internal class TrainingRepository(
     }
 
     suspend fun getTrainingDetail(trainingId: Long): TrainingDetailState = withContext(Dispatchers.IO) {
-        val training = dao.getTrainingById(trainingId)
-            ?: return@withContext TrainingDetailState(isLoading = false, notFound = true)
+        val training = dao.getTrainingById(trainingId) ?: return@withContext TrainingDetailState(
+            isLoading = false,
+            notFound = true
+        )
 
         val pieces = dao.getPiecesForTraining(trainingId)
         val athleteIds = pieces.map { it.athleteId }.distinct()
@@ -133,7 +135,7 @@ internal class TrainingRepository(
             groups[piece.distanceMeters] = (groups[piece.distanceMeters] ?: 0) + 1
         }
         return groups.entries.joinToString(separator = " + ") { (distance, count) ->
-            (if (count > 1) "${count}×" else "") + "${distance}м"
+            (if (count > 1) "$count×" else "") + "${distance}м"
         }
     }
 }

@@ -1,0 +1,682 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+    <ManuallySuppressedIssues />
+    <CurrentIssues>
+        <ID>MultipleArgumentListWrapping:Accordion.kt$PaddingValues(horizontal = Spacing.M, vertical = Spacing.SM)</ID>
+        <ID>MultipleArgumentListWrapping:AchievementDetailsScreen.kt$padding(horizontal = 16.dp, vertical = 24.dp)</ID>
+        <ID>MultipleArgumentListWrapping:AchievementItem.kt$padding(vertical = Spacing.XS, horizontal = Spacing.SM)</ID>
+        <ID>
+            MultipleArgumentListWrapping:AchievementItemPreview.kt$AchievementUiItemParameterProvider$createAchievementUiItem(isNew
+            = false, isLoading = false)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:AchievementItemPreview.kt$AchievementUiItemParameterProvider$createAchievementUiItem(isNew
+            = false, isLoading = true)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:AchievementItemPreview.kt$AchievementUiItemParameterProvider$createAchievementUiItem(isNew
+            = true, isLoading = false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:AlarmMedicineScreen.kt$background( color = backgroundColor, shape =
+            RoundedCornerShape(ChipCornerRadius) )
+        </ID>
+        <ID>MultipleArgumentListWrapping:AlarmMedicineScreen.kt$padding( horizontal = 16.dp, vertical = 8.dp )</ID>
+        <ID>MultipleArgumentListWrapping:AlarmsMapper.kt$AlarmsMapper$formatMillisToTime(milliseconds = time, isUtc =
+            true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:AlarmsUserManager.kt$AlarmsUserManager$attachToUserChangedEvent( manager =
+            this, onUserLogOut = { sharedPrefsAlarm.deleteAlarms() alarmSchedulerHelper.updateAlarms() })
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:AuthBottomSheetDialogFragment.kt$AuthBottomSheetDialogFragment$onAuthActivityResult(result
+            = it, authSelected = PARAM_AUTH_SELECTED_GOS_VALUE)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:AuthBottomSheetDialogFragment.kt$AuthBottomSheetDialogFragment$onAuthActivityResult(result
+            = it, authSelected = PARAM_AUTH_SELECTED_PHONE_VALUE)
+        </ID>
+        <ID>MultipleArgumentListWrapping:AvailabilityInformation.kt$RadioButtonUiItemCommon(text = "Да", isSelected =
+            true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:AveragePriceView.kt$SpanStyle(fontWeight = FontWeight(600), fontSize = 18.sp)
+        </ID>
+        <ID>MultipleArgumentListWrapping:AveragePriceView.kt$rememberPagerState(initialPage = 0, pageCount = { 3 })</ID>
+        <ID>MultipleArgumentListWrapping:BasketViewModelShared.kt$BasketViewModelShared$copy(error = Event(result),
+            isLoadingState = false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:BottomSheet.kt$padding(bottom = Spacing.M, top = Spacing.S)</ID>
+        <ID>
+            MultipleArgumentListWrapping:BottomSheetScreenPreviewParameterProvider.kt$BottomSheetScreenPreviewParameterProvider$YMKAddress(title
+            = "Парикмахерская", description = null, distance = "12 м", uri = null)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:BottomSheetScreenPreviewParameterProvider.kt$BottomSheetScreenPreviewParameterProvider$YMKAddress(title
+            = "Парикмахерская1", description = "123", distance = "12 м", uri = null)
+        </ID>
+        <ID>MultipleArgumentListWrapping:CheckResultUserManager.kt$CheckResultUserManager$attachToUserChangedEvent(
+            manager = this, onUserLogOut = { expirationSchedulerHelperImpl.clearExpirations()
+            sharedPrefsDyslexia.clearDyslexia() })
+        </ID>
+        <ID>MultipleArgumentListWrapping:CheckResultV2Manager.kt$CheckResultV2Manager$PagerState( currentPage = 0,
+            currentPageOffsetFraction = 0f, pageCount = { avPriceItem?.images?.size ?: 0 })
+        </ID>
+        <ID>MultipleArgumentListWrapping:Checkbox.kt$border(width = 1.dp, color = borderColor, shape = SHAPE)</ID>
+        <ID>MultipleArgumentListWrapping:CircularStaticProgressBar.kt$Stroke(width = 4.dp.toPx(), cap =
+            StrokeCap.Round)
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComplaintViewModel.kt$ComplaintViewModel$checkImage(data = cropDM, photo =
+            productPhoto)
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComplaintViewModel.kt$ComplaintViewModel$copy(value = newValue, state =
+            newValue.fieldState())
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:ComplaintsDraftsRepositoryImpl.kt$ComplaintsDraftsRepositoryImpl$DraftComplaintPhoto(url
+            = it.url, fileName = it.fileName.orEmpty())
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:ComplaintsDraftsUserManager.kt$ComplaintsDraftsUserManager$attachToUserChangedEvent(
+            manager = this, onUserLogOut = { complaintsDraftsManager.clearAllNotSendDrafts() }, onUserChanged = {
+            userChangedParams -&gt; if (userChangedParams.isUserIdChanged) {
+            complaintsDraftsManager.clearAllNotSendDrafts() } })
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComponentButton.kt$ComponentButtonType$BorderStroke(width = borderWidth, color
+            = borderColor)
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComponentCheckbox.kt$background(color = backgroundColor, shape =
+            RoundedCornerShape(checkBoxCornerRadius))
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComponentCheckbox.kt$rememberCheckboxState(checked = true, enable = false)</ID>
+        <ID>MultipleArgumentListWrapping:ComponentRadioButtonRedesigned.kt$ComponentRadioButton(selected = false,
+            onClick = {})
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComponentRadioButtonRedesigned.kt$ComponentRadioButton(selected = true, onClick
+            = {})
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComponentRadioButtonRedesigned.kt$ComponentRadioButtonRedesigned(text =
+            "Selected", selected = true, onClick = {})
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComponentRadioButtonRedesigned.kt$ComponentRadioButtonRedesigned(text =
+            "Unselected", selected = false, onClick = {})
+        </ID>
+        <ID>MultipleArgumentListWrapping:ComponentTextCheckbox.kt$rememberCheckboxState(checked = true, enable =
+            false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:CountriesBottomSheetContent.kt$padding(horizontal = 24.dp, vertical = 16.dp)
+        </ID>
+        <ID>MultipleArgumentListWrapping:CourierScanViewModel.kt$CourierScanViewModel$copy(isLoading = false, error =
+            error)
+        </ID>
+        <ID>MultipleArgumentListWrapping:CrptMetricsPlatform.kt$CrptMetricsPlatform$joinToString(prefix = "{", postfix =
+            "}")
+        </ID>
+        <ID>MultipleArgumentListWrapping:DateEntryContainer.kt$Box( modifier = Modifier .clearAndSetSemantics {
+            contentDescription = it.first } .size( width = RecommendedSizeForAccessibility, height =
+            RecommendedSizeForAccessibility ), contentAlignment = Alignment.Center) { Text( text = it.second, modifier =
+            Modifier.wrapContentSize(), color = colors.weekdayContentColor, style = textStyle, textAlign =
+            TextAlign.Center ) }
+        </ID>
+        <ID>MultipleArgumentListWrapping:DateEntryContainer.kt$IconButton(onClick = {
+            onDisplayModeChange(DisplayMode.Input) }, modifier = modifier) { Icon( imageVector = Icons.Filled.Edit,
+            contentDescription = "" ) }
+        </ID>
+        <ID>MultipleArgumentListWrapping:DateEntryContainer.kt$IconButton(onClick = {
+            onDisplayModeChange(DisplayMode.Picker) }, modifier = modifier) { Icon( imageVector =
+            Icons.Filled.DateRange, contentDescription = "" ) }
+        </ID>
+        <ID>MultipleArgumentListWrapping:DateEntryContainer.kt$PaddingValues(end = 12.dp, bottom = 12.dp)</ID>
+        <ID>MultipleArgumentListWrapping:DateEntryContainer.kt$toLocalString(minDigits = 0, maxDigits = 20,
+            isGroupingUsed = false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:DatesRangePicker.kt$LaunchedEffect(key1 = startDate, key2 = endDate) {
+            isIntervalValid = endDate != null &amp;&amp; startDate != null &amp;&amp; endDate &gt;= startDate }
+        </ID>
+        <ID>MultipleArgumentListWrapping:DatesRangePicker.kt$padding(bottom = 16.dp, start = 16.dp, end = 16.dp, top =
+            8.dp)
+        </ID>
+        <ID>MultipleArgumentListWrapping:DatesRangePickerCopy.kt$AnimatedVisibility( visible = displayMode ==
+            DisplayMode.Input, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.semantics {
+            @Suppress("DEPRECATION") isContainer = true }, label = "" ) { DateRangeInputContent( selectedStartDateMillis
+            = selectedStartDateMillis, selectedEndDateMillis = selectedEndDateMillis, onDatesSelectionChange =
+            onDatesSelectionChange, calendarModel = calendarModel, yearRange = yearRange, dateFormatter = dateFormatter,
+            selectableDates = selectableDates, colors = colors ) }
+        </ID>
+        <ID>MultipleArgumentListWrapping:DatesRangePickerCopy.kt$AnimatedVisibility( visible = displayMode ==
+            DisplayMode.Picker, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.semantics {
+            @Suppress("DEPRECATION") isContainer = true }, label = "" ) { DateRangePickerContent(
+            selectedStartDateMillis = selectedStartDateMillis, selectedEndDateMillis = selectedEndDateMillis,
+            displayedMonthMillis = displayedMonthMillis, onDatesSelectionChange = onDatesSelectionChange,
+            onDisplayedMonthChange = onDisplayedMonthChange, calendarModel = calendarModel, yearRange = yearRange,
+            dateFormatter = dateFormatter, selectableDates = selectableDates, colors = colors ) }
+        </ID>
+        <ID>MultipleArgumentListWrapping:DatesRangePickerCopy.kt$ScrollAxisRange(value = { 0f }, maxValue = { 0f })</ID>
+        <ID>MultipleArgumentListWrapping:DescriptionValidator.kt$DescriptionValidator$replace(regex = Regex(pattern =
+            "\\s+"), replacement = " ")
+        </ID>
+        <ID>MultipleArgumentListWrapping:DocumentScreen.kt$advancedShadow( alpha = 0.24f, cornersRadius = 16.dp,
+            blurRadius = 10.dp )
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:DocumentsListAnalyticHelperTest.kt$DocumentsListAnalyticHelperTest$logDocumentClickEvent(docType
+            = docType, isSingle = isSingle)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:DocumentsListAnalyticHelperTest.kt$DocumentsListAnalyticHelperTest$logDocumentOpenEvent(openedFromWidget
+            = openedFromWidget, category = category)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:DocumentsListAnalyticHelperTest.kt$DocumentsListAnalyticHelperTest$logDocumentOpenEvent(openedFromWidget
+            = true, category = category)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:ExpirationMultiViewPreviewParameterProvider.kt$ExpirationMultiViewPreviewParameterProvider$createItem(showIcons
+            = false, itemsCount = 1)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:ExpirationMultiViewPreviewParameterProvider.kt$ExpirationMultiViewPreviewParameterProvider$createItem(showIcons
+            = false, itemsCount = 2)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:ExpirationMultiViewPreviewParameterProvider.kt$ExpirationMultiViewPreviewParameterProvider$createItem(showIcons
+            = true, itemsCount = 1)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:ExpirationMultiViewPreviewParameterProvider.kt$ExpirationMultiViewPreviewParameterProvider$createItem(showIcons
+            = true, itemsCount = 2)
+        </ID>
+        <ID>MultipleArgumentListWrapping:FilterChip.kt$padding(horizontal = 16.dp, vertical = 8.dp)</ID>
+        <ID>MultipleArgumentListWrapping:FiscalHelper.kt$formatMillis(milliseconds = this, format = PAST_DATE_FORMAT,
+            isUTC = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:FiscalHelper.kt$formatMillisToTime(milliseconds = this, isUtc = true)</ID>
+        <ID>MultipleArgumentListWrapping:FiscalScannerFragment.kt$FiscalScannerFragment$FiscalDto(checkV2 = it.checkV2,
+            externalError = externalError)
+        </ID>
+        <ID>MultipleArgumentListWrapping:FocusableScanView.kt$FocusableScanView$focus(xCoordinate = point.x, yCoordinate
+            = point.y)
+        </ID>
+        <ID>MultipleArgumentListWrapping:HalfExpandableBottomSheet.kt$RoundedCornerShape(topStart = cornerRadius, topEnd
+            = cornerRadius)
+        </ID>
+        <ID>MultipleArgumentListWrapping:HalfExpandableBottomSheet.kt$copy(minWidth = 0, minHeight = 0)</ID>
+        <ID>MultipleArgumentListWrapping:HalfExpandableBottomSheet.kt$layout( width = layoutWidth, height = layoutHeight
+            ) { val sheetOffsetY = sheetOffset().roundToInt() val sheetOffsetX = Integer.max(0, (layoutWidth -
+            sheetPlaceable.width) / 2) val snackbarOffsetX = (layoutWidth - snackbarPlaceable.width) / 2 val
+            snackbarThreshold = minOf(snackbarPlaceable.height * 2f, layoutHeight * 0.3f) val snackbarOffsetY = if
+            (layoutHeight - sheetOffsetY &lt; snackbarThreshold) { sheetOffsetY - snackbarPlaceable.height } else {
+            layoutHeight - snackbarPlaceable.height } // Placement order is important for elevation
+            bodyPlaceable.placeRelative(0, 0) topBarPlaceable?.placeRelative(0, 0)
+            sheetPlaceable.placeRelative(sheetOffsetX, sheetOffsetY) snackbarPlaceable.placeRelative(snackbarOffsetX,
+            snackbarOffsetY) if (useNavBarDummy) { val navBarY = if (useStatusBarPaddingForDummy) layoutHeight else
+            layoutHeight - navBarHeight navBarPlaceable.placeRelative(0, navBarY) } }
+        </ID>
+        <ID>MultipleArgumentListWrapping:HistoryItemWithDismiss.kt$toPx(shapeSize = Size.Zero, density = density)</ID>
+        <ID>MultipleArgumentListWrapping:HomeScreen.kt$PaddingValues(horizontal = 60.dp, vertical = 12.dp)</ID>
+        <ID>MultipleArgumentListWrapping:HomeScreen.kt$offset(x = 3.dp, y = (-3).dp)</ID>
+        <ID>MultipleArgumentListWrapping:HomeScreen.kt$padding(vertical = 8.dp, horizontal = 8.dp)</ID>
+        <ID>MultipleArgumentListWrapping:HomeScreen.kt$weight(weight = 1f, fill = false)</ID>
+        <ID>MultipleArgumentListWrapping:ImageUtils.kt$listener( onError = { _, result: ErrorResult -&gt;
+            onError?.invoke(result) }, onSuccess = { _, _ -&gt; onSuccess?.invoke() })
+        </ID>
+        <ID>MultipleArgumentListWrapping:LikeWidget.kt$animate(composition = composition, speed = 0f, initialProgress =
+            0f)
+        </ID>
+        <ID>MultipleArgumentListWrapping:LikeWidget.kt$animate(composition = composition, speed = 1f)</ID>
+        <ID>MultipleArgumentListWrapping:LikeWidget.kt$padding(horizontal = Spacing.S, vertical = Spacing.XS)</ID>
+        <ID>
+            MultipleArgumentListWrapping:LocationPermissionManagerTest.kt$LocationPermissionManagerTest$LocationPermissionManager(
+            foundUserLocation = { _, _ -&gt; }, onPermissionDenied = { wasDeniedCalled = true }, openGpsUnavailable = {
+            })
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:LocationPermissionManagerTest.kt$LocationPermissionManagerTest$LocationPermissionManager(
+            foundUserLocation = { _, _ -&gt; }, onPermissionDenied = { }, openGpsUnavailable = { wasGpsDialogOpened =
+            true })
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:LocationPermissionManagerTest.kt$LocationPermissionManagerTest$LocationPermissionManager(
+            foundUserLocation = { _, _ -&gt; }, onPermissionDenied = { }, openGpsUnavailable = { })
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:LocationPermissionManagerTest.kt$LocationPermissionManagerTest$LocationPermissionManager(
+            foundUserLocation = { _, _ -&gt; }, onPermissionDenied = {})
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:LocationPermissionManagerTest.kt$LocationPermissionManagerTest$LocationPermissionManager(
+            foundUserLocation = { _, _ -&gt; }, onPermissionDenied = {}, openGpsUnavailable = { wasGpsDialogOpened =
+            true })
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:LocationPermissionManagerTest.kt$LocationPermissionManagerTest$LocationPermissionManager(
+            foundUserLocation = { _, _ -&gt; }, onPermissionDenied = {}, openGpsUnavailable = { })
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:LocationPermissionManagerTest.kt$LocationPermissionManagerTest$LocationPermissionManager(
+            foundUserLocation = { point, _ -&gt; userPoint = point }, onPermissionDenied = { }, openGpsUnavailable = {
+            })
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:LocationPermissionManagerTest.kt$LocationPermissionManagerTest$LocationPermissionManager(
+            foundUserLocation = { point, _ -&gt; userPoint = point }, onPermissionDenied = {}, openGpsUnavailable = { })
+        </ID>
+        <ID>MultipleArgumentListWrapping:LoginEsiaViewModel.kt$LoginEsiaViewModel$copy(isLoading = false, esiaUrl =
+            Event(url))
+        </ID>
+        <ID>MultipleArgumentListWrapping:MScanMapper.kt$MScanMapper$replace(oldValue = SUBDOMAIN_WWW, newValue = "")
+        </ID>
+        <ID>MultipleArgumentListWrapping:MScanSignInfoScreen.kt$padding(horizontal = Spacing.S, vertical = Spacing.L)
+        </ID>
+        <ID>MultipleArgumentListWrapping:MScanViewModel.kt$MScanViewModel$copy(error = error, isLoading = false)</ID>
+        <ID>MultipleArgumentListWrapping:MainMapper.kt$MainMapper$buildLabelIfNotNull(name = it.value, iconResId =
+            iconResId)
+        </ID>
+        <ID>MultipleArgumentListWrapping:MainMapper.kt$MainMapper$buildLabelIfNotNull(name = text, iconResId =
+            iconResId)
+        </ID>
+        <ID>MultipleArgumentListWrapping:MainMapperCountryInfoLinkTest.kt$MainMapperCountryInfoLinkTest$map(item =
+            mainItem, checkData = null)
+        </ID>
+        <ID>MultipleArgumentListWrapping:MatrixScreen.kt$background(color = backgroundColor, shape = shape)</ID>
+        <ID>MultipleArgumentListWrapping:Modifiers.kt$onClick(click = onClick, debounceDelayMs = debounceDelayMs)</ID>
+        <ID>MultipleArgumentListWrapping:NutritionBottomSheet.kt$TableRow(row = it, selectedTabIndex =
+            selectedTabIndex.intValue)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:NutritionViewModelTest.kt$NutritionViewModelTest$NutritionComponentsListItemInfo(name
+            = "name1", color = Color.Green.toArgb())
+        </ID>
+        <ID>MultipleArgumentListWrapping:OfflineStoreViewModel.kt$OfflineStoreViewModel$setSearchAddressExpanded(flag =
+            false, addressText = title)
+        </ID>
+        <ID>MultipleArgumentListWrapping:OfflineUserManager.kt$OfflineUserManager$attachToUserChangedEvent( manager =
+            this, onUserChanged = { userChangedParams: UserRepository.UserChangedParams -&gt;
+            sharedPrefsOffline.actualizeScanProcessingTime(user = userChangedParams.newUser) })
+        </ID>
+        <ID>MultipleArgumentListWrapping:PhoneCardContent.kt$debounceClickable(onClick = onClick, enabled =
+            state.countryChooserEnabled)
+        </ID>
+        <ID>MultipleArgumentListWrapping:PhotoPickerScreen.kt$tween&lt;Float&gt;(durationMillis = 50, easing =
+            LinearEasing)
+        </ID>
+        <ID>MultipleArgumentListWrapping:PhotoUploadButton.kt$UploadButton(isPhotoProcessed = false, onClick = { })</ID>
+        <ID>MultipleArgumentListWrapping:PhotoUploadButton.kt$UploadButton(isPhotoProcessed = true, onClick = { })</ID>
+        <ID>MultipleArgumentListWrapping:Preview.kt$FieldsProvider.Companion$ProductCheckbox(enabled = false, checked =
+            true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:PreviewContentComponentButtonRedesigned.kt$Button(enabled = false, type =
+            type)
+        </ID>
+        <ID>MultipleArgumentListWrapping:PreviewContentComponentButtonRedesigned.kt$Button(enabled = true, type =
+            type)
+        </ID>
+        <ID>MultipleArgumentListWrapping:PreviewContentComponentTextButtonRedesigned.kt$Button(size = it, fontWeight =
+            FontWeight.Normal)
+        </ID>
+        <ID>MultipleArgumentListWrapping:PreviewContentComponentTextButtonRedesigned.kt$Button(size = it, fontWeight =
+            FontWeight.SemiBold)
+        </ID>
+        <ID>MultipleArgumentListWrapping:ProfileScreen.kt$padding(bottom = 24.dp, start = 16.dp, top = 8.dp, end =
+            4.dp)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:RegionSelectionScreenParameterProvider.kt$RegionSelectionScreenParameterProvider$RegionInfo(
+            name = "Поселок Центральной усадьбы совхоза имени 40-летия Великого Октября", fiasId = "",
+            saveRegionInProfileEnabled = true )
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:RegionSelectionScreenParameterProvider.kt$RegionSelectionScreenParameterProvider$RegionInfo(name
+            = "Москва", fiasId = "", saveRegionInProfileEnabled = true)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:RegionSelectionScreenParameterProvider.kt$RegionSelectionScreenParameterProvider$RegionInfo(name
+            = "Пермь", fiasId = "", saveRegionInProfileEnabled = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SaleInfoScreen.kt$RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp)</ID>
+        <ID>MultipleArgumentListWrapping:SaleInfoScreen.kt$padding(horizontal = Spacing.SM, vertical = Spacing.S)</ID>
+        <ID>MultipleArgumentListWrapping:SalesMapContent.kt$padding(vertical = 4.dp, horizontal = 4.dp)</ID>
+        <ID>MultipleArgumentListWrapping:SalesMapFilterTest.kt$SalesMapFilterTest$SaleMapPin(idSp = 0, categories =
+            listOf("filter1"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapFilterTest.kt$SalesMapFilterTest$SaleMapPin(idSp = 1, categories =
+            listOf("filter2"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapFilterTest.kt$SalesMapFilterTest$SaleMapPin(idSp = 1, violations =
+            listOf("violation1"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapFilterTest.kt$SalesMapFilterTest$SalePointsOnMap(setBottomSheetItems =
+            true, point = Point(2.0, 3.0))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildCategoriesClickTestDataProvider$Category(key = "1",
+            isChecked = false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildCategoriesClickTestDataProvider$Category(key = "1",
+            isChecked = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildCategoriesClickTestDataProvider$Category(key = "2",
+            isChecked = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterPinsDataProvider$SaleMapPin(idSp = 1, categories
+            = listOf("1", "2"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterPinsDataProvider$SaleMapPin(idSp = 1, violations
+            = listOf("1", "2"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterPinsDataProvider$SaleMapPin(idSp = 2, categories
+            = listOf("1", "2", "3"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterPinsDataProvider$SaleMapPin(idSp = 2, categories
+            = listOf("2"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterPinsDataProvider$SaleMapPin(idSp = 3, categories
+            = listOf("1", "2"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterPinsDataProvider$SaleMapPin(idSp = 4, categories
+            = listOf("2", "3"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$CategoryFilter(name =
+            "234", isSelected = false, categories = listOf("234"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$CategoryFilter(name =
+            "234", isSelected = true, categories = listOf("345"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$CategoryFilter(name =
+            "345", isSelected = false, categories = listOf("345"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$CategoryFilter(name =
+            "345", isSelected = true, categories = listOf("234"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$CategoryFilter(name =
+            "456", isSelected = false, categories = listOf("345"))
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$OpenAdditionalSettingsFilter(selectedCategories
+            = 1, isSelected = true)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$OpenAdditionalSettingsFilter(selectedCategories
+            = 2, isSelected = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "234", categories = listOf("123"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "234", categories = listOf("234"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "234", categories = listOf("345"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "234", categories = listOf("345", "234"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "234", categories = listOf("345", "678", "789"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "234", categories = listOf())
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "345", categories = listOf("234"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "345", categories = listOf("345"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "345", categories = listOf())
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "456", categories = listOf("567", "345"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$SalesMapShortCut(name
+            = "456", categories = listOf("567", "345", "234"))
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapTestData.kt$BuildFilterShortcutsTestDataProvider$ViolationFilter(text =
+            "violations", isSelected = true)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SalesMapTestData.kt$BuildMapCategoriesTestDataProvider$ConfigScanTypeCategory(key
+            = "1", shortName = "short1")
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SalesMapTestData.kt$BuildMapCategoriesTestDataProvider$ConfigScanTypeCategory(key
+            = "2", shortName = "2")
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SalesMapTestData.kt$BuildSalesInfoMapCategoriesTestDataProvider$ConfigScanTypeCategory(key
+            = "water", fullName = "Упакованная вода")
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapUtilsTest.kt$SalesMapUtilsTest$ConfigSalesMap(pinAddressRadius =
+            addressPinRadius, pinUserRadius = userPinRadius)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SaleMapPin(idSp = 0, lat = 50.8,
+            lon = 20.7)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SaleMapPin(idSp = 1, lat = 9.2,
+            lon = 3.3, name = "name1")
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SaleMapPin(idSp = 5, lat = 2.2,
+            lon = 9.3, name = "name4")
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SaleMapPin(idSp = goodPointId1,
+            lat = 2.2, lon = 3.3, name = "name4")
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SaleMapPin(idSp = goodPointId2,
+            lat = 2.2, lon = 3.3, name = "name2")
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SaleMapPin(lat = 50.8, lon =
+            20.7)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SaleMapPin(lat = 50.8, lon =
+            20.7, idSp = idSp)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SalePoint(idSp = 3, location =
+            null, name = "name4")
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SalePoint(idSp = null, location
+            = SalePointLocation(lat = 1.0, lon = 1.0), name = "name3")
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SalePointLocation(lat = 0.0, lon
+            = 100.0 + DEFAULT_SEARCH_RADIUS)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SalePointLocation(lat = 1.0, lon
+            = 1.0)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SalePointLocation(lat = 1.0, lon
+            = 4.0)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SalePointLocation(lat = 10.0,
+            lon = 1.0)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$SalePointLocation(lat = 100.0 +
+            DEFAULT_SEARCH_RADIUS, lon = 0.0)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$onPinSelected(point =
+            newSelectedPoint, isPinSelectedFromStart = false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$onPinSelected(point =
+            selectedPoint, isPinSelectedFromStart = false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SalesMapViewModelTest.kt$SalesMapViewModelTest$onPinSelected(point =
+            selectedPoint, isPinSelectedFromStart = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchCategoriesScreen.kt$clickable( onClick = onClick, indication = null,
+            interactionSource = remember { MutableInteractionSource() })
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchCategoriesViewModelTest.kt$SearchCategoriesViewModelTest$copy(query =
+            "234", isLoading = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchMedicineMapper.kt$SearchMedicineMapper$replace(regex =
+            PHONE_NUMBER_FORMAT_REGEX, replacement = "$1 $2 $3 $4 $5")
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchMedicineRepository.kt$SearchMedicineRepository$getMedicineCard(gtin = id,
+            branchId = branchId)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchMedicineViewModel.kt$SearchMedicineViewModel$Product(medicine = this,
+            isHistory = isHistory)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SearchMedicinesMapFragment.kt$SearchMedicinesMapFragment$moveToCenterScreenWithZoom(point
+            = point, zoom = zoom)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchMedicinesMapFragment.kt$SearchMedicinesMapFragment$startRequestFlow(
+            dialogRationaleText = getString(R.string.permission_location_dialog_rationale_text), onDenied = {
+            vm.setUserLocation(null) })
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchMedicinesMapFragment.kt$SearchMedicinesMapFragment.&lt;no name provided&gt;$newInstance(
+            medicine = medicine, pharmacyId = pharmacyId, pharmacySelectedContent = pharmacyId?.let {
+            vm.getPharmacyById(it) })
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchPharmacyFilterScreen.kt$padding(horizontal = 16.dp, vertical = 8.dp)</ID>
+        <ID>MultipleArgumentListWrapping:SearchPharmacyListFragment.kt$SearchPharmacyListFragment$SearchPharmacyAdapter(
+            vmBasket = vmBasket, imageLoader = get(), listeners = listeners, watchAll = { pharmacy -&gt;
+            watchAllMedicines(pharmacy) })
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchPharmacyListFragment.kt$SearchPharmacyListFragment$setLoading(isLoading =
+            false, isListEmpty = true)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SearchPharmacyMapFragment.kt$SearchPharmacyMapFragment$openDialer(contextWithActivity
+            = activity, phoneNumber = phone)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SearchPharmacyMapFragment.kt$SearchPharmacyMapFragment$openDialer(contextWithActivity
+            = activity, phoneNumber = phoneNumber)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:SearchPharmacyMapMapper.kt$SearchPharmacyMapMapper$MedicineSearchScheduleModel(text
+            = schedule, textColor = ColorPalette.Grey70)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchPharmacyMapMapper.kt$SearchPharmacyMapMapper$parseTimeToMillis(timeString
+            = tomorrowOpenHour, isTomorrow = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SearchPharmacyOrderFilterScreen.kt$copy( lineHeight = 24.fontDp, color =
+            ColorPalette.Blue50 )
+        </ID>
+        <ID>MultipleArgumentListWrapping:Shapes.kt$copy(bottomStart = CornerSize(0.0.dp), bottomEnd =
+            CornerSize(0.0.dp))
+        </ID>
+        <ID>MultipleArgumentListWrapping:Shapes.kt$copy(topEnd = CornerSize(0.0.dp), bottomEnd = CornerSize(0.0.dp))
+        </ID>
+        <ID>MultipleArgumentListWrapping:Shapes.kt$copy(topStart = CornerSize(0.0.dp), bottomStart =
+            CornerSize(0.0.dp))
+        </ID>
+        <ID>MultipleArgumentListWrapping:Shapes.kt$copy(topStart = CornerSize(0.0.dp), topEnd = CornerSize(0.0.dp))</ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$boolean(key = PREF_FIRST_OPEN, default = true)</ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$boolean(key = PREF_INSTALL_REFERRER_HANDLED, default
+            = false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$boolean(key = PREF_IS_ANONYMOUS, default = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$boolean(key = PREF_NUTRITION_INTRO_SHOWED, default =
+            false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$int(key = PREF_FISCAL_CHECK_ID_AFTER_AUTH, default =
+            DEFAULT_CHECK_ID)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$int(key = PREF_USER_GENDER, default = -1)</ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$int(key = PREF_USER_ID, default = DEFAULT_USER_ID)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$long(key = PREF_EXPIRES_IN, default =
+            DEFAULT_EXPIRES_IN)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$long(key = PREF_FEATURE_LAST_ESIA_AUTH, default =
+            -1)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$long(key = PREF_FEATURE_OFFER_SUBMITTED, default =
+            -1)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$long(key = PREF_POPUP_DATE_SCAN_SHOWED, default = 0,
+            commit = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$long(key = PREF_USER_LAST_UPDATE_TIME, default = 0L,
+            commit = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$string(key = FIAS_ID, default = "")</ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$string(key = PREF_INSTALLATION_SOURCE, default =
+            DEFAULT_NONE_VALUE)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$string(key = PREF_INSTANCE_ID, default =
+            DEFAULT_INSTANCE_ID)
+        </ID>
+        <ID>MultipleArgumentListWrapping:SharedPrefs.kt$SharedPrefs$string(key = PREF_SID, commit = true)</ID>
+        <ID>MultipleArgumentListWrapping:Snackbar.kt$padding(horizontal = Spacing.M, vertical = Spacing.SM)</ID>
+        <ID>MultipleArgumentListWrapping:Sticker.kt$Sticker( text = "Warning Square", stickerForm = StickerForm.SQUARE,
+            stickerType = StickerType.WARNING )
+        </ID>
+        <ID>MultipleArgumentListWrapping:StickyHeaderItemDecoration.kt$StickyHeaderItemDecoration$draw(canvas = canvas,
+            translateXY = Pair(0f, 0f))
+        </ID>
+        <ID>MultipleArgumentListWrapping:StickyHeaderItemDecoration.kt$StickyHeaderItemDecoration$draw(canvas = canvas,
+            translateXY = translateXY)
+        </ID>
+        <ID>MultipleArgumentListWrapping:StoriesScreen.kt$IntOffset(x = 0, y = swipeableState.offset.takeUnless {
+            it.isNaN() }?.roundToInt() ?: 0)
+        </ID>
+        <ID>MultipleArgumentListWrapping:StoryPageButton.kt$PaddingValues(horizontal = 24.dp, vertical = 20.dp)</ID>
+        <ID>MultipleArgumentListWrapping:StringUtils.kt$StringUtils$openLinkInBrowser(contextWithActivity =
+            contextWithActivity, url = url)
+        </ID>
+        <ID>MultipleArgumentListWrapping:TrackingMapContentMap.kt$padding(end = 8.dp, bottom = 32.dp)</ID>
+        <ID>MultipleArgumentListWrapping:TrackingMapContentMap.kt$padding(horizontal = 16.dp, vertical = 8.dp)</ID>
+        <ID>MultipleArgumentListWrapping:TrackingMapContentProgress.kt$padding(start = 10.dp, end = 8.dp)</ID>
+        <ID>MultipleArgumentListWrapping:TrackingMapSheetPointCountry.kt$padding(start = 8.dp, end = 12.dp)</ID>
+        <ID>MultipleArgumentListWrapping:TrackingMapSheetPointProducts.kt$linkTo(anchor = dot.end, margin = 8.dp)</ID>
+        <ID>MultipleArgumentListWrapping:TrackingMapVMPointsHelper.kt$TrackingMapVMPointsHelper$copy( name =
+            product.groupName, details = product.details.map { it.copy(name = null) })
+        </ID>
+        <ID>MultipleArgumentListWrapping:Type.kt$Font(resId = R.font.inter_bold, weight = FontWeight.Bold)</ID>
+        <ID>MultipleArgumentListWrapping:Type.kt$Font(resId = R.font.inter_bold_italic, style = FontStyle.Italic, weight
+            = FontWeight.Bold)
+        </ID>
+        <ID>MultipleArgumentListWrapping:Type.kt$Font(resId = R.font.inter_italic, style = FontStyle.Italic)</ID>
+        <ID>MultipleArgumentListWrapping:Type.kt$Font(resId = R.font.inter_medium, weight = FontWeight.Medium)</ID>
+        <ID>MultipleArgumentListWrapping:Type.kt$Font(resId = R.font.inter_medium_italic, style = FontStyle.Italic,
+            weight = FontWeight.Medium)
+        </ID>
+        <ID>MultipleArgumentListWrapping:Type.kt$Font(resId = R.font.inter_regular, weight = FontWeight.Normal)</ID>
+        <ID>MultipleArgumentListWrapping:Type.kt$Font(resId = R.font.inter_semi_bold, weight = FontWeight.SemiBold)</ID>
+        <ID>MultipleArgumentListWrapping:Type.kt$Font(resId = R.font.inter_semi_bold_italic, style = FontStyle.Italic,
+            weight = FontWeight.SemiBold)
+        </ID>
+        <ID>MultipleArgumentListWrapping:UpdatedAgreementLogoutScreen.kt$padding(bottom = 8.dp, start = 16.dp, end =
+            16.dp)
+        </ID>
+        <ID>MultipleArgumentListWrapping:UrlSchemaScreen.kt$Checkbox(checked = isChecked, onCheckedChange = null)</ID>
+        <ID>MultipleArgumentListWrapping:UrlSchemaScreen.kt$RadioButton(selected = isChecked, onClick = null)</ID>
+        <ID>MultipleArgumentListWrapping:WidgetsListScreen.kt$RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp)</ID>
+        <ID>
+            MultipleArgumentListWrapping:WidgetsListViewModelTest.kt$WidgetsListViewModelTest$onScroll(isComplaintButtonVisible
+            = false, isScrollToBottom = true)
+        </ID>
+        <ID>
+            MultipleArgumentListWrapping:WidgetsListViewModelTest.kt$WidgetsListViewModelTest$onScroll(isComplaintButtonVisible
+            = true, isScrollToBottom = true)
+        </ID>
+        <ID>MultipleArgumentListWrapping:YandexMapContentZoom.kt$debounceClickable(onClick = onClick, debounceDelayMs =
+            ZOOM_DEBOUNCE_DELAY_MS)
+        </ID>
+        <ID>MultipleArgumentListWrapping:YandexMapDelegate.kt$YandexMapDelegate$addListeners(cameraListener =
+            cameraListener, tapPointListener = tapPointListener)
+        </ID>
+        <ID>MultipleArgumentListWrapping:YandexMapDelegate.kt$YandexMapDelegate$drawLine(polyline = polyline, dashed =
+            dashed)
+        </ID>
+        <ID>MultipleArgumentListWrapping:YandexMapDelegate.kt$YandexMapDelegate$drawLine(polyline = polyline, dashed =
+            false)
+        </ID>
+        <ID>MultipleArgumentListWrapping:YandexMapDelegate.kt$YandexMapDelegate$getPolylineByType(startPoint =
+            manufacture, endPoint = store)
+        </ID>
+        <ID>MultipleArgumentListWrapping:YandexMapDelegate.kt$YandexMapDelegate$getPolylineByType(startPoint =
+            startPoint, endPoint = manufacture)
+        </ID>
+        <ID>MultipleArgumentListWrapping:YandexMapDelegate.kt$YandexMapDelegate$moveToPoint(point = Point(lat, lon),
+            zoom = MAX_ZOOM)
+        </ID>
+        <ID>MultipleArgumentListWrapping:ZoomState.kt$ZoomState$coerceIn(minimumValue = -boundY, maximumValue =
+            boundY)
+        </ID>
+        <ID>MultipleArgumentListWrapping:Zoomable.kt$ZoomableNode$placeWithLayer(x = 0, y = 0) { scaleX =
+            zoomState.scale scaleY = zoomState.scale translationX = zoomState.offsetX translationY = zoomState.offsetY }
+        </ID>
+    </CurrentIssues>
+</SmellBaseline>

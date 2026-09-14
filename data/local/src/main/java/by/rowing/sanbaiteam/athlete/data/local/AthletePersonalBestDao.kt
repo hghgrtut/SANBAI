@@ -5,8 +5,10 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 
+@AllowDetektPublic
 @Dao
 interface AthletePersonalBestDao {
 
@@ -52,7 +54,10 @@ interface AthletePersonalBestDao {
     suspend fun delete(best: AthletePersonalBestEntity)
 
     @Query("DELETE FROM $TABLE_NAME WHERE athleteId = :athleteId AND boatType = :boatType")
-    suspend fun deleteAllForAthleteBoatType(athleteId: Long, boatType: TrainingPieceType)
+    suspend fun deleteAllForAthleteBoatType(
+        athleteId: Long,
+        boatType: TrainingPieceType
+    )
 
     companion object {
         const val TABLE_NAME = "athlete_personal_best"

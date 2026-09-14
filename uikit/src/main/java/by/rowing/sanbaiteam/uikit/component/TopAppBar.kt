@@ -41,21 +41,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.R
+import by.rowing.sanbaiteam.uikit.modifier.ClickableState
+import by.rowing.sanbaiteam.uikit.modifier.LocalClickableState
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import com.checker.uikit3.modifier.ClickableState
-import com.checker.uikit3.modifier.LocalClickableState
 import com.checker.uikit3.modifier.clickableIfProvided
 
 private val ICON_SIZE
     @Composable get() = 24.dp
 
-val TOP_BAR_HEIGHT
+private val TOP_BAR_HEIGHT
     @Composable get() = 44.dp
 
-val TITLE_TEXT_STYLE
+private val TITLE_TEXT_STYLE
     @Composable get() = TypographyPalette.Body2Medium
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,6 +138,7 @@ private fun TopAppBarInternalWithLabels(
     theme = theme
 )
 
+@AllowDetektPublic
 @Composable
 fun SimpleTopAppBar(
     title: String = "",
@@ -151,6 +153,7 @@ fun SimpleTopAppBar(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@AllowDetektPublic
 @Composable
 fun TopAppBarWithCustomContent(
     navIcon: @Composable (() -> Unit)? = null,
@@ -192,6 +195,7 @@ fun TopAppBarWithCustomContent(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@AllowDetektPublic
 @Composable
 fun TopAppBar(
     modifier: Modifier = Modifier,
@@ -269,7 +273,7 @@ private fun TopAppBarInternal(
 }
 
 @Composable
-fun DefaultNavigationIcon(
+private fun DefaultNavigationIcon(
     modifier: Modifier = Modifier,
     tint: Color = ColorPalette.Grey20,
     onNavIconClick: (() -> Unit)? = null,
@@ -300,6 +304,7 @@ fun DefaultNavigationIcon(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@AllowDetektPublic
 sealed interface TopAppBarTheme {
     val containerColor: Color
     val contentColor: Color
@@ -323,7 +328,7 @@ sealed interface TopAppBarTheme {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-fun TopAppBarColors(
+private fun TopAppBarColors(
     containerColor: Color,
     contentColor: Color,
     scrolledContainerColor: Color = containerColor,

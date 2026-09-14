@@ -1,11 +1,17 @@
 package by.rowing.sanbaiteam.training.presentation.add
 
 import android.app.DatePickerDialog
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -45,7 +51,6 @@ import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerM
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -53,211 +58,237 @@ import java.util.Calendar
 
 @Composable
 internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
-    var showSaveDialog by remember { mutableStateOf(false) }
     val state = viewModel.state
     val context = LocalContext.current
-    val importLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
-    ) { uris ->
-        val csvTexts = uris.mapNotNull { selectedUri ->
-            runCatching {
-                context.contentResolver.openInputStream(selectedUri)?.bufferedReader()?.use { it.readText() }
-            }.getOrNull()
-        }
-        if (csvTexts.isNotEmpty()) {
-            viewModel.importCsvBatch(csvTexts)
-        }
-    }
 
-    LaunchedEffect(Unit) {
-        val initialUri = viewModel.consumeInitialImportUri() ?: return@LaunchedEffect
-        runCatching {
-            context.contentResolver.openInputStream(initialUri.toUri())?.bufferedReader()?.use { it.readText() }
-        }.getOrNull()?.let(viewModel::importCsv)
-    }
+    ParseInitialCsv(
+        viewModel = viewModel,
+        context = context
+    )
 
     Scaffold(
-        topBar = {
-            SimpleTopAppBar(
-                title = stringResource(R.string.add_training_title),
-                onNavIconClick = viewModel::onBackClick
-            )
-        },
+        topBar = addTrainingToolbar(onBackClick = viewModel::onBackClick),
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showSaveDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Save,
-                    contentDescription = stringResource(R.string.save)
-                )
-            }
+                onClick = viewModel::showSaveTrainingDialog,
+                containerColor = MaterialTheme.colorScheme.primary,
+            ) { SaveIcon() }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.M)
-        ) {
-            Text(
-                text = stringResource(R.string.training_piece_type_single),
-                style = TypographyPalette.Body2Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        AddTrainingDataInputs(
+            paddingValues = paddingValues,
+            state = state,
+            viewModel = viewModel,
+            importLauncher = csvParserLauncher(
+                viewModel = viewModel,
+                context = context
             )
-            SpacerXS()
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        val calendar = Calendar.getInstance().apply { timeInMillis = state.dateMillis }
-                        DatePickerDialog(
-                            context,
-                            { _, year, month, dayOfMonth ->
-                                viewModel.onDatePicked(year, month, dayOfMonth)
-                            },
-                            calendar.get(Calendar.YEAR),
-                            calendar.get(Calendar.MONTH),
-                            calendar.get(Calendar.DAY_OF_MONTH)
-                        ).show()
-                    }
-            ) {
-                TextField(
-                    value = state.dateFormatted,
-                    onValueChange = {},
-                    label = stringResource(R.string.add_training_date_label),
-                    textStyle = TypographyPalette.Body1Regular,
-                    enabled = false,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            SpacerM()
+        )
 
-            Text(
-                text = stringResource(R.string.add_training_crew_header),
-                style = TypographyPalette.H4
-            )
-            SpacerS()
-            state.crewAthletes.forEachIndexed { index, crewAthlete ->
-                val selectedIds = state.crewAthletes.map { it.athleteId }.filter { it > 0 }.toSet()
-                AthleteDropdown(
-                    athletes = state.athletesCatalog.filter { athlete ->
-                        athlete.id == crewAthlete.athleteId || athlete.id !in selectedIds
-                    },
-                    selectedAthleteId = crewAthlete.athleteId,
-                    label = stringResource(R.string.add_training_athlete_header, index + 1),
-                    onAthleteSelected = { viewModel.changeAthleteId(crewAthlete.localId, it) }
-                )
-                if (state.crewAthletes.size > 1) {
-                    SpacerXS()
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(R.string.add_training_delete_piece_work),
-                        buttonColors = ButtonColors.text(),
-                        debounceClick = { viewModel.removeCrewAthlete(crewAthlete.localId) }
-                    )
-                }
-                SpacerS()
-            }
-            if (state.crewAthletes.size < AddTrainingState.MAX_CREW_SIZE) {
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.add_training_piece_athlete),
-                    debounceClick = viewModel::addCrewAthlete
-                )
-                SpacerM()
-            }
-
-            Text(
-                text = stringResource(R.string.add_training_pieces_header),
-                style = TypographyPalette.H4
-            )
-            SpacerS()
-            state.pieces.forEachIndexed { pieceIndex, piece ->
-                PieceForm(
-                    index = pieceIndex,
-                    piece = piece,
-                    canRemove = state.pieces.size > 1,
-                    onDistanceChange = { viewModel.changePieceDistance(piece.localId, it) },
-                    onTimeChange = { viewModel.changePieceTime(piece.localId, it) },
-                    onStrokeRateChange = { viewModel.changePieceStrokeRate(piece.localId, it) },
-                    onRemove = { viewModel.removePiece(piece.localId) }
-                )
-                SpacerS()
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.add_training_piece),
-                debounceClick = viewModel::addPiece
-            )
-            SpacerM()
-
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.add_training_import_csv),
-                debounceClick = { importLauncher.launch("*/*") }
-            )
-            SpacerS()
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.add_training_save),
-                debounceClick = { showSaveDialog = true }
-            )
-            SpacerM()
-        }
-
-        if (showSaveDialog) {
-            SaveTrainingDialog(
-                onConfirm = {
-                    showSaveDialog = false
-                    viewModel.saveTraining()
-                },
-                onDismiss = { showSaveDialog = false }
-            )
-        }
-
-        state.validationError?.let { error ->
-            AlertDialog(
-                onDismissRequest = viewModel::clearValidationError,
-                title = {
-                    Text(
-                        text = stringResource(R.string.add_training_validation_title),
-                        style = TypographyPalette.H4
-                    )
-                },
-                text = {
-                    Text(text = error, style = TypographyPalette.Body1Regular)
-                },
-                confirmButton = {
-                    Button(
-                        text = stringResource(R.string.cancel),
-                        buttonColors = ButtonColors.text(),
-                        debounceClick = viewModel::clearValidationError
-                    )
-                }
-            )
-        }
-        state.importNotice?.let { notice ->
-            AlertDialog(
-                onDismissRequest = viewModel::clearValidationError,
-                title = {
-                    Text(
-                        text = stringResource(R.string.add_training_import_notice_title),
-                        style = TypographyPalette.H4
-                    )
-                },
-                text = { Text(text = notice, style = TypographyPalette.Body1Regular) },
-                confirmButton = {
-                    Button(
-                        text = stringResource(R.string.cancel),
-                        buttonColors = ButtonColors.text(),
-                        debounceClick = viewModel::clearValidationError
-                    )
-                }
-            )
-        }
+        AddTrainingAlerts(
+            viewModel = viewModel,
+            state = state,
+        )
     }
+}
+
+@Composable
+private fun AddTrainingAlerts(
+    viewModel: AddTrainingViewModel,
+    state: AddTrainingState,
+) {
+    if (state.showSaveDialog) {
+        Alert(
+            titleResId = R.string.add_training_save,
+            text = stringResource(R.string.add_training_save_are_you_sure),
+            onDismiss = viewModel::hideSaveTrainingDialog,
+            onConfirm = viewModel::saveTraining
+        )
+    }
+    state.validationError?.let { error ->
+        Alert(
+            titleResId = R.string.add_training_validation_title,
+            text = error,
+            onDismiss = viewModel::clearValidationError,
+        )
+    }
+    state.importNotice?.let { notice ->
+        Alert(
+            titleResId = R.string.add_training_import_notice_title,
+            text = notice,
+            onDismiss = viewModel::clearValidationError,
+        )
+    }
+}
+
+@Composable
+private fun AddTrainingDataInputs(
+    paddingValues: PaddingValues,
+    state: AddTrainingState,
+    viewModel: AddTrainingViewModel,
+    importLauncher: ManagedActivityResultLauncher<String, List<@JvmSuppressWildcards Uri>>
+) {
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = Spacing.M)
+    ) {
+        Text(
+            text = stringResource(R.string.training_piece_type_single),
+            style = TypographyPalette.Body2Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        SpacerXS()
+        Date(
+            state = state,
+            viewModel = viewModel
+        )
+        Text(
+            text = stringResource(R.string.add_training_crew_header),
+            style = TypographyPalette.H4
+        )
+        SpacerS()
+        AthleteDropdown(
+            state = state,
+            onAthleteSelected = viewModel::changeAthleteId
+        )
+        Text(
+            text = stringResource(R.string.add_training_pieces_header),
+            style = TypographyPalette.H4
+        )
+        SpacerS()
+        TrainingPieces(
+            state = state,
+            viewModel = viewModel
+        )
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.add_training_piece),
+            debounceClick = viewModel::addPiece
+        )
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = Spacing.M),
+            text = stringResource(R.string.add_training_import_csv),
+            debounceClick = { importLauncher.launch("*/*") }
+        )
+    }
+}
+
+@Composable
+private fun addTrainingToolbar(onBackClick: () -> Unit) = @Composable {
+    SimpleTopAppBar(
+        title = stringResource(R.string.add_training_title),
+        onNavIconClick = onBackClick
+    )
+}
+
+@Composable
+private fun ParseInitialCsv(
+    viewModel: AddTrainingViewModel,
+    context: Context
+) {
+    LaunchedEffect(Unit) {
+        viewModel.importCsvBatchFromUris(
+            uris = listOfNotNull(viewModel.consumeInitialImportUri()?.toUri()),
+            context = context
+        )
+    }
+}
+
+@Composable
+private fun csvParserLauncher(
+    viewModel: AddTrainingViewModel,
+    context: Context
+): ManagedActivityResultLauncher<String, List<@JvmSuppressWildcards Uri>> =
+    rememberLauncherForActivityResult(contract = ActivityResultContracts.GetMultipleContents()) {
+        viewModel.importCsvBatchFromUris(
+            uris = it,
+            context = context
+        )
+    }
+
+@Composable
+private fun TrainingPieces(
+    state: AddTrainingState,
+    viewModel: AddTrainingViewModel
+) {
+    state.pieces.forEachIndexed { pieceIndex, piece ->
+        PieceForm(
+            index = pieceIndex,
+            piece = piece,
+            canRemove = state.pieces.size > 1,
+            onDistanceChange = { newDistance ->
+                viewModel.changePieceDistance(
+                    pieceLocalId = piece.localId,
+                    text = newDistance
+                )
+            },
+            onTimeChange = { newTime ->
+                viewModel.changePieceTime(
+                    pieceLocalId = piece.localId,
+                    text = newTime
+                )
+            },
+            onStrokeRateChange = { newStrokeRate ->
+                viewModel.changePieceStrokeRate(
+                    pieceLocalId = piece.localId,
+                    text = newStrokeRate
+                )
+            },
+            onRemove = { viewModel.removePiece(pieceLocalId = piece.localId) }
+        )
+    }
+}
+
+@Composable
+private fun Date(
+    state: AddTrainingState,
+    viewModel: AddTrainingViewModel
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance().apply { timeInMillis = state.dateMillis }
+    val onDatePicked: DatePickerDialog.OnDateSetListener = { _, year, month, dayOfMonth ->
+        viewModel.onDatePicked(
+            year = year,
+            month = month,
+            dayOfMonth = dayOfMonth
+        )
+    }
+    val onClickDate = {
+        DatePickerDialog(
+            context,
+            onDatePicked,
+            calendar[Calendar.YEAR],
+            calendar[Calendar.MONTH],
+            calendar[Calendar.DAY_OF_MONTH]
+        ).show()
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = Spacing.M)
+            .clickable(onClick = onClickDate)
+    ) {
+        TextField(
+            value = state.dateFormatted,
+            onValueChange = {},
+            label = stringResource(R.string.add_training_date_label),
+            textStyle = TypographyPalette.Body1Regular,
+            enabled = false,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun SaveIcon() {
+    Icon(
+        imageVector = Icons.Default.Save,
+        contentDescription = stringResource(R.string.save)
+    )
 }
 
 @Composable
@@ -270,76 +301,84 @@ private fun PieceForm(
     onStrokeRateChange: (String) -> Unit,
     onRemove: () -> Unit,
 ) {
-    val pace = RowingTimeFormat.formatPace(piece.timeMillis, piece.distanceMeters)
-        ?: stringResource(R.string.add_training_pace_placeholder)
+    val pace: String = RowingTimeFormat.formatPace(
+        timeMillis = piece.timeMillis,
+        distanceMeters = piece.distanceMeters
+    ) ?: stringResource(R.string.add_training_pace_placeholder)
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(Spacing.S)) {
-            Text(
-                text = stringResource(R.string.add_training_piece_header, index + 1),
-                style = TypographyPalette.Body2Medium
+    Box(modifier = Modifier.padding(bottom = Spacing.S)) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
             )
-            SpacerXS()
-            TextField(
-                value = piece.distanceText,
-                onValueChange = onDistanceChange,
-                label = stringResource(R.string.add_training_piece_length_label),
-                textStyle = TypographyPalette.Body1Regular,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-            SpacerXS()
-            TextField(
-                value = piece.timeText,
-                onValueChange = onTimeChange,
-                label = stringResource(R.string.add_training_piece_time_label),
-                textStyle = TypographyPalette.Body1Regular,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
-            )
-            SpacerXS()
-            TextField(
-                value = piece.strokeRateText,
-                onValueChange = onStrokeRateChange,
-                label = stringResource(R.string.add_training_piece_stroke_rate_label),
-                textStyle = TypographyPalette.Body1Regular,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
-            )
-            SpacerXS()
-            Text(
-                text = stringResource(R.string.add_training_piece_pace_label, pace),
-                style = TypographyPalette.Body2Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (canRemove) {
-                SpacerXS()
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.add_training_delete_piece),
-                    buttonColors = ButtonColors.text(),
-                    debounceClick = onRemove
+        ) {
+            Column(
+                modifier = Modifier.padding(Spacing.S),
+                verticalArrangement = Arrangement.spacedBy(space = Spacing.XS)
+            ) {
+                Text(
+                    text = stringResource(R.string.add_training_piece_header, index + 1),
+                    style = TypographyPalette.Body2Medium
                 )
+                TextField(
+                    value = piece.distanceText,
+                    onValueChange = onDistanceChange,
+                    label = stringResource(R.string.add_training_piece_length_label),
+                    textStyle = TypographyPalette.Body1Regular,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextField(
+                    value = piece.timeText,
+                    onValueChange = onTimeChange,
+                    label = stringResource(R.string.add_training_piece_time_label),
+                    textStyle = TypographyPalette.Body1Regular,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextField(
+                    value = piece.strokeRateText,
+                    onValueChange = onStrokeRateChange,
+                    label = stringResource(R.string.add_training_piece_stroke_rate_label),
+                    textStyle = TypographyPalette.Body1Regular,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = stringResource(R.string.add_training_piece_pace_label, pace),
+                    style = TypographyPalette.Body2Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (canRemove) {
+                    RemovePieceButton(onRemove = onRemove)
+                }
             }
         }
     }
 }
 
+@Composable
+private fun RemovePieceButton(onRemove: () -> Unit) {
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        text = stringResource(R.string.add_training_delete_piece),
+        buttonColors = ButtonColors.text(),
+        debounceClick = onRemove
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AthleteDropdown(
-    athletes: List<AthleteItemModel>,
-    selectedAthleteId: Long,
-    label: String,
-    onAthleteSelected: (Long) -> Unit
+    state: AddTrainingState,
+    onAthleteSelected: (crewId: Long, athleteId: Long) -> Unit
 ) {
+    val rowers = state.rowersCatalog
+    val selectedRower = state.crewAthletes.first()
+    val selectedRowerId: Long = selectedRower.rowerId
     var expanded by remember { mutableStateOf(false) }
-    val selectedName = athletes.find { it.id == selectedAthleteId }?.name
+    val selectedName = rowers.find { it.id == selectedRowerId }?.name
         ?: stringResource(R.string.add_training_select_athlete)
 
     ExposedDropdownMenuBox(
@@ -350,7 +389,7 @@ private fun AthleteDropdown(
             value = selectedName,
             onValueChange = {},
             readOnly = true,
-            label = label,
+            label = stringResource(R.string.add_training_athlete_header),
             textStyle = TypographyPalette.Body1Regular,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
@@ -361,18 +400,12 @@ private fun AthleteDropdown(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            athletes.forEach { athlete ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = athlete.name,
-                            style = TypographyPalette.Body1Regular
-                        )
-                    },
-                    onClick = {
-                        onAthleteSelected(athlete.id)
-                        expanded = false
-                    }
+            rowers.forEach { rower ->
+                expanded = rowerItem(
+                    rower = rower,
+                    onAthleteSelected = onAthleteSelected,
+                    selectedRower = selectedRower,
+                    expanded = expanded
                 )
             }
         }
@@ -380,37 +413,67 @@ private fun AthleteDropdown(
 }
 
 @Composable
-private fun SaveTrainingDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+private fun rowerItem(
+    rower: AthleteItemModel,
+    onAthleteSelected: (Long, Long) -> Unit,
+    selectedRower: AddCrewAthlete,
+    expanded: Boolean
+): Boolean {
+    var expanded1 = expanded
+    DropdownMenuItem(
+        text = {
+            Text(
+                text = rower.name,
+                style = TypographyPalette.Body1Regular
+            )
+        },
+        onClick = {
+            onAthleteSelected(selectedRower.crewId, rower.id)
+            expanded1 = false
+        }
+    )
+    return expanded1
+}
+
+@Composable
+private fun Alert(
+    @StringRes titleResId: Int,
+    text: String,
+    onDismiss: () -> Unit,
+    onConfirm: (() -> Unit)? = null
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = stringResource(R.string.add_training_save),
+                text = stringResource(titleResId),
                 style = TypographyPalette.H4
             )
         },
         text = {
             Text(
-                stringResource(R.string.add_training_save_are_you_sure),
+                text = text,
                 style = TypographyPalette.Body1Regular
             )
         },
         confirmButton = {
             Button(
-                text = stringResource(R.string.save),
+                text = stringResource(if (onConfirm != null) R.string.save else R.string.cancel),
                 buttonColors = ButtonColors.text(),
-                debounceClick = onConfirm
+                debounceClick = {
+                    onDismiss()
+                    onConfirm?.invoke()
+                }
             )
         },
-        dismissButton = {
-            Button(
-                text = stringResource(R.string.cancel),
-                buttonColors = ButtonColors.text(),
-                debounceClick = onDismiss
-            )
+        dismissButton = onConfirm?.let {
+            {
+                Button(
+                    text = stringResource(R.string.cancel),
+                    buttonColors = ButtonColors.text(),
+                    debounceClick = onDismiss
+                )
+            }
         }
     )
 }

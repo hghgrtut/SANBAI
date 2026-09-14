@@ -6,15 +6,38 @@ import kotlin.math.roundToLong
 
 internal object SpeedCoachCsvMerger {
 
+    private const val INTERVAL_SUMMARIES = "Interval Summaries:"
+    private const val PER_STROKE_DATA = "Per-Stroke Data:"
+    private const val TOTAL_DISTANCE_GPS = "Total Distance (GPS)"
+    private const val TOTAL_ELAPSED_TIME = "Total Elapsed Time"
+    private const val AVG_STROKE_RATE = "Avg Stroke Rate"
+    private const val TOTAL_STROKES = "Total Strokes"
+
+    private val sectionHeaderPrefixes = listOf(
+        "Session Information",
+        "Session Summary",
+        "Interval Summaries",
+        "Per-Stroke Data",
+    )
+
     fun merge(csvTexts: List<String>): String {
         require(csvTexts.isNotEmpty()) { "At least one CSV is required." }
         if (csvTexts.size == 1) return csvTexts.first()
 
         val firstLines = normalizeLines(csvTexts.first())
-        val intervalSection = findSection(firstLines, "Interval Summaries:")
+        val intervalSection = findSection(
+            lines = firstLines,
+            sectionTitle = INTERVAL_SUMMARIES
+        )
             ?: return csvTexts.first()
-        val perStrokeSection = findSection(firstLines, "Per-Stroke Data:")
-        val sessionSection = findSection(firstLines, "Session Summary:")
+        val perStrokeSection = findSection(
+            lines = firstLines,
+            sectionTitle = PER_STROKE_DATA
+        )
+        val sessionSection = findSection(
+            lines = firstLines,
+            sectionTitle = "Session Summary:"
+        )
 
         val mergedIntervalRows = mutableListOf<String>()
         val mergedPerStrokeRows = mutableListOf<String>()
@@ -23,9 +46,15 @@ internal object SpeedCoachCsvMerger {
 
         for (csvText in csvTexts) {
             val lines = normalizeLines(csvText)
-            val fileIntervalSection = findSection(lines, "Interval Summaries:") ?: continue
+            val fileIntervalSection = findSection(
+                lines = lines,
+                sectionTitle = INTERVAL_SUMMARIES
+            ) ?: continue
             val fileHeaders = lines[fileIntervalSection.columnHeaderIndex].split(',')
-            val dataRows = extractDataRows(lines, fileIntervalSection)
+            val dataRows = extractDataRows(
+                lines = lines,
+                section = fileIntervalSection
+            )
 
             dataRows.forEach { row ->
                 val columns = row.split(',').toMutableList()
@@ -33,7 +62,10 @@ internal object SpeedCoachCsvMerger {
                 mergedIntervalRows += columns.joinToString(",")
             }
 
-            findSection(lines, "Per-Stroke Data:")?.let { strokeSection ->
+            findSection(
+                lines = lines,
+                sectionTitle = PER_STROKE_DATA
+            )?.let { strokeSection ->
                 extractDataRows(lines, strokeSection).forEach { row ->
                     val columns = row.split(',').toMutableList()
                     if (columns.isNotEmpty()) {
@@ -125,11 +157,24 @@ internal object SpeedCoachCsvMerger {
             cols += "---"
         }
 
-        fun setColumn(name: String, value: String) {
+        fun setColumn(
+            name: String,
+            value: String
+        ) {
             val index = headers.indexOf(name)
             if (index in cols.indices) {
                 cols[index] = value
             }
+        }
+
+        fun setColumn(
+            name: String,
+            value: Double,
+        ) {
+            setColumn(
+                name = name,
+                value = String.format(Locale.US, "%.1f", value)
+            )
         }
 
         val totalIntervals = intervals.size
@@ -137,18 +182,33 @@ internal object SpeedCoachCsvMerger {
         val totalTimeMillis = intervals.sumOf { it.timeMillis }
         val totalStrokes = intervals.mapNotNull { it.totalStrokes }.takeIf { it.isNotEmpty() }?.sum()
 
-        setColumn("Total Intervals", totalIntervals.toString())
-        setColumn("Total Distance (GPS)", String.format(Locale.US, "%.1f", totalDistance))
+        setColumn(
+            name = "Total Intervals",
+            value = totalIntervals.toString()
+        )
+        setColumn(
+            name = TOTAL_DISTANCE_GPS,
+            value = totalDistance
+        )
 
         if (totalTimeMillis > 0) {
-            setColumn("Total Elapsed Time", RowingTimeFormat.formatDurationHhMmSsTenths(totalTimeMillis))
+            setColumn(
+                name = TOTAL_ELAPSED_TIME,
+                value = RowingTimeFormat.formatDurationHhMmSsTenths(totalTimeMillis)
+            )
         }
 
         if (totalDistance > 0 && totalTimeMillis > 0) {
             val paceMillis = (totalTimeMillis.toDouble() * 500 / totalDistance).roundToLong()
-            setColumn("Avg Split (GPS)", RowingTimeFormat.formatDurationHhMmSsTenths(paceMillis))
-            val timeSeconds = totalTimeMillis / 1000.0
-            setColumn("Avg Speed (GPS)", String.format(Locale.US, "%.2f", totalDistance / timeSeconds))
+            setColumn(
+                name = "Avg Split (GPS)",
+                value = RowingTimeFormat.formatDurationHhMmSsTenths(paceMillis)
+            )
+            val timeSeconds = totalTimeMillis / RowingTimeFormat.MILLIS_PER_SECOND
+            setColumn(
+                name = "Avg Speed (GPS)",
+                value = totalDistance / timeSeconds
+            )
         }
 
         val avgStrokeRate = if (totalStrokes != null && totalStrokes > 0) {
@@ -157,27 +217,40 @@ internal object SpeedCoachCsvMerger {
         } else {
             intervals.map { it.strokeRate }.average()
         }
-        setColumn("Avg Stroke Rate", String.format(Locale.US, "%.1f", avgStrokeRate))
+        setColumn(
+            name = AVG_STROKE_RATE,
+            value = avgStrokeRate
+        )
 
         if (totalStrokes != null && totalStrokes > 0) {
-            setColumn("Total Strokes", totalStrokes.toString())
-            setColumn("Distance/Stroke (GPS)", String.format(Locale.US, "%.2f", totalDistance / totalStrokes))
+            setColumn(
+                name = TOTAL_STROKES,
+                value = totalStrokes.toString()
+            )
+            setColumn(
+                name = "Distance/Stroke (GPS)",
+                value = totalDistance / totalStrokes
+            )
         }
 
         return cols.joinToString(",")
     }
 
-    private fun parseIntervalMetrics(columns: List<String>, headers: List<String>): IntervalMetrics {
+    private fun parseIntervalMetrics(
+        columns: List<String>,
+        headers: List<String>
+    ): IntervalMetrics {
         fun value(name: String): String? {
             val index = headers.indexOf(name)
             return columns.getOrNull(index)?.trim()?.takeIf { it.isNotEmpty() }
         }
 
         return IntervalMetrics(
-            distanceMeters = value("Total Distance (GPS)")?.toDoubleOrNull() ?: 0.0,
-            timeMillis = value("Total Elapsed Time")?.let(RowingTimeFormat::parseDurationHhMmSsTenths) ?: 0L,
-            strokeRate = value("Avg Stroke Rate")?.toDoubleOrNull() ?: 0.0,
-            totalStrokes = value("Total Strokes")?.toIntOrNull(),
+            distanceMeters = value(TOTAL_DISTANCE_GPS)?.toDoubleOrNull() ?: 0.0,
+            timeMillis =
+                value(TOTAL_ELAPSED_TIME)?.let { RowingTimeFormat.parseDurationHhMmSsTenths(it) } ?: 0L,
+            strokeRate = value(AVG_STROKE_RATE)?.toDoubleOrNull() ?: 0.0,
+            totalStrokes = value(TOTAL_STROKES)?.toIntOrNull(),
         )
     }
 
@@ -186,7 +259,10 @@ internal object SpeedCoachCsvMerger {
         .replace('\r', '\n')
         .split('\n')
 
-    private fun findSection(lines: List<String>, sectionTitle: String): CsvSection? {
+    private fun findSection(
+        lines: List<String>,
+        sectionTitle: String
+    ): CsvSection? {
         val headerIndex = lines.indexOfFirst { it.trim().startsWith(sectionTitle, ignoreCase = true) }
         if (headerIndex < 0) return null
 
@@ -213,19 +289,23 @@ internal object SpeedCoachCsvMerger {
         )
     }
 
-    private fun extractDataRows(lines: List<String>, section: CsvSection): List<String> =
-        lines.subList(section.dataStartIndex, section.dataEndIndex)
-            .map { it.trimEnd() }
-            .filter { it.isNotBlank() }
+    private fun extractDataRows(
+        lines: List<String>,
+        section: CsvSection
+    ): List<String> = lines.subList(
+        fromIndex = section.dataStartIndex,
+        toIndex = section.dataEndIndex
+    ).map { it.trimEnd() }
+        .filter { it.isNotBlank() }
 
     private fun isSectionHeader(line: String): Boolean {
         val trimmed = line.trim()
-        return trimmed.endsWith(':') && (
-            trimmed.startsWith("Session Information", ignoreCase = true) ||
-                trimmed.startsWith("Session Summary", ignoreCase = true) ||
-                trimmed.startsWith("Interval Summaries", ignoreCase = true) ||
-                trimmed.startsWith("Per-Stroke Data", ignoreCase = true)
+        return trimmed.endsWith(':') && sectionHeaderPrefixes.any { sectionHeaderPrefix ->
+            trimmed.startsWith(
+                prefix = sectionHeaderPrefix,
+                ignoreCase = true
             )
+        }
     }
 
     private data class CsvSection(

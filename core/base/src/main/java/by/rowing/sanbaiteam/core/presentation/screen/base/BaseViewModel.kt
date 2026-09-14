@@ -5,7 +5,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
+@AllowDetektPublic
 abstract class BaseViewModel : ViewModel(), LifecycleEventObserver {
 
     private val viewCreatedLatch = SingleCallLatch()

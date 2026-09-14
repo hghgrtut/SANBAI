@@ -1,9 +1,11 @@
 package by.rowing.sanbaiteam.core.util
 
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
+@AllowDetektPublic
 object TimeUtils {
 
     private const val DATE_FORMAT = "dd.MM.yyyy"

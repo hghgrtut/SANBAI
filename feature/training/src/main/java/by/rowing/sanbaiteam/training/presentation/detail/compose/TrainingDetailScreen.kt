@@ -2,14 +2,13 @@ package by.rowing.sanbaiteam.training.presentation.detail.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -18,13 +17,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.training.R
 import by.rowing.sanbaiteam.training.presentation.detail.TrainingDetailViewModel
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailState
+import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
@@ -51,88 +51,95 @@ private fun TrainingDetailContent(
         }
     ) { paddingValues ->
         when {
-            state.isLoading -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            state.notFound -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(Spacing.M),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+            state.isLoading -> TrainingLoader(paddingValues = paddingValues)
+            state.notFound -> TrainingNotFound(paddingValues = paddingValues)
+            else -> Training(
+                paddingValues = paddingValues,
+                state = state
+            )
+        }
+    }
+}
+
+@Composable
+private fun TrainingLoader(paddingValues: PaddingValues) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) { CircularProgressIndicator() }
+}
+
+@Composable
+private fun TrainingNotFound(paddingValues: PaddingValues) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(Spacing.M),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.training_detail_not_found),
+            style = TypographyPaletteSp.Body1Regular
+        )
+    }
+}
+
+@Composable
+private fun Training(
+    paddingValues: PaddingValues,
+    state: TrainingDetailState
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(horizontal = Spacing.M),
+        verticalArrangement = Arrangement.spacedBy(Spacing.M)
+    ) {
+        item {
+            Text(
+                modifier = Modifier.padding(bottom = Spacing.XS),
+                text = stringResource(state.typeResId),
+                style = TypographyPalette.Body2Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = state.dateFormatted,
+                style = TypographyPaletteSp.H2
+            )
+        }
+        item {
+            DataCard(
+                modifier = Modifier.fillMaxWidth(),
+                verticalSpacing = 0.dp
+            ) {
+                Text(
+                    modifier = Modifier.padding(bottom = Spacing.S),
+                    text = stringResource(R.string.training_detail_crew_header),
+                    style = TypographyPalette.H4
+                )
+                state.athleteNames.forEach { name ->
                     Text(
-                        text = stringResource(R.string.training_detail_not_found),
+                        modifier = Modifier.padding(bottom = Spacing.XS),
+                        text = name,
                         style = TypographyPaletteSp.Body1Regular
                     )
                 }
             }
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(all = Spacing.M),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.M)
-                ) {
-                    item {
-                        Text(
-                            modifier = Modifier.padding(bottom = Spacing.XS),
-                            text = stringResource(state.typeResId),
-                            style = TypographyPalette.Body2Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = state.dateFormatted,
-                            style = TypographyPaletteSp.H2
-                        )
-                    }
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
-                        ) {
-                            Column(modifier = Modifier.padding(Spacing.M)) {
-                                Text(
-                                    text = stringResource(R.string.training_detail_crew_header),
-                                    style = TypographyPalette.H4
-                                )
-                                SpacerS()
-                                state.athleteNames.forEach { name ->
-                                    Text(
-                                        text = name,
-                                        style = TypographyPaletteSp.Body1Regular
-                                    )
-                                    SpacerXS()
-                                }
-                            }
-                        }
-                    }
-                    items(
-                        state.pieces,
-                        key = { it.order }
-                    ) { piece ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
-                        ) {
-                            Column(modifier = Modifier.padding(Spacing.M)) {
-                                PieceResultRow(piece)
-                            }
-                        }
-                    }
-                }
-            }
+        }
+        items(
+            state.pieces,
+            key = { it.order }
+        ) { piece ->
+            DataCard(
+                modifier = Modifier.fillMaxWidth(),
+                verticalSpacing = 0.dp
+            ) { PieceResultRow(piece = piece) }
         }
     }
 }

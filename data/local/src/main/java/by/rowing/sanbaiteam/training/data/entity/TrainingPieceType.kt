@@ -1,7 +1,9 @@
 package by.rowing.sanbaiteam.training.data.entity
 
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.data.local.R
 
+@AllowDetektPublic
 enum class TrainingPieceType(
     val uiResId: Int,
     val seatsCount: Int = 1
@@ -38,5 +40,5 @@ enum class TrainingPieceType(
     EIGHT(
         uiResId = R.string.training_piece_type_eight,
         seatsCount = 8
-    );
+    )
 }

@@ -26,9 +26,9 @@ import by.rowing.sanbaiteam.main.presentation.MainScreen
 import by.rowing.sanbaiteam.main.presentation.MainViewModel
 import by.rowing.sanbaiteam.main.presentation.navigation.MainNavigation
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavGraphProvider
+import by.rowing.sanbaiteam.uikit.modifier.ClickableState
+import by.rowing.sanbaiteam.uikit.modifier.LocalClickableState
 import by.rowing.sanbaiteam.uikit.theme.SANBAITeamTheme
-import com.checker.uikit3.modifier.ClickableState
-import com.checker.uikit3.modifier.LocalClickableState
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -39,14 +39,16 @@ class MainActivity : ComponentActivity() {
     private val composeNavigator by inject<ComposeNavigator>()
     private var pendingImportUri by mutableStateOf<String?>(null)
 
-
     private val mainActivityContent: @Composable () -> Unit = {
         CompositionLocalProvider(LocalClickableState provides clickableState) {
             SANBAITeamTheme {
                 val navController = rememberNavController()
                 LaunchedEffect(null) {
                     composeNavigator.sharedFlow.collect { navigation ->
-                        handleNavigationEvent(navigation = navigation, navController = navController)
+                        handleNavigationEvent(
+                            navigation = navigation,
+                            navController = navController
+                        )
                     }
                 }
                 LaunchedEffect(pendingImportUri) {
@@ -80,7 +82,6 @@ class MainActivity : ComponentActivity() {
             navigator = composeNavigator
         )
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,7 +129,6 @@ private fun handleNavigationEvent(
         }
     }
 }
-
 
 private fun navigateForward(
     navigation: NavigationEvent.NavigateForward,

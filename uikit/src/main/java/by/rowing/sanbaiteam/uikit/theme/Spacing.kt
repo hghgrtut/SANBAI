@@ -16,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
+
+@AllowDetektPublic
 object Spacing {
     /** 0.dp */
     val None = 0.dp

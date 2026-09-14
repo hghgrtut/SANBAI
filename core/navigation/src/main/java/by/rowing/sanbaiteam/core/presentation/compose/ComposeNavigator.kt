@@ -3,11 +3,13 @@ package by.rowing.sanbaiteam.core.presentation.compose
 import android.os.Parcelable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+@AllowDetektPublic
 abstract class ComposeNavigator(
     replay: Int = 1,
     extraBufferCapacity: Int = 0,
@@ -79,6 +81,7 @@ abstract class ComposeNavigator(
     }
 }
 
+@AllowDetektPublic
 sealed interface NavigationEvent {
 
     data class NavigateForward(
@@ -98,11 +101,13 @@ sealed interface NavigationEvent {
     data object ClearBackStack : NavigationEvent
 }
 
+@AllowDetektPublic
 data class NavigationDataArgs(
     val key: String,
     val value: Any,
 )
 
+@AllowDetektPublic
 @Serializable
 @Parcelize
 data object NavigationNullObject : Parcelable

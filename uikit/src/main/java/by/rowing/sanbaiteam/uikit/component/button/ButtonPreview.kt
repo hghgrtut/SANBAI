@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import by.rowing.sanbaiteam.uikit.R
+import by.rowing.sanbaiteam.uikit.modifier.ClickableState
+import by.rowing.sanbaiteam.uikit.modifier.LocalClickableState
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import com.checker.uikit3.modifier.ClickableState
-import com.checker.uikit3.modifier.LocalClickableState
 
 internal data class ButtonPreviewState(
     val backgroundColor: Color,

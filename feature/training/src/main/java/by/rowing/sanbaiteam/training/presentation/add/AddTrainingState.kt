@@ -5,7 +5,7 @@ import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 internal data class AddTrainingState(
     val dateMillis: Long,
     val dateFormatted: String,
-    val athletesCatalog: List<AthleteItemModel> = emptyList(),
+    val rowersCatalog: List<AthleteItemModel> = emptyList(),
     val crewAthletes: List<AddCrewAthlete> = listOf(AddCrewAthlete()),
     val pieces: List<AddPieceDraft> = listOf(AddPieceDraft()),
     val validationError: String? = null,
@@ -13,6 +13,7 @@ internal data class AddTrainingState(
     val pendingSourceSerial: String? = null,
     val pendingSourceSessionName: String? = null,
     val importNotice: String? = null,
+    val showSaveDialog: Boolean = false
 ) {
     companion object {
         const val MAX_CREW_SIZE = 9
@@ -20,8 +21,8 @@ internal data class AddTrainingState(
 }
 
 internal data class AddCrewAthlete(
-    val localId: Long = nextLocalId(),
-    val athleteId: Long = 0,
+    val crewId: Long = nextLocalId(),
+    val rowerId: Long = 0,
 ) {
     companion object {
         private var localIdSeq = 1L

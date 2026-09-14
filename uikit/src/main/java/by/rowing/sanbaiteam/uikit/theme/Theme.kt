@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
+@AllowDetektPublic
 @Composable
 fun SANBAITeamTheme(
     useLightStatusBars: Boolean = true,

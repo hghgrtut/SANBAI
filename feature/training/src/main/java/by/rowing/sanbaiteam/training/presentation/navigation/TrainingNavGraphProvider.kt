@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingScreen
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingViewModel
@@ -14,6 +15,7 @@ import by.rowing.sanbaiteam.training.presentation.list.compose.ListTrainingScree
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+@AllowDetektPublic
 object TrainingNavGraphProvider {
 
     fun trainingNavGraph(

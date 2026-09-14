@@ -20,7 +20,7 @@
     <string name="add_training_title">Новая тренировка</string>
     <string name="add_training_date_label">Дата тренировки</string>
     <string name="add_training_athlete_label">Спортсмен</string>
-    <string name="add_training_athlete_header">Спортсмен %1$d</string>
+    <string name="add_training_athlete_header">Спортсмен</string>
     <string name="add_training_crew_header">Экипаж</string>
     <string name="add_training_pieces_header">Куски</string>
     <string name="add_training_select_athlete">Выберите спортсмена</string>

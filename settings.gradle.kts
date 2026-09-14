@@ -10,6 +10,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    includeBuild("gradle/plugins")
 }
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
@@ -26,9 +27,11 @@ rootProject.name = "SANBAI Team"
 include(":app")
 include(":uikit")
 include(":core:util")
+include(":core:annotation")
 include(":core:navigation")
 include(":core:base")
 include(":data:local")
+include(":detekt")
 include(":feature:calculator")
 include(":feature:athlete")
 include(":feature:training")

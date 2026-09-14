@@ -23,6 +23,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:annotation"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.navigation.compose)

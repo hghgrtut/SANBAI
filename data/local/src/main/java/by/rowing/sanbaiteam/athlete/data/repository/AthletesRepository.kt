@@ -3,9 +3,11 @@ package by.rowing.sanbaiteam.athlete.data.repository
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlinx.coroutines.flow.Flow
 
+@AllowDetektPublic
 interface AthletesRepository {
 
     val allAthletes: Flow<List<AthleteItemModel>>
