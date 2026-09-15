@@ -3,7 +3,9 @@ package by.rowing.sanbaiteam.athlete.presentation.detail.compose
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,12 +47,12 @@ import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailScreenActio
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailState
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailViewModel
 import by.rowing.sanbaiteam.athlete.presentation.detail.PersonalBestDraft
+import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
@@ -70,83 +72,77 @@ private fun AthleteDetailScreenContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.athletes_detail_title),
-                actions = {
-                    if (!state.isLoading && !state.notFound) {
-                        IconButton(onClick = actions::onSaveClick) {
-                            Icon(
-                                imageVector = Icons.Default.Save,
-                                contentDescription = stringResource(R.string.save),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                },
-                onNavIconClick = actions::onBackClick
+            RowDetailsTopBar(
+                state = state,
+                actions = actions
             )
         }
     ) { paddingValues ->
-        when {
-            state.isLoading -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            state.notFound -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(Spacing.M),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.athletes_detail_not_found),
-                        style = TypographyPaletteSp.Body1Regular
-                    )
-                }
-            }
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(Spacing.M),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.M)
-                ) {
-                    ProfileFields(state = state, actions = actions)
-                    RecordsSection(state = state, actions = actions)
-                }
-            }
+        if (!state.isLoading && !state.notFound) {
+            RowerData(
+                paddingValues = paddingValues,
+                state = state,
+                actions = actions
+            )
+        } else {
+            NotLoadedRower(
+                paddingValues = paddingValues,
+                state = state
+            )
         }
     }
 
     state.recordsError?.let { error ->
-        AlertDialog(
-            onDismissRequest = actions::clearRecordsError,
-            title = {
-                Text(
-                    text = stringResource(R.string.athletes_detail_save_error),
-                    style = TypographyPalette.H4
-                )
-            },
-            text = { Text(text = error, style = TypographyPalette.Body1Regular) },
-            confirmButton = {
-                Button(
-                    text = stringResource(R.string.cancel),
-                    buttonColors = ButtonColors.text(),
-                    debounceClick = actions::clearRecordsError
-                )
+        RecordErrorAlert(
+            actions = actions,
+            error = error
+        )
+    }
+}
+
+@Composable
+private fun RowDetailsTopBar(
+    state: AthleteDetailState,
+    actions: AthleteDetailScreenActions
+) {
+    TopAppBar(
+        title = stringResource(R.string.athletes_detail_title),
+        actions = {
+            if (!state.isLoading && !state.notFound) {
+                IconButton(onClick = actions::onSaveClick) {
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = stringResource(R.string.save),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
+        },
+        onNavIconClick = actions::onBackClick
+    )
+}
+
+@Composable
+private fun RowerData(
+    paddingValues: PaddingValues,
+    state: AthleteDetailState,
+    actions: AthleteDetailScreenActions
+) {
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(Spacing.M),
+        verticalArrangement = Arrangement.spacedBy(Spacing.M)
+    ) {
+        ProfileFields(
+            state = state,
+            actions = actions
+        )
+        RecordsSection(
+            state = state,
+            actions = actions
         )
     }
 }
@@ -199,31 +195,28 @@ private fun ProfileFields(
             imeAction = ImeAction.Done,
         )
     )
-    Card(
+    DataCard(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
+        verticalSpacing = Spacing.S
     ) {
-        Column(modifier = Modifier.padding(Spacing.M)) {
-            Text(
-                text = stringResource(R.string.athletes_detail_gender_label),
-                style = TypographyPaletteSp.Body2Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        Text(
+            text = stringResource(R.string.athletes_detail_gender_label),
+            style = TypographyPaletteSp.Body2Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+            GenderOption(
+                textResId = R.string.athletes_add_athlete_gender_male,
+                isSelected = state.isMale,
+                onClick = { actions.changeGender(isMale = true) },
+                icon = Icons.Default.Male
             )
-            SpacerS()
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
-                GenderOption(
-                    textResId = R.string.athletes_add_athlete_gender_male,
-                    isSelected = state.isMale,
-                    onClick = { actions.changeGender(isMale = true) },
-                    icon = Icons.Default.Male
-                )
-                GenderOption(
-                    textResId = R.string.athletes_add_athlete_gender_female,
-                    isSelected = !state.isMale,
-                    onClick = { actions.changeGender(isMale = false) },
-                    icon = Icons.Default.Female
-                )
-            }
+            GenderOption(
+                textResId = R.string.athletes_add_athlete_gender_female,
+                isSelected = !state.isMale,
+                onClick = { actions.changeGender(isMale = false) },
+                icon = Icons.Default.Female
+            )
         }
     }
 }
@@ -319,8 +312,7 @@ private fun GenderOption(
         ),
         border = BorderStroke(
             width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.outline
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
         )
     ) {
         Column(
@@ -338,6 +330,57 @@ private fun GenderOption(
             )
         }
     }
+}
+
+@Composable
+private fun NotLoadedRower(
+    paddingValues: PaddingValues,
+    state: AthleteDetailState
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues = paddingValues),
+        contentAlignment = Alignment.Center
+    ) {
+        if (state.notFound) {
+            Text(
+                text = stringResource(R.string.athletes_detail_not_found),
+                style = TypographyPaletteSp.Body1Regular
+            )
+        } else {
+            CircularProgressIndicator()
+        }
+    }
+}
+
+@Composable
+private fun RecordErrorAlert(
+    actions: AthleteDetailScreenActions,
+    error: String
+) {
+    AlertDialog(
+        onDismissRequest = actions::clearRecordsError,
+        title = {
+            Text(
+                text = stringResource(R.string.athletes_detail_save_error),
+                style = TypographyPalette.H4
+            )
+        },
+        text = {
+            Text(
+                text = error,
+                style = TypographyPalette.Body1Regular
+            )
+        },
+        confirmButton = {
+            Button(
+                text = stringResource(R.string.cancel),
+                buttonColors = ButtonColors.text(),
+                debounceClick = actions::clearRecordsError
+            )
+        }
+    )
 }
 
 private class DateTransformation : VisualTransformation {

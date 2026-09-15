@@ -1,9 +1,11 @@
 package by.rowing.sanbaiteam.core.util
 
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
+@AllowDetektPublic
 object PersonalBestPercent {
 
     const val DEFAULT_PB_DISTANCE_METERS = 2000
@@ -27,7 +29,10 @@ object PersonalBestPercent {
      * Percent of record speed when both values are paces (/500м).
      * Faster pace (smaller time) → higher percent: `(recordPace / pace) * 100`.
      */
-    fun percentFromPaces(recordPaceMillis: Long, paceMillis: Long): Double? {
+    fun percentFromPaces(
+        recordPaceMillis: Long,
+        paceMillis: Long
+    ): Double? {
         if (recordPaceMillis <= 0 || paceMillis <= 0) return null
         val percent = recordPaceMillis.toDouble() / paceMillis.toDouble() * 100.0
         return (percent * 10).roundToInt() / 10.0
@@ -36,7 +41,10 @@ object PersonalBestPercent {
     /**
      * Pace (/500м) that corresponds to [percent] of record pace speed.
      */
-    fun paceFromPercent(recordPaceMillis: Long, percent: Double): Long? {
+    fun paceFromPercent(
+        recordPaceMillis: Long,
+        percent: Double
+    ): Long? {
         if (recordPaceMillis <= 0 || percent <= 0) return null
         val pace = (recordPaceMillis.toDouble() * 100.0 / percent).roundToLong()
         return ((pace + 50) / 100) * 100

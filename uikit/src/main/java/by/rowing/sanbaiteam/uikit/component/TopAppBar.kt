@@ -41,102 +41,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.R
+import by.rowing.sanbaiteam.uikit.modifier.ClickableState
+import by.rowing.sanbaiteam.uikit.modifier.LocalClickableState
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import com.checker.uikit3.modifier.ClickableState
-import com.checker.uikit3.modifier.LocalClickableState
 import com.checker.uikit3.modifier.clickableIfProvided
 
 private val ICON_SIZE
     @Composable get() = 24.dp
 
-val TOP_BAR_HEIGHT
+private val TOP_BAR_HEIGHT
     @Composable get() = 44.dp
 
-val TITLE_TEXT_STYLE
+private val TITLE_TEXT_STYLE
     @Composable get() = TypographyPalette.Body2Medium
 
 @OptIn(ExperimentalMaterial3Api::class)
 private val DEFAULT_WINDOW_INSETS
     @Composable get() = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal)
 
-@Composable
-private fun TopAppBarInternalWithLabels(
-    modifier: Modifier = Modifier,
-    title: AnnotatedString,
-    @DrawableRes leadingIcon: Int? = null,
-    leadingText: String? = null,
-    onLeadingBlockClick: (() -> Unit)? = null,
-    @DrawableRes trailingIcon: Int? = null,
-    trailingText: String? = null,
-    onTrailingBlockClick: (() -> Unit)? = null,
-    theme: TopAppBarTheme = TopAppBarTheme.TRANSPARENT
-): Unit = TopAppBarInternal(
-    modifier = modifier,
-    title = title,
-    navigationIcon = {
-        Row(
-            modifier = Modifier
-                .padding(start = Spacing.XS)
-                .minimumInteractiveComponentSize()
-                .clip(CircleShape)
-                .clickableIfProvided(onClick = onLeadingBlockClick)
-                .padding(Spacing.S),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.S)
-        ) {
-            if (leadingIcon != null) {
-                Icon(
-                    modifier = Modifier.size(ICON_SIZE),
-                    painter = painterResource(leadingIcon),
-                    contentDescription = null,
-                )
-            }
-
-            if (leadingText != null) {
-                Text(
-                    text = leadingText,
-                    style = TypographyPalette.Body1Regular,
-                    color = ColorPalette.Grey20,
-                )
-            }
-        }
-    },
-    actions = {
-        Row(
-            modifier = Modifier
-                .minimumInteractiveComponentSize()
-                .clip(CircleShape)
-                .clickableIfProvided(onClick = onTrailingBlockClick)
-                .padding(Spacing.S)
-                .padding(end = Spacing.XS),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.S)
-        ) {
-            if (trailingText != null) {
-                Text(
-                    text = trailingText,
-                    style = TypographyPalette.Body1Regular,
-                    color = ColorPalette.Grey20,
-                )
-            }
-
-            if (trailingIcon != null) {
-                Icon(
-                    modifier = Modifier
-                        .padding(end = Spacing.S)
-                        .size(ICON_SIZE),
-                    painter = painterResource(trailingIcon),
-                    contentDescription = null,
-                )
-            }
-        }
-    },
-    theme = theme
-)
-
+@AllowDetektPublic
 @Composable
 fun SimpleTopAppBar(
     title: String = "",
@@ -151,6 +78,7 @@ fun SimpleTopAppBar(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@AllowDetektPublic
 @Composable
 fun TopAppBarWithCustomContent(
     navIcon: @Composable (() -> Unit)? = null,
@@ -192,6 +120,7 @@ fun TopAppBarWithCustomContent(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@AllowDetektPublic
 @Composable
 fun TopAppBar(
     modifier: Modifier = Modifier,
@@ -269,7 +198,82 @@ private fun TopAppBarInternal(
 }
 
 @Composable
-fun DefaultNavigationIcon(
+private fun TopAppBarInternalWithLabels(
+    modifier: Modifier = Modifier,
+    title: AnnotatedString,
+    @DrawableRes leadingIcon: Int? = null,
+    leadingText: String? = null,
+    onLeadingBlockClick: (() -> Unit)? = null,
+    @DrawableRes trailingIcon: Int? = null,
+    trailingText: String? = null,
+    onTrailingBlockClick: (() -> Unit)? = null,
+    theme: TopAppBarTheme = TopAppBarTheme.TRANSPARENT
+): Unit = TopAppBarInternal(
+    modifier = modifier,
+    title = title,
+    navigationIcon = {
+        Row(
+            modifier = Modifier
+                .padding(start = Spacing.XS)
+                .minimumInteractiveComponentSize()
+                .clip(CircleShape)
+                .clickableIfProvided(onClick = onLeadingBlockClick)
+                .padding(Spacing.S),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.S)
+        ) {
+            if (leadingIcon != null) {
+                Icon(
+                    modifier = Modifier.size(ICON_SIZE),
+                    painter = painterResource(leadingIcon),
+                    contentDescription = null,
+                )
+            }
+
+            if (leadingText != null) {
+                Text(
+                    text = leadingText,
+                    style = TypographyPalette.Body1Regular,
+                    color = ColorPalette.Grey20,
+                )
+            }
+        }
+    },
+    actions = {
+        Row(
+            modifier = Modifier
+                .minimumInteractiveComponentSize()
+                .clip(CircleShape)
+                .clickableIfProvided(onClick = onTrailingBlockClick)
+                .padding(Spacing.S)
+                .padding(end = Spacing.XS),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.S)
+        ) {
+            if (trailingText != null) {
+                Text(
+                    text = trailingText,
+                    style = TypographyPalette.Body1Regular,
+                    color = ColorPalette.Grey20,
+                )
+            }
+
+            if (trailingIcon != null) {
+                Icon(
+                    modifier = Modifier
+                        .padding(end = Spacing.S)
+                        .size(ICON_SIZE),
+                    painter = painterResource(trailingIcon),
+                    contentDescription = null,
+                )
+            }
+        }
+    },
+    theme = theme
+)
+
+@Composable
+private fun DefaultNavigationIcon(
     modifier: Modifier = Modifier,
     tint: Color = ColorPalette.Grey20,
     onNavIconClick: (() -> Unit)? = null,
@@ -300,6 +304,7 @@ fun DefaultNavigationIcon(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@AllowDetektPublic
 sealed interface TopAppBarTheme {
     val containerColor: Color
     val contentColor: Color
@@ -323,7 +328,7 @@ sealed interface TopAppBarTheme {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-fun TopAppBarColors(
+private fun TopAppBarColors(
     containerColor: Color,
     contentColor: Color,
     scrolledContainerColor: Color = containerColor,

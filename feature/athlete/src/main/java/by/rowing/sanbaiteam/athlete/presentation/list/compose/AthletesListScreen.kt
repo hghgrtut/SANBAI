@@ -17,8 +17,6 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +35,7 @@ import by.rowing.sanbaiteam.athlete.R
 import by.rowing.sanbaiteam.athlete.presentation.common.AthleteListItem
 import by.rowing.sanbaiteam.athlete.presentation.list.AthletesUiState
 import by.rowing.sanbaiteam.athlete.presentation.list.AthletesViewModel
+import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.button.Button
@@ -163,32 +162,30 @@ private fun AthleteListTopBarWithSearch(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacing.M, vertical = Spacing.S)
+                .padding(
+                    horizontal = Spacing.M,
+                    vertical = Spacing.S
+                )
         )
     }
 }
 
 @Composable
 private fun AthleteFilters(modifier: Modifier = Modifier) {
-    Card(
+    DataCard(
         modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
+        verticalSpacing = Spacing.SM
     ) {
-        Column(
-            modifier = Modifier.padding(Spacing.M),
-            verticalArrangement = Arrangement.spacedBy(Spacing.SM)
-        ) {
-            Text(
-                text = "Filters",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = "Filter options coming soon...",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = "Filters",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = "Filter options coming soon...",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

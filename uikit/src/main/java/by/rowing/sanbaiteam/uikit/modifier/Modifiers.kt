@@ -16,8 +16,10 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsCompat
+import by.rowing.sanbaiteam.uikit.modifier.DEBOUNCE_DELAY_MILLIS
+import by.rowing.sanbaiteam.uikit.modifier.LocalClickableState
 
-fun Modifier.debounceClickable(
+internal fun Modifier.debounceClickable(
     interactionSource: MutableInteractionSource? = null,
     enabled: Boolean = true,
     debounceDelayMs: Long = DEBOUNCE_DELAY_MILLIS,
@@ -32,7 +34,7 @@ fun Modifier.debounceClickable(
     )
 }
 
-fun Modifier.debounceClickable(
+internal fun Modifier.debounceClickable(
     interactionSource: MutableInteractionSource,
     indication: Indication?,
     enabled: Boolean = true,
@@ -49,7 +51,7 @@ fun Modifier.debounceClickable(
     )
 }
 
-fun Modifier.debounceClickableWithoutEffect(onClick: () -> Unit): Modifier = composed {
+internal fun Modifier.debounceClickableWithoutEffect(onClick: () -> Unit): Modifier = composed {
     return@composed this.debounceClickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = null,
@@ -61,11 +63,11 @@ fun Modifier.debounceClickableWithoutEffect(onClick: () -> Unit): Modifier = com
  * Если действие по клику != null, то применяет debounceClickable со стандартными настройками.
  * Иначе - элемент не кликабелен.
  */
-fun Modifier.clickableIfProvided(
+internal fun Modifier.clickableIfProvided(
     onClick: (() -> Unit)?,
 ): Modifier = if (onClick != null) debounceClickable(onClick = onClick) else this
 
-inline fun Modifier.applyIfEnabled(
+internal inline fun Modifier.applyIfEnabled(
     enabled: Boolean?,
     builder: Modifier.() -> Modifier,
 ): Modifier = if (enabled == true) builder() else this

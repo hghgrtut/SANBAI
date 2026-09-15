@@ -5,10 +5,12 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import by.rowing.sanbaiteam.calculator.presentation.CalculatorViewModel
 import by.rowing.sanbaiteam.calculator.presentation.compose.CalculatorScreen
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+@AllowDetektPublic
 object CalculatorNavGraphProvider {
 
     fun calculatorNavGraph(

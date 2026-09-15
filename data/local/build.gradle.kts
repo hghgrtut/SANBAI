@@ -18,6 +18,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:annotation"))
     ksp(libs.room.compiler)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

@@ -24,6 +24,7 @@ android {
 dependencies {
     implementation(project(":data:local"))
     implementation(project(":core:util"))
+    implementation(project(":core:annotation"))
     implementation(project(":core:navigation"))
     implementation(project(":core:base"))
     implementation(project(":uikit"))
@@ -39,4 +40,5 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.androidx.compose)
     implementation(libs.material.icons.extended)
+    testImplementation(libs.junit)
 }

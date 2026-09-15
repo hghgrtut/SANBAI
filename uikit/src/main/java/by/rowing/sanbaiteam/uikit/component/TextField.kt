@@ -23,13 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
 import by.rowing.sanbaiteam.uikit.R
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
@@ -37,6 +37,7 @@ import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import com.checker.uikit3.modifier.clearFocusOnKeyboardDismiss
 
 /** https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=423-630 */
+@AllowDetektPublic
 @Composable
 fun TextField(
     modifier: Modifier = Modifier,
@@ -77,6 +78,7 @@ fun TextField(
 )
 
 /** https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=423-630 */
+@AllowDetektPublic
 @Composable
 fun TextField(
     modifier: Modifier = Modifier,
@@ -141,6 +143,7 @@ fun TextField(
 }
 
 /** https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=423-630 */
+@AllowDetektPublic
 @Composable
 fun TextField(
     modifier: Modifier = Modifier,
@@ -198,7 +201,7 @@ fun TextField(
 }
 
 @Composable
-fun getColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
+private fun getColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
     focusedContainerColor = ColorPalette.White,
     unfocusedContainerColor = ColorPalette.White,
     errorContainerColor = ColorPalette.White,
@@ -342,11 +345,9 @@ private val BorderOutlinedTextFieldTopPadding = 8.dp
 private fun TextFieldPreview() {
     ComposePreviewWrapper {
 
-        val focusManager = LocalFocusManager.current
-
         @Composable
         fun Icon() {
-            IconButton(onClick = { focusManager.clearFocus() }) {
+            IconButton(onClick = {}) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check_16),
                     contentDescription = null,

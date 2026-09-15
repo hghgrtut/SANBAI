@@ -1,11 +1,13 @@
 package by.rowing.sanbaiteam.core.presentation.compose
 
 import androidx.navigation.NavOptions
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
 /**
  * Пункт назначения для compose-навигации
  * @param OutArg тип результата работы экрана, если он есть
  */
+@AllowDetektPublic
 interface NavigationDestination<OutArg> {
     fun navigateTo(
         composeNavigator: ComposeNavigator,
@@ -41,6 +43,7 @@ interface NavigationDestination<OutArg> {
     }
 }
 
+@AllowDetektPublic
 inline fun <reified T : Any> getReturnToScreenNavOptions() = NavOptions.Builder()
     .setPopUpTo<T>(
         saveState = true,

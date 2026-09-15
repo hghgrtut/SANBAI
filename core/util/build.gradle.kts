@@ -17,5 +17,6 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:annotation"))
     implementation(libs.androidx.core.ktx)
 }

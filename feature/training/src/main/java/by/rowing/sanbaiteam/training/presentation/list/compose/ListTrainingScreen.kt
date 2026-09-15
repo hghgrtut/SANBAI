@@ -18,8 +18,6 @@ import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.TableRows
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +41,7 @@ import by.rowing.sanbaiteam.training.R
 import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
+import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.button.Button
@@ -193,25 +192,20 @@ private fun ListTrainingTopBarWithSearch(
 
 @Composable
 private fun TrainingFilters() {
-    Card(
+    DataCard(
         modifier = Modifier.padding(all = Spacing.M),
-        elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
+        verticalSpacing = Spacing.SM
     ) {
-        Column(
-            modifier = Modifier.padding(all = Spacing.M),
-            verticalArrangement = Arrangement.spacedBy(space = Spacing.SM)
-        ) {
-            Text(
-                text = "Filters",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = "Filter options coming soon...",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = "Filters",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = "Filter options coming soon...",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

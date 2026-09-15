@@ -83,7 +83,10 @@ internal object SpeedCoachCsvParser {
         return null
     }
 
-    private fun extractHeaderValue(lines: List<String>, key: String): String? {
+    private fun extractHeaderValue(
+        lines: List<String>,
+        key: String
+    ): String? {
         for (line in lines) {
             val raw = line.trim()
             val keyIndex = raw.indexOf(key, ignoreCase = true)

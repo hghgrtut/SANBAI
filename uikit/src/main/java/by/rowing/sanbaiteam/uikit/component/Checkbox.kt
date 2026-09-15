@@ -41,7 +41,7 @@ import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import com.checker.uikit3.modifier.debounceClickable
 
 @Composable
-fun Checkbox(
+internal fun Checkbox(
     modifier: Modifier = Modifier,
     label: String,
     subtitle: String = "",
@@ -89,7 +89,7 @@ fun Checkbox(
 }
 
 @Composable
-fun Checkbox(
+internal fun Checkbox(
     modifier: Modifier = Modifier,
     checked: CheckedState,
     error: Boolean = false,
@@ -150,7 +150,7 @@ private val SHAPE = RoundedCornerShape(4.dp)
 private val RIPPLE_RADIUS = 19.dp
 private val ICON_SIZE = 16.dp
 
-enum class CheckedState {
+internal enum class CheckedState {
     CHECKED,
     UNCHECKED,
     INDETERMINATE,

@@ -5,8 +5,10 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import kotlinx.coroutines.flow.Flow
 
+@AllowDetektPublic
 @Dao
 interface AthleteDao {
 

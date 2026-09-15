@@ -16,8 +16,6 @@ import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,10 +40,10 @@ import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.athlete.presentation.add.AddAthleteState
 import by.rowing.sanbaiteam.athlete.presentation.add.AddAthleteViewModel
 import by.rowing.sanbaiteam.athlete.presentation.common.AthleteListItem
+import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 
 @Composable
@@ -118,7 +116,8 @@ private fun AddAthleteForm(
             onValueChange = actions::changeBirthDate,
             label = stringResource(R.string.athletes_add_athlete_birth_date_label),
             placeholder = stringResource(R.string.athletes_add_athlete_birth_date_placeholder),
-            supportingText = state.dateError ?: stringResource(R.string.athletes_add_athlete_birth_date_supporting_text),
+            supportingText = state.dateError
+                ?: stringResource(R.string.athletes_add_athlete_birth_date_supporting_text),
             error = state.dateError != null,
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
@@ -144,33 +143,28 @@ private fun AddAthleteForm(
                 imeAction = ImeAction.Done,
             )
         )
-        Card(
+        DataCard(
             modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS)
+            verticalSpacing = Spacing.S
         ) {
-            Column(
-                modifier = Modifier.padding(Spacing.M)
-            ) {
-                Text(
-                    text = "Пол спортсмена",
-                    style = TypographyPaletteSp.Body2Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            Text(
+                text = "Пол спортсмена",
+                style = TypographyPaletteSp.Body2Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+                GenderOption(
+                    textResId = R.string.athletes_add_athlete_gender_male,
+                    isSelected = state.isMale,
+                    onClick = { actions.changeGender(isMale = true) },
+                    icon = Icons.Default.Male
                 )
-                SpacerS()
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
-                    GenderOption(
-                        textResId = R.string.athletes_add_athlete_gender_male,
-                        isSelected = state.isMale,
-                        onClick = { actions.changeGender(isMale = true) },
-                        icon = Icons.Default.Male
-                    )
-                    GenderOption(
-                        textResId = R.string.athletes_add_athlete_gender_female,
-                        isSelected = !state.isMale,
-                        onClick = { actions.changeGender(isMale = false) },
-                        icon = Icons.Default.Female
-                    )
-                }
+                GenderOption(
+                    textResId = R.string.athletes_add_athlete_gender_female,
+                    isSelected = !state.isMale,
+                    onClick = { actions.changeGender(isMale = false) },
+                    icon = Icons.Default.Female
+                )
             }
         }
 
@@ -213,8 +207,7 @@ private fun GenderOption(
         ),
         border = BorderStroke(
             width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.outline
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
         )
     ) {
         Column(

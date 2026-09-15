@@ -10,10 +10,12 @@ import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailViewModel
 import by.rowing.sanbaiteam.athlete.presentation.detail.compose.AthleteDetailScreen
 import by.rowing.sanbaiteam.athlete.presentation.list.AthletesViewModel
 import by.rowing.sanbaiteam.athlete.presentation.list.compose.AthleteListScreen
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+@AllowDetektPublic
 object AthletesNavGraphProvider {
 
     fun athletesNavGraph(

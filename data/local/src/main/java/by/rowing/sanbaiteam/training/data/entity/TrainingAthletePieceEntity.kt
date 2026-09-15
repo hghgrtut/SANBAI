@@ -2,8 +2,10 @@ package by.rowing.sanbaiteam.training.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
 
+@AllowDetektPublic
 @Entity(tableName = TrainingDao.TABLE_TRAINING_ATHLETE_PIECE)
 data class TrainingAthletePieceEntity(
     @PrimaryKey(autoGenerate = true)

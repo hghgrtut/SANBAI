@@ -22,6 +22,7 @@ android {
 
 dependencies {
     implementation(project(":uikit"))
+    implementation(project(":core:annotation"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)

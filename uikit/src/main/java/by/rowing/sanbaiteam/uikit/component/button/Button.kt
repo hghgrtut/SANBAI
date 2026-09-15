@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.component.Throbber
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Radius
@@ -50,6 +51,7 @@ import androidx.compose.material3.LocalContentColor as LocalMaterial3ContentColo
  *
  * Макет: [figma](https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=2407-925)
  */
+@AllowDetektPublic
 @Composable
 fun Button(
     modifier: Modifier = Modifier,
@@ -224,6 +226,7 @@ private fun IconSlot(
     }
 }
 
+@AllowDetektPublic
 object Button {
     /**
      * Иконка для кнопки.
@@ -260,6 +263,7 @@ private fun ProvideContentColor(
 
 private val ICON_SIZE = 24.dp
 
+@AllowDetektPublic
 enum class ButtonSize(
     internal val shape: Shape,
     internal val paddingValues: PaddingValues,
@@ -287,6 +291,7 @@ enum class ButtonSize(
     ),
 }
 
+@AllowDetektPublic
 class ButtonColors
 @Deprecated("Следует использовать предоставленные в ButtonColors.Companion значения или методы")
 constructor(

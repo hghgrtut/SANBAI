@@ -18,9 +18,15 @@ internal interface AthleteDetailScreenActions {
 
     fun removeRecord(localId: Long)
 
-    fun changeRecordDistance(localId: Long, text: String)
+    fun changeRecordDistance(
+        localId: Long,
+        text: String
+    )
 
-    fun changeRecordTime(localId: Long, text: String)
+    fun changeRecordTime(
+        localId: Long,
+        text: String
+    )
 
     fun clearRecordsError()
 
@@ -34,8 +40,17 @@ internal interface AthleteDetailScreenActions {
             override fun changeSpeedCoachSerial(newSerial: String) {}
             override fun addRecord() {}
             override fun removeRecord(localId: Long) {}
-            override fun changeRecordDistance(localId: Long, text: String) {}
-            override fun changeRecordTime(localId: Long, text: String) {}
+            override fun changeRecordDistance(
+                localId: Long,
+                text: String
+            ) {
+            }
+
+            override fun changeRecordTime(
+                localId: Long,
+                text: String
+            ) {
+            }
             override fun clearRecordsError() {}
         }
     }

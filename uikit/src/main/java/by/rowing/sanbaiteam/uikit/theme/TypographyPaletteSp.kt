@@ -2,10 +2,12 @@ package by.rowing.sanbaiteam.uikit.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
 /**
  * figma: https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=2-11&p=f&t=Cwyq7FbrKyH7r243-0
  */
+@AllowDetektPublic
 object TypographyPaletteSp {
 
     /**

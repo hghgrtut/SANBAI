@@ -5,8 +5,10 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import by.rowing.sanbaiteam.athlete.data.local.AthletePersonalBestDao
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 
+@AllowDetektPublic
 @Entity(
     tableName = AthletePersonalBestDao.TABLE_NAME,
     foreignKeys = [
@@ -18,7 +20,10 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
         )
     ],
     indices = [
-        Index(value = ["athleteId", "boatType", "distanceMeters"], unique = true),
+        Index(
+            value = ["athleteId", "boatType", "distanceMeters"],
+            unique = true
+        ),
         Index(value = ["athleteId"]),
     ]
 )

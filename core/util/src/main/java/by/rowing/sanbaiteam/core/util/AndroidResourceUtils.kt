@@ -2,7 +2,9 @@ package by.rowing.sanbaiteam.core.util
 
 import android.content.Context
 import androidx.annotation.StringRes
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
+@AllowDetektPublic
 class AndroidResourceUtils(private val context: Context) {
 
     fun getString(

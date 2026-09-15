@@ -12,7 +12,6 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 internal class AthleteDetailViewModel(
@@ -26,6 +25,145 @@ internal class AthleteDetailViewModel(
 
     init {
         viewModelScope.launch { loadAthlete() }
+    }
+
+    private val dateFormat: SimpleDateFormat get() = SimpleDateFormat(DATE_PATTERN, Locale.getDefault())
+
+    override fun onBackClick() {
+        composeNavigator.navigateBack()
+    }
+
+    override fun onSaveClick() {
+        if (!validateForm()) {
+            changeState {
+                copy(
+                    nameError = resourceUtils.getString(R.string.athletes_add_athlete_name_error)
+                        .takeIf { name.isBlank() },
+                    dateError = resourceUtils.getString(R.string.athletes_add_athlete_date_error)
+                        .takeIf { !isValidDate(dateOfBirth) },
+                    recordsError = validateRecordsError(),
+                )
+            }
+            return
+        }
+        viewModelScope.launch {
+            athleteRepository.updateAthlete(
+                AthleteEntity(
+                    id = athleteId,
+                    name = state.name.trim(),
+                    dateOfBirth = dateFormat.parse(state.dateOfBirth) ?: return@launch,
+                    isMale = state.isMale,
+                    speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null },
+                )
+            )
+            val bests = state.records.map { draft ->
+                AthletePersonalBestEntity(
+                    athleteId = athleteId,
+                    boatType = TrainingPieceType.SINGLE,
+                    distanceMeters = draft.distanceMeters,
+                    timeMillis = RowingTimeFormat.parseDuration(draft.timeText) ?: draft.timeMillis,
+                )
+            }
+            athleteRepository.replacePersonalBestsForBoatType(
+                athleteId = athleteId,
+                boatType = TrainingPieceType.SINGLE,
+                bests = bests,
+            )
+            onBackClick()
+        }
+    }
+
+    override fun changeName(newName: String) {
+        changeState {
+            copy(
+                name = newName,
+                nameError = null
+            )
+        }
+    }
+
+    override fun changeBirthDate(newDate: String) {
+        if (newDate.length <= 8 && newDate.all { it.isDigit() }) {
+            changeState {
+                copy(
+                    dateOfBirth = newDate,
+                    dateError = null
+                )
+            }
+        }
+    }
+
+    override fun changeGender(isMale: Boolean) {
+        changeState { copy(isMale = isMale) }
+    }
+
+    override fun changeSpeedCoachSerial(newSerial: String) {
+        changeState { copy(speedCoachSerial = newSerial.filter { it.isLetterOrDigit() }) }
+    }
+
+    override fun addRecord() {
+        changeState {
+            copy(
+                records = records + PersonalBestDraft(),
+                recordsError = null
+            )
+        }
+    }
+
+    override fun removeRecord(localId: Long) {
+        changeState {
+            copy(
+                records = records.filterNot { it.localId == localId },
+                recordsError = null
+            )
+        }
+    }
+
+    override fun changeRecordDistance(
+        localId: Long,
+        text: String
+    ) {
+        val digits = text.filter { it.isDigit() }
+        changeState {
+            copy(
+                records = records.map { draft ->
+                    if (draft.localId != localId) {
+                        draft
+                    } else {
+                        draft.copy(
+                            distanceText = digits,
+                            distanceMeters = digits.toIntOrNull() ?: 0,
+                        )
+                    }
+                },
+                recordsError = null,
+            )
+        }
+    }
+
+    override fun changeRecordTime(
+        localId: Long,
+        text: String
+    ) {
+        changeState {
+            copy(
+                records = records.map { draft ->
+                    if (draft.localId != localId) {
+                        draft
+                    } else {
+                        draft.copy(
+                            timeText = text,
+                            timeMillis = RowingTimeFormat.parseDuration(text) ?: 0L,
+                        )
+                    }
+                },
+                recordsError = null,
+            )
+        }
+    }
+
+    override fun clearRecordsError() {
+        changeState { copy(recordsError = null) }
     }
 
     private suspend fun loadAthlete() {
@@ -52,7 +190,7 @@ internal class AthleteDetailViewModel(
         changeState {
             copy(
                 name = athlete.name,
-                dateOfBirth = birthDateDigits(athlete.dateOfBirth),
+                dateOfBirth = dateFormat.format(athlete.dateOfBirth),
                 speedCoachSerial = athlete.speedCoachSerial.orEmpty(),
                 isMale = athlete.isMale,
                 records = records,
@@ -60,115 +198,6 @@ internal class AthleteDetailViewModel(
                 notFound = false,
             )
         }
-    }
-
-    override fun onBackClick() {
-        composeNavigator.navigateBack()
-    }
-
-    override fun onSaveClick() {
-        if (!validateForm()) {
-            changeState {
-                copy(
-                    nameError = resourceUtils.getString(R.string.athletes_add_athlete_name_error)
-                        .takeIf { name.isBlank() },
-                    dateError = resourceUtils.getString(R.string.athletes_add_athlete_date_error)
-                        .takeIf { !isValidDate(dateOfBirth) },
-                    recordsError = validateRecordsError(),
-                )
-            }
-            return
-        }
-        viewModelScope.launch {
-            athleteRepository.updateAthlete(
-                AthleteEntity(
-                    id = athleteId,
-                    name = state.name.trim(),
-                    dateOfBirth = getBirthDate(state.dateOfBirth) ?: return@launch,
-                    isMale = state.isMale,
-                    speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null },
-                )
-            )
-            val bests = state.records.map { draft ->
-                AthletePersonalBestEntity(
-                    athleteId = athleteId,
-                    boatType = TrainingPieceType.SINGLE,
-                    distanceMeters = draft.distanceMeters,
-                    timeMillis = RowingTimeFormat.parseDuration(draft.timeText) ?: draft.timeMillis,
-                )
-            }
-            athleteRepository.replacePersonalBestsForBoatType(
-                athleteId = athleteId,
-                boatType = TrainingPieceType.SINGLE,
-                bests = bests,
-            )
-            onBackClick()
-        }
-    }
-
-    override fun changeName(newName: String) {
-        changeState { copy(name = newName, nameError = null) }
-    }
-
-    override fun changeBirthDate(newDate: String) {
-        if (newDate.length <= 8 && newDate.all { it.isDigit() }) {
-            changeState { copy(dateOfBirth = newDate, dateError = null) }
-        }
-    }
-
-    override fun changeGender(isMale: Boolean) {
-        changeState { copy(isMale = isMale) }
-    }
-
-    override fun changeSpeedCoachSerial(newSerial: String) {
-        changeState { copy(speedCoachSerial = newSerial.filter { it.isLetterOrDigit() }) }
-    }
-
-    override fun addRecord() {
-        changeState {
-            copy(records = records + PersonalBestDraft(), recordsError = null)
-        }
-    }
-
-    override fun removeRecord(localId: Long) {
-        changeState {
-            copy(records = records.filterNot { it.localId == localId }, recordsError = null)
-        }
-    }
-
-    override fun changeRecordDistance(localId: Long, text: String) {
-        val digits = text.filter { it.isDigit() }
-        changeState {
-            copy(
-                records = records.map { draft ->
-                    if (draft.localId != localId) draft
-                    else draft.copy(
-                        distanceText = digits,
-                        distanceMeters = digits.toIntOrNull() ?: 0,
-                    )
-                },
-                recordsError = null,
-            )
-        }
-    }
-
-    override fun changeRecordTime(localId: Long, text: String) {
-        changeState {
-            copy(
-                records = records.map { draft ->
-                    if (draft.localId != localId) draft
-                    else draft.copy(
-                        timeText = text,
-                        timeMillis = RowingTimeFormat.parseDuration(text) ?: 0L,
-                    )
-                },
-                recordsError = null,
-            )
-        }
-    }
-
-    override fun clearRecordsError() {
-        changeState { copy(recordsError = null) }
     }
 
     private fun validateForm(): Boolean =
@@ -193,19 +222,13 @@ internal class AthleteDetailViewModel(
 
     private fun isValidDate(dateString: String): Boolean {
         return try {
-            val format = SimpleDateFormat(DATE_PATTERN, Locale.getDefault())
+            val format = dateFormat
             format.isLenient = false
             format.parse(dateString) != null
         } catch (_: Exception) {
             false
         }
     }
-
-    private fun getBirthDate(dateOfBirth: String): Date? =
-        SimpleDateFormat(DATE_PATTERN, Locale.getDefault()).parse(dateOfBirth)
-
-    private fun birthDateDigits(date: Date): String =
-        SimpleDateFormat(DATE_PATTERN, Locale.getDefault()).format(date)
 
     companion object {
         private const val DATE_PATTERN = "ddMMyyyy"
