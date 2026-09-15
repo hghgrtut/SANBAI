@@ -718,9 +718,6 @@ honestsign-detekt-rules:
   ViewModelUseInitBlock:
     active: false
     autoCorrect: true
-  FocusManagerShouldBeReplaced:
-    active: true
-    autoCorrect: false
   WrongClassDeclarationsOrder:
     active: true
     autoCorrect: true
