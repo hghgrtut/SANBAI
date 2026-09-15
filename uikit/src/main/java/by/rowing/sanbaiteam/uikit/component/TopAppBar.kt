@@ -63,81 +63,6 @@ private val TITLE_TEXT_STYLE
 private val DEFAULT_WINDOW_INSETS
     @Composable get() = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal)
 
-@Composable
-private fun TopAppBarInternalWithLabels(
-    modifier: Modifier = Modifier,
-    title: AnnotatedString,
-    @DrawableRes leadingIcon: Int? = null,
-    leadingText: String? = null,
-    onLeadingBlockClick: (() -> Unit)? = null,
-    @DrawableRes trailingIcon: Int? = null,
-    trailingText: String? = null,
-    onTrailingBlockClick: (() -> Unit)? = null,
-    theme: TopAppBarTheme = TopAppBarTheme.TRANSPARENT
-): Unit = TopAppBarInternal(
-    modifier = modifier,
-    title = title,
-    navigationIcon = {
-        Row(
-            modifier = Modifier
-                .padding(start = Spacing.XS)
-                .minimumInteractiveComponentSize()
-                .clip(CircleShape)
-                .clickableIfProvided(onClick = onLeadingBlockClick)
-                .padding(Spacing.S),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.S)
-        ) {
-            if (leadingIcon != null) {
-                Icon(
-                    modifier = Modifier.size(ICON_SIZE),
-                    painter = painterResource(leadingIcon),
-                    contentDescription = null,
-                )
-            }
-
-            if (leadingText != null) {
-                Text(
-                    text = leadingText,
-                    style = TypographyPalette.Body1Regular,
-                    color = ColorPalette.Grey20,
-                )
-            }
-        }
-    },
-    actions = {
-        Row(
-            modifier = Modifier
-                .minimumInteractiveComponentSize()
-                .clip(CircleShape)
-                .clickableIfProvided(onClick = onTrailingBlockClick)
-                .padding(Spacing.S)
-                .padding(end = Spacing.XS),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.S)
-        ) {
-            if (trailingText != null) {
-                Text(
-                    text = trailingText,
-                    style = TypographyPalette.Body1Regular,
-                    color = ColorPalette.Grey20,
-                )
-            }
-
-            if (trailingIcon != null) {
-                Icon(
-                    modifier = Modifier
-                        .padding(end = Spacing.S)
-                        .size(ICON_SIZE),
-                    painter = painterResource(trailingIcon),
-                    contentDescription = null,
-                )
-            }
-        }
-    },
-    theme = theme
-)
-
 @AllowDetektPublic
 @Composable
 fun SimpleTopAppBar(
@@ -271,6 +196,81 @@ private fun TopAppBarInternal(
         expandedHeight = TOP_BAR_HEIGHT
     )
 }
+
+@Composable
+private fun TopAppBarInternalWithLabels(
+    modifier: Modifier = Modifier,
+    title: AnnotatedString,
+    @DrawableRes leadingIcon: Int? = null,
+    leadingText: String? = null,
+    onLeadingBlockClick: (() -> Unit)? = null,
+    @DrawableRes trailingIcon: Int? = null,
+    trailingText: String? = null,
+    onTrailingBlockClick: (() -> Unit)? = null,
+    theme: TopAppBarTheme = TopAppBarTheme.TRANSPARENT
+): Unit = TopAppBarInternal(
+    modifier = modifier,
+    title = title,
+    navigationIcon = {
+        Row(
+            modifier = Modifier
+                .padding(start = Spacing.XS)
+                .minimumInteractiveComponentSize()
+                .clip(CircleShape)
+                .clickableIfProvided(onClick = onLeadingBlockClick)
+                .padding(Spacing.S),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.S)
+        ) {
+            if (leadingIcon != null) {
+                Icon(
+                    modifier = Modifier.size(ICON_SIZE),
+                    painter = painterResource(leadingIcon),
+                    contentDescription = null,
+                )
+            }
+
+            if (leadingText != null) {
+                Text(
+                    text = leadingText,
+                    style = TypographyPalette.Body1Regular,
+                    color = ColorPalette.Grey20,
+                )
+            }
+        }
+    },
+    actions = {
+        Row(
+            modifier = Modifier
+                .minimumInteractiveComponentSize()
+                .clip(CircleShape)
+                .clickableIfProvided(onClick = onTrailingBlockClick)
+                .padding(Spacing.S)
+                .padding(end = Spacing.XS),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.S)
+        ) {
+            if (trailingText != null) {
+                Text(
+                    text = trailingText,
+                    style = TypographyPalette.Body1Regular,
+                    color = ColorPalette.Grey20,
+                )
+            }
+
+            if (trailingIcon != null) {
+                Icon(
+                    modifier = Modifier
+                        .padding(end = Spacing.S)
+                        .size(ICON_SIZE),
+                    painter = painterResource(trailingIcon),
+                    contentDescription = null,
+                )
+            }
+        }
+    },
+    theme = theme
+)
 
 @Composable
 private fun DefaultNavigationIcon(

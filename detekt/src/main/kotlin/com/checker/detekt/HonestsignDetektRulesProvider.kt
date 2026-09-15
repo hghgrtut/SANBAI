@@ -1,6 +1,5 @@
 package com.checker.detekt
 
-import com.checker.detekt.rule.FocusManagerShouldBeReplaced
 import com.checker.detekt.rule.MultipleArgumentListWrapping
 import com.checker.detekt.rule.MultipleParameterListWrapping
 import com.checker.detekt.rule.TopLevelDeclarationsShouldNotBePublic
@@ -18,7 +17,6 @@ internal class HonestsignDetektRulesProvider : RuleSetProvider {
         ruleSetId,
         listOf(
             TopLevelDeclarationsShouldNotBePublic(config),
-            FocusManagerShouldBeReplaced(config),
             ViewModelUseInitBlock(config),
             WrongClassDeclarationsOrder(config),
             MultipleArgumentListWrapping(config),

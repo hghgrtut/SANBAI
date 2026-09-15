@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.athlete.presentation.detail.compose
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -311,11 +312,7 @@ private fun GenderOption(
         ),
         border = BorderStroke(
             width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.outline
-            }
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
         )
     ) {
         Column(
@@ -340,12 +337,11 @@ private fun NotLoadedRower(
     paddingValues: PaddingValues,
     state: AthleteDetailState
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues = paddingValues),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        contentAlignment = Alignment.Center
     ) {
         if (state.notFound) {
             Text(

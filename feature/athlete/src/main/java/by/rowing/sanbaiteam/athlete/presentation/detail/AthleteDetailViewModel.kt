@@ -12,7 +12,6 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 internal class AthleteDetailViewModel(
@@ -27,6 +26,8 @@ internal class AthleteDetailViewModel(
     init {
         viewModelScope.launch { loadAthlete() }
     }
+
+    private val dateFormat: SimpleDateFormat get() = SimpleDateFormat(DATE_PATTERN, Locale.getDefault())
 
     override fun onBackClick() {
         composeNavigator.navigateBack()
@@ -50,7 +51,7 @@ internal class AthleteDetailViewModel(
                 AthleteEntity(
                     id = athleteId,
                     name = state.name.trim(),
-                    dateOfBirth = getBirthDate(state.dateOfBirth) ?: return@launch,
+                    dateOfBirth = dateFormat.parse(state.dateOfBirth) ?: return@launch,
                     isMale = state.isMale,
                     speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null },
                 )
@@ -130,9 +131,9 @@ internal class AthleteDetailViewModel(
                         draft
                     } else {
                         draft.copy(
-                        distanceText = digits,
-                        distanceMeters = digits.toIntOrNull() ?: 0,
-                    )
+                            distanceText = digits,
+                            distanceMeters = digits.toIntOrNull() ?: 0,
+                        )
                     }
                 },
                 recordsError = null,
@@ -151,9 +152,9 @@ internal class AthleteDetailViewModel(
                         draft
                     } else {
                         draft.copy(
-                        timeText = text,
-                        timeMillis = RowingTimeFormat.parseDuration(text) ?: 0L,
-                    )
+                            timeText = text,
+                            timeMillis = RowingTimeFormat.parseDuration(text) ?: 0L,
+                        )
                     }
                 },
                 recordsError = null,
@@ -189,7 +190,7 @@ internal class AthleteDetailViewModel(
         changeState {
             copy(
                 name = athlete.name,
-                dateOfBirth = birthDateDigits(athlete.dateOfBirth),
+                dateOfBirth = dateFormat.format(athlete.dateOfBirth),
                 speedCoachSerial = athlete.speedCoachSerial.orEmpty(),
                 isMale = athlete.isMale,
                 records = records,
@@ -221,19 +222,13 @@ internal class AthleteDetailViewModel(
 
     private fun isValidDate(dateString: String): Boolean {
         return try {
-            val format = SimpleDateFormat(DATE_PATTERN, Locale.getDefault())
+            val format = dateFormat
             format.isLenient = false
             format.parse(dateString) != null
         } catch (_: Exception) {
             false
         }
     }
-
-    private fun getBirthDate(dateOfBirth: String): Date? =
-        SimpleDateFormat(DATE_PATTERN, Locale.getDefault()).parse(dateOfBirth)
-
-    private fun birthDateDigits(date: Date): String =
-        SimpleDateFormat(DATE_PATTERN, Locale.getDefault()).format(date)
 
     companion object {
         private const val DATE_PATTERN = "ddMMyyyy"

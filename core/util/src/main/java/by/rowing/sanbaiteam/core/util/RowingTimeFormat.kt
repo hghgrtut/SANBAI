@@ -8,13 +8,16 @@ import kotlin.math.roundToLong
 @AllowDetektPublic
 object RowingTimeFormat {
 
-    private const val MILLIS_PER_TENTH = 100L
     const val MILLIS_PER_SECOND = 1_000L
+
+    private const val MILLIS_PER_TENTH = 100L
     private const val MILLIS_PER_MINUTE = 60_000L
     private const val MILLIS_PER_HOUR = 3_600_000L
     private const val TENTH_PER_SECOND = 10L
     private const val TENTH_PER_MINUTE = 600L
     private const val TENTH_PER_HOUR = 36_000L
+    private const val SECONDS_PER_MINUTE = 60L
+    private const val MINUTES_PER_HOUR = 60L
     private const val PACE_DISTANCE_METERS = 500
 
     /**
@@ -23,9 +26,9 @@ object RowingTimeFormat {
     fun formatDuration(timeMillis: Long): String {
         if (timeMillis < 0) return "0:00.0"
         val totalTenths = (timeMillis + MILLIS_PER_TENTH / 2) / MILLIS_PER_TENTH
-        val minutes = totalTenths / 600
-        val seconds = (totalTenths % 600) / 10
-        val tenths = totalTenths % 10
+        val minutes = totalTenths / TENTH_PER_MINUTE
+        val seconds = (totalTenths % TENTH_PER_MINUTE) / TENTH_PER_SECOND
+        val tenths = totalTenths % TENTH_PER_SECOND
         return String.format(Locale.US, "%d:%02d.%d", minutes, seconds, tenths)
     }
 
@@ -41,7 +44,7 @@ object RowingTimeFormat {
             val minutes = withTenths.groupValues[1].toLong()
             val seconds = withTenths.groupValues[2].toLong()
             val tenths = withTenths.groupValues[3].toLong()
-            if (seconds >= 60) return null
+            if (seconds >= SECONDS_PER_MINUTE) return null
             return minutes * MILLIS_PER_MINUTE + seconds * MILLIS_PER_SECOND + tenths * MILLIS_PER_TENTH
         }
 
@@ -49,7 +52,7 @@ object RowingTimeFormat {
         if (withoutTenths != null) {
             val minutes = withoutTenths.groupValues[1].toLong()
             val seconds = withoutTenths.groupValues[2].toLong()
-            if (seconds >= 60) return null
+            if (seconds >= SECONDS_PER_MINUTE) return null
             return minutes * MILLIS_PER_MINUTE + seconds * MILLIS_PER_SECOND
         }
 
@@ -65,7 +68,7 @@ object RowingTimeFormat {
         val minutes = match.groupValues[2].toLong()
         val seconds = match.groupValues[3].toLong()
         val tenths = match.groupValues[4].takeIf { it.isNotEmpty() }?.toLong() ?: 0L
-        if (minutes >= 60 || seconds >= 60) return null
+        if (minutes >= MINUTES_PER_HOUR || seconds >= SECONDS_PER_MINUTE) return null
         return hours * MILLIS_PER_HOUR + minutes * MILLIS_PER_MINUTE + seconds * MILLIS_PER_SECOND + tenths * MILLIS_PER_TENTH
     }
 

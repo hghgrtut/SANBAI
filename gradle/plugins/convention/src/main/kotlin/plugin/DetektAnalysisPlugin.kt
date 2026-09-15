@@ -20,7 +20,6 @@ class DetektAnalysisPlugin : Plugin<Project> {
             autoCorrect = System.getenv("CI").toBoolean().not()
             basePath = projectPath
             config.setFrom(files("$projectPath/config/detekt.yml"))
-            baseline = file("$projectPath/config/detekt-baseline.xml")
             parallel = true
             source.setFrom(
                 fileTree(projectPath) {
