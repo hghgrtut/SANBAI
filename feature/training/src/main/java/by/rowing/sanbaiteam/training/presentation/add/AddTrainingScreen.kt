@@ -238,6 +238,24 @@ private fun TrainingPieces(
                     text = newStrokeRate
                 )
             },
+            onAvgHeartRateChange = { newValue ->
+                viewModel.changePieceAvgHeartRate(
+                    pieceLocalId = piece.localId,
+                    text = newValue
+                )
+            },
+            onMaxHeartRateChange = { newValue ->
+                viewModel.changePieceMaxHeartRate(
+                    pieceLocalId = piece.localId,
+                    text = newValue
+                )
+            },
+            onRecoveryHeartRateChange = { newValue ->
+                viewModel.changePieceRecoveryHeartRate(
+                    pieceLocalId = piece.localId,
+                    text = newValue
+                )
+            },
             onRemove = { viewModel.removePiece(pieceLocalId = piece.localId) }
         )
     }
@@ -299,6 +317,9 @@ private fun PieceForm(
     onDistanceChange: (String) -> Unit,
     onTimeChange: (String) -> Unit,
     onStrokeRateChange: (String) -> Unit,
+    onAvgHeartRateChange: (String) -> Unit,
+    onMaxHeartRateChange: (String) -> Unit,
+    onRecoveryHeartRateChange: (String) -> Unit,
     onRemove: () -> Unit,
 ) {
     val pace: String = RowingTimeFormat.formatPace(
@@ -343,6 +364,30 @@ private fun PieceForm(
                     label = stringResource(R.string.add_training_piece_stroke_rate_label),
                     textStyle = TypographyPalette.Body1Regular,
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextField(
+                    value = piece.avgHeartRate?.toString().orEmpty(),
+                    onValueChange = onAvgHeartRateChange,
+                    label = stringResource(R.string.add_training_piece_avg_heart_rate_label),
+                    textStyle = TypographyPalette.Body1Regular,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextField(
+                    value = piece.maxHeartRate?.toString().orEmpty(),
+                    onValueChange = onMaxHeartRateChange,
+                    label = stringResource(R.string.add_training_piece_max_heart_rate_label),
+                    textStyle = TypographyPalette.Body1Regular,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextField(
+                    value = piece.recoveryHeartRate?.toString().orEmpty(),
+                    onValueChange = onRecoveryHeartRateChange,
+                    label = stringResource(R.string.add_training_piece_recovery_heart_rate_label),
+                    textStyle = TypographyPalette.Body1Regular,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(

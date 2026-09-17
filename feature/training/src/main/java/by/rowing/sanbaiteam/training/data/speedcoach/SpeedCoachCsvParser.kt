@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.training.data.speedcoach
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.math.roundToInt
 
 internal object SpeedCoachCsvParser {
 
@@ -14,13 +15,16 @@ internal object SpeedCoachCsvParser {
         val startTimeMillis = extractStartTime(lines)
         val intervals = parseIntervalSummaries(lines)
         if (intervals.isEmpty()) throw IllegalArgumentException("CSV does not contain interval summaries.")
+        val perStrokeMaxHeartRates = parsePerStrokeMaxHeartRates(lines)
 
         return SpeedCoachCsvImport(
             rawCsv = csvText,
             deviceSerial = serial?.normalizeSerial(),
             sessionName = sessionName?.takeIf { it.isNotBlank() },
             startTimeMillis = startTimeMillis,
-            intervals = intervals
+            intervals = intervals.mapIndexed { index, interval ->
+                interval.copy(maxHeartRate = perStrokeMaxHeartRates[index + 1])
+            }
         )
     }
 
@@ -38,27 +42,29 @@ internal object SpeedCoachCsvParser {
             lines.getOrNull(startIndex + 3)?.takeIf { it.startsWith("(Interval)") } ?: return emptyList()
         if (unitLine.isBlank()) return emptyList()
 
-        val headers = headerLine.split(',')
+        val headers = headerLine.splitToColumns()
         val distanceIndex = headers.indexOf("Total Distance (GPS)")
         val timeIndex = headers.indexOf("Total Elapsed Time")
         val strokeIndex = headers.indexOf("Avg Stroke Rate")
+        val heartRateIndex = headers.indexOf("Avg Heart Rate")
         if (distanceIndex < 0 || timeIndex < 0 || strokeIndex < 0) return emptyList()
 
         val result = mutableListOf<SpeedCoachCsvInterval>()
         var lineIndex = startIndex + 4
         while (lineIndex < lines.size) {
             val line = lines[lineIndex].trim()
-            if (line.isBlank() || line.startsWith("Per-Stroke Data", ignoreCase = true)) break
-            val columns = line.split(',')
+            if (line.isBlank() || line.isPerStrokeSectionHeader()) break
+            val columns = line.splitToColumns()
             if (columns.size > strokeIndex) {
-                val distance = columns[distanceIndex].toDoubleOrNull()
                 val time = RowingTimeFormat.parseDurationHhMmSsTenths(columns[timeIndex])
                 val strokeRate = columns[strokeIndex].toDoubleOrNull()
-                if (distance != null && time != null && strokeRate != null) {
+                val avgHeartRate = columns.parseDoubleToInt(columnIndex = heartRateIndex).takeIf { heartRateIndex >= 0 }
+                if (time != null && strokeRate != null) {
                     result += SpeedCoachCsvInterval(
-                        distanceMeters = distance.toInt(),
+                        distanceMeters = columns.parseDoubleToInt(columnIndex = distanceIndex) ?: 0,
                         timeMillis = time,
-                        strokeRate = strokeRate
+                        strokeRate = strokeRate,
+                        avgHeartRate = avgHeartRate
                     )
                 }
             }
@@ -66,6 +72,45 @@ internal object SpeedCoachCsvParser {
         }
         return result
     }
+
+    private fun parsePerStrokeMaxHeartRates(lines: List<String>): Map<Int, Int> {
+        val sectionIndex = lines.indexOfFirst { it.trim().isPerStrokeSectionHeader() }
+        if (sectionIndex < 0) return emptyMap()
+
+        var columnHeaderIndex = -1
+        for (index in sectionIndex + 1 until lines.size) {
+            val line = lines[index].trim()
+            if (line.isEmpty() || line.startsWith("(")) continue
+            if (line.contains("Interval")) {
+                columnHeaderIndex = index
+                break
+            }
+        }
+        if (columnHeaderIndex < 0) return emptyMap()
+
+        val headers = lines[columnHeaderIndex].splitToColumns()
+        val heartRateIndex = headers.indexOf("Heart Rate")
+        if (heartRateIndex < 0) return emptyMap()
+
+        val result = mutableMapOf<Int, Int>()
+        var lineIndex = columnHeaderIndex + 1
+        if (lines.getOrNull(lineIndex)?.trim()?.startsWith("(") == true) lineIndex++
+        while (lineIndex < lines.size) {
+            val line = lines[lineIndex].trim()
+            if (line.isBlank()) break
+            val columns = line.splitToColumns()
+            val intervalNumber = columns.getOrNull(0)?.trim()?.toIntOrNull()
+            val heartRate = columns.parseDoubleToInt(columnIndex = heartRateIndex)
+            if (intervalNumber != null && heartRate != null) {
+                result[intervalNumber] = maxOf(result[intervalNumber] ?: 0, heartRate)
+            }
+            lineIndex++
+        }
+        return result
+    }
+
+    private fun List<String>.parseDoubleToInt(columnIndex: Int): Int? =
+        getOrNull(columnIndex)?.trim()?.toDoubleOrNull()?.roundToInt()
 
     private fun extractStartTime(lines: List<String>): Long? {
         val value = extractHeaderValue(lines, "Start Time:") ?: return null
@@ -104,6 +149,13 @@ internal object SpeedCoachCsvParser {
     }
 
     private fun String.normalizeSerial(): String = filter { it.isLetterOrDigit() }
+
+    private fun String.splitToColumns(): List<String> = split(',')
+
+    private fun String.isPerStrokeSectionHeader(): Boolean = startsWith(
+        prefix = "Per-Stroke Data",
+        ignoreCase = true
+    )
 }
 
 internal data class SpeedCoachCsvImport(
@@ -118,4 +170,6 @@ internal data class SpeedCoachCsvInterval(
     val distanceMeters: Int,
     val timeMillis: Long,
     val strokeRate: Double,
+    val avgHeartRate: Int? = null,
+    val maxHeartRate: Int? = null,
 )

@@ -16,4 +16,7 @@ data class TrainingAthletePieceEntity(
     val distanceMeters: Int,
     val timeMillis: Long,
     val strokeRate: Double,
+    val avgHeartRate: Int? = null,
+    val maxHeartRate: Int? = null,
+    val recoveryHeartRate: Int? = null,
 )

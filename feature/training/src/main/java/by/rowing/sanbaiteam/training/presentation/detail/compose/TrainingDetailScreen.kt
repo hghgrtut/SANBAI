@@ -191,6 +191,17 @@ private fun PieceResultRow(piece: TrainingDetailPiece) {
         SpacerXS()
         Text(
             text = stringResource(
+                R.string.training_detail_heart_rate,
+                piece.avgHeartRate?.toString() ?: "—",
+                piece.maxHeartRate?.toString() ?: "—",
+                piece.recoveryHeartRate?.toString() ?: "—",
+            ),
+            style = TypographyPaletteSp.Body2Regular.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
+        Text(
+            text = stringResource(
                 R.string.training_detail_percent_of_pb,
                 piece.percentOfPbFormatted
             ),

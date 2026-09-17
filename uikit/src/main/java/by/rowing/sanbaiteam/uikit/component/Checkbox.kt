@@ -120,7 +120,11 @@ internal fun Checkbox(
             .fillMaxSize()
             .clip(SHAPE)
             .background(backgroundColor)
-            .border(width = 1.dp, color = borderColor, shape = SHAPE),
+            .border(
+                width = 1.dp,
+                color = borderColor,
+                shape = SHAPE
+            ),
         contentAlignment = Alignment.Center
     ) {
         val resId = when (checked) {
