@@ -83,6 +83,33 @@ internal class AddTrainingViewModel(
         }
     }
 
+    fun changePieceAvgHeartRate(
+        pieceLocalId: Long,
+        text: String
+    ) {
+        updatePiece(pieceLocalId) { piece ->
+            piece.copy(avgHeartRate = parseIntFromText(text))
+        }
+    }
+
+    fun changePieceMaxHeartRate(
+        pieceLocalId: Long,
+        text: String
+    ) {
+        updatePiece(pieceLocalId) { piece ->
+            piece.copy(maxHeartRate = parseIntFromText(text))
+        }
+    }
+
+    fun changePieceRecoveryHeartRate(
+        pieceLocalId: Long,
+        text: String
+    ) {
+        updatePiece(pieceLocalId) { piece ->
+            piece.copy(recoveryHeartRate = parseIntFromText(text))
+        }
+    }
+
     fun changePieceDistance(
         pieceLocalId: Long,
         text: String
@@ -117,33 +144,6 @@ internal class AddTrainingViewModel(
                 strokeRateText = text,
                 strokeRate = RowingTimeFormat.parseStrokeRate(text) ?: 0.0
             )
-        }
-    }
-
-    fun changePieceAvgHeartRate(
-        pieceLocalId: Long,
-        text: String
-    ) {
-        updatePiece(pieceLocalId) { piece ->
-            piece.copy(avgHeartRate = parseIntFromText(text))
-        }
-    }
-
-    fun changePieceMaxHeartRate(
-        pieceLocalId: Long,
-        text: String
-    ) {
-        updatePiece(pieceLocalId) { piece ->
-            piece.copy(maxHeartRate = parseIntFromText(text))
-        }
-    }
-
-    fun changePieceRecoveryHeartRate(
-        pieceLocalId: Long,
-        text: String
-    ) {
-        updatePiece(pieceLocalId) { piece ->
-            piece.copy(recoveryHeartRate = parseIntFromText(text))
         }
     }
 
