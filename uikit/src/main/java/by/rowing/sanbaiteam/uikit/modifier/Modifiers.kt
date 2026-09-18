@@ -47,7 +47,12 @@ internal fun Modifier.debounceClickable(
         interactionSource = interactionSource,
         indication = indication,
         enabled = enabled,
-        onClick = { clickableState.onClick(click = onClick, debounceDelayMs = debounceDelayMs) }
+        onClick = {
+            clickableState.onClick(
+                click = onClick,
+                debounceDelayMs = debounceDelayMs
+            )
+        }
     )
 }
 

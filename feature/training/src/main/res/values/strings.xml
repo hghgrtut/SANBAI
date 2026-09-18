@@ -35,6 +35,9 @@
     <string name="add_training_piece_length_label">Дистанция (метры)</string>
     <string name="add_training_piece_time_label">Время (м:сс.д)</string>
     <string name="add_training_piece_stroke_rate_label">Частота гребков</string>
+    <string name="add_training_piece_avg_heart_rate_label">Средняя ЧСС</string>
+    <string name="add_training_piece_max_heart_rate_label">Максимальная ЧСС</string>
+    <string name="add_training_piece_recovery_heart_rate_label">ЧСС восстановления</string>
     <string name="add_training_piece_pace_label">Темп: %1$s</string>
     <string name="add_training_pace_placeholder">—</string>
     <string name="add_training_import_csv">Импорт из SpeedCoach (CSV)</string>
@@ -50,5 +53,6 @@
     <string name="training_detail_piece_number">Кусок %1$d</string>
     <string name="training_detail_distance">%1$d м</string>
     <string name="training_detail_stroke_rate">%1$s гр/мин</string>
+    <string name="training_detail_heart_rate">ЧСС: ср. %1$s · макс. %2$s · восст. %3$s</string>
     <string name="training_detail_percent_of_pb">%% рекорда: %1$s</string>
 </resources>

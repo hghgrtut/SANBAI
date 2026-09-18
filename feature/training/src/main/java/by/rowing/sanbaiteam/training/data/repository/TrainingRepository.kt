@@ -118,6 +118,9 @@ internal class TrainingRepository(
                         distanceMeters = piece.distanceMeters
                     ).orEmpty(),
                     strokeRateFormatted = RowingTimeFormat.formatStrokeRate(piece.strokeRate),
+                    avgHeartRate = piece.avgHeartRate,
+                    maxHeartRate = piece.maxHeartRate,
+                    recoveryHeartRate = piece.recoveryHeartRate,
                     percentOfPbFormatted = PersonalBestPercent.format(
                         PersonalBestPercent.average(crewPercents)
                     ),

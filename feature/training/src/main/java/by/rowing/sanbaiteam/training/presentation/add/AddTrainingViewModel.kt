@@ -83,34 +83,30 @@ internal class AddTrainingViewModel(
         }
     }
 
-    fun addCrewAthlete() {
-        changeState {
-            if (crewAthletes.size >= AddTrainingState.MAX_CREW_SIZE) {
-                copy(
-                    validationError = resourceUtils.getString(
-                        R.string.add_training_crew_max_size,
-                        AddTrainingState.MAX_CREW_SIZE
-                    )
-                )
-            } else {
-                copy(
-                    crewAthletes = crewAthletes + AddCrewAthlete(),
-                    validationError = null
-                )
-            }
+    fun changePieceAvgHeartRate(
+        pieceLocalId: Long,
+        text: String
+    ) {
+        updatePiece(pieceLocalId) { piece ->
+            piece.copy(avgHeartRate = parseIntFromText(text))
         }
     }
 
-    fun removeCrewAthlete(crewLocalId: Long) {
-        changeState {
-            if (crewAthletes.size <= 1) {
-                this
-            } else {
-                copy(
-                    crewAthletes = crewAthletes.filterNot { it.crewId == crewLocalId },
-                validationError = null
-            )
-            }
+    fun changePieceMaxHeartRate(
+        pieceLocalId: Long,
+        text: String
+    ) {
+        updatePiece(pieceLocalId) { piece ->
+            piece.copy(maxHeartRate = parseIntFromText(text))
+        }
+    }
+
+    fun changePieceRecoveryHeartRate(
+        pieceLocalId: Long,
+        text: String
+    ) {
+        updatePiece(pieceLocalId) { piece ->
+            piece.copy(recoveryHeartRate = parseIntFromText(text))
         }
     }
 
@@ -119,7 +115,7 @@ internal class AddTrainingViewModel(
         text: String
     ) {
         updatePiece(pieceLocalId) { piece ->
-            val distance = text.filter { it.isDigit() }.toIntOrNull() ?: 0
+            val distance = parseIntFromText(text) ?: 0
             piece.copy(
                 distanceText = text.filter { it.isDigit() },
                 distanceMeters = distance
@@ -159,6 +155,9 @@ internal class AddTrainingViewModel(
                     distanceMeters = template.distanceMeters,
                     timeMillis = template.timeMillis,
                     strokeRate = template.strokeRate,
+                    avgHeartRate = template.avgHeartRate,
+                    maxHeartRate = template.maxHeartRate,
+                    recoveryHeartRate = template.recoveryHeartRate,
                     distanceText = template.distanceText,
                     timeText = template.timeText,
                     strokeRateText = template.strokeRateText
@@ -198,10 +197,11 @@ internal class AddTrainingViewModel(
                         athleteId = crewAthlete.rowerId,
                         order = index,
                         distanceMeters = piece.distanceMeters,
-                        timeMillis = RowingTimeFormat.parseDuration(piece.timeText)
-                            ?: piece.timeMillis,
-                        strokeRate = RowingTimeFormat.parseStrokeRate(piece.strokeRateText)
-                            ?: piece.strokeRate
+                        timeMillis = RowingTimeFormat.parseDuration(piece.timeText) ?: piece.timeMillis,
+                        strokeRate = RowingTimeFormat.parseStrokeRate(piece.strokeRateText) ?: piece.strokeRate,
+                        avgHeartRate = piece.avgHeartRate,
+                        maxHeartRate = piece.maxHeartRate,
+                        recoveryHeartRate = piece.recoveryHeartRate,
                     )
                 }
             }
@@ -275,12 +275,16 @@ internal class AddTrainingViewModel(
         }
     }
 
+    private fun parseIntFromText(text: String): Int? = text.filter { it.isDigit() }.toIntOrNull()
+
     private suspend fun applyParsedImport(parsed: SpeedCoachCsvImport) {
         val newPieces = parsed.intervals.map { interval ->
             AddPieceDraft(
                 distanceMeters = interval.distanceMeters,
                 timeMillis = interval.timeMillis,
                 strokeRate = interval.strokeRate,
+                avgHeartRate = interval.avgHeartRate,
+                maxHeartRate = interval.maxHeartRate,
                 distanceText = interval.distanceMeters.toString(),
                 timeText = RowingTimeFormat.formatDuration(interval.timeMillis),
                 strokeRateText = RowingTimeFormat.formatStrokeRate(interval.strokeRate),
