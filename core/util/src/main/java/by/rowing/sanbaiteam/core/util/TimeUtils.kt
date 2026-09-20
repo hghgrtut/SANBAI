@@ -2,6 +2,7 @@ package by.rowing.sanbaiteam.core.util
 
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 
@@ -21,5 +22,15 @@ object TimeUtils {
         dateFormat.timeZone = timeZone
 
         return dateFormat.format(timeInMillis)
+    }
+
+    fun isSameCalendarDay(
+        firstMillis: Long,
+        secondMillis: Long,
+    ): Boolean {
+        val first = Calendar.getInstance().apply { timeInMillis = firstMillis }
+        val second = Calendar.getInstance().apply { timeInMillis = secondMillis }
+        val fieldsToCompare = listOf(Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH)
+        return fieldsToCompare.all { field -> first.get(field) == second.get(field) }
     }
 }

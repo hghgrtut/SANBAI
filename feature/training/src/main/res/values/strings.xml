@@ -55,4 +55,12 @@
     <string name="training_detail_stroke_rate">%1$s гр/мин</string>
     <string name="training_detail_heart_rate">ЧСС: ср. %1$s · макс. %2$s · восст. %3$s</string>
     <string name="training_detail_percent_of_pb">%% рекорда: %1$s</string>
+    <string name="training_transfer_notice_title">Перенос данных</string>
+    <string name="training_transfer_export_action">Экспорт тренировок</string>
+    <string name="training_transfer_import_action">Импорт тренировок</string>
+    <string name="training_transfer_export_success">Резервная копия сохранена.</string>
+    <string name="training_transfer_export_error">Не удалось создать резервную копию.</string>
+    <string name="training_transfer_import_result">Импортировано тренировок: %1$d, добавлено спортсменов: %2$d</string>
+    <string name="training_transfer_import_error">Не удалось импортировать файл.</string>
+    <string name="ok">ОК</string>
 </resources>

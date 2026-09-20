@@ -19,4 +19,9 @@ internal class SpeedCoachImportStorage(private val context: Context) {
         file.writeText(csvText)
         return "speedcoach_imports/$fileName"
     }
+
+    fun readCsv(relativePath: String): String? {
+        val file = File(context.filesDir, relativePath)
+        return if (file.exists()) file.readText() else null
+    }
 }
