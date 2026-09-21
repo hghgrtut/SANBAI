@@ -12,7 +12,9 @@ interface AthletesRepository {
 
     val allAthletes: Flow<List<AthleteItemModel>>
 
-    fun addAthlete(athlete: AthleteEntity)
+    suspend fun getAllAthletesOnce(): List<AthleteEntity>
+
+    suspend fun addAthlete(athlete: AthleteEntity): Long
 
     suspend fun getAthlete(athleteId: Long): AthleteEntity?
 

@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.athlete.presentation.add
 
+import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.R
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
@@ -7,6 +8,7 @@ import by.rowing.sanbaiteam.athlete.presentation.add.compose.AddAthleteScreenAct
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.core.util.AndroidResourceUtils
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -32,8 +34,7 @@ internal class AddAthleteViewModel(
 
     override fun onSaveClick() {
         if (validateForm()) {
-            createAthleteFromState()?.let { athleteRepository.addAthlete(it) }
-            onBackClick()
+            saveRower()
         } else {
             changeState {
                 copy(
@@ -88,13 +89,18 @@ internal class AddAthleteViewModel(
 
     private fun validateForm(): Boolean = state.name.isNotBlank() && isValidDate(state.dateOfBirth)
 
-    private fun createAthleteFromState(): AthleteEntity? {
-        return AthleteEntity(
-            name = state.name,
-            dateOfBirth = getBirthDate(state.dateOfBirth) ?: return null,
-            isMale = state.isMale,
-            speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null }
-        )
+    private fun saveRower() {
+        viewModelScope.launch {
+            athleteRepository.addAthlete(
+                athlete = AthleteEntity(
+                    name = state.name,
+                    dateOfBirth = getBirthDate(state.dateOfBirth) ?: return@launch,
+                    isMale = state.isMale,
+                    speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null }
+                )
+            )
+            onBackClick()
+        }
     }
 
     private fun getBirthDate(dateOfBirth: String): Date? =

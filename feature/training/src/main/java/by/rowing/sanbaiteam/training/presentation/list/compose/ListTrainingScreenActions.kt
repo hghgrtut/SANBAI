@@ -1,5 +1,8 @@
 package by.rowing.sanbaiteam.training.presentation.list.compose
 
+import android.content.Context
+import android.net.Uri
+
 internal interface ListTrainingScreenActions {
 
     fun onBackClick()
@@ -12,6 +15,22 @@ internal interface ListTrainingScreenActions {
 
     fun onTrainingClick(trainingId: Long)
 
+    fun onExportClick()
+
+    fun onExportPromptLaunched()
+
+    fun onExportToUri(
+        uri: Uri,
+        context: Context
+    )
+
+    fun onImportFromUri(
+        uri: Uri,
+        context: Context
+    )
+
+    fun onDismissTransferNotice()
+
     companion object {
 
         fun empty() = object : ListTrainingScreenActions {
@@ -20,6 +39,21 @@ internal interface ListTrainingScreenActions {
             override fun onShowFiltersChange(showFilters: Boolean) {}
             override fun onAddTrainingClick() {}
             override fun onTrainingClick(trainingId: Long) {}
+            override fun onExportClick() {}
+            override fun onExportPromptLaunched() {}
+            override fun onExportToUri(
+                uri: Uri,
+                context: Context
+            ) {
+            }
+
+            override fun onImportFromUri(
+                uri: Uri,
+                context: Context
+            ) {
+            }
+
+            override fun onDismissTransferNotice() {}
         }
     }
 }

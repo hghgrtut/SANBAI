@@ -16,7 +16,7 @@ interface AthleteDao {
     fun getAllAthletes(): Flow<List<AthleteEntity>>
 
     @Insert
-    suspend fun addAthlete(athlete: AthleteEntity)
+    suspend fun addAthlete(athlete: AthleteEntity): Long
 
     @Query("SELECT name FROM $TABLE_NAME WHERE id IN (:athleteIds)")
     suspend fun getAthleteNames(athleteIds: List<Long>): List<String>

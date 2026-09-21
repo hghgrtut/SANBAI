@@ -40,5 +40,6 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.androidx.compose)
     implementation(libs.material.icons.extended)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
 }

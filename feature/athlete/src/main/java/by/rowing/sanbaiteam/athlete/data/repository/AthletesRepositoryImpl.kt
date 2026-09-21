@@ -6,11 +6,10 @@ import by.rowing.sanbaiteam.athlete.data.local.AthleteDao
 import by.rowing.sanbaiteam.athlete.data.local.AthletePersonalBestDao
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -35,9 +34,11 @@ internal class AthletesRepositoryImpl(
         }
     }
 
-    override fun addAthlete(athlete: AthleteEntity) {
-        CoroutineScope(Dispatchers.IO).launch { dao.addAthlete(athlete = athlete) }
-    }
+    override suspend fun getAllAthletesOnce(): List<AthleteEntity> =
+        withContext(Dispatchers.IO) { dao.getAllAthletes().first() }
+
+    override suspend fun addAthlete(athlete: AthleteEntity): Long =
+        withContext(Dispatchers.IO) { dao.addAthlete(athlete = athlete) }
 
     override suspend fun getAthlete(athleteId: Long): AthleteEntity? =
         withContext(Dispatchers.IO) { dao.getById(athleteId) }
