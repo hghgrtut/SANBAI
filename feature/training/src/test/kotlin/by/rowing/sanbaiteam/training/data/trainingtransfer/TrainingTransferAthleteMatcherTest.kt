@@ -11,11 +11,20 @@ internal class TrainingTransferAthleteMatcherTest {
 
     @Test
     fun match_namesAreMatchedCaseInsensitiveAndSameCalendarDay() {
+        // ФИО и дата рождения гребцов совпадают, время рождения не важно
         val existing = listOf(
             AthleteEntity(
                 id = 7,
                 name = "Иван Иванов",
-                dateOfBirth = Date(localMillis(1995, 2, 10, 10, 0)),
+                dateOfBirth = Date(
+                    localMillis(
+                        year = 1995,
+                        month = 2,
+                        day = 10,
+                        hour = 10,
+                        minute = 0
+                    )
+                ),
                 isMale = true,
                 speedCoachSerial = null
             )
@@ -23,7 +32,13 @@ internal class TrainingTransferAthleteMatcherTest {
         val backupAthletes = listOf(
             BackupAthlete(
                 name = "  иван иванов ",
-                dateOfBirthMillis = localMillis(1995, 2, 10, 23, 30),
+                dateOfBirthMillis = localMillis(
+                    year = 1995,
+                    month = 2,
+                    day = 10,
+                    hour = 23,
+                    minute = 30
+                ),
                 isMale = true
             )
         )
@@ -37,7 +52,15 @@ internal class TrainingTransferAthleteMatcherTest {
             AthleteEntity(
                 id = 3,
                 name = "Иван Иванов",
-                dateOfBirth = Date(localMillis(1995, 2, 9, 12, 0)),
+                dateOfBirth = Date(
+                    localMillis(
+                        year = 1995,
+                        month = 2,
+                        day = 9,
+                        hour = 12,
+                        minute = 0
+                    )
+                ),
                 isMale = true,
                 speedCoachSerial = null
             )
@@ -45,7 +68,13 @@ internal class TrainingTransferAthleteMatcherTest {
         val backupAthletes = listOf(
             BackupAthlete(
                 name = "Иван Иванов",
-                dateOfBirthMillis = localMillis(1995, 2, 10, 12, 0),
+                dateOfBirthMillis = localMillis(
+                    year = 1995,
+                    month = 2,
+                    day = 10,
+                    hour = 12,
+                    minute = 0
+                ),
                 isMale = true
             )
         )

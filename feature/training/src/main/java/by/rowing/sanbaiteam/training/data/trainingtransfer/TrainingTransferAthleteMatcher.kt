@@ -14,6 +14,7 @@ internal fun matchBackupAthletesToExisting(
     return result
 }
 
+/** Cчитает одинаковыми гребцов при совпадении ФИО и даты рождения */
 private fun AthleteEntity.matches(backupAthlete: BackupAthlete): Boolean =
     name.trim().equals(
         other = backupAthlete.name.trim(),
