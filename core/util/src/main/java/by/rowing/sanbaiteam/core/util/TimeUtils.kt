@@ -9,6 +9,8 @@ import java.util.TimeZone
 @AllowDetektPublic
 object TimeUtils {
 
+    const val MILLIS_PER_SECOND = 1_000L
+
     private const val DATE_FORMAT = "dd.MM.yyyy"
 
     private val DEFAULT_TIME_ZONE: TimeZone by lazy { TimeZone.getDefault() }

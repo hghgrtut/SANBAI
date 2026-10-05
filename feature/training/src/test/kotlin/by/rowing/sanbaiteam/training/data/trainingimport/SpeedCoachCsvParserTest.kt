@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.training.data.speedcoach
+package by.rowing.sanbaiteam.training.data.trainingimport
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

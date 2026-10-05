@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.training.data.speedcoach
+package by.rowing.sanbaiteam.training.data.trainingimport
 
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import org.junit.Assert.assertEquals

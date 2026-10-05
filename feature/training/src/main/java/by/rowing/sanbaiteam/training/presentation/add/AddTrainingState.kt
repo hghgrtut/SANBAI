@@ -1,6 +1,8 @@
 package by.rowing.sanbaiteam.training.presentation.add
 
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
 
 internal data class AddTrainingState(
     val dateMillis: Long,
@@ -10,6 +12,8 @@ internal data class AddTrainingState(
     val pieces: List<AddPieceDraft> = listOf(AddPieceDraft()),
     val validationError: String? = null,
     val pendingRawCsvs: List<String> = emptyList(),
+    val pendingImportSource: TrainingImportSource? = null,
+    val trainingType: TrainingPieceType = TrainingPieceType.SINGLE,
     val pendingSourceSerial: String? = null,
     val pendingSourceSessionName: String? = null,
     val importNotice: String? = null,

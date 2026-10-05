@@ -47,6 +47,7 @@ import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailScreenActio
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailState
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailViewModel
 import by.rowing.sanbaiteam.athlete.presentation.detail.PersonalBestDraft
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
@@ -226,23 +227,34 @@ private fun RecordsSection(
     state: AthleteDetailState,
     actions: AthleteDetailScreenActions,
 ) {
-    Text(
-        text = stringResource(R.string.athletes_detail_records_header),
-        style = TypographyPalette.H4
-    )
-    state.records.forEach { record ->
-        RecordRow(
-            record = record,
-            onDistanceChange = { actions.changeRecordDistance(record.localId, it) },
-            onTimeChange = { actions.changeRecordTime(record.localId, it) },
-            onRemove = { actions.removeRecord(record.localId) },
-        )
-    }
-    Button(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        text = stringResource(R.string.athletes_detail_add_record),
-        debounceClick = actions::addRecord
-    )
+        verticalArrangement = Arrangement.spacedBy(space = Spacing.XS)
+    ) {
+        Text(
+            text = stringResource(R.string.athletes_detail_records_header),
+            style = TypographyPalette.H4
+        )
+        for (type in TrainingPieceType.entries) {
+            Text(
+                text = stringResource(type.uiResId),
+                style = TypographyPalette.H4
+            )
+            state.recordsByType[type]?.forEach { record ->
+                RecordRow(
+                    record = record,
+                    onDistanceChange = { actions.changeRecordDistance(type, record.localId, it) },
+                    onTimeChange = { actions.changeRecordTime(type, record.localId, it) },
+                    onRemove = { actions.removeRecord(type, record.localId) },
+                )
+            }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.athletes_detail_add_record),
+                debounceClick = { actions.addRecord(type) }
+            )
+        }
+    }
 }
 
 @Composable

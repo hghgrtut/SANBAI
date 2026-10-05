@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.athlete.data.local
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
@@ -53,11 +54,19 @@ interface AthletePersonalBestDao {
     @Delete
     suspend fun delete(best: AthletePersonalBestEntity)
 
-    @Query("DELETE FROM $TABLE_NAME WHERE athleteId = :athleteId AND boatType = :boatType")
-    suspend fun deleteAllForAthleteBoatType(
+    @Query("DELETE FROM $TABLE_NAME WHERE athleteId = :athleteId")
+    suspend fun deleteAllForAthlete(athleteId: Long)
+
+    @Transaction
+    suspend fun replaceAllForAthlete(
         athleteId: Long,
-        boatType: TrainingPieceType
-    )
+        bests: List<AthletePersonalBestEntity>,
+    ) {
+        deleteAllForAthlete(athleteId)
+        if (bests.isNotEmpty()) {
+            upsertAll(bests)
+        }
+    }
 
     companion object {
         const val TABLE_NAME = "athlete_personal_best"

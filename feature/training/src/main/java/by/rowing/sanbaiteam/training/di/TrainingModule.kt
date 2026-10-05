@@ -1,7 +1,7 @@
 package by.rowing.sanbaiteam.training.di
 
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
-import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachImportStorage
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.detail.TrainingDetailViewModel
@@ -15,7 +15,7 @@ import org.koin.dsl.module
 val trainingModule = module {
     singleOf(::TrainingRepository)
     singleOf(::TrainingTransferRepository)
-    single { SpeedCoachImportStorage(androidContext()) }
+    single { TrainingImportStorage(androidContext()) }
 
     viewModelOf(::ListTrainingViewModel)
     viewModelOf(::TrainingDetailViewModel)
@@ -24,7 +24,7 @@ val trainingModule = module {
             resourceUtils = get(),
             athleteRepository = get(),
             trainingRepository = get(),
-            speedCoachImportStorage = get(),
+            trainingImportStorage = get(),
             composeNavigator = get(),
             importUri = getOrNull()
         )
