@@ -55,7 +55,12 @@ internal class AthletesRepositoryImpl(
     ) = withContext(Dispatchers.IO) {
         personalBestDao.replaceAllForAthlete(
             athleteId = athleteId,
-            bests = bests.map { it.copy(id = 0, athleteId = athleteId) },
+            bests = bests.map {
+                it.copy(
+                    id = 0,
+                    athleteId = athleteId
+                )
+            },
         )
     }
 

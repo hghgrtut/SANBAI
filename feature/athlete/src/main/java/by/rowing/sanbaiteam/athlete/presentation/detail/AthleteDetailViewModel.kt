@@ -144,17 +144,19 @@ internal class AthleteDetailViewModel(
     }
 
     private suspend fun savePersonalBests() {
-        val bests = TrainingPieceType.entries.flatMap { type ->
-            state.recordsByType[type].orEmpty().map { draft ->
-                AthletePersonalBestEntity(
-                    athleteId = athleteId,
-                    boatType = type,
-                    distanceMeters = draft.distanceMeters,
-                    timeMillis = RowingTimeFormat.parseDuration(draft.timeText) ?: draft.timeMillis,
-                )
+        athleteRepository.replacePersonalBests(
+            athleteId = athleteId,
+            bests = TrainingPieceType.entries.flatMap { type ->
+                state.recordsByType[type].orEmpty().map { draft ->
+                    AthletePersonalBestEntity(
+                        athleteId = athleteId,
+                        boatType = type,
+                        distanceMeters = draft.distanceMeters,
+                        timeMillis = RowingTimeFormat.parseDuration(draft.timeText) ?: draft.timeMillis,
+                    )
+                }
             }
-        }
-        athleteRepository.replacePersonalBests(athleteId = athleteId, bests = bests)
+        )
     }
 
     private fun updateRecords(
@@ -215,30 +217,21 @@ internal class AthleteDetailViewModel(
     private fun validateForm(): Boolean =
         state.name.isNotBlank() && isValidDate(state.dateOfBirth) && validateRecordsError() == null
 
-    private fun validateRecordsError(): String? {
-        for (records in state.recordsByType.values) {
-            val error = validateRecords(records)
-            if (error != null) return error
-        }
-        return null
-    }
-
-    private fun validateRecords(records: List<PersonalBestDraft>): String? {
+    private fun validateRecordsError(): String? = state.recordsByType.values.firstNotNullOfOrNull { records ->
         val distances = mutableSetOf<Int>()
         for (record in records) {
             if (record.distanceMeters <= 0) {
-                return resourceUtils.getString(R.string.athletes_detail_record_distance_error)
+                return@firstNotNullOfOrNull R.string.athletes_detail_record_distance_error
             }
-            val time = RowingTimeFormat.parseDuration(record.timeText) ?: record.timeMillis
-            if (time <= 0) {
-                return resourceUtils.getString(R.string.athletes_detail_record_time_error)
+            if ((RowingTimeFormat.parseDuration(record.timeText) ?: record.timeMillis) <= 0) {
+                return@firstNotNullOfOrNull R.string.athletes_detail_record_time_error
             }
             if (!distances.add(record.distanceMeters)) {
-                return resourceUtils.getString(R.string.athletes_detail_duplicate_distance)
+                return@firstNotNullOfOrNull R.string.athletes_detail_duplicate_distance
             }
         }
-        return null
-    }
+        return@firstNotNullOfOrNull null
+    }?.let { errorResId -> resourceUtils.getString(id = errorResId) }
 
     private fun isValidDate(dateString: String): Boolean {
         return try {

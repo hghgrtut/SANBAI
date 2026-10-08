@@ -19,6 +19,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
+import java.util.Date
 import kotlin.math.roundToInt
 import com.garmin.fit.File as GarminFile
 
@@ -84,9 +85,16 @@ internal class Concept2FitParserTest {
 
     @Test
     fun parse_nonRowingFitFile_isRejected() {
-        val bytes = encodeFit(
-            sessionSport = Sport.RUNNING,
-            sessionSubSport = SubSport.GENERIC
+        val bytes = encode(
+            listOf(
+                fileId(START_MILLIS),
+                session(START_MILLIS).apply {
+                    this.sport = Sport.RUNNING
+                    this.subSport = SubSport.GENERIC
+                },
+                lap(Concept2LapIntensity.ACTIVE, START_MILLIS, WORK_MILLIS, 4464f),
+                record(START_MILLIS, 160, 24),
+            )
         )
 
         assertThrows(IllegalArgumentException::class.java) { Concept2FitParser.parse(bytes) }
@@ -132,9 +140,9 @@ internal class Concept2FitParserTest {
         messages += lap(Concept2LapIntensity.ACTIVE, activeStart, WORK_MILLIS, 4464f)
         messages += lap(Concept2LapIntensity.REST, restStart, REST_MILLIS, 420f)
         messages += lap(Concept2LapIntensity.ACTIVE, lastActiveStart, WORK_MILLIS, 4460f)
-        messages += recordsInLap(activeStart, WORK_MILLIS, firstHeartRates, FIRST_ACTIVE_CADENCE)
+        messages += recordsInLap(activeStart, firstHeartRates, FIRST_ACTIVE_CADENCE)
         messages += restRecords(restStart)
-        messages += recordsInLap(lastActiveStart, WORK_MILLIS, lastHeartRates, LAST_ACTIVE_CADENCE)
+        messages += recordsInLap(lastActiveStart, lastHeartRates, LAST_ACTIVE_CADENCE)
         messages += record(lastActiveStart + WORK_MILLIS, LAST_LAP_END_HEART_RATE, LAST_ACTIVE_CADENCE)
 
         return Fixture(
@@ -153,6 +161,7 @@ internal class Concept2FitParserTest {
         sport = Sport.FITNESS_EQUIPMENT
         subSport = SubSport.INDOOR_ROWING
         timestamp = fitDateTime(startMillis)
+        startTime = fitDateTime(startMillis)
         firstLapIndex = 0
         numLaps = LAP_COUNT
         totalElapsedTime = (WORK_MILLIS * 2 + REST_MILLIS) / TimeUtils.MILLIS_PER_SECOND.toFloat()
@@ -174,13 +183,15 @@ internal class Concept2FitParserTest {
 
     private fun recordsInLap(
         startMillis: Long,
-        elapsedMillis: Long,
         heartRates: List<Int>,
         cadence: Int
-    ): List<RecordMesg> = heartRates.mapIndexedNotNull { index, heartRate ->
-        val offset = index * RECORD_INTERVAL_MILLIS
-        if (offset >= elapsedMillis) return@mapIndexedNotNull null
-        record(startMillis + offset, heartRate, cadence)
+    ): List<RecordMesg> {
+        val elapsedMillis = WORK_MILLIS
+        return heartRates.mapIndexedNotNull { index, heartRate ->
+            val offset = index * RECORD_INTERVAL_MILLIS
+            if (offset >= elapsedMillis) return@mapIndexedNotNull null
+            record(startMillis + offset, heartRate, cadence)
+        }
     }
 
     private fun restRecords(restStartMillis: Long): List<RecordMesg> = listOf(
@@ -199,21 +210,6 @@ internal class Concept2FitParserTest {
         this.cadence = cadence.toShort()
     }
 
-    private fun encodeFit(
-        sessionSport: Sport,
-        sessionSubSport: SubSport
-    ): ByteArray = encode(
-        listOf(
-            fileId(START_MILLIS),
-            session(START_MILLIS).apply {
-                this.sport = sessionSport
-                this.subSport = sessionSubSport
-            },
-            lap(Concept2LapIntensity.ACTIVE, START_MILLIS, WORK_MILLIS, 4464f),
-            record(START_MILLIS, 160, 24),
-        )
-    )
-
     private fun encode(messages: List<Mesg>): ByteArray {
         val file = File.createTempFile("concept2_fit_test", FIT_EXTENSION)
         file.deleteOnExit()
@@ -223,8 +219,7 @@ internal class Concept2FitParserTest {
         return file.readBytes()
     }
 
-    private fun fitDateTime(millis: Long): DateTime =
-        DateTime(millis / TimeUtils.MILLIS_PER_SECOND + FIT_EPOCH_OFFSET)
+    private fun fitDateTime(millis: Long): DateTime = DateTime(Date(millis))
 
     private fun speedCoachCsv(): String = "Session Information:,,,Device Information:\r\nInterval Summaries:\r\n"
 
@@ -233,7 +228,6 @@ internal class Concept2FitParserTest {
         const val START_MILLIS = 1_789_000_000_000L
         const val WORK_MILLIS = 900_000L
         const val REST_MILLIS = 360_000L
-        const val FIT_EPOCH_OFFSET = 631_065_600L
         const val RECORD_INTERVAL_MILLIS = 10_000L
         const val WORK_RECORD_COUNT = 90
         const val LAP_COUNT = 3

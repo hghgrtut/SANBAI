@@ -112,8 +112,14 @@ internal object Concept2FitParser : TrainingImportParser {
         )
     }
 
-    private fun readStartMillis(fit: FitMessages): Long? =
-        (fit.sessionMesgs.firstOrNull()?.timestamp ?: fit.fileIdMesgs.firstOrNull()?.timeCreated)?.toEpochMillis()
+    private fun readStartMillis(fit: FitMessages): Long? {
+        val session = fit.sessionMesgs.firstOrNull()
+        return listOfNotNull(
+            session?.startTime,
+            session?.timestamp,
+            fit.fileIdMesgs.firstOrNull()?.timeCreated,
+        ).firstNotNullOfOrNull { it.toEpochMillis() }
+    }
 
     private fun readRecoveryHeartRate(
         restLap: LapData?,
@@ -148,7 +154,7 @@ internal object Concept2FitParser : TrainingImportParser {
         this == null || subSport == SubSport.INDOOR_ROWING || sport == Sport.ROWING || sport == Sport.FITNESS_EQUIPMENT
 
     private fun DateTime.toEpochMillis(): Long? =
-        timestamp?.takeIf { it != DateTime.INVALID }?.let { it * TimeUtils.MILLIS_PER_SECOND }
+        if (timestamp == DateTime.INVALID) null else getDate().time
 
     private fun ByteArray.hasFitMagic(): Boolean = size > FIT_HEADER_SIZE &&
             this[FIT_MAGIC_OFFSET] == FIT_MAGIC_DOT &&

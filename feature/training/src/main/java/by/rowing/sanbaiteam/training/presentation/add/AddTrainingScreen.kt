@@ -336,7 +336,7 @@ private fun PieceForm(
                 verticalArrangement = Arrangement.spacedBy(space = Spacing.XS)
             ) {
                 Text(
-                    text = stringResource(R.string.add_training_piece_header, index + 1),
+                    text = stringResource(R.string.training_detail_piece_number, index + 1),
                     style = TypographyPalette.Body2Medium
                 )
                 TextField(
