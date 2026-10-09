@@ -3,7 +3,6 @@ package by.rowing.sanbaiteam.training.data.trainingimport
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import com.garmin.fit.DateTime
 import com.garmin.fit.FitDecoder
-import com.garmin.fit.FitMessages
 import com.garmin.fit.Intensity
 import com.garmin.fit.LapMesg
 import com.garmin.fit.RecordMesg
@@ -34,7 +33,8 @@ internal object Concept2FitParser : TrainingImportParser {
             throw IllegalArgumentException("File does not contain a FIT header.")
         }
         val fit = FitDecoder().decode(ByteArrayInputStream(bytes))
-        if (!fit.sessionMesgs.firstOrNull().isRowingWorkout()) {
+        val session = fit.sessionMesgs.firstOrNull()
+        if (!session.isRowingWorkout()) {
             throw IllegalArgumentException("FIT file does not contain a rowing workout.")
         }
 
@@ -77,7 +77,8 @@ internal object Concept2FitParser : TrainingImportParser {
             csvText = Concept2LapCsv.encode(summaries),
             deviceSerial = null,
             sessionName = null,
-            startTimeMillis = readStartMillis(fit),
+            startTimeMillis = (session?.startTime ?: session?.timestamp ?: fit.fileIdMesgs.firstOrNull()?.timeCreated)
+                ?.toEpochMillis(),
             intervals = intervals,
         )
     }
@@ -112,15 +113,6 @@ internal object Concept2FitParser : TrainingImportParser {
         )
     }
 
-    private fun readStartMillis(fit: FitMessages): Long? {
-        val session = fit.sessionMesgs.firstOrNull()
-        return listOfNotNull(
-            session?.startTime,
-            session?.timestamp,
-            fit.fileIdMesgs.firstOrNull()?.timeCreated,
-        ).firstNotNullOfOrNull { it.toEpochMillis() }
-    }
-
     private fun readRecoveryHeartRate(
         restLap: LapData?,
         records: List<RecordData>
@@ -151,7 +143,7 @@ internal object Concept2FitParser : TrainingImportParser {
     private fun List<Int>.avg(): Int? = takeIf { it.isNotEmpty() }?.average()?.roundToInt()
 
     private fun SessionMesg?.isRowingWorkout(): Boolean =
-        this == null || subSport == SubSport.INDOOR_ROWING || sport == Sport.ROWING || sport == Sport.FITNESS_EQUIPMENT
+        this == null || subSport == SubSport.INDOOR_ROWING || sport == Sport.ROWING
 
     private fun DateTime.toEpochMillis(): Long? =
         if (timestamp == DateTime.INVALID) null else getDate().time
