@@ -49,23 +49,19 @@ internal class AthletesRepositoryImpl(
     override suspend fun getPersonalBests(athleteId: Long): List<AthletePersonalBestEntity> =
         withContext(Dispatchers.IO) { personalBestDao.getByAthlete(athleteId) }
 
-    override suspend fun replacePersonalBestsForBoatType(
+    override suspend fun replacePersonalBests(
         athleteId: Long,
-        boatType: TrainingPieceType,
         bests: List<AthletePersonalBestEntity>,
     ) = withContext(Dispatchers.IO) {
-        personalBestDao.deleteAllForAthleteBoatType(athleteId, boatType)
-        if (bests.isNotEmpty()) {
-            personalBestDao.upsertAll(
-                bests.map {
-                    it.copy(
-                        id = 0,
-                        athleteId = athleteId,
-                        boatType = boatType
-                    )
-                }
-            )
-        }
+        personalBestDao.replaceAllForAthlete(
+            athleteId = athleteId,
+            bests = bests.map {
+                it.copy(
+                    id = 0,
+                    athleteId = athleteId
+                )
+            },
+        )
     }
 
     override suspend fun getPersonalBestsForAthletes(

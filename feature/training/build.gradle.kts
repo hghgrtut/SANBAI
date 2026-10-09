@@ -41,5 +41,6 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.garmin.fit)
     testImplementation(libs.junit)
 }

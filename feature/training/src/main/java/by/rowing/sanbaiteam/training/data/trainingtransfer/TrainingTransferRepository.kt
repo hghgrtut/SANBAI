@@ -7,7 +7,8 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
 import by.rowing.sanbaiteam.training.data.models.TrainingTransferResult
-import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachImportStorage
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Date
@@ -15,7 +16,7 @@ import java.util.Date
 internal class TrainingTransferRepository(
     private val trainingDao: TrainingDao,
     private val athletesRepository: AthletesRepository,
-    private val csvStorage: SpeedCoachImportStorage,
+    private val importStorage: TrainingImportStorage,
 ) {
 
     suspend fun exportAllBackup(): TrainingBackup = withContext(Dispatchers.IO) {
@@ -48,7 +49,7 @@ internal class TrainingTransferRepository(
                     type = training.type.name,
                     sourceDeviceSerial = training.sourceDeviceSerial,
                     sourceSessionName = training.sourceSessionName,
-                    sourceCsvContent = training.sourceCsvRelativePath?.let { csvStorage.readCsv(it) },
+                    sourceCsvContent = training.sourceCsvRelativePath?.let { importStorage.readCsv(it) },
                     pieces = pieces.map { piece ->
                         BackupPiece(
                             athleteIndex = athleteIndexInExportData.getValue(piece.athleteId),
@@ -127,8 +128,9 @@ internal class TrainingTransferRepository(
             )
 
             if (training.sourceCsvContent != null) {
-                val csvRelativePath = csvStorage.saveCsv(
+                val csvRelativePath = importStorage.saveCsv(
                     trainingId = newTrainingId,
+                    source = TrainingImportSource.byCsvContent(training.sourceCsvContent),
                     serial = training.sourceDeviceSerial,
                     csvText = training.sourceCsvContent,
                 )

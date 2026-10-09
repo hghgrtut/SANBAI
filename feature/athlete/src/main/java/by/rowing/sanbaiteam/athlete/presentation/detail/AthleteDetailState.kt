@@ -1,12 +1,14 @@
 package by.rowing.sanbaiteam.athlete.presentation.detail
 
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
+
 internal data class AthleteDetailState(
     val athleteId: Long = 0,
     val name: String = "",
     val dateOfBirth: String = "",
     val speedCoachSerial: String = "",
     val isMale: Boolean = true,
-    val records: List<PersonalBestDraft> = emptyList(),
+    val recordsByType: Map<TrainingPieceType, List<PersonalBestDraft>> = emptyRecordsByType(),
     val isLoading: Boolean = true,
     val notFound: Boolean = false,
     val nameError: String? = null,
@@ -26,3 +28,6 @@ internal data class PersonalBestDraft(
         fun nextLocalId(): Long = localIdSeq++
     }
 }
+
+private fun emptyRecordsByType(): Map<TrainingPieceType, List<PersonalBestDraft>> =
+    TrainingPieceType.entries.associateWith { emptyList() }

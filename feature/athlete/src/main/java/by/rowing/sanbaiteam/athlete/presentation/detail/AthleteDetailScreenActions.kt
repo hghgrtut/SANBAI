@@ -1,5 +1,7 @@
 package by.rowing.sanbaiteam.athlete.presentation.detail
 
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
+
 internal interface AthleteDetailScreenActions {
 
     fun onBackClick()
@@ -14,18 +16,23 @@ internal interface AthleteDetailScreenActions {
 
     fun changeSpeedCoachSerial(newSerial: String)
 
-    fun addRecord()
+    fun addRecord(type: TrainingPieceType)
 
-    fun removeRecord(localId: Long)
+    fun removeRecord(
+        type: TrainingPieceType,
+        localId: Long,
+    )
 
     fun changeRecordDistance(
+        type: TrainingPieceType,
         localId: Long,
-        text: String
+        text: String,
     )
 
     fun changeRecordTime(
+        type: TrainingPieceType,
         localId: Long,
-        text: String
+        text: String,
     )
 
     fun clearRecordsError()
@@ -38,15 +45,20 @@ internal interface AthleteDetailScreenActions {
             override fun changeBirthDate(newDate: String) {}
             override fun changeGender(isMale: Boolean) {}
             override fun changeSpeedCoachSerial(newSerial: String) {}
-            override fun addRecord() {}
-            override fun removeRecord(localId: Long) {}
+            override fun addRecord(type: TrainingPieceType) {}
+            override fun removeRecord(
+                type: TrainingPieceType,
+                localId: Long
+            ) {
+            }
             override fun changeRecordDistance(
+                type: TrainingPieceType,
                 localId: Long,
                 text: String
             ) {
             }
-
             override fun changeRecordTime(
+                type: TrainingPieceType,
                 localId: Long,
                 text: String
             ) {

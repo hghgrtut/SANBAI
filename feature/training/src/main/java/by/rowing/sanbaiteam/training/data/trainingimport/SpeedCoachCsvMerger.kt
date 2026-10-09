@@ -1,6 +1,7 @@
-package by.rowing.sanbaiteam.training.data.speedcoach
+package by.rowing.sanbaiteam.training.data.trainingimport
 
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
+import by.rowing.sanbaiteam.core.util.TimeUtils
 import java.util.Locale
 import kotlin.math.roundToLong
 
@@ -204,10 +205,9 @@ internal object SpeedCoachCsvMerger {
                 name = "Avg Split (GPS)",
                 value = RowingTimeFormat.formatDurationHhMmSsTenths(paceMillis)
             )
-            val timeSeconds = totalTimeMillis / RowingTimeFormat.MILLIS_PER_SECOND
             setColumn(
                 name = "Avg Speed (GPS)",
-                value = totalDistance / timeSeconds
+                value = totalDistance / (totalTimeMillis / TimeUtils.MILLIS_PER_SECOND)
             )
         }
 

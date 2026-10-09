@@ -43,16 +43,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.net.toUri
-import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.training.R
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import java.util.Calendar
 
@@ -61,7 +60,7 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
     val state = viewModel.state
     val context = LocalContext.current
 
-    ParseInitialCsv(
+    ParseInitialTrainingFile(
         viewModel = viewModel,
         context = context
     )
@@ -79,7 +78,7 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
             paddingValues = paddingValues,
             state = state,
             viewModel = viewModel,
-            importLauncher = csvParserLauncher(
+            importLauncher = trainingImportLauncher(
                 viewModel = viewModel,
                 context = context
             )
@@ -134,12 +133,10 @@ private fun AddTrainingDataInputs(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Spacing.M)
     ) {
-        Text(
-            text = stringResource(R.string.training_piece_type_single),
-            style = TypographyPalette.Body2Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        TrainingTypeDropdown(
+            state = state,
+            onTypeSelected = viewModel::changeTrainingType
         )
-        SpacerXS()
         Date(
             state = state,
             viewModel = viewModel
@@ -186,12 +183,12 @@ private fun addTrainingToolbar(onBackClick: () -> Unit) = @Composable {
 }
 
 @Composable
-private fun ParseInitialCsv(
+private fun ParseInitialTrainingFile(
     viewModel: AddTrainingViewModel,
     context: Context
 ) {
     LaunchedEffect(Unit) {
-        viewModel.importCsvBatchFromUris(
+        viewModel.importTrainingBatchFromUris(
             uris = listOfNotNull(viewModel.consumeInitialImportUri()?.toUri()),
             context = context
         )
@@ -199,12 +196,12 @@ private fun ParseInitialCsv(
 }
 
 @Composable
-private fun csvParserLauncher(
+private fun trainingImportLauncher(
     viewModel: AddTrainingViewModel,
     context: Context
 ): ManagedActivityResultLauncher<String, List<@JvmSuppressWildcards Uri>> =
     rememberLauncherForActivityResult(contract = ActivityResultContracts.GetMultipleContents()) {
-        viewModel.importCsvBatchFromUris(
+        viewModel.importTrainingBatchFromUris(
             uris = it,
             context = context
         )
@@ -339,7 +336,7 @@ private fun PieceForm(
                 verticalArrangement = Arrangement.spacedBy(space = Spacing.XS)
             ) {
                 Text(
-                    text = stringResource(R.string.add_training_piece_header, index + 1),
+                    text = stringResource(R.string.training_detail_piece_number, index + 1),
                     style = TypographyPalette.Body2Medium
                 )
                 TextField(
@@ -421,20 +418,50 @@ private fun AthleteDropdown(
 ) {
     val rowers = state.rowersCatalog
     val selectedRower = state.crewAthletes.first()
-    val selectedRowerId: Long = selectedRower.rowerId
+    ExposedSelectionDropdown(
+        selectedLabel = rowers.find { it.id == selectedRower.rowerId }?.name
+            ?: stringResource(R.string.add_training_select_athlete),
+        items = rowers,
+        label = stringResource(R.string.add_training_athlete_header),
+        itemText = { rower -> rower.name },
+        onItemSelected = { rower -> onAthleteSelected(selectedRower.crewId, rower.id) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TrainingTypeDropdown(
+    state: AddTrainingState,
+    onTypeSelected: (trainingType: TrainingPieceType) -> Unit
+) {
+    ExposedSelectionDropdown(
+        selectedLabel = stringResource(state.trainingType.uiResId),
+        items = TrainingPieceType.entries,
+        itemText = { trainingType -> stringResource(trainingType.uiResId) },
+        onItemSelected = onTypeSelected
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun <T> ExposedSelectionDropdown(
+    selectedLabel: String,
+    items: List<T>,
+    itemText: @Composable (item: T) -> String,
+    onItemSelected: (item: T) -> Unit,
+    label: String? = null
+) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedName = rowers.find { it.id == selectedRowerId }?.name
-        ?: stringResource(R.string.add_training_select_athlete)
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = it }
     ) {
         TextField(
-            value = selectedName,
+            value = selectedLabel,
             onValueChange = {},
             readOnly = true,
-            label = stringResource(R.string.add_training_athlete_header),
+            label = label,
             textStyle = TypographyPalette.Body1Regular,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
@@ -445,39 +472,22 @@ private fun AthleteDropdown(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            rowers.forEach { rower ->
-                expanded = rowerItem(
-                    rower = rower,
-                    onAthleteSelected = onAthleteSelected,
-                    selectedRower = selectedRower,
-                    expanded = expanded
+            items.forEach { item ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = itemText(item),
+                            style = TypographyPalette.Body1Regular
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onItemSelected(item)
+                    }
                 )
             }
         }
     }
-}
-
-@Composable
-private fun rowerItem(
-    rower: AthleteItemModel,
-    onAthleteSelected: (Long, Long) -> Unit,
-    selectedRower: AddCrewAthlete,
-    expanded: Boolean
-): Boolean {
-    var expanded1 = expanded
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = rower.name,
-                style = TypographyPalette.Body1Regular
-            )
-        },
-        onClick = {
-            onAthleteSelected(selectedRower.crewId, rower.id)
-            expanded1 = false
-        }
-    )
-    return expanded1
 }
 
 @Composable

@@ -1,13 +1,25 @@
-package by.rowing.sanbaiteam.training.data.speedcoach
+package by.rowing.sanbaiteam.training.data.trainingimport
 
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.roundToInt
 
-internal object SpeedCoachCsvParser {
+internal object SpeedCoachCsvParser : TrainingImportParser {
 
-    fun parse(csvText: String): SpeedCoachCsvImport {
+    override val source = TrainingImportSource.SPEED_COACH
+
+    private const val INTERVAL_SUMMARIES_MARKER = "Interval Summaries:"
+
+    override fun matches(bytes: ByteArray): Boolean =
+        !Concept2FitParser.matches(bytes) &&
+                String(bytes, Charsets.UTF_8).contains(INTERVAL_SUMMARIES_MARKER)
+
+    override fun parse(bytes: ByteArray): ParsedTrainingImport = parse(String(bytes, Charsets.UTF_8))
+
+    override fun merge(csvTexts: List<String>): String = SpeedCoachCsvMerger.merge(csvTexts)
+
+    fun parse(csvText: String): ParsedTrainingImport {
         val lines = normalizeLines(csvText)
 
         val serial = extractHeaderValue(lines, "Serial:")
@@ -17,8 +29,9 @@ internal object SpeedCoachCsvParser {
         if (intervals.isEmpty()) throw IllegalArgumentException("CSV does not contain interval summaries.")
         val perStrokeMaxHeartRates = parsePerStrokeMaxHeartRates(lines)
 
-        return SpeedCoachCsvImport(
-            rawCsv = csvText,
+        return ParsedTrainingImport(
+            source = source,
+            csvText = csvText,
             deviceSerial = serial?.normalizeSerial(),
             sessionName = sessionName?.takeIf { it.isNotBlank() },
             startTimeMillis = startTimeMillis,
@@ -33,8 +46,8 @@ internal object SpeedCoachCsvParser {
         .replace('\r', '\n')
         .split('\n')
 
-    private fun parseIntervalSummaries(lines: List<String>): List<SpeedCoachCsvInterval> {
-        val startIndex = lines.indexOfFirst { it.trim().startsWith("Interval Summaries:", ignoreCase = true) }
+    private fun parseIntervalSummaries(lines: List<String>): List<TrainingImportInterval> {
+        val startIndex = lines.indexOfFirst { it.trim().startsWith(INTERVAL_SUMMARIES_MARKER, ignoreCase = true) }
         if (startIndex < 0) return emptyList()
         val headerLine =
             lines.getOrNull(startIndex + 2)?.takeIf { it.contains("Interval,") } ?: return emptyList()
@@ -49,7 +62,7 @@ internal object SpeedCoachCsvParser {
         val heartRateIndex = headers.indexOf("Avg Heart Rate")
         if (distanceIndex < 0 || timeIndex < 0 || strokeIndex < 0) return emptyList()
 
-        val result = mutableListOf<SpeedCoachCsvInterval>()
+        val result = mutableListOf<TrainingImportInterval>()
         var lineIndex = startIndex + 4
         while (lineIndex < lines.size) {
             val line = lines[lineIndex].trim()
@@ -60,7 +73,7 @@ internal object SpeedCoachCsvParser {
                 val strokeRate = columns[strokeIndex].toDoubleOrNull()
                 val avgHeartRate = columns.parseDoubleToInt(columnIndex = heartRateIndex).takeIf { heartRateIndex >= 0 }
                 if (time != null && strokeRate != null) {
-                    result += SpeedCoachCsvInterval(
+                    result += TrainingImportInterval(
                         distanceMeters = columns.parseDoubleToInt(columnIndex = distanceIndex) ?: 0,
                         timeMillis = time,
                         strokeRate = strokeRate,
@@ -157,19 +170,3 @@ internal object SpeedCoachCsvParser {
         ignoreCase = true
     )
 }
-
-internal data class SpeedCoachCsvImport(
-    val rawCsv: String,
-    val deviceSerial: String?,
-    val sessionName: String?,
-    val startTimeMillis: Long?,
-    val intervals: List<SpeedCoachCsvInterval>,
-)
-
-internal data class SpeedCoachCsvInterval(
-    val distanceMeters: Int,
-    val timeMillis: Long,
-    val strokeRate: Double,
-    val avgHeartRate: Int? = null,
-    val maxHeartRate: Int? = null,
-)

@@ -90,7 +90,7 @@ internal class TrainingRepository(
 
         val personalBests = athletesRepository.getPersonalBestsForAthletes(
             athleteIds = athleteIds,
-            boatType = TrainingPieceType.SINGLE,
+            boatType = training.type,
             distanceMeters = PersonalBestPercent.DEFAULT_PB_DISTANCE_METERS,
         )
 

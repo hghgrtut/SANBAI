@@ -22,9 +22,8 @@ interface AthletesRepository {
 
     suspend fun getPersonalBests(athleteId: Long): List<AthletePersonalBestEntity>
 
-    suspend fun replacePersonalBestsForBoatType(
+    suspend fun replacePersonalBests(
         athleteId: Long,
-        boatType: TrainingPieceType,
         bests: List<AthletePersonalBestEntity>,
     )
 

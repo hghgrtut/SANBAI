@@ -8,19 +8,11 @@ enum class TrainingPieceType(
     val uiResId: Int,
     val seatsCount: Int = 1
 ) {
-
-    REST(
-        uiResId = R.string.training_piece_type_rest,
-    ),
-    ERGO(
-        uiResId = R.string.training_piece_type_ergo,
-    ),
-    BIKE(
-        uiResId = R.string.training_piece_type_bike,
-    ),
-    SINGLE(
-        uiResId = R.string.training_piece_type_single,
-    ),
+    CONCEPT_ROW_ERG(uiResId = R.string.training_piece_type_concept_row_erg),
+    RP_3(uiResId = R.string.training_piece_type_rp3),
+    CONCEPT_BIKE_ERG(uiResId = R.string.training_piece_type_concept_bike_erg),
+    WATT_BIKE(uiResId = R.string.training_piece_type_watt_bike),
+    SINGLE(uiResId = R.string.training_piece_type_single),
     DOUBLE(
         uiResId = R.string.training_piece_type_double,
         seatsCount = 2,

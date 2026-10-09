@@ -56,19 +56,7 @@ internal class AthleteDetailViewModel(
                     speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null },
                 )
             )
-            val bests = state.records.map { draft ->
-                AthletePersonalBestEntity(
-                    athleteId = athleteId,
-                    boatType = TrainingPieceType.SINGLE,
-                    distanceMeters = draft.distanceMeters,
-                    timeMillis = RowingTimeFormat.parseDuration(draft.timeText) ?: draft.timeMillis,
-                )
-            }
-            athleteRepository.replacePersonalBestsForBoatType(
-                athleteId = athleteId,
-                boatType = TrainingPieceType.SINGLE,
-                bests = bests,
-            )
+            savePersonalBests()
             onBackClick()
         }
     }
@@ -101,69 +89,86 @@ internal class AthleteDetailViewModel(
         changeState { copy(speedCoachSerial = newSerial.filter { it.isLetterOrDigit() }) }
     }
 
-    override fun addRecord() {
-        changeState {
-            copy(
-                records = records + PersonalBestDraft(),
-                recordsError = null
-            )
-        }
+    override fun addRecord(type: TrainingPieceType) {
+        updateRecords(type) { it + PersonalBestDraft() }
     }
 
-    override fun removeRecord(localId: Long) {
-        changeState {
-            copy(
-                records = records.filterNot { it.localId == localId },
-                recordsError = null
-            )
-        }
+    override fun removeRecord(
+        type: TrainingPieceType,
+        localId: Long
+    ) {
+        updateRecords(type) { records -> records.filterNot { it.localId == localId } }
     }
 
     override fun changeRecordDistance(
+        type: TrainingPieceType,
         localId: Long,
-        text: String
+        text: String,
     ) {
         val digits = text.filter { it.isDigit() }
-        changeState {
-            copy(
-                records = records.map { draft ->
-                    if (draft.localId != localId) {
-                        draft
-                    } else {
-                        draft.copy(
-                            distanceText = digits,
-                            distanceMeters = digits.toIntOrNull() ?: 0,
-                        )
-                    }
-                },
-                recordsError = null,
-            )
+        updateRecords(type) { records ->
+            records.map { draft ->
+                if (draft.localId != localId) {
+                    draft
+                } else {
+                    draft.copy(
+                        distanceText = digits,
+                        distanceMeters = digits.toIntOrNull() ?: 0,
+                    )
+                }
+            }
         }
     }
 
     override fun changeRecordTime(
+        type: TrainingPieceType,
         localId: Long,
-        text: String
+        text: String,
     ) {
-        changeState {
-            copy(
-                records = records.map { draft ->
-                    if (draft.localId != localId) {
-                        draft
-                    } else {
-                        draft.copy(
-                            timeText = text,
-                            timeMillis = RowingTimeFormat.parseDuration(text) ?: 0L,
-                        )
-                    }
-                },
-                recordsError = null,
-            )
+        updateRecords(type) { records ->
+            records.map { draft ->
+                if (draft.localId != localId) {
+                    draft
+                } else {
+                    draft.copy(
+                        timeText = text,
+                        timeMillis = RowingTimeFormat.parseDuration(text) ?: 0L,
+                    )
+                }
+            }
         }
     }
 
     override fun clearRecordsError() {
         changeState { copy(recordsError = null) }
+    }
+
+    private suspend fun savePersonalBests() {
+        athleteRepository.replacePersonalBests(
+            athleteId = athleteId,
+            bests = TrainingPieceType.entries.flatMap { type ->
+                state.recordsByType[type].orEmpty().map { draft ->
+                    AthletePersonalBestEntity(
+                        athleteId = athleteId,
+                        boatType = type,
+                        distanceMeters = draft.distanceMeters,
+                        timeMillis = RowingTimeFormat.parseDuration(draft.timeText) ?: draft.timeMillis,
+                    )
+                }
+            }
+        )
+    }
+
+    private fun updateRecords(
+        type: TrainingPieceType,
+        transform: (List<PersonalBestDraft>) -> List<PersonalBestDraft>,
+    ) {
+        changeState {
+            copy(
+                recordsByType = recordsByType + (type to transform(recordsByType[type].orEmpty())),
+                recordsError = null,
+            )
+        }
     }
 
     private suspend fun loadAthlete() {
@@ -177,48 +182,56 @@ internal class AthleteDetailViewModel(
             }
             return
         }
-        val records = athleteRepository.getPersonalBests(athleteId)
-            .filter { it.boatType == TrainingPieceType.SINGLE }
-            .map { best ->
-                PersonalBestDraft(
-                    distanceMeters = best.distanceMeters,
-                    timeMillis = best.timeMillis,
-                    distanceText = best.distanceMeters.toString(),
-                    timeText = RowingTimeFormat.formatDuration(best.timeMillis),
-                )
-            }
+        val recordsByType = loadRecordsByType(athleteRepository.getPersonalBests(athleteId))
         changeState {
             copy(
                 name = athlete.name,
                 dateOfBirth = dateFormat.format(athlete.dateOfBirth),
                 speedCoachSerial = athlete.speedCoachSerial.orEmpty(),
                 isMale = athlete.isMale,
-                records = records,
+                recordsByType = recordsByType,
                 isLoading = false,
                 notFound = false,
             )
         }
     }
 
+    private fun loadRecordsByType(
+        bests: List<AthletePersonalBestEntity>,
+    ): Map<TrainingPieceType, List<PersonalBestDraft>> {
+        val grouped = bests.groupBy { it.boatType }
+        return TrainingPieceType.entries.associateWith { type ->
+            grouped[type].orEmpty()
+                .sortedBy { it.distanceMeters }
+                .map { best ->
+                    PersonalBestDraft(
+                        distanceMeters = best.distanceMeters,
+                        timeMillis = best.timeMillis,
+                        distanceText = best.distanceMeters.toString(),
+                        timeText = RowingTimeFormat.formatDuration(best.timeMillis),
+                    )
+                }
+        }
+    }
+
     private fun validateForm(): Boolean =
         state.name.isNotBlank() && isValidDate(state.dateOfBirth) && validateRecordsError() == null
 
-    private fun validateRecordsError(): String? {
+    private fun validateRecordsError(): String? = state.recordsByType.values.firstNotNullOfOrNull { records ->
         val distances = mutableSetOf<Int>()
-        for (record in state.records) {
+        for (record in records) {
             if (record.distanceMeters <= 0) {
-                return resourceUtils.getString(R.string.athletes_detail_record_distance_error)
+                return@firstNotNullOfOrNull R.string.athletes_detail_record_distance_error
             }
-            val time = RowingTimeFormat.parseDuration(record.timeText) ?: record.timeMillis
-            if (time <= 0) {
-                return resourceUtils.getString(R.string.athletes_detail_record_time_error)
+            if ((RowingTimeFormat.parseDuration(record.timeText) ?: record.timeMillis) <= 0) {
+                return@firstNotNullOfOrNull R.string.athletes_detail_record_time_error
             }
             if (!distances.add(record.distanceMeters)) {
-                return resourceUtils.getString(R.string.athletes_detail_duplicate_distance)
+                return@firstNotNullOfOrNull R.string.athletes_detail_duplicate_distance
             }
         }
-        return null
-    }
+        return@firstNotNullOfOrNull null
+    }?.let { errorResId -> resourceUtils.getString(id = errorResId) }
 
     private fun isValidDate(dateString: String): Boolean {
         return try {

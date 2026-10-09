@@ -13,10 +13,11 @@ import by.rowing.sanbaiteam.training.R
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
-import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachCsvImport
-import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachCsvMerger
-import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachCsvParser
-import by.rowing.sanbaiteam.training.data.speedcoach.SpeedCoachImportStorage
+import by.rowing.sanbaiteam.training.data.trainingimport.ParsedTrainingImport
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportParsers
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
+import by.rowing.sanbaiteam.training.data.trainingimport.impliedTrainingType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -27,7 +28,7 @@ internal class AddTrainingViewModel(
     private val resourceUtils: AndroidResourceUtils,
     private val athleteRepository: AthletesRepository,
     private val trainingRepository: TrainingRepository,
-    private val speedCoachImportStorage: SpeedCoachImportStorage,
+    private val trainingImportStorage: TrainingImportStorage,
     private val composeNavigator: ComposeNavigator,
     importUri: String?,
 ) : ComposeBaseViewModel<AddTrainingState>(
@@ -65,6 +66,15 @@ internal class AddTrainingViewModel(
             copy(
                 dateMillis = millis,
                 dateFormatted = TimeUtils.formatMillisToString(millis)
+            )
+        }
+    }
+
+    fun changeTrainingType(trainingType: TrainingPieceType) {
+        changeState {
+            copy(
+                trainingType = trainingType,
+                validationError = null
             )
         }
     }
@@ -208,15 +218,17 @@ internal class AddTrainingViewModel(
             withContext(Dispatchers.IO) {
                 val trainingId = trainingRepository.saveTraining(
                     dateMillis = state.dateMillis,
-                    type = TrainingPieceType.SINGLE,
+                    type = state.trainingType,
                     pieces = piecesToSave,
                     sourceDeviceSerial = state.pendingSourceSerial,
                     sourceSessionName = state.pendingSourceSessionName,
                 )
                 if (state.pendingRawCsvs.isNotEmpty()) {
-                    val mergedCsv = SpeedCoachCsvMerger.merge(state.pendingRawCsvs)
-                    val relativePath = speedCoachImportStorage.saveCsv(
+                    val importSource = state.pendingImportSource ?: TrainingImportSource.SPEED_COACH
+                    val mergedCsv = TrainingImportParsers.bySource(importSource).merge(state.pendingRawCsvs)
+                    val relativePath = trainingImportStorage.saveCsv(
                         trainingId = trainingId,
+                        source = importSource,
                         serial = state.pendingSourceSerial,
                         csvText = mergedCsv
                     )
@@ -253,18 +265,29 @@ internal class AddTrainingViewModel(
         changeState { copy(showSaveDialog = false) }
     }
 
-    fun importCsvBatchFromUris(
+    fun importTrainingBatchFromUris(
         uris: List<Uri>,
         context: Context
     ) {
-        val csvTexts = uris.mapNotNull { selectedUri ->
-            runCatching {
-                context.contentResolver.openInputStream(selectedUri)?.bufferedReader()?.use { it.readText() }
-            }.getOrNull()
-        }
+        if (uris.isEmpty()) return
         viewModelScope.launch {
-            for (csvText in csvTexts) {
-                val parsed = runCatching { SpeedCoachCsvParser.parse(csvText) }.getOrElse {
+            val fileContents = withContext(Dispatchers.IO) { readFileContents(uris, context) }
+            val sources = fileContents.map { bytes -> TrainingImportParsers.detect(bytes)?.source }
+            val importSource = sources.filterNotNull().distinct().singleOrNull()
+            val errorResId = when {
+                fileContents.size < uris.size -> R.string.add_training_import_read_error
+                importSource == null -> R.string.add_training_import_unsupported_format
+                sources.size > 1 -> R.string.add_training_import_mixed_sources
+                else -> null
+            }
+            if (errorResId != null) {
+                changeState { copy(importNotice = resourceUtils.getString(errorResId)) }
+                return@launch
+            }
+            val parser = TrainingImportParsers.bySource(checkNotNull(importSource))
+            fileContents.forEach { bytes ->
+                val parsed = runCatching { parser.parse(bytes) }.getOrNull()
+                if (parsed == null) {
                     changeState {
                         copy(importNotice = resourceUtils.getString(R.string.add_training_import_parse_error))
                     }
@@ -275,9 +298,18 @@ internal class AddTrainingViewModel(
         }
     }
 
+    private fun readFileContents(
+        uris: List<Uri>,
+        context: Context
+    ): List<ByteArray> = uris.mapNotNull { uri ->
+        runCatching {
+            context.contentResolver.openInputStream(uri)?.use { stream -> stream.readBytes() }
+        }.getOrNull()
+    }
+
     private fun parseIntFromText(text: String): Int? = text.filter { it.isDigit() }.toIntOrNull()
 
-    private suspend fun applyParsedImport(parsed: SpeedCoachCsvImport) {
+    private suspend fun applyParsedImport(parsed: ParsedTrainingImport) {
         val newPieces = parsed.intervals.map { interval ->
             AddPieceDraft(
                 distanceMeters = interval.distanceMeters,
@@ -285,6 +317,7 @@ internal class AddTrainingViewModel(
                 strokeRate = interval.strokeRate,
                 avgHeartRate = interval.avgHeartRate,
                 maxHeartRate = interval.maxHeartRate,
+                recoveryHeartRate = interval.recoveryHeartRate,
                 distanceText = interval.distanceMeters.toString(),
                 timeText = RowingTimeFormat.formatDuration(interval.timeMillis),
                 strokeRateText = RowingTimeFormat.formatStrokeRate(interval.strokeRate),
@@ -303,7 +336,9 @@ internal class AddTrainingViewModel(
                     dateFormatted = TimeUtils.formatMillisToString(trainingDateMillis),
                     crewAthletes = listOf(AddCrewAthlete(rowerId = parsedAthleteId)),
                     pieces = newPieces.ifEmpty { listOf(AddPieceDraft()) },
-                    pendingRawCsvs = listOf(parsed.rawCsv),
+                    trainingType = parsed.source.impliedTrainingType(),
+                    pendingRawCsvs = listOf(parsed.csvText),
+                    pendingImportSource = parsed.source,
                     pendingSourceSerial = parsed.deviceSerial,
                     pendingSourceSessionName = parsed.sessionName,
                     importNotice = buildImportNotice(
@@ -321,7 +356,7 @@ internal class AddTrainingViewModel(
             changeState {
                 copy(
                     pieces = pieces + newPieces,
-                    pendingRawCsvs = pendingRawCsvs + parsed.rawCsv,
+                    pendingRawCsvs = pendingRawCsvs + parsed.csvText,
                     importNotice = buildImportNotice(
                         fileCount = fileCount,
                         pieceCount = pieceCount,
