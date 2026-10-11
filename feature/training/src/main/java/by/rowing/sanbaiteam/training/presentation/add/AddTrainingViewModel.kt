@@ -2,6 +2,7 @@ package by.rowing.sanbaiteam.training.presentation.add
 
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
@@ -271,8 +272,14 @@ internal class AddTrainingViewModel(
     ) {
         if (uris.isEmpty()) return
         viewModelScope.launch {
-            val fileContents = withContext(Dispatchers.IO) { readFileContents(uris, context) }
-            val sources = fileContents.map { bytes -> TrainingImportParsers.detect(bytes)?.source }
+            val fileContents = withContext(Dispatchers.IO) {
+                uris.mapNotNull { uri ->
+                    runCatching {
+                        context.contentResolver.openInputStream(uri)?.use { stream -> stream.readBytes() }
+                    }.getOrNull()?.let { bytes -> bytes to uri.readDisplayName(context) }
+                }
+            }
+            val sources = fileContents.map { (bytes, _) -> TrainingImportParsers.detect(bytes)?.source }
             val importSource = sources.filterNotNull().distinct().singleOrNull()
             val errorResId = when {
                 fileContents.size < uris.size -> R.string.add_training_import_read_error
@@ -285,26 +292,31 @@ internal class AddTrainingViewModel(
                 return@launch
             }
             val parser = TrainingImportParsers.bySource(checkNotNull(importSource))
-            fileContents.forEach { bytes ->
-                val parsed = runCatching { parser.parse(bytes) }.getOrNull()
-                if (parsed == null) {
-                    changeState {
-                        copy(importNotice = resourceUtils.getString(R.string.add_training_import_parse_error))
-                    }
+            fileContents.forEach { (bytes, fileName) ->
+                runCatching {
+                    parser.parse(
+                        bytes = bytes,
+                        fileName = fileName
+                    )
+                }.getOrNull()?.let { parsed -> applyParsedImport(parsed) } ?: run {
+                    val importError = resourceUtils.getString(R.string.add_training_import_parse_error)
+                    changeState { copy(importNotice = importError) }
                     return@launch
                 }
-                applyParsedImport(parsed)
             }
         }
     }
 
-    private fun readFileContents(
-        uris: List<Uri>,
-        context: Context
-    ): List<ByteArray> = uris.mapNotNull { uri ->
-        runCatching {
-            context.contentResolver.openInputStream(uri)?.use { stream -> stream.readBytes() }
+    private fun Uri.readDisplayName(context: Context): String? {
+        val providerName = runCatching {
+            context.contentResolver
+                .query(this, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { cursor ->
+                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (index >= 0 && cursor.moveToFirst()) cursor.getString(index) else null
+                }
         }.getOrNull()
+        return providerName?.takeIf { it.isNotBlank() } ?: lastPathSegment
     }
 
     private fun parseIntFromText(text: String): Int? = text.filter { it.isDigit() }.toIntOrNull()

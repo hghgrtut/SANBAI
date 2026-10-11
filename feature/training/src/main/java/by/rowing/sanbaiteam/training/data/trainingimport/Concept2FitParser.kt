@@ -28,7 +28,10 @@ internal object Concept2FitParser : TrainingImportParser {
 
     override fun matches(bytes: ByteArray): Boolean = bytes.hasFitMagic()
 
-    override fun parse(bytes: ByteArray): ParsedTrainingImport {
+    override fun parse(
+        bytes: ByteArray,
+        fileName: String?
+    ): ParsedTrainingImport {
         if (!bytes.hasFitMagic()) {
             throw IllegalArgumentException("File does not contain a FIT header.")
         }

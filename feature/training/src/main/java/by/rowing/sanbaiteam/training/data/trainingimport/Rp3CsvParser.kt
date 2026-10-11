@@ -1,0 +1,225 @@
+package by.rowing.sanbaiteam.training.data.trainingimport
+
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
+
+/**
+ * Reads RP3 stroke-by-stroke `.csv` exports.
+ *
+ * Every row describes a single stroke, `workout_interval_id` groups strokes into pieces and the
+ * cumulative `distance` counter restarts at the beginning of each piece. The raw file is stored
+ * as-is, so nothing from the original export is lost.
+ */
+internal object Rp3CsvParser : TrainingImportParser {
+
+    override val source = TrainingImportSource.RP3_CSV
+
+    private const val HEADER_PREFIX = "id,workout_interval_id,"
+    private const val BOM = '\uFEFF'
+
+    private const val COLUMN_INTERVAL_ID = "workout_interval_id"
+    private const val COLUMN_STROKE_RATE = "stroke_rate"
+    private const val COLUMN_TIME = "time"
+    private const val COLUMN_DISTANCE = "distance"
+    private const val COLUMN_PULSE = "pulse"
+
+    private const val FILE_NAME_DATE_PATTERN = "yyyyMMddHHmm"
+    private val FILE_NAME_DATE_REGEX = Regex("^(\\d{12})")
+
+    override fun matches(bytes: ByteArray): Boolean = hasRp3CsvContent(csvText = String(bytes))
+
+    fun hasRp3CsvContent(csvText: String): Boolean =
+        csvText.trimStart(BOM).trimStart().startsWith(HEADER_PREFIX)
+
+    override fun parse(
+        bytes: ByteArray,
+        fileName: String?
+    ): ParsedTrainingImport {
+        val csvText = String(bytes)
+        if (!hasRp3CsvContent(csvText)) {
+            throw IllegalArgumentException("CSV does not contain RP3 stroke data.")
+        }
+
+        val lines = csvText.normalizeLines()
+        val headerIndex = lines.indexOfFirst { it.trimStart(BOM).trimStart().startsWith(HEADER_PREFIX) }
+        val header = lines[headerIndex].splitRp3Row()
+        val columns = header.withIndex().associate { (index, name) -> name.trim() to index }
+        val (intervalIndex, timeIndex, distanceIndex, strokeRateIndex, pulseIndex) =
+            listOf(COLUMN_INTERVAL_ID, COLUMN_TIME, COLUMN_DISTANCE, COLUMN_STROKE_RATE, COLUMN_PULSE).map { column ->
+                columns[column] ?: throw IllegalArgumentException("Missing RP3 column $column.")
+            }
+
+        val rows = lines.asSequence()
+            .drop(headerIndex + 1)
+            .mapNotNull { line ->
+                line.parseStroke(
+                    intervalIndex,
+                    timeIndex,
+                    distanceIndex,
+                    strokeRateIndex,
+                    pulseIndex
+                )
+            }
+            .toList()
+        if (rows.isEmpty()) {
+            throw IllegalArgumentException("CSV does not contain RP3 stroke data.")
+        }
+
+        return ParsedTrainingImport(
+            source = source,
+            csvText = csvText,
+            deviceSerial = null,
+            sessionName = null,
+            startTimeMillis = parseStartTimeMillis(fileName),
+            intervals = rows.toIntervals(),
+        )
+    }
+
+    override fun merge(csvTexts: List<String>): String {
+        require(csvTexts.isNotEmpty()) { "At least one CSV is required." }
+        if (csvTexts.size == 1) return csvTexts.first()
+
+        val header = csvTexts.first().normalizeLines().find { it.isNotBlank() }?.splitRp3Row()
+            ?: return csvTexts.first()
+        val intervalIndex = header.indexOf(COLUMN_INTERVAL_ID)
+        if (intervalIndex < 0) return csvTexts.first()
+
+        val result = mutableListOf(CsvWriter.row(*header.toTypedArray()))
+        var nextIntervalId = 0L
+
+        for (csvText in csvTexts) {
+            val lines = csvText.normalizeLines()
+            val sourceHeaderIndex = lines.indexOfFirst { it.isNotBlank() }
+            val idByOriginalId = mutableMapOf<String, Long>()
+            lines.asSequence()
+                .drop(sourceHeaderIndex + 1)
+                .filter { it.isNotBlank() }
+                .forEach { line ->
+                    val columns = line.splitRp3Row().toMutableList()
+                    if (columns.size > intervalIndex) {
+                        val originalId = columns[intervalIndex].trim()
+                        val newId = idByOriginalId.getOrPut(originalId) { ++nextIntervalId }
+                        columns[intervalIndex] = newId.toString()
+                    }
+                    result += CsvWriter.row(*columns.toTypedArray())
+                }
+        }
+
+        return result.joinToString("\n")
+    }
+
+    private fun List<StrokeRow>.toIntervals(): List<TrainingImportInterval> {
+        val intervals = mutableListOf<TrainingImportInterval>()
+        var startIndex = 0
+        while (startIndex < size) {
+            var endIndex = startIndex + 1
+            while (endIndex < size && this[endIndex].intervalId == this[startIndex].intervalId) {
+                endIndex++
+            }
+            val previous = getOrNull(startIndex - 1)
+            intervals += subList(startIndex, endIndex).toInterval(
+                boundaryDistance = previous?.distanceMeters ?: 0.0,
+                boundaryTime = previous?.timeSeconds ?: 0.0
+            )
+            startIndex = endIndex
+        }
+        return intervals
+    }
+
+    private fun List<StrokeRow>.toInterval(
+        boundaryDistance: Double,
+        boundaryTime: Double
+    ): TrainingImportInterval {
+        val reset = first().distanceMeters < boundaryDistance
+        val distanceBoundary = if (reset) 0.0 else boundaryDistance
+        val heartRates = mapNotNull { it.pulse }
+        val strokeRates = mapNotNull { it.strokeRate }
+        return TrainingImportInterval(
+            distanceMeters = (last().distanceMeters - distanceBoundary).roundToInt(),
+            timeMillis = ((last().timeSeconds - boundaryTime) * MILLIS_PER_SECOND).roundToLong(),
+            strokeRate = if (strokeRates.isEmpty()) 0.0 else strokeRates.average(),
+            avgHeartRate = if (heartRates.isEmpty()) null else heartRates.average().roundToInt(),
+            maxHeartRate = heartRates.maxOrNull(),
+            recoveryHeartRate = null,
+        )
+    }
+
+    private fun String.parseStroke(
+        intervalIndex: Int,
+        timeIndex: Int,
+        distanceIndex: Int,
+        strokeRateIndex: Int,
+        pulseIndex: Int
+    ): StrokeRow? {
+        if (isBlank()) return null
+        val columns = splitRp3Row()
+        if (columns.size <= maxOf(intervalIndex, timeIndex, distanceIndex, strokeRateIndex, pulseIndex)) {
+            return null
+        }
+        val intervalId = columns[intervalIndex].trim()
+        val time = columns[timeIndex].trim().toDoubleOrNull() ?: return null
+        val distance = columns[distanceIndex].trim().toDoubleOrNull() ?: return null
+        return StrokeRow(
+            intervalId = intervalId,
+            timeSeconds = time,
+            distanceMeters = distance,
+            strokeRate = columns[strokeRateIndex].trim().toDoubleOrNull(),
+            pulse = columns[pulseIndex].trim().toDoubleOrNull()?.roundToInt()?.takeIf { it > 0 },
+        )
+    }
+
+    private fun parseStartTimeMillis(fileName: String?): Long? {
+        val date = FILE_NAME_DATE_REGEX.find(fileName ?: return null)?.value ?: return null
+        val parser = SimpleDateFormat(FILE_NAME_DATE_PATTERN, Locale.US).apply {
+            isLenient = false
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        return runCatching { parser.parse(date) }.getOrNull()?.time
+    }
+
+    private fun String.normalizeLines(): List<String> = replace("\r\n", "\n")
+        .replace('\r', '\n')
+        .split('\n')
+
+    private data class StrokeRow(
+        val intervalId: String,
+        val timeSeconds: Double,
+        val distanceMeters: Double,
+        val strokeRate: Double?,
+        val pulse: Int?,
+    )
+
+    private const val MILLIS_PER_SECOND = 1000L
+}
+
+internal fun String.splitRp3Row(): List<String> {
+    val result = mutableListOf<String>()
+    val current = StringBuilder()
+    var inQuotes = false
+    var index = 0
+    while (index < length) {
+        when (val symbol = this[index]) {
+            '"' -> {
+                if (inQuotes && this.getOrNull(index + 1) == '"') {
+                    current.append('"')
+                    index++
+                } else {
+                    inQuotes = !inQuotes
+                }
+            }
+
+            ',' if !inQuotes -> {
+                result += current.toString()
+                current.setLength(0)
+            }
+
+            else -> current.append(symbol)
+        }
+        index++
+    }
+    result += current.toString()
+    return result
+}
