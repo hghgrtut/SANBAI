@@ -80,14 +80,8 @@ object RowingTimeFormat {
      * Parses `m:ss.t` / `m:ss` or, when no `:` is present, a plain seconds value `ss.t` / `ss`.
      * Seconds must be below 60.
      */
-    fun parseTimeInput(input: String): Long? {
-        val trimmed = input.trim().ifEmpty { null } ?: return null
-        parseDurationMmSsTenths(trimmed)?.let { return it }
-        val secondsValue = Regex("""^(\d{1,2})(?:\.(\d)?)?$""").matchEntire(trimmed) ?: return null
-        val seconds = secondsValue.groupValues[1].toLong()
-        if (seconds >= SECONDS_PER_MINUTE) return null
-        val tenths = secondsValue.groupValues[2].takeIf { it.isNotEmpty() }?.toLong() ?: 0L
-        return seconds * TimeUtils.MILLIS_PER_SECOND + tenths * MILLIS_PER_TENTH
+    fun parseTimeInput(input: String): Long? = input.trim().ifEmpty { null }?.let { trimmed ->
+        parseDurationMmSsTenths(input = trimmed) ?: parseDurationMmSsTenths(input = "0:$trimmed")
     }
 
     fun parseDurationHhMmSsTenths(input: String): Long? {

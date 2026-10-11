@@ -10,9 +10,7 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 internal class CalculatorViewModel(
     private val resourceUtils: AndroidResourceUtils,
     private val composeNavigator: ComposeNavigator,
-) : ComposeBaseViewModel<CalculatorState>(
-    initialState = CalculatorState()
-) {
+) : ComposeBaseViewModel<CalculatorState>(initialState = CalculatorState()) {
 
     fun onBackClick() {
         composeNavigator.navigateBack()
@@ -62,7 +60,7 @@ internal class CalculatorViewModel(
                 symbol.isDigit() -> result.append(symbol)
                 (symbol == '.' || symbol == ',') && !hasSeparator -> {
                     hasSeparator = true
-                    result.append(symbol)
+                    result.append('.')
                 }
             }
         }
@@ -70,8 +68,8 @@ internal class CalculatorViewModel(
     }
 
     private fun calculatePercent() {
-        val recordPace = RowingTimeFormat.parseTimeInput(state.recordPaceText)
-        val pace = RowingTimeFormat.parseTimeInput(state.paceText)
+        val recordPace = RowingTimeFormat.parseTimeInput(input = state.recordPaceText)
+        val pace = RowingTimeFormat.parseTimeInput(input = state.paceText)
         if (recordPace == null || recordPace <= 0) {
             changeState { copy(error = resourceUtils.getString(R.string.calculator_error_record_pace)) }
             return
@@ -94,10 +92,7 @@ internal class CalculatorViewModel(
 
     private fun calculatePace() {
         val recordPace = RowingTimeFormat.parseTimeInput(input = state.recordPaceText)
-        val percent = state.percentText.trim().replace(
-            oldChar = ',',
-            newChar = '.'
-        ).toDoubleOrNull()
+        val percent = state.percentText.toDoubleOrNull()
         if (recordPace == null || recordPace <= 0) {
             changeState { copy(error = resourceUtils.getString(R.string.calculator_error_record_pace)) }
             return

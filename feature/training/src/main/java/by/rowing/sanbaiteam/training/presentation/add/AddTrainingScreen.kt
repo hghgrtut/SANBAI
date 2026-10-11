@@ -45,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.training.R
@@ -313,7 +312,10 @@ private fun SaveIcon() {
     )
 }
 
-private val CompactFieldContentPadding = PaddingValues(horizontal = 8.dp, vertical = 16.dp)
+private val CompactFieldContentPadding = PaddingValues(
+    horizontal = Spacing.S,
+    vertical = Spacing.M
+)
 
 @Composable
 private fun PieceForm(

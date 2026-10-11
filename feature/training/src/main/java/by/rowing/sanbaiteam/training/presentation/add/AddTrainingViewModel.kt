@@ -139,10 +139,10 @@ internal class AddTrainingViewModel(
         text: String
     ) {
         updatePiece(pieceLocalId) { piece ->
-            val sanitized = RowingTimeFormat.sanitizeTimeInput(text)
+            val sanitized = RowingTimeFormat.sanitizeTimeInput(text = text)
             piece.copy(
                 timeText = sanitized,
-                timeMillis = RowingTimeFormat.parseTimeInput(sanitized) ?: 0L
+                timeMillis = RowingTimeFormat.parseTimeInput(input = sanitized) ?: 0L
             )
         }
     }
@@ -209,8 +209,8 @@ internal class AddTrainingViewModel(
                         athleteId = crewAthlete.rowerId,
                         order = index,
                         distanceMeters = piece.distanceMeters,
-                        timeMillis = RowingTimeFormat.parseTimeInput(piece.timeText) ?: piece.timeMillis,
-                        strokeRate = RowingTimeFormat.parseStrokeRate(piece.strokeRateText) ?: piece.strokeRate,
+                        timeMillis = RowingTimeFormat.parseTimeInput(input = piece.timeText) ?: piece.timeMillis,
+                        strokeRate = RowingTimeFormat.parseStrokeRate(input = piece.strokeRateText) ?: piece.strokeRate,
                         avgHeartRate = piece.avgHeartRate,
                         maxHeartRate = piece.maxHeartRate,
                         recoveryHeartRate = piece.recoveryHeartRate,

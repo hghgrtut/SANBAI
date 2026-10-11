@@ -124,7 +124,7 @@ private fun CalculatorScreenContent(
             label = stringResource(R.string.calculator_record_pace_label),
             placeholder = stringResource(R.string.calculator_pace_placeholder),
             textStyle = TypographyPaletteSp.Body1Regular,
-            keyboardOptions = KeyboardOptions.time(imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions.time(),
             modifier = Modifier.fillMaxWidth()
         )
 
