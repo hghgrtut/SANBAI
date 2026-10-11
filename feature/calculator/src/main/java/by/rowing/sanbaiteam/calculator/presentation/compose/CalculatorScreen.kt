@@ -20,7 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import by.rowing.sanbaiteam.calculator.R
 import by.rowing.sanbaiteam.calculator.presentation.CalculatorMode
 import by.rowing.sanbaiteam.calculator.presentation.CalculatorState
@@ -29,6 +29,8 @@ import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
+import by.rowing.sanbaiteam.uikit.component.decimal
+import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerM
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -122,7 +124,7 @@ private fun CalculatorScreenContent(
             label = stringResource(R.string.calculator_record_pace_label),
             placeholder = stringResource(R.string.calculator_pace_placeholder),
             textStyle = TypographyPaletteSp.Body1Regular,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+            keyboardOptions = KeyboardOptions.time(imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -184,6 +186,7 @@ private fun CalculatorInputField(
                 onValueChange = onPaceChange,
                 label = stringResource(R.string.calculator_pace_label),
                 placeholder = stringResource(R.string.calculator_pace_placeholder),
+                keyboardOptions = KeyboardOptions.time(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -194,6 +197,7 @@ private fun CalculatorInputField(
                 onValueChange = onPercentChange,
                 label = stringResource(R.string.calculator_percent_label),
                 placeholder = stringResource(R.string.calculator_percent_placeholder),
+                keyboardOptions = KeyboardOptions.decimal(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
             )
         }

@@ -25,17 +25,17 @@ internal class CalculatorViewModel(
 
     fun changeRecordPace(text: String) {
         clearResult()
-        changeState { copy(recordPaceText = text) }
+        changeState { copy(recordPaceText = RowingTimeFormat.sanitizeTimeInput(text)) }
     }
 
     fun changePace(text: String) {
         clearResult()
-        changeState { copy(paceText = text) }
+        changeState { copy(paceText = RowingTimeFormat.sanitizeTimeInput(text)) }
     }
 
     fun changePercent(text: String) {
         clearResult()
-        changeState { copy(percentText = text) }
+        changeState { copy(percentText = sanitizePercentInput(text)) }
     }
 
     fun calculate() {
@@ -54,9 +54,24 @@ internal class CalculatorViewModel(
         }
     }
 
+    private fun sanitizePercentInput(text: String): String {
+        val result = StringBuilder()
+        var hasSeparator = false
+        text.forEach { symbol ->
+            when {
+                symbol.isDigit() -> result.append(symbol)
+                (symbol == '.' || symbol == ',') && !hasSeparator -> {
+                    hasSeparator = true
+                    result.append(symbol)
+                }
+            }
+        }
+        return result.toString()
+    }
+
     private fun calculatePercent() {
-        val recordPace = RowingTimeFormat.parseDuration(state.recordPaceText)
-        val pace = RowingTimeFormat.parseDuration(state.paceText)
+        val recordPace = RowingTimeFormat.parseTimeInput(state.recordPaceText)
+        val pace = RowingTimeFormat.parseTimeInput(state.paceText)
         if (recordPace == null || recordPace <= 0) {
             changeState { copy(error = resourceUtils.getString(R.string.calculator_error_record_pace)) }
             return
@@ -78,7 +93,7 @@ internal class CalculatorViewModel(
     }
 
     private fun calculatePace() {
-        val recordPace = RowingTimeFormat.parseDuration(input = state.recordPaceText)
+        val recordPace = RowingTimeFormat.parseTimeInput(input = state.recordPaceText)
         val percent = state.percentText.trim().replace(
             oldChar = ',',
             newChar = '.'

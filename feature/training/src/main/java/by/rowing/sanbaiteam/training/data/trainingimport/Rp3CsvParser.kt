@@ -40,7 +40,7 @@ internal object Rp3CsvParser : TrainingImportParser {
     ): ParsedTrainingImport {
         val csvText = String(bytes)
         if (!hasRp3CsvContent(csvText)) {
-            throw IllegalArgumentException("CSV does not contain RP3 stroke data.")
+            throwParseError()
         }
 
         val lines = csvText.normalizeLines()
@@ -49,7 +49,7 @@ internal object Rp3CsvParser : TrainingImportParser {
         val columns = header.withIndex().associate { (index, name) -> name.trim() to index }
         val (intervalIndex, timeIndex, distanceIndex, strokeRateIndex, pulseIndex) =
             listOf(COLUMN_INTERVAL_ID, COLUMN_TIME, COLUMN_DISTANCE, COLUMN_STROKE_RATE, COLUMN_PULSE).map { column ->
-                columns[column] ?: throw IllegalArgumentException("Missing RP3 column $column.")
+                columns[column] ?: throwParseError("Missing RP3 column $column.")
             }
 
         val rows = lines.asSequence()
@@ -64,9 +64,7 @@ internal object Rp3CsvParser : TrainingImportParser {
                 )
             }
             .toList()
-        if (rows.isEmpty()) {
-            throw IllegalArgumentException("CSV does not contain RP3 stroke data.")
-        }
+            .ifEmpty { throwParseError() }
 
         return ParsedTrainingImport(
             source = source,
@@ -179,6 +177,9 @@ internal object Rp3CsvParser : TrainingImportParser {
         }
         return runCatching { parser.parse(date) }.getOrNull()?.time
     }
+
+    private fun throwParseError(errorText: String = "CSV does not contain RP3 stroke data."): Nothing =
+        throw IllegalArgumentException(errorText)
 
     private fun String.normalizeLines(): List<String> = replace("\r\n", "\n")
         .replace('\r', '\n')
