@@ -12,10 +12,12 @@ internal object SpeedCoachCsvParser : TrainingImportParser {
     private const val INTERVAL_SUMMARIES_MARKER = "Interval Summaries:"
 
     override fun matches(bytes: ByteArray): Boolean =
-        !Concept2FitParser.matches(bytes) &&
-                String(bytes, Charsets.UTF_8).contains(INTERVAL_SUMMARIES_MARKER)
+        !Concept2FitParser.matches(bytes) && String(bytes).contains(INTERVAL_SUMMARIES_MARKER)
 
-    override fun parse(bytes: ByteArray): ParsedTrainingImport = parse(String(bytes, Charsets.UTF_8))
+    override fun parse(
+        bytes: ByteArray,
+        fileName: String?
+    ): ParsedTrainingImport = parse(csvText = String(bytes))
 
     override fun merge(csvTexts: List<String>): String = SpeedCoachCsvMerger.merge(csvTexts)
 

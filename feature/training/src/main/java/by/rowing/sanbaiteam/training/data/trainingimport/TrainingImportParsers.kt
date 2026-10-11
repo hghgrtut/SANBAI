@@ -5,11 +5,10 @@ internal object TrainingImportParsers {
     private val parsers: List<TrainingImportParser> = listOf(
         Concept2FitParser,
         SpeedCoachCsvParser,
+        Rp3CsvParser,
     )
 
-    fun detect(bytes: ByteArray): TrainingImportParser? = parsers.firstOrNull { parser ->
-        parser.matches(bytes)
-    }
+    fun detect(bytes: ByteArray): TrainingImportParser? = parsers.firstOrNull { parser -> parser.matches(bytes) }
 
     fun bySource(source: TrainingImportSource): TrainingImportParser = parsers.first { parser ->
         parser.source == source

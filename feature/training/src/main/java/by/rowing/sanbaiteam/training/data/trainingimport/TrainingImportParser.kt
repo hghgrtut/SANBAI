@@ -6,7 +6,10 @@ internal interface TrainingImportParser {
 
     fun matches(bytes: ByteArray): Boolean
 
-    fun parse(bytes: ByteArray): ParsedTrainingImport
+    fun parse(
+        bytes: ByteArray,
+        fileName: String?
+    ): ParsedTrainingImport
 
     fun merge(csvTexts: List<String>): String
 }

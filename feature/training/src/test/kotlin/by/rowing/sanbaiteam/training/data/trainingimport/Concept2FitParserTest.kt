@@ -30,7 +30,7 @@ internal class Concept2FitParserTest {
     fun parse_pm5IntervalWorkout_returnsOnlyActiveLapsWithRecoveryHeartRate() {
         val fixture = buildFixture()
 
-        val parsed = Concept2FitParser.parse(fixture.bytes)
+        val parsed = Concept2FitParser.parse(fixture.bytes, null)
 
         assertEquals(TrainingImportSource.CONCEPT2_FIT, parsed.source)
         assertNull(parsed.deviceSerial)
@@ -51,7 +51,7 @@ internal class Concept2FitParserTest {
     fun parse_activeLapWithoutFollowingRest_hasNoRecoveryHeartRate() {
         val fixture = buildFixture()
 
-        val lastPiece = Concept2FitParser.parse(fixture.bytes).intervals.last()
+        val lastPiece = Concept2FitParser.parse(fixture.bytes, null).intervals.last()
 
         assertEquals(4460, lastPiece.distanceMeters)
         assertEquals(LAST_ACTIVE_CADENCE.toDouble(), lastPiece.strokeRate, 0.001)
@@ -62,7 +62,7 @@ internal class Concept2FitParserTest {
     fun parse_recordOnLastLapEndTimestamp_isIncludedInLastLap() {
         val fixture = buildFixture()
 
-        val lastPiece = Concept2FitParser.parse(fixture.bytes).intervals.last()
+        val lastPiece = Concept2FitParser.parse(fixture.bytes, null).intervals.last()
 
         assertEquals(LAST_LAP_END_HEART_RATE, lastPiece.maxHeartRate)
     }
@@ -71,7 +71,7 @@ internal class Concept2FitParserTest {
     fun parse_restLapsAreStoredAsArchiveRows_withoutBecomingPieces() {
         val fixture = buildFixture()
 
-        val parsed = Concept2FitParser.parse(fixture.bytes)
+        val parsed = Concept2FitParser.parse(fixture.bytes, null)
         val laps = Concept2LapCsv.decode(parsed.csvText)
 
         assertTrue(Concept2LapCsv.isArchive(parsed.csvText))
@@ -97,14 +97,14 @@ internal class Concept2FitParserTest {
             )
         )
 
-        assertThrows(IllegalArgumentException::class.java) { Concept2FitParser.parse(bytes) }
+        assertThrows(IllegalArgumentException::class.java) { Concept2FitParser.parse(bytes, null) }
     }
 
     @Test
     fun parse_fileWithoutFitHeader_isRejected() {
         val bytes = "Interval Summaries:\n1,500.0".toByteArray()
 
-        assertThrows(IllegalArgumentException::class.java) { Concept2FitParser.parse(bytes) }
+        assertThrows(IllegalArgumentException::class.java) { Concept2FitParser.parse(bytes, null) }
     }
 
     @Test
@@ -118,8 +118,8 @@ internal class Concept2FitParserTest {
 
     @Test
     fun parseAndMerge_twoFiles_concatenateLapArchives() {
-        val first = Concept2FitParser.parse(buildFixture().bytes)
-        val second = Concept2FitParser.parse(buildFixture().bytes)
+        val first = Concept2FitParser.parse(buildFixture().bytes, null)
+        val second = Concept2FitParser.parse(buildFixture().bytes, null)
 
         val merged = Concept2FitParser.merge(listOf(first.csvText, second.csvText))
 
