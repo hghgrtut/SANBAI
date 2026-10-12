@@ -53,6 +53,8 @@ import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
+import by.rowing.sanbaiteam.uikit.component.number
+import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -276,7 +278,7 @@ private fun RecordRow(
                 onValueChange = onDistanceChange,
                 label = stringResource(R.string.athletes_detail_record_distance_label),
                 textStyle = TypographyPaletteSp.Body1Regular,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions.number(),
                 modifier = Modifier.fillMaxWidth()
             )
             SpacerXS()
@@ -285,7 +287,7 @@ private fun RecordRow(
                 onValueChange = onTimeChange,
                 label = stringResource(R.string.athletes_detail_record_time_label),
                 textStyle = TypographyPaletteSp.Body1Regular,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+                keyboardOptions = KeyboardOptions.time(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
             )
             SpacerXS()

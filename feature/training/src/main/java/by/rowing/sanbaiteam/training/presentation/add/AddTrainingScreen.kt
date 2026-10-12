@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -38,10 +40,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.core.net.toUri
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.training.R
@@ -50,6 +53,9 @@ import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
+import by.rowing.sanbaiteam.uikit.component.decimal
+import by.rowing.sanbaiteam.uikit.component.number
+import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -306,6 +312,11 @@ private fun SaveIcon() {
     )
 }
 
+private val CompactFieldContentPadding = PaddingValues(
+    horizontal = Spacing.S,
+    vertical = Spacing.M
+)
+
 @Composable
 private fun PieceForm(
     index: Int,
@@ -339,54 +350,65 @@ private fun PieceForm(
                     text = stringResource(R.string.training_detail_piece_number, index + 1),
                     style = TypographyPalette.Body2Medium
                 )
-                TextField(
-                    value = piece.distanceText,
-                    onValueChange = onDistanceChange,
-                    label = stringResource(R.string.add_training_piece_length_label),
-                    textStyle = TypographyPalette.Body1Regular,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                TextField(
-                    value = piece.timeText,
-                    onValueChange = onTimeChange,
-                    label = stringResource(R.string.add_training_piece_time_label),
-                    textStyle = TypographyPalette.Body1Regular,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                TextField(
-                    value = piece.strokeRateText,
-                    onValueChange = onStrokeRateChange,
-                    label = stringResource(R.string.add_training_piece_stroke_rate_label),
-                    textStyle = TypographyPalette.Body1Regular,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                TextField(
-                    value = piece.avgHeartRate?.toString().orEmpty(),
-                    onValueChange = onAvgHeartRateChange,
-                    label = stringResource(R.string.add_training_piece_avg_heart_rate_label),
-                    textStyle = TypographyPalette.Body1Regular,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                TextField(
-                    value = piece.maxHeartRate?.toString().orEmpty(),
-                    onValueChange = onMaxHeartRateChange,
-                    label = stringResource(R.string.add_training_piece_max_heart_rate_label),
-                    textStyle = TypographyPalette.Body1Regular,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                TextField(
-                    value = piece.recoveryHeartRate?.toString().orEmpty(),
-                    onValueChange = onRecoveryHeartRateChange,
-                    label = stringResource(R.string.add_training_piece_recovery_heart_rate_label),
-                    textStyle = TypographyPalette.Body1Regular,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                DataInputRow {
+                    TextField(
+                        value = piece.distanceText,
+                        onValueChange = onDistanceChange,
+                        label = stringResource(R.string.add_training_piece_length_label),
+                        contentPadding = CompactFieldContentPadding,
+                        textStyle = TypographyPalette.Body1Regular,
+                        keyboardOptions = KeyboardOptions.number(),
+                        modifier = Modifier.weight(2f)
+                    )
+                    TextField(
+                        value = piece.timeText,
+                        onValueChange = onTimeChange,
+                        label = stringResource(R.string.add_training_piece_time_label),
+                        contentPadding = CompactFieldContentPadding,
+                        placeholder = stringResource(R.string.add_training_piece_time_placeholder),
+                        textStyle = TypographyPalette.Body1Regular,
+                        keyboardOptions = KeyboardOptions.time(),
+                        modifier = Modifier.weight(3f)
+                    )
+                    TextField(
+                        value = piece.strokeRateText,
+                        onValueChange = onStrokeRateChange,
+                        label = stringResource(R.string.add_training_piece_stroke_rate_label),
+                        contentPadding = CompactFieldContentPadding,
+                        textStyle = TypographyPalette.Body1Regular,
+                        keyboardOptions = KeyboardOptions.decimal(),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                DataInputRow {
+                    TextField(
+                        value = piece.avgHeartRate?.toString().orEmpty(),
+                        onValueChange = onAvgHeartRateChange,
+                        label = stringResource(R.string.add_training_piece_avg_heart_rate_label),
+                        contentPadding = CompactFieldContentPadding,
+                        textStyle = TypographyPalette.Body1Regular,
+                        keyboardOptions = KeyboardOptions.number(),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextField(
+                        value = piece.maxHeartRate?.toString().orEmpty(),
+                        onValueChange = onMaxHeartRateChange,
+                        label = stringResource(R.string.add_training_piece_max_heart_rate_label),
+                        contentPadding = CompactFieldContentPadding,
+                        textStyle = TypographyPalette.Body1Regular,
+                        keyboardOptions = KeyboardOptions.number(),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextField(
+                        value = piece.recoveryHeartRate?.toString().orEmpty(),
+                        onValueChange = onRecoveryHeartRateChange,
+                        label = stringResource(R.string.add_training_piece_recovery_heart_rate_label),
+                        contentPadding = CompactFieldContentPadding,
+                        textStyle = TypographyPalette.Body1Regular,
+                        keyboardOptions = KeyboardOptions.number(imeAction = ImeAction.Done),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
                 Text(
                     text = stringResource(R.string.add_training_piece_pace_label, pace),
                     style = TypographyPalette.Body2Medium,
@@ -399,6 +421,14 @@ private fun PieceForm(
         }
     }
 }
+
+@Composable
+private fun DataInputRow(content: @Composable (RowScope.() -> Unit)) = Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(Spacing.XS),
+    verticalAlignment = Alignment.CenterVertically,
+    content = content
+)
 
 @Composable
 private fun RemovePieceButton(onRemove: () -> Unit) {

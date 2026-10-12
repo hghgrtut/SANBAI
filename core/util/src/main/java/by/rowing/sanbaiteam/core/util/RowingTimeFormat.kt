@@ -17,6 +17,9 @@ object RowingTimeFormat {
     private const val SECONDS_PER_MINUTE = 60L
     private const val MINUTES_PER_HOUR = 60L
     private const val PACE_DISTANCE_METERS = 500
+    private const val MAX_MINUTE_DIGITS = 3
+    private const val MAX_SECOND_DIGITS = 2
+    private const val MAX_TENTH_DIGITS = 1
 
     /**
      * Formats elapsed duration as `m:ss.t` or `mm:ss.t` (tenths of a second).
@@ -31,30 +34,54 @@ object RowingTimeFormat {
     }
 
     /**
-     * Parses `m:ss.t` / `mm:ss.t` or `m:ss` into millis rounded to tenths.
+     * Keeps only characters valid for an `m:ss.t` input field: digits, a single `:` and a single `.`.
+     * Before `:` a `.` is allowed as well, in which case the value is treated as seconds (`ss.t`).
+     * Segment lengths are capped (up to 3 minute digits, 2 seconds, 1 tenth).
      */
-    fun parseDuration(input: String): Long? {
-        val trimmed = input.trim()
-        if (trimmed.isEmpty()) return null
+    fun sanitizeTimeInput(text: String): String {
+        val result = StringBuilder()
+        var hasColon = false
+        var hasDot = false
+        var minuteDigits = 0
+        var secondDigits = 0
+        var tenthDigits = 0
+        text.forEach { symbol ->
+            when {
+                symbol.isDigit() && hasDot && tenthDigits < MAX_TENTH_DIGITS -> {
+                    tenthDigits++
+                    result.append(symbol)
+                }
 
-        val withTenths = Regex("""^(\d+):(\d{1,2})\.(\d)$""").matchEntire(trimmed)
-        if (withTenths != null) {
-            val minutes = withTenths.groupValues[1].toLong()
-            val seconds = withTenths.groupValues[2].toLong()
-            val tenths = withTenths.groupValues[3].toLong()
-            if (seconds >= SECONDS_PER_MINUTE) return null
-            return minutes * MILLIS_PER_MINUTE + seconds * TimeUtils.MILLIS_PER_SECOND + tenths * MILLIS_PER_TENTH
+                symbol.isDigit() && hasColon && secondDigits < MAX_SECOND_DIGITS -> {
+                    secondDigits++
+                    result.append(symbol)
+                }
+
+                symbol.isDigit() && !hasColon && !hasDot && minuteDigits < MAX_MINUTE_DIGITS -> {
+                    minuteDigits++
+                    result.append(symbol)
+                }
+
+                symbol == ':' && !hasColon && !hasDot && minuteDigits > 0 -> {
+                    hasColon = true
+                    result.append(symbol)
+                }
+
+                symbol == '.' && !hasDot && minuteDigits > 0 -> {
+                    hasDot = true
+                    result.append(symbol)
+                }
+            }
         }
+        return result.toString()
+    }
 
-        val withoutTenths = Regex("""^(\d+):(\d{1,2})$""").matchEntire(trimmed)
-        if (withoutTenths != null) {
-            val minutes = withoutTenths.groupValues[1].toLong()
-            val seconds = withoutTenths.groupValues[2].toLong()
-            if (seconds >= SECONDS_PER_MINUTE) return null
-            return minutes * MILLIS_PER_MINUTE + seconds * TimeUtils.MILLIS_PER_SECOND
-        }
-
-        return null
+    /**
+     * Parses `m:ss.t` / `m:ss` or, when no `:` is present, a plain seconds value `ss.t` / `ss`.
+     * Seconds must be below 60.
+     */
+    fun parseTimeInput(input: String): Long? = input.trim().ifEmpty { null }?.let { trimmed ->
+        parseDurationMmSsTenths(input = trimmed) ?: parseDurationMmSsTenths(input = "0:$trimmed")
     }
 
     fun parseDurationHhMmSsTenths(input: String): Long? {
@@ -104,6 +131,23 @@ object RowingTimeFormat {
         val value = input.trim().replace(',', '.').toDoubleOrNull() ?: return null
         if (value < 0) return null
         return (value * 10).roundToInt() / 10.0
+    }
+
+    /**
+     * Parses `m:ss.t` / `mm:ss.t` or `m:ss` into millis rounded to tenths.
+     */
+    private fun parseDurationMmSsTenths(input: String): Long? {
+        val matchResult = Regex("""^(\d+):(\d{1,2})\.(\d)$""").matchEntire(input) // `m:ss.t`
+            ?: Regex("""^(\d+):(\d{1,2})$""").matchEntire(input) // `m:ss`
+            ?: return null
+        val minutes = matchResult.groupValues[1].toLong()
+        val seconds = matchResult.groupValues[2].toLong()
+        val tenths = matchResult.groupValues.getOrNull(3)?.toLong() ?: 0L
+        return if (seconds >= SECONDS_PER_MINUTE) {
+            null
+        } else {
+            minutes * MILLIS_PER_MINUTE + seconds * TimeUtils.MILLIS_PER_SECOND + tenths * MILLIS_PER_TENTH
+        }
     }
 
     private fun Long.roundToTenths(): Long =

@@ -10,9 +10,7 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 internal class CalculatorViewModel(
     private val resourceUtils: AndroidResourceUtils,
     private val composeNavigator: ComposeNavigator,
-) : ComposeBaseViewModel<CalculatorState>(
-    initialState = CalculatorState()
-) {
+) : ComposeBaseViewModel<CalculatorState>(initialState = CalculatorState()) {
 
     fun onBackClick() {
         composeNavigator.navigateBack()
@@ -25,17 +23,17 @@ internal class CalculatorViewModel(
 
     fun changeRecordPace(text: String) {
         clearResult()
-        changeState { copy(recordPaceText = text) }
+        changeState { copy(recordPaceText = RowingTimeFormat.sanitizeTimeInput(text)) }
     }
 
     fun changePace(text: String) {
         clearResult()
-        changeState { copy(paceText = text) }
+        changeState { copy(paceText = RowingTimeFormat.sanitizeTimeInput(text)) }
     }
 
     fun changePercent(text: String) {
         clearResult()
-        changeState { copy(percentText = text) }
+        changeState { copy(percentText = sanitizePercentInput(text)) }
     }
 
     fun calculate() {
@@ -54,9 +52,24 @@ internal class CalculatorViewModel(
         }
     }
 
+    private fun sanitizePercentInput(text: String): String {
+        val result = StringBuilder()
+        var hasSeparator = false
+        text.forEach { symbol ->
+            when {
+                symbol.isDigit() -> result.append(symbol)
+                (symbol == '.' || symbol == ',') && !hasSeparator -> {
+                    hasSeparator = true
+                    result.append('.')
+                }
+            }
+        }
+        return result.toString()
+    }
+
     private fun calculatePercent() {
-        val recordPace = RowingTimeFormat.parseDuration(state.recordPaceText)
-        val pace = RowingTimeFormat.parseDuration(state.paceText)
+        val recordPace = RowingTimeFormat.parseTimeInput(input = state.recordPaceText)
+        val pace = RowingTimeFormat.parseTimeInput(input = state.paceText)
         if (recordPace == null || recordPace <= 0) {
             changeState { copy(error = resourceUtils.getString(R.string.calculator_error_record_pace)) }
             return
@@ -78,11 +91,8 @@ internal class CalculatorViewModel(
     }
 
     private fun calculatePace() {
-        val recordPace = RowingTimeFormat.parseDuration(input = state.recordPaceText)
-        val percent = state.percentText.trim().replace(
-            oldChar = ',',
-            newChar = '.'
-        ).toDoubleOrNull()
+        val recordPace = RowingTimeFormat.parseTimeInput(input = state.recordPaceText)
+        val percent = state.percentText.toDoubleOrNull()
         if (recordPace == null || recordPace <= 0) {
             changeState { copy(error = resourceUtils.getString(R.string.calculator_error_record_pace)) }
             return

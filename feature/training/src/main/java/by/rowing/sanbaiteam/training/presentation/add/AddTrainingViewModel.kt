@@ -139,9 +139,10 @@ internal class AddTrainingViewModel(
         text: String
     ) {
         updatePiece(pieceLocalId) { piece ->
+            val sanitized = RowingTimeFormat.sanitizeTimeInput(text = text)
             piece.copy(
-                timeText = text,
-                timeMillis = RowingTimeFormat.parseDuration(text) ?: 0L
+                timeText = sanitized,
+                timeMillis = RowingTimeFormat.parseTimeInput(input = sanitized) ?: 0L
             )
         }
     }
@@ -208,8 +209,8 @@ internal class AddTrainingViewModel(
                         athleteId = crewAthlete.rowerId,
                         order = index,
                         distanceMeters = piece.distanceMeters,
-                        timeMillis = RowingTimeFormat.parseDuration(piece.timeText) ?: piece.timeMillis,
-                        strokeRate = RowingTimeFormat.parseStrokeRate(piece.strokeRateText) ?: piece.strokeRate,
+                        timeMillis = RowingTimeFormat.parseTimeInput(input = piece.timeText) ?: piece.timeMillis,
+                        strokeRate = RowingTimeFormat.parseStrokeRate(input = piece.strokeRateText) ?: piece.strokeRate,
                         avgHeartRate = piece.avgHeartRate,
                         maxHeartRate = piece.maxHeartRate,
                         recoveryHeartRate = piece.recoveryHeartRate,
@@ -462,7 +463,7 @@ internal class AddTrainingViewModel(
             return resourceUtils.getString(R.string.add_training_validation_need_piece)
         }
         for (piece in state.pieces) {
-            val time = RowingTimeFormat.parseDuration(piece.timeText) ?: piece.timeMillis
+            val time = RowingTimeFormat.parseTimeInput(input = piece.timeText) ?: piece.timeMillis
             val rate = RowingTimeFormat.parseStrokeRate(piece.strokeRateText) ?: piece.strokeRate
             when {
                 piece.distanceMeters <= 0 ->

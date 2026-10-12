@@ -132,7 +132,7 @@ internal class AthleteDetailViewModel(
                 } else {
                     draft.copy(
                         timeText = text,
-                        timeMillis = RowingTimeFormat.parseDuration(text) ?: 0L,
+                        timeMillis = RowingTimeFormat.parseTimeInput(input = text) ?: 0L,
                     )
                 }
             }
@@ -152,7 +152,7 @@ internal class AthleteDetailViewModel(
                         athleteId = athleteId,
                         boatType = type,
                         distanceMeters = draft.distanceMeters,
-                        timeMillis = RowingTimeFormat.parseDuration(draft.timeText) ?: draft.timeMillis,
+                        timeMillis = RowingTimeFormat.parseTimeInput(input = draft.timeText) ?: draft.timeMillis,
                     )
                 }
             }
@@ -223,7 +223,7 @@ internal class AthleteDetailViewModel(
             if (record.distanceMeters <= 0) {
                 return@firstNotNullOfOrNull R.string.athletes_detail_record_distance_error
             }
-            if ((RowingTimeFormat.parseDuration(record.timeText) ?: record.timeMillis) <= 0) {
+            if ((RowingTimeFormat.parseTimeInput(input = record.timeText) ?: record.timeMillis) <= 0) {
                 return@firstNotNullOfOrNull R.string.athletes_detail_record_time_error
             }
             if (!distances.add(record.distanceMeters)) {
