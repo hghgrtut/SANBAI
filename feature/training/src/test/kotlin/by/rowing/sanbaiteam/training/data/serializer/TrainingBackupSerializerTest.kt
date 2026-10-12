@@ -42,6 +42,7 @@ internal class TrainingBackupSerializerTest {
                             avgHeartRate = 155,
                             maxHeartRate = 161,
                             recoveryHeartRate = 120,
+                            lactate = 12.3,
                         ),
                         BackupPiece(
                             athleteIndex = 1,

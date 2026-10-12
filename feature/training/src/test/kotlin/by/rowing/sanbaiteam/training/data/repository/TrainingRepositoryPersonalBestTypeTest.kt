@@ -1,14 +1,17 @@
 package by.rowing.sanbaiteam.training.data.repository
 
+import android.content.Context
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.core.util.AndroidResourceUtils
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
+import io.mockk.mockk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
@@ -128,6 +131,7 @@ internal class TrainingRepositoryPersonalBestTypeTest {
             ),
         ),
         athletesRepository = athletesRepository,
+        resourceUtils = AndroidResourceUtils(mockk<Context>(relaxed = true)),
     )
 
     private fun best(

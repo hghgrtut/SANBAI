@@ -19,4 +19,5 @@ data class TrainingAthletePieceEntity(
     val avgHeartRate: Int? = null,
     val maxHeartRate: Int? = null,
     val recoveryHeartRate: Int? = null,
+    val lactate: Double? = null,
 )

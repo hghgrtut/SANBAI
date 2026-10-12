@@ -1,9 +1,11 @@
 package by.rowing.sanbaiteam.training.data.repository
 
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.core.util.AndroidResourceUtils
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.training.R
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -16,7 +18,8 @@ import kotlinx.coroutines.withContext
 
 internal class TrainingRepository(
     private val dao: TrainingDao,
-    private val athletesRepository: AthletesRepository
+    private val athletesRepository: AthletesRepository,
+    private val resourceUtils: AndroidResourceUtils,
 ) {
 
     suspend fun saveTraining(
@@ -118,9 +121,14 @@ internal class TrainingRepository(
                         distanceMeters = piece.distanceMeters
                     ).orEmpty(),
                     strokeRateFormatted = RowingTimeFormat.formatStrokeRate(piece.strokeRate),
-                    avgHeartRate = piece.avgHeartRate,
-                    maxHeartRate = piece.maxHeartRate,
-                    recoveryHeartRate = piece.recoveryHeartRate,
+                    heartRateText = resourceUtils.getString(
+                        R.string.training_detail_heart_rate,
+                        formatHeartRate(value = piece.avgHeartRate),
+                        formatHeartRate(value = piece.maxHeartRate),
+                        formatHeartRate(value = piece.recoveryHeartRate)
+                    ) + (piece.lactate?.let { lactate ->
+                        resourceUtils.getString(R.string.training_detail_lactate, lactate)
+                    } ?: ""),
                     percentOfPbFormatted = PersonalBestPercent.format(
                         PersonalBestPercent.average(crewPercents)
                     ),
@@ -130,7 +138,6 @@ internal class TrainingRepository(
             notFound = false
         )
     }
-
     private fun formatWorkSummary(pieces: List<TrainingAthletePieceEntity>): String {
         if (pieces.isEmpty()) return ""
         val groups = LinkedHashMap<Int, Int>()
@@ -140,5 +147,12 @@ internal class TrainingRepository(
         return groups.entries.joinToString(separator = " + ") { (distance, count) ->
             (if (count > 1) "$count×" else "") + "${distance}м"
         }
+    }
+
+    companion object {
+
+        private const val MISSING_VALUE = "—"
+
+        private fun formatHeartRate(value: Int?): String = value?.toString() ?: MISSING_VALUE
     }
 }
