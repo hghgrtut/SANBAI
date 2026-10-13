@@ -71,7 +71,7 @@ internal class TrainingRepository(
             ListTrainingStateItem(
                 trainingId = training.id,
                 trainingTypeResId = training.type.uiResId,
-                trainingDate = TimeUtils.formatMillisToString(training.dateMillis),
+                trainingDate = TimeUtils.formatDate(training.dateMillis),
                 trainingWork = formatWorkSummary(crewPieces),
                 athletes = athleteNames
             )
@@ -99,7 +99,7 @@ internal class TrainingRepository(
 
         TrainingDetailState(
             trainingId = training.id,
-            dateFormatted = TimeUtils.formatMillisToString(training.dateMillis),
+            dateFormatted = TimeUtils.formatDate(training.dateMillis),
             typeResId = training.type.uiResId,
             athleteNames = athleteIds.mapNotNull { nameMap[it] },
             pieces = crewPieces.map { piece ->

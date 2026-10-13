@@ -38,7 +38,7 @@ internal class AddTrainingViewModel(
         val dateMillis = System.currentTimeMillis()
         AddTrainingState(
             dateMillis = dateMillis,
-            dateFormatted = TimeUtils.formatMillisToString(dateMillis)
+            dateFormatted = TimeUtils.formatDate(dateMillis)
         )
     }
 ) {
@@ -67,7 +67,7 @@ internal class AddTrainingViewModel(
         changeState {
             copy(
                 dateMillis = millis,
-                dateFormatted = TimeUtils.formatMillisToString(millis)
+                dateFormatted = TimeUtils.formatDate(millis)
             )
         }
     }
@@ -370,7 +370,7 @@ internal class AddTrainingViewModel(
             changeState {
                 copy(
                     dateMillis = trainingDateMillis,
-                    dateFormatted = TimeUtils.formatMillisToString(trainingDateMillis),
+                    dateFormatted = TimeUtils.formatDate(trainingDateMillis),
                     crewAthletes = listOf(AddCrewAthlete(rowerId = parsedAthleteId)),
                     pieces = newPieces.ifEmpty { listOf(AddPieceDraft()) },
                     trainingType = parsed.source.impliedTrainingType(),

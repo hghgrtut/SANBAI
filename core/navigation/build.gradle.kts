@@ -1,35 +1,41 @@
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.jetbrains.kotlin.plugin.serialization)
 }
 
-android {
-    namespace = "by.rowing.sanbaiteam.core.navigation"
-    compileSdk = 37
-
-    defaultConfig {
+kotlin {
+    android {
+        namespace = "by.rowing.sanbaiteam.core.navigation"
+        compileSdk = 37
         minSdk = 25
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+                }
+            }
+        }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        compose = true
-    }
-}
+    iosArm64()
+    iosSimulatorArm64()
 
-dependencies {
-    implementation(project(":core:annotation"))
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.coroutines.android)
-    implementation(libs.kotlin.parcelize.runtime)
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:annotation"))
+            implementation(compose.runtime)
+            implementation(compose.ui)
+            implementation(libs.jetbrains.navigation.compose)
+            implementation(libs.jetbrains.lifecycle.runtime.compose)
+            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+    }
 }
