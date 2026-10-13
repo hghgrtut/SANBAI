@@ -38,7 +38,7 @@ internal abstract class RowingDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: RowingDatabase? = null
 
-        const val DATABASE_VERSION = 5
+        const val DATABASE_VERSION = 6
 
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -80,6 +80,12 @@ internal abstract class RowingDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `${TrainingDao.TABLE_TRAINING_ATHLETE_PIECE}` ADD COLUMN `lactate` REAL")
+            }
+        }
+
         fun getInstance(context: Context): RowingDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -87,7 +93,7 @@ internal abstract class RowingDatabase : RoomDatabase() {
                     RowingDatabase::class.java,
                     "rowing_database"
                 )
-                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build()
                 INSTANCE = instance
                 instance

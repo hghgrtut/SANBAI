@@ -42,9 +42,11 @@ internal data class AddPieceDraft(
     val avgHeartRate: Int? = null,
     val maxHeartRate: Int? = null,
     val recoveryHeartRate: Int? = null,
+    val lactate: Double? = null,
     val distanceText: String = "",
     val timeText: String = "",
     val strokeRateText: String = "",
+    val lactateText: String = "",
 ) {
     companion object {
         private var localIdSeq = 1L

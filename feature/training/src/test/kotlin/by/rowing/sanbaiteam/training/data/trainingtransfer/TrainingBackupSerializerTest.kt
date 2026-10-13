@@ -38,6 +38,7 @@ internal class TrainingBackupSerializerTest {
                             avgHeartRate = 155,
                             maxHeartRate = 161,
                             recoveryHeartRate = 120,
+                            lactate = 12.3,
                         ),
                         BackupPiece(
                             athleteIndex = 1,
@@ -81,6 +82,7 @@ internal class TrainingBackupSerializerTest {
         assertNull(decoded.trainings[0].pieces[0].avgHeartRate)
         assertNull(decoded.trainings[0].pieces[0].maxHeartRate)
         assertNull(decoded.trainings[0].pieces[0].recoveryHeartRate)
+        assertNull(decoded.trainings[0].pieces[0].lactate)
     }
 
     @Test

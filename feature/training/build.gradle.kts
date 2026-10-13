@@ -43,4 +43,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.garmin.fit)
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
 }

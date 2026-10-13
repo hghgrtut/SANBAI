@@ -168,46 +168,34 @@ private fun PieceResultRow(piece: TrainingDetailPiece) {
                 style = TypographyPaletteSp.Body2Regular
             )
         }
+        val pieceDataStyle = TypographyPaletteSp.Body2Regular.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = piece.paceFormatted.ifEmpty { "—" },
-                style = TypographyPaletteSp.Body2Regular.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                style = pieceDataStyle
             )
             Text(
                 text = stringResource(
                     R.string.training_detail_stroke_rate,
                     piece.strokeRateFormatted
                 ),
-                style = TypographyPaletteSp.Body2Regular.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                style = pieceDataStyle
             )
         }
         SpacerXS()
         Text(
-            text = stringResource(
-                R.string.training_detail_heart_rate,
-                piece.avgHeartRate?.toString() ?: "—",
-                piece.maxHeartRate?.toString() ?: "—",
-                piece.recoveryHeartRate?.toString() ?: "—",
-            ),
-            style = TypographyPaletteSp.Body2Regular.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            text = piece.heartRateText,
+            style = pieceDataStyle
         )
         Text(
             text = stringResource(
                 R.string.training_detail_percent_of_pb,
                 piece.percentOfPbFormatted
             ),
-            style = TypographyPaletteSp.Body2Regular.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            style = pieceDataStyle
         )
     }
 }

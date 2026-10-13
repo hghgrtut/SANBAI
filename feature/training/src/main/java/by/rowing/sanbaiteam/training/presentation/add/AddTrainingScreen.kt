@@ -259,6 +259,12 @@ private fun TrainingPieces(
                     text = newValue
                 )
             },
+            onLactateChange = { newValue ->
+                viewModel.changePieceLactate(
+                    pieceLocalId = piece.localId,
+                    text = newValue
+                )
+            },
             onRemove = { viewModel.removePiece(pieceLocalId = piece.localId) }
         )
     }
@@ -328,97 +334,136 @@ private fun PieceForm(
     onAvgHeartRateChange: (String) -> Unit,
     onMaxHeartRateChange: (String) -> Unit,
     onRecoveryHeartRateChange: (String) -> Unit,
+    onLactateChange: (String) -> Unit,
     onRemove: () -> Unit,
 ) {
     val pace: String = RowingTimeFormat.formatPace(
         timeMillis = piece.timeMillis,
         distanceMeters = piece.distanceMeters
     ) ?: stringResource(R.string.add_training_pace_placeholder)
-
-    Box(modifier = Modifier.padding(bottom = Spacing.S)) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-            )
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = Spacing.S),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier.padding(Spacing.S),
+            verticalArrangement = Arrangement.spacedBy(space = Spacing.XS)
         ) {
-            Column(
-                modifier = Modifier.padding(Spacing.S),
-                verticalArrangement = Arrangement.spacedBy(space = Spacing.XS)
-            ) {
-                Text(
-                    text = stringResource(R.string.training_detail_piece_number, index + 1),
-                    style = TypographyPalette.Body2Medium
-                )
-                DataInputRow {
-                    TextField(
-                        value = piece.distanceText,
-                        onValueChange = onDistanceChange,
-                        label = stringResource(R.string.add_training_piece_length_label),
-                        contentPadding = CompactFieldContentPadding,
-                        textStyle = TypographyPalette.Body1Regular,
-                        keyboardOptions = KeyboardOptions.number(),
-                        modifier = Modifier.weight(2f)
-                    )
-                    TextField(
-                        value = piece.timeText,
-                        onValueChange = onTimeChange,
-                        label = stringResource(R.string.add_training_piece_time_label),
-                        contentPadding = CompactFieldContentPadding,
-                        placeholder = stringResource(R.string.add_training_piece_time_placeholder),
-                        textStyle = TypographyPalette.Body1Regular,
-                        keyboardOptions = KeyboardOptions.time(),
-                        modifier = Modifier.weight(3f)
-                    )
-                    TextField(
-                        value = piece.strokeRateText,
-                        onValueChange = onStrokeRateChange,
-                        label = stringResource(R.string.add_training_piece_stroke_rate_label),
-                        contentPadding = CompactFieldContentPadding,
-                        textStyle = TypographyPalette.Body1Regular,
-                        keyboardOptions = KeyboardOptions.decimal(),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                DataInputRow {
-                    TextField(
-                        value = piece.avgHeartRate?.toString().orEmpty(),
-                        onValueChange = onAvgHeartRateChange,
-                        label = stringResource(R.string.add_training_piece_avg_heart_rate_label),
-                        contentPadding = CompactFieldContentPadding,
-                        textStyle = TypographyPalette.Body1Regular,
-                        keyboardOptions = KeyboardOptions.number(),
-                        modifier = Modifier.weight(1f)
-                    )
-                    TextField(
-                        value = piece.maxHeartRate?.toString().orEmpty(),
-                        onValueChange = onMaxHeartRateChange,
-                        label = stringResource(R.string.add_training_piece_max_heart_rate_label),
-                        contentPadding = CompactFieldContentPadding,
-                        textStyle = TypographyPalette.Body1Regular,
-                        keyboardOptions = KeyboardOptions.number(),
-                        modifier = Modifier.weight(1f)
-                    )
-                    TextField(
-                        value = piece.recoveryHeartRate?.toString().orEmpty(),
-                        onValueChange = onRecoveryHeartRateChange,
-                        label = stringResource(R.string.add_training_piece_recovery_heart_rate_label),
-                        contentPadding = CompactFieldContentPadding,
-                        textStyle = TypographyPalette.Body1Regular,
-                        keyboardOptions = KeyboardOptions.number(imeAction = ImeAction.Done),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.add_training_piece_pace_label, pace),
-                    style = TypographyPalette.Body2Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (canRemove) {
-                    RemovePieceButton(onRemove = onRemove)
-                }
+            Text(
+                text = stringResource(R.string.training_detail_piece_number, index + 1),
+                style = TypographyPalette.Body2Medium
+            )
+            DistanceTimeSPMBlock(
+                piece = piece,
+                onDistanceChange = onDistanceChange,
+                onTimeChange = onTimeChange,
+                onStrokeRateChange = onStrokeRateChange
+            )
+            HeartRateLactateBlock(
+                piece = piece,
+                onAvgHeartRateChange = onAvgHeartRateChange,
+                onMaxHeartRateChange = onMaxHeartRateChange,
+                onRecoveryHeartRateChange = onRecoveryHeartRateChange,
+                onLactateChange = onLactateChange
+            )
+            Text(
+                text = stringResource(R.string.add_training_piece_pace_label, pace),
+                style = TypographyPalette.Body2Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (canRemove) {
+                RemovePieceButton(onRemove = onRemove)
             }
         }
+    }
+}
+
+@Composable
+private fun DistanceTimeSPMBlock(
+    piece: AddPieceDraft,
+    onDistanceChange: (String) -> Unit,
+    onTimeChange: (String) -> Unit,
+    onStrokeRateChange: (String) -> Unit
+) {
+    DataInputRow {
+        TextField(
+            value = piece.distanceText,
+            onValueChange = onDistanceChange,
+            label = stringResource(R.string.add_training_piece_length_label),
+            contentPadding = CompactFieldContentPadding,
+            textStyle = TypographyPalette.Body1Regular,
+            keyboardOptions = KeyboardOptions.number(),
+            modifier = Modifier.weight(2f)
+        )
+        TextField(
+            value = piece.timeText,
+            onValueChange = onTimeChange,
+            label = stringResource(R.string.add_training_piece_time_label),
+            contentPadding = CompactFieldContentPadding,
+            placeholder = stringResource(R.string.add_training_piece_time_placeholder),
+            textStyle = TypographyPalette.Body1Regular,
+            keyboardOptions = KeyboardOptions.time(),
+            modifier = Modifier.weight(3f)
+        )
+        TextField(
+            value = piece.strokeRateText,
+            onValueChange = onStrokeRateChange,
+            label = stringResource(R.string.add_training_piece_stroke_rate_label),
+            contentPadding = CompactFieldContentPadding,
+            textStyle = TypographyPalette.Body1Regular,
+            keyboardOptions = KeyboardOptions.decimal(),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun HeartRateLactateBlock(
+    piece: AddPieceDraft,
+    onAvgHeartRateChange: (String) -> Unit,
+    onMaxHeartRateChange: (String) -> Unit,
+    onRecoveryHeartRateChange: (String) -> Unit,
+    onLactateChange: (String) -> Unit
+) {
+    DataInputRow {
+        TextField(
+            value = piece.avgHeartRate?.toString().orEmpty(),
+            onValueChange = onAvgHeartRateChange,
+            label = stringResource(R.string.add_training_piece_avg_heart_rate_label),
+            contentPadding = CompactFieldContentPadding,
+            textStyle = TypographyPalette.Body1Regular,
+            keyboardOptions = KeyboardOptions.number(),
+            modifier = Modifier.weight(1f)
+        )
+        TextField(
+            value = piece.maxHeartRate?.toString().orEmpty(),
+            onValueChange = onMaxHeartRateChange,
+            label = stringResource(R.string.add_training_piece_max_heart_rate_label),
+            contentPadding = CompactFieldContentPadding,
+            textStyle = TypographyPalette.Body1Regular,
+            keyboardOptions = KeyboardOptions.number(),
+            modifier = Modifier.weight(1f)
+        )
+        TextField(
+            value = piece.recoveryHeartRate?.toString().orEmpty(),
+            onValueChange = onRecoveryHeartRateChange,
+            label = stringResource(R.string.add_training_piece_recovery_heart_rate_label),
+            contentPadding = CompactFieldContentPadding,
+            textStyle = TypographyPalette.Body1Regular,
+            keyboardOptions = KeyboardOptions.number(imeAction = ImeAction.Next),
+            modifier = Modifier.weight(1f)
+        )
+        TextField(
+            value = piece.lactateText,
+            onValueChange = onLactateChange,
+            label = stringResource(R.string.add_training_piece_lactate_label),
+            contentPadding = CompactFieldContentPadding,
+            textStyle = TypographyPalette.Body1Regular,
+            keyboardOptions = KeyboardOptions.decimal(),
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

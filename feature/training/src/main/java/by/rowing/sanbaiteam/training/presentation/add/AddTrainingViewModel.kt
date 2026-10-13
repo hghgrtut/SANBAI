@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import kotlin.math.roundToInt
 
 internal class AddTrainingViewModel(
     private val resourceUtils: AndroidResourceUtils,
@@ -121,6 +122,18 @@ internal class AddTrainingViewModel(
         }
     }
 
+    fun changePieceLactate(
+        pieceLocalId: Long,
+        text: String
+    ) {
+        updatePiece(pieceLocalId) { piece ->
+            piece.copy(
+                lactateText = text,
+                lactate = parseLactateFromText(text)
+            )
+        }
+    }
+
     fun changePieceDistance(
         pieceLocalId: Long,
         text: String
@@ -170,9 +183,11 @@ internal class AddTrainingViewModel(
                     avgHeartRate = template.avgHeartRate,
                     maxHeartRate = template.maxHeartRate,
                     recoveryHeartRate = template.recoveryHeartRate,
+                    lactate = template.lactate,
                     distanceText = template.distanceText,
                     timeText = template.timeText,
-                    strokeRateText = template.strokeRateText
+                    strokeRateText = template.strokeRateText,
+                    lactateText = template.lactateText,
                 )
             } else {
                 AddPieceDraft()
@@ -214,6 +229,7 @@ internal class AddTrainingViewModel(
                         avgHeartRate = piece.avgHeartRate,
                         maxHeartRate = piece.maxHeartRate,
                         recoveryHeartRate = piece.recoveryHeartRate,
+                        lactate = parseLactateFromText(piece.lactateText) ?: piece.lactate,
                     )
                 }
             }
@@ -321,6 +337,14 @@ internal class AddTrainingViewModel(
     }
 
     private fun parseIntFromText(text: String): Int? = text.filter { it.isDigit() }.toIntOrNull()
+
+    private fun parseLactateFromText(text: String): Double? {
+        val value = text.filter { it.isDigit() || it == ',' || it == '.' }
+            .replace(',', '.')
+            .toDoubleOrNull()
+            ?: return null
+        return (value * 10).roundToInt() / 10.0
+    }
 
     private suspend fun applyParsedImport(parsed: ParsedTrainingImport) {
         val newPieces = parsed.intervals.map { interval ->
