@@ -28,15 +28,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
-import by.rowing.sanbaiteam.uikit.R
+import by.rowing.sanbaiteam.uikit.modifier.debounceClickable
+import by.rowing.sanbaiteam.uikit.resources.Res
+import by.rowing.sanbaiteam.uikit.resources.ic_check_16
+import by.rowing.sanbaiteam.uikit.resources.ic_minus_16
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import com.checker.uikit3.modifier.debounceClickable
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 internal fun Checkbox(
@@ -127,8 +129,8 @@ internal fun Checkbox(
     ) {
         val resId = when (checked) {
             CheckedState.UNCHECKED -> null
-            CheckedState.CHECKED -> R.drawable.ic_check_16
-            CheckedState.INDETERMINATE -> R.drawable.ic_minus_16
+            CheckedState.CHECKED -> Res.drawable.ic_check_16
+            CheckedState.INDETERMINATE -> Res.drawable.ic_minus_16
         }
 
         AnimatedContent(

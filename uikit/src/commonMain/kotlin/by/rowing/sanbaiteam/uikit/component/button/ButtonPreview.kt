@@ -10,11 +10,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import by.rowing.sanbaiteam.uikit.R
 import by.rowing.sanbaiteam.uikit.modifier.ClickableState
 import by.rowing.sanbaiteam.uikit.modifier.LocalClickableState
+import by.rowing.sanbaiteam.uikit.resources.Res
+import by.rowing.sanbaiteam.uikit.resources.ic_check_16
+import by.rowing.sanbaiteam.uikit.resources.ic_close_16
 import by.rowing.sanbaiteam.uikit.theme.Spacing
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameterProvider
 
 internal data class ButtonPreviewState(
     val backgroundColor: Color,
@@ -24,7 +26,7 @@ internal data class ButtonPreviewState(
 @Composable
 internal fun ButtonPreviewContent(
     state: ButtonPreviewState,
-    label: String = "Сообщить о нарушении",
+    label: String = "РЎРѕРѕР±С‰РёС‚СЊ Рѕ РЅР°СЂСѓС€РµРЅРёРё",
 ) {
     CompositionLocalProvider(LocalClickableState provides ClickableState()) {
         Column(
@@ -39,8 +41,8 @@ internal fun ButtonPreviewContent(
                 text = label,
                 debounceClick = {},
                 buttonColors = state.buttonColors,
-                leadingIcon = { Icon(R.drawable.ic_check_16) },
-                trailingIcon = { Icon(R.drawable.ic_close_16) },
+                leadingIcon = { Icon(Res.drawable.ic_check_16) },
+                trailingIcon = { Icon(Res.drawable.ic_close_16) },
                 size = ButtonSize.LARGE,
             )
             ButtonSize.entries.forEach { size ->
@@ -48,7 +50,7 @@ internal fun ButtonPreviewContent(
                     text = label,
                     debounceClick = {},
                     buttonColors = state.buttonColors,
-                    leadingIcon = { Icon(R.drawable.ic_check_16) },
+                    leadingIcon = { Icon(Res.drawable.ic_check_16) },
                     size = size,
                 )
             }
@@ -58,7 +60,7 @@ internal fun ButtonPreviewContent(
                     debounceClick = {},
                     enabled = false,
                     buttonColors = state.buttonColors,
-                    leadingIcon = { Icon(R.drawable.ic_check_16) },
+                    leadingIcon = { Icon(Res.drawable.ic_check_16) },
                     size = size,
                 )
             }
@@ -68,7 +70,7 @@ internal fun ButtonPreviewContent(
                     debounceClick = {},
                     loading = true,
                     buttonColors = state.buttonColors,
-                    leadingIcon = { Icon(R.drawable.ic_check_16) },
+                    leadingIcon = { Icon(Res.drawable.ic_check_16) },
                     size = size,
                 )
             }

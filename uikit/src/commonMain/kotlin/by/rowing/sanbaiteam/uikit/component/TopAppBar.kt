@@ -1,7 +1,5 @@
 package by.rowing.sanbaiteam.uikit.component
 
-import androidx.activity.compose.LocalActivity
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -34,21 +32,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
-import by.rowing.sanbaiteam.uikit.R
 import by.rowing.sanbaiteam.uikit.modifier.ClickableState
 import by.rowing.sanbaiteam.uikit.modifier.LocalClickableState
+import by.rowing.sanbaiteam.uikit.modifier.clickableIfProvided
+import by.rowing.sanbaiteam.uikit.resources.Res
+import by.rowing.sanbaiteam.uikit.resources.ic_check_16
+import by.rowing.sanbaiteam.uikit.resources.ic_chevron_left_24
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import com.checker.uikit3.modifier.clickableIfProvided
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val ICON_SIZE
     @Composable get() = 24.dp
@@ -201,10 +201,10 @@ private fun TopAppBarInternal(
 private fun TopAppBarInternalWithLabels(
     modifier: Modifier = Modifier,
     title: AnnotatedString,
-    @DrawableRes leadingIcon: Int? = null,
+    leadingIcon: DrawableResource? = null,
     leadingText: String? = null,
     onLeadingBlockClick: (() -> Unit)? = null,
-    @DrawableRes trailingIcon: Int? = null,
+    trailingIcon: DrawableResource? = null,
     trailingText: String? = null,
     onTrailingBlockClick: (() -> Unit)? = null,
     theme: TopAppBarTheme = TopAppBarTheme.TRANSPARENT
@@ -280,14 +280,14 @@ private fun DefaultNavigationIcon(
     customIconPainter: Painter? = null
 ) {
     val clickableState = LocalClickableState.current
-    val activity = (LocalActivity.current as? FragmentActivity)
+    val backAction = defaultBackAction()
     val clickListener = {
         clickableState.onClick {
-            onNavIconClick?.invoke() ?: activity?.onBackPressedDispatcher?.onBackPressed()
+            onNavIconClick?.invoke() ?: backAction()
         }
     }
 
-    val defaultIconPainter = painterResource(id = R.drawable.ic_chevron_left_24)
+    val defaultIconPainter = painterResource(resource = Res.drawable.ic_chevron_left_24)
 
     IconButton(
         modifier = modifier,
@@ -359,7 +359,7 @@ private fun TopAppBarPreview() {
                     IconButton(onClick = {}) {
                         Icon(
                             modifier = Modifier.size(ICON_SIZE),
-                            painter = painterResource(R.drawable.ic_check_16),
+                            painter = painterResource(Res.drawable.ic_check_16),
                             contentDescription = null,
                         )
                     }
@@ -368,10 +368,10 @@ private fun TopAppBarPreview() {
 
             TopAppBarInternalWithLabels(
                 title = AnnotatedString("Title2"),
-                leadingIcon = R.drawable.ic_chevron_left_24,
+                leadingIcon = Res.drawable.ic_chevron_left_24,
                 leadingText = "Label L",
                 onLeadingBlockClick = {},
-                trailingIcon = R.drawable.ic_check_16,
+                trailingIcon = Res.drawable.ic_check_16,
                 trailingText = "Label R",
                 theme = TopAppBarTheme.LIGHT
             )
@@ -383,7 +383,7 @@ private fun TopAppBarPreview() {
                     IconButton(onClick = {}) {
                         Icon(
                             modifier = Modifier.size(ICON_SIZE),
-                            painter = painterResource(R.drawable.ic_check_16),
+                            painter = painterResource(Res.drawable.ic_check_16),
                             contentDescription = null,
                         )
                     }
@@ -392,16 +392,16 @@ private fun TopAppBarPreview() {
 
             TopAppBarInternalWithLabels(
                 title = AnnotatedString("Long Long Long Long Long Long Long Long Long Long Long Long Title2"),
-                leadingIcon = R.drawable.ic_chevron_left_24,
+                leadingIcon = Res.drawable.ic_chevron_left_24,
                 leadingText = "Label L",
                 onLeadingBlockClick = {},
-                trailingIcon = R.drawable.ic_check_16,
+                trailingIcon = Res.drawable.ic_check_16,
                 trailingText = "Label R",
                 theme = TopAppBarTheme.LIGHT
             )
 
             TopAppBarWithCustomContent(
-                contentIcon = painterResource(id = R.drawable.ic_check_16),
+                contentIcon = painterResource(resource = Res.drawable.ic_check_16),
                 onNavIconClick = {},
                 theme = TopAppBarTheme.LIGHT
             )

@@ -2,7 +2,6 @@
 
 package by.rowing.sanbaiteam.uikit.component.button
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,24 +25,25 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.component.Throbber
+import by.rowing.sanbaiteam.uikit.modifier.applyIfEnabled
+import by.rowing.sanbaiteam.uikit.modifier.debounceClickable
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Radius
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
-import com.checker.uikit3.modifier.applyIfEnabled
-import com.checker.uikit3.modifier.debounceClickable
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.material3.LocalContentColor as LocalMaterial3ContentColor
 
 /**
@@ -237,7 +237,7 @@ object Button {
      */
     @Composable
     fun Icon(
-        @DrawableRes icon: Int,
+        icon: DrawableResource,
         tint: Color = LocalContentColor.current,
     ) {
         Icon(

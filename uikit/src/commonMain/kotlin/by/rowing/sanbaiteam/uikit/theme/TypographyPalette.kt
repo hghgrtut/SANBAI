@@ -1,7 +1,5 @@
 package by.rowing.sanbaiteam.uikit.theme
 
-import android.content.res.Resources
-import android.util.TypedValue
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,12 +13,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.InterFontFamily
-import kotlin.math.roundToInt
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
  * figma: https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=2-11&p=f&t=Cwyq7FbrKyH7r243-0
@@ -232,13 +229,7 @@ object TypographyPalette {
 
     private val Int.fontDp: TextUnit
         @Composable
-        get() = with(LocalDensity.current) { dp().toSp() }
-
-    fun Int.dp() = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP,
-        this.toFloat(),
-        Resources.getSystem().displayMetrics
-    ).roundToInt()
+        get() = with(LocalDensity.current) { this@fontDp.dp.toSp() }
 }
 
 @Preview

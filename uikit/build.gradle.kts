@@ -1,36 +1,59 @@
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.kotlin.compose)
 }
 
-android {
-    namespace = "by.rowing.sanbaiteam.uikit"
-    compileSdk = 37
-
-    defaultConfig {
+kotlin {
+    android {
+        namespace = "by.rowing.sanbaiteam.uikit"
+        compileSdk = 37
         minSdk = 25
+        androidResources {
+            enable = true
+        }
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+                }
+            }
+        }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "Uikit"
+            isStatic = true
+        }
     }
-    buildFeatures {
-        compose = true
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:annotation"))
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.fragment.ktx)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 
-dependencies {
-    implementation(project(":core:annotation"))
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.foundation.layout)
-    implementation(libs.androidx.fragment.ktx)
-    implementation(libs.coroutines.android)
+compose.resources {
+    packageOfResClass = "by.rowing.sanbaiteam.uikit.resources"
 }

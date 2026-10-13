@@ -23,18 +23,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
-import by.rowing.sanbaiteam.uikit.R
+import by.rowing.sanbaiteam.uikit.modifier.clearFocusOnKeyboardDismiss
+import by.rowing.sanbaiteam.uikit.resources.Res
+import by.rowing.sanbaiteam.uikit.resources.ic_check_16
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import com.checker.uikit3.modifier.clearFocusOnKeyboardDismiss
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /** https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=423-630 */
 @AllowDetektPublic
@@ -349,7 +350,7 @@ private fun TextFieldPreview() {
         fun Icon() {
             IconButton(onClick = {}) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_check_16),
+                    painter = painterResource(Res.drawable.ic_check_16),
                     contentDescription = null,
                 )
             }
