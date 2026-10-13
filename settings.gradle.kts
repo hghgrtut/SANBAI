@@ -25,6 +25,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "SANBAI Team"
 include(":app")
+include(":shared")
 include(":uikit")
 include(":core:util")
 include(":core:annotation")
