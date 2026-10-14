@@ -1,12 +1,14 @@
 package by.rowing.sanbaiteam.core.util
 
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
  * Formats a value as a decimal with a single fraction digit (locale-independent), e.g. `12.3`.
  */
-internal fun formatTenths(value: Double): String {
+@AllowDetektPublic
+fun formatTenths(value: Double): String {
     val scaled = (value * 10).roundToInt()
     val sign = if (scaled < 0) "-" else ""
     val magnitude = abs(scaled)
