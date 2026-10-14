@@ -28,6 +28,7 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
+import org.jetbrains.compose.resources.stringResource as composeStringResource
 
 @Composable
 internal fun TrainingDetailScreen(viewModel: TrainingDetailViewModel) {
@@ -104,7 +105,7 @@ private fun Training(
         item {
             Text(
                 modifier = Modifier.padding(bottom = Spacing.XS),
-                text = stringResource(state.typeResId),
+                text = state.typeResId?.let { composeStringResource(it) }.orEmpty(),
                 style = TypographyPalette.Body2Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

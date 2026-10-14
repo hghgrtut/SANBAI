@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 internal class AthletesRepositoryImpl(
@@ -27,7 +28,7 @@ internal class AthletesRepositoryImpl(
                 dateOfBirth = SimpleDateFormat(
                     "dd MMM yyyy",
                     Locale.getDefault()
-                ).format(athlete.dateOfBirth),
+                ).format(Date(athlete.dateOfBirth)),
                 isMale = athlete.isMale,
                 speedCoachSerial = athlete.speedCoachSerial,
             )

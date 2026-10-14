@@ -20,6 +20,6 @@ private fun AthleteEntity.matches(backupAthlete: BackupAthlete): Boolean =
         other = backupAthlete.name.trim(),
         ignoreCase = true
     ) && TimeUtils.isSameCalendarDay(
-        firstMillis = dateOfBirth.time,
+        firstMillis = dateOfBirth,
         secondMillis = backupAthlete.dateOfBirthMillis
     )

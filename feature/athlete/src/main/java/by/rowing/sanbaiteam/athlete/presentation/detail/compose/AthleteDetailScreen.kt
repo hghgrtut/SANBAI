@@ -59,6 +59,7 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
+import org.jetbrains.compose.resources.stringResource as composeStringResource
 
 @Composable
 internal fun AthleteDetailScreen(viewModel: AthleteDetailViewModel) {
@@ -239,7 +240,7 @@ private fun RecordsSection(
         )
         for (type in TrainingPieceType.entries) {
             Text(
-                text = stringResource(type.uiResId),
+                text = composeStringResource(type.uiResId),
                 style = TypographyPalette.H4
             )
             state.recordsByType[type]?.forEach { record ->

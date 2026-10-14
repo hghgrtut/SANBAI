@@ -1,12 +1,12 @@
 package by.rowing.sanbaiteam.core.data.local
 
-import android.content.Context
+import androidx.room.ConstructedBy
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import androidx.room.RoomDatabaseConstructor
 import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.local.AthleteDao
@@ -26,7 +26,7 @@ import by.rowing.sanbaiteam.training.data.local.TrainingDao
     version = DATABASE_VERSION,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
+@ConstructedBy(RowingDatabaseConstructor::class)
 internal abstract class RowingDatabase : RoomDatabase() {
 
     abstract fun athleteDao(): AthleteDao
@@ -35,14 +35,12 @@ internal abstract class RowingDatabase : RoomDatabase() {
 
     companion object {
 
-        @Volatile
-        private var INSTANCE: RowingDatabase? = null
-
         const val DATABASE_VERSION = 6
+        const val DATABASE_NAME = "rowing_database"
 
         val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL(
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS `${AthletePersonalBestDao.TABLE_NAME}` (
                         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -55,14 +53,14 @@ internal abstract class RowingDatabase : RoomDatabase() {
                     )
                     """.trimIndent()
                 )
-                db.execSQL(
+                connection.execSQL(
                     """
                     CREATE UNIQUE INDEX IF NOT EXISTS
                     `index_athlete_personal_best_athleteId_boatType_distanceMeters`
                     ON `${AthletePersonalBestDao.TABLE_NAME}` (`athleteId`, `boatType`, `distanceMeters`)
                     """.trimIndent()
                 )
-                db.execSQL(
+                connection.execSQL(
                     """
                     CREATE INDEX IF NOT EXISTS
                     `index_athlete_personal_best_athleteId`
@@ -73,31 +71,24 @@ internal abstract class RowingDatabase : RoomDatabase() {
         }
 
         val MIGRATION_4_5 = object : Migration(4, 5) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
                 for (column in listOf("avgHeartRate", "maxHeartRate", "recoveryHeartRate")) {
-                    db.execSQL("ALTER TABLE `${TrainingDao.TABLE_TRAINING_ATHLETE_PIECE}` ADD COLUMN `$column` INTEGER")
+                    connection.execSQL("ALTER TABLE `${TrainingDao.TABLE_TRAINING_ATHLETE_PIECE}` ADD COLUMN `$column` INTEGER")
                 }
             }
         }
 
         val MIGRATION_5_6 = object : Migration(5, 6) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE `${TrainingDao.TABLE_TRAINING_ATHLETE_PIECE}` ADD COLUMN `lactate` REAL")
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE `${TrainingDao.TABLE_TRAINING_ATHLETE_PIECE}` ADD COLUMN `lactate` REAL")
             }
         }
 
-        fun getInstance(context: Context): RowingDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    RowingDatabase::class.java,
-                    "rowing_database"
-                )
-                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
-                    .build()
-                INSTANCE = instance
-                instance
-            }
-        }
+        val MIGRATIONS = arrayOf(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
     }
+}
+
+@Suppress("NO_ACTUAL_FOR_EXPECT")
+internal expect object RowingDatabaseConstructor : RoomDatabaseConstructor<RowingDatabase> {
+    override fun initialize(): RowingDatabase
 }

@@ -12,6 +12,7 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 internal class AthleteDetailViewModel(
@@ -51,7 +52,7 @@ internal class AthleteDetailViewModel(
                 AthleteEntity(
                     id = athleteId,
                     name = state.name.trim(),
-                    dateOfBirth = dateFormat.parse(state.dateOfBirth) ?: return@launch,
+                    dateOfBirth = dateFormat.parse(state.dateOfBirth)?.time ?: return@launch,
                     isMale = state.isMale,
                     speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null },
                 )
@@ -186,7 +187,7 @@ internal class AthleteDetailViewModel(
         changeState {
             copy(
                 name = athlete.name,
-                dateOfBirth = dateFormat.format(athlete.dateOfBirth),
+                dateOfBirth = dateFormat.format(Date(athlete.dateOfBirth)),
                 speedCoachSerial = athlete.speedCoachSerial.orEmpty(),
                 isMale = athlete.isMale,
                 recordsByType = recordsByType,

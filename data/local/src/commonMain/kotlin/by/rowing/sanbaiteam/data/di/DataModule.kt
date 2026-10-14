@@ -1,11 +1,11 @@
 package by.rowing.sanbaiteam.data.di
 
 import by.rowing.sanbaiteam.core.data.local.RowingDatabase
-import org.koin.android.ext.koin.androidContext
-import org.koin.dsl.module
+import org.koin.core.module.Module
 
-val databaseModule = module {
-    single { RowingDatabase.getInstance(androidContext()) }
+expect val databaseModule: Module
+
+internal fun Module.databaseDaos() {
     single { get<RowingDatabase>().athleteDao() }
     single { get<RowingDatabase>().athletePersonalBestDao() }
     single { get<RowingDatabase>().trainingDao() }

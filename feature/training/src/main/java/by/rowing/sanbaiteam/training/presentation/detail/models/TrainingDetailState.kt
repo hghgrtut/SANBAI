@@ -1,9 +1,11 @@
 package by.rowing.sanbaiteam.training.presentation.detail.models
 
+import org.jetbrains.compose.resources.StringResource
+
 internal data class TrainingDetailState(
     val trainingId: Long = 0,
     val dateFormatted: String = "",
-    val typeResId: Int = 0,
+    val typeResId: StringResource? = null,
     val athleteNames: List<String> = emptyList(),
     val pieces: List<TrainingDetailPiece> = emptyList(),
     val isLoading: Boolean = true,

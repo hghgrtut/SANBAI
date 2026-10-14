@@ -5,7 +5,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Calendar
-import java.util.Date
 
 internal class TrainingTransferAthleteMatcherTest {
 
@@ -16,14 +15,12 @@ internal class TrainingTransferAthleteMatcherTest {
             AthleteEntity(
                 id = 7,
                 name = "Иван Иванов",
-                dateOfBirth = Date(
-                    localMillis(
-                        year = 1995,
-                        month = 2,
-                        day = 10,
-                        hour = 10,
-                        minute = 0
-                    )
+                dateOfBirth = localMillis(
+                    year = 1995,
+                    month = 2,
+                    day = 10,
+                    hour = 10,
+                    minute = 0
                 ),
                 isMale = true,
                 speedCoachSerial = null
@@ -52,14 +49,12 @@ internal class TrainingTransferAthleteMatcherTest {
             AthleteEntity(
                 id = 3,
                 name = "Иван Иванов",
-                dateOfBirth = Date(
-                    localMillis(
-                        year = 1995,
-                        month = 2,
-                        day = 9,
-                        hour = 12,
-                        minute = 0
-                    )
+                dateOfBirth = localMillis(
+                    year = 1995,
+                    month = 2,
+                    day = 9,
+                    hour = 12,
+                    minute = 0
                 ),
                 isMale = true,
                 speedCoachSerial = null
@@ -88,7 +83,7 @@ internal class TrainingTransferAthleteMatcherTest {
             AthleteEntity(
                 id = 5,
                 name = "Пётр Петров",
-                dateOfBirth = Date(localMillis(1990, 1, 1, 0, 0)),
+                dateOfBirth = localMillis(1990, 1, 1, 0, 0),
                 isMale = true,
                 speedCoachSerial = null
             )

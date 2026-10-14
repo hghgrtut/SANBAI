@@ -60,6 +60,7 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import java.util.Calendar
+import org.jetbrains.compose.resources.stringResource as composeStringResource
 
 @Composable
 internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
@@ -510,9 +511,9 @@ private fun TrainingTypeDropdown(
     onTypeSelected: (trainingType: TrainingPieceType) -> Unit
 ) {
     ExposedSelectionDropdown(
-        selectedLabel = stringResource(state.trainingType.uiResId),
+        selectedLabel = composeStringResource(state.trainingType.uiResId),
         items = TrainingPieceType.entries,
-        itemText = { trainingType -> stringResource(trainingType.uiResId) },
+        itemText = { trainingType -> composeStringResource(trainingType.uiResId) },
         onItemSelected = onTypeSelected
     )
 }

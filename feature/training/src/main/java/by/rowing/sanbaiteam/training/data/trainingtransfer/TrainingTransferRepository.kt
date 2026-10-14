@@ -11,7 +11,6 @@ import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Date
 
 internal class TrainingTransferRepository(
     private val trainingDao: TrainingDao,
@@ -38,7 +37,7 @@ internal class TrainingTransferRepository(
                         val athlete = athletesById[athleteId]
                         backupAthletes += BackupAthlete(
                             name = athlete?.name.orEmpty(),
-                            dateOfBirthMillis = athlete?.dateOfBirth?.time ?: 0L,
+                            dateOfBirthMillis = athlete?.dateOfBirth ?: 0L,
                             isMale = athlete?.isMale ?: false,
                         )
                     }
@@ -90,7 +89,7 @@ internal class TrainingTransferRepository(
                 athleteIdByIndex[index] = athletesRepository.addAthlete(
                     AthleteEntity(
                         name = backupAthlete.name,
-                        dateOfBirth = Date(backupAthlete.dateOfBirthMillis),
+                        dateOfBirth = backupAthlete.dateOfBirthMillis,
                         isMale = backupAthlete.isMale,
                         speedCoachSerial = null,
                     )

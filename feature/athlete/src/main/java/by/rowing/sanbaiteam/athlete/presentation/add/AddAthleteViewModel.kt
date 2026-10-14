@@ -10,7 +10,6 @@ import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.core.util.AndroidResourceUtils
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 internal class AddAthleteViewModel(
@@ -103,8 +102,8 @@ internal class AddAthleteViewModel(
         }
     }
 
-    private fun getBirthDate(dateOfBirth: String): Date? =
-        SimpleDateFormat(DATE_PATTERN, Locale.getDefault()).parse(dateOfBirth)
+    private fun getBirthDate(dateOfBirth: String): Long? =
+        SimpleDateFormat(DATE_PATTERN, Locale.getDefault()).parse(dateOfBirth)?.time
 
     companion object {
 

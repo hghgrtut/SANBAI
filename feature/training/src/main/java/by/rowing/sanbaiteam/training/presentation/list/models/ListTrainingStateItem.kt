@@ -1,10 +1,10 @@
 package by.rowing.sanbaiteam.training.presentation.list.models
 
-import androidx.annotation.StringRes
+import org.jetbrains.compose.resources.StringResource
 
 internal data class ListTrainingStateItem(
     val trainingId: Long,
-    @StringRes val trainingTypeResId: Int,
+    val trainingTypeResId: StringResource,
     val trainingDate: String,
     val trainingWork: String,
     val athletes: List<String>,
