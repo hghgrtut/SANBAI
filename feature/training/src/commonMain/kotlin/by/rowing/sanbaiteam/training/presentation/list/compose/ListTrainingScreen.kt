@@ -40,6 +40,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import by.rowing.sanbaiteam.athlete.presentation.common.ItemCard
+import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
@@ -68,7 +69,7 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXL
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
-import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
@@ -412,7 +413,7 @@ private fun TransferDataAlert(
 }
 
 private fun suggestedBackupFileName(): String {
-    val date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val date = Instant.fromEpochMilliseconds(nowInMillis()).toLocalDateTime(TimeZone.currentSystemDefault()).date
     val month = date.monthNumber.toString().padStart(2, '0')
     val day = date.dayOfMonth.toString().padStart(2, '0')
     return "sanbai-training-backup-${date.year}$month$day.json"

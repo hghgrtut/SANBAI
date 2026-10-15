@@ -6,6 +6,7 @@ import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
@@ -37,7 +38,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -55,7 +55,7 @@ internal class AddTrainingViewModel(
     importUri: String?,
 ) : ComposeBaseViewModel<AddTrainingState>(
     initialState = run {
-        val dateMillis = Clock.System.now().toEpochMilliseconds()
+        val dateMillis = nowInMillis()
         AddTrainingState(
             dateMillis = dateMillis,
             dateFormatted = TimeUtils.formatDate(dateMillis)
@@ -253,7 +253,7 @@ internal class AddTrainingViewModel(
                     )
                 }
             }
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Default) {
                 val trainingId = trainingRepository.saveTraining(
                     dateMillis = state.dateMillis,
                     type = state.trainingType,

@@ -71,3 +71,6 @@ object TimeUtils {
         return first == second
     }
 }
+
+@AllowDetektPublic
+expect fun nowInMillis(): Long

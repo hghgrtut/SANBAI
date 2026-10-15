@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.main.presentation
+package by.rowing.sanbaiteam.shared.main.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.DirectionsBoat
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -31,11 +31,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import by.rowing.sanbaiteam.R
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
@@ -107,7 +104,7 @@ private fun WelcomeSection() {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.DirectionsBoat,
+                imageVector = Icons.Default.Home,
                 contentDescription = "Rowing App",
                 modifier = Modifier.size(60.dp),
                 tint = ColorPalette.White
@@ -141,7 +138,7 @@ private fun NavigationGrid(
         NavigationCard(
             title = "Team Athletes",
             subtitle = "Manage your rowing team",
-            icon = Icons.Default.People,
+            icon = Icons.Default.Person,
             iconBackgroundColor = ColorPalette.Blue50,
             textColor = ColorPalette.White,
             onClick = actions::navigateToAthletesScreen,
@@ -150,15 +147,15 @@ private fun NavigationGrid(
         NavigationCard(
             title = "Training Sessions",
             subtitle = "Log and view workouts",
-            icon = Icons.Default.FitnessCenter,
+            icon = Icons.Default.Star,
             iconBackgroundColor = ColorPalette.Green50,
             textColor = ColorPalette.Grey10,
             onClick = actions::navigateToTrainingsScreen
         )
         NavigationCard(
-            title = stringResource(R.string.calculator_title),
-            subtitle = stringResource(R.string.calculator_main_subtitle),
-            icon = Icons.Default.Calculate,
+            title = PlatformStrings.calculatorTitle,
+            subtitle = PlatformStrings.calculatorSubtitle,
+            icon = Icons.Default.Info,
             iconBackgroundColor = ColorPalette.Orange50,
             textColor = ColorPalette.Grey10,
             onClick = actions::navigateToCalculatorScreen
@@ -244,7 +241,7 @@ private fun NavigationCard(
                 )
             }
             Icon(
-                imageVector = Icons.Default.ChevronRight,
+                imageVector = Icons.Default.KeyboardArrowRight,
                 contentDescription = "Navigate to $title",
                 modifier = Modifier.size(24.dp),
                 tint = when {
@@ -257,7 +254,7 @@ private fun NavigationCard(
     }
 }
 
-@Preview
+@Suppress("unused")
 @Composable
 private fun MainScreenPreview() {
     ComposePreviewWrapper { MainScreenContent(actions = MainScreenActions.empty()) }

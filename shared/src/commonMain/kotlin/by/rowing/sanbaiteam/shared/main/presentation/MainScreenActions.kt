@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.main.presentation
+package by.rowing.sanbaiteam.shared.main.presentation
 
 internal interface MainScreenActions {
 

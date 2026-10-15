@@ -31,24 +31,24 @@ internal class AthletesRepositoryImpl(
     }
 
     override suspend fun getAllAthletesOnce(): List<AthleteEntity> =
-        withContext(Dispatchers.IO) { dao.getAllAthletes().first() }
+        withContext(Dispatchers.Default) { dao.getAllAthletes().first() }
 
     override suspend fun addAthlete(athlete: AthleteEntity): Long =
-        withContext(Dispatchers.IO) { dao.addAthlete(athlete = athlete) }
+        withContext(Dispatchers.Default) { dao.addAthlete(athlete = athlete) }
 
     override suspend fun getAthlete(athleteId: Long): AthleteEntity? =
-        withContext(Dispatchers.IO) { dao.getById(athleteId) }
+        withContext(Dispatchers.Default) { dao.getById(athleteId) }
 
     override suspend fun updateAthlete(athlete: AthleteEntity) =
-        withContext(Dispatchers.IO) { dao.updateAthlete(athlete) }
+        withContext(Dispatchers.Default) { dao.updateAthlete(athlete) }
 
     override suspend fun getPersonalBests(athleteId: Long): List<AthletePersonalBestEntity> =
-        withContext(Dispatchers.IO) { personalBestDao.getByAthlete(athleteId) }
+        withContext(Dispatchers.Default) { personalBestDao.getByAthlete(athleteId) }
 
     override suspend fun replacePersonalBests(
         athleteId: Long,
         bests: List<AthletePersonalBestEntity>,
-    ) = withContext(Dispatchers.IO) {
+    ) = withContext(Dispatchers.Default) {
         personalBestDao.replaceAllForAthlete(
             athleteId = athleteId,
             bests = bests.map {
@@ -64,7 +64,7 @@ internal class AthletesRepositoryImpl(
         athleteIds: List<Long>,
         boatType: TrainingPieceType,
         distanceMeters: Int,
-    ): Map<Long, AthletePersonalBestEntity> = withContext(Dispatchers.IO) {
+    ): Map<Long, AthletePersonalBestEntity> = withContext(Dispatchers.Default) {
         if (athleteIds.isEmpty()) {
             emptyMap()
         } else {
@@ -76,11 +76,12 @@ internal class AthletesRepositoryImpl(
         }
     }
 
-    override suspend fun getAthleteNameMap(athleteIds: List<Long>): Map<Long, String> = withContext(Dispatchers.IO) {
+    override suspend fun getAthleteNameMap(athleteIds: List<Long>): Map<Long, String> =
+        withContext(Dispatchers.Default) {
         if (athleteIds.isEmpty()) emptyMap() else dao.getAthletesByIds(athleteIds).associate { it.id to it.name }
     }
 
-    override suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long? = withContext(Dispatchers.IO) {
+    override suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long? = withContext(Dispatchers.Default) {
         dao.getAthleteBySpeedCoachSerial(serial)?.id
     }
 }

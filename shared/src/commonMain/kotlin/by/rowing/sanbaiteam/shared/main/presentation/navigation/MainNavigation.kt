@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.main.presentation.navigation
+package by.rowing.sanbaiteam.shared.main.presentation.navigation
 
 import by.rowing.sanbaiteam.core.presentation.compose.NavigationDestination
 import kotlinx.serialization.Serializable

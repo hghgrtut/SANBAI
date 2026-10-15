@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.jetbrains.kotlin.plugin.serialization)
 }
 
 kotlin {
@@ -31,10 +32,20 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":uikit"))
+            implementation(project(":core:util"))
             implementation(project(":core:annotation"))
+            implementation(project(":core:navigation"))
+            implementation(project(":core:base"))
+            implementation(project(":data:local"))
+            implementation(project(":feature:calculator"))
+            implementation(project(":feature:athlete"))
+            implementation(project(":feature:training"))
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -45,9 +56,15 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "by.rowing.sanbaiteam.shared.resources"
+    publicResClass = true
 }

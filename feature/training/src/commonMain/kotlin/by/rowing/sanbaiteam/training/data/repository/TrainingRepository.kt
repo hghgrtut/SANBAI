@@ -25,7 +25,7 @@ internal class TrainingRepository(
         pieces: List<TrainingAthletePieceEntity>,
         sourceDeviceSerial: String? = null,
         sourceSessionName: String? = null,
-    ): Long = withContext(Dispatchers.IO) {
+    ): Long = withContext(Dispatchers.Default) {
         dao.saveTrainingWithPieces(
             training = TrainingEntity(
                 dateMillis = dateMillis,
@@ -43,7 +43,7 @@ internal class TrainingRepository(
         deviceSerial: String?,
         sessionName: String?
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Default) {
             dao.updateImportMetadata(
                 trainingId = trainingId,
                 relativePath = relativePath,
@@ -53,7 +53,7 @@ internal class TrainingRepository(
         }
     }
 
-    suspend fun getTrainingsList(): List<ListTrainingStateItem> = withContext(Dispatchers.IO) {
+    suspend fun getTrainingsList(): List<ListTrainingStateItem> = withContext(Dispatchers.Default) {
         dao.getAllTrainingEntities().mapNotNull { training ->
             val pieces = dao.getPiecesForTraining(training.id)
             if (pieces.isEmpty()) return@mapNotNull null
@@ -75,7 +75,7 @@ internal class TrainingRepository(
         }
     }
 
-    suspend fun getTrainingDetail(trainingId: Long): TrainingDetailState = withContext(Dispatchers.IO) {
+    suspend fun getTrainingDetail(trainingId: Long): TrainingDetailState = withContext(Dispatchers.Default) {
         val training = dao.getTrainingById(trainingId) ?: return@withContext TrainingDetailState(
             isLoading = false,
             notFound = true

@@ -18,7 +18,7 @@ internal class TrainingTransferRepository(
     private val importStorage: TrainingImportStorage,
 ) {
 
-    suspend fun exportAllBackup(): TrainingBackup = withContext(Dispatchers.IO) {
+    suspend fun exportAllBackup(): TrainingBackup = withContext(Dispatchers.Default) {
         val athletesById = athletesRepository.getAllAthletesOnce().associateBy { it.id }
         val trainingsWithPieces = trainingDao.getAllTrainingEntities().map { training ->
             training to trainingDao.getPiecesForTraining(training.id)
@@ -67,7 +67,7 @@ internal class TrainingTransferRepository(
         )
     }
 
-    suspend fun importBackup(backup: TrainingBackup): TrainingTransferResult = withContext(Dispatchers.IO) {
+    suspend fun importBackup(backup: TrainingBackup): TrainingTransferResult = withContext(Dispatchers.Default) {
         if (backup.formatVersion != TrainingBackup.FORMAT_VERSION) {
             throw IllegalArgumentException(
                 "Unsupported backup format version: ${backup.formatVersion}, " +
