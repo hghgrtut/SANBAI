@@ -7,6 +7,7 @@ import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.data.di.databaseModule
 import by.rowing.sanbaiteam.shared.di.sharedAppModule
 import by.rowing.sanbaiteam.training.di.trainingModule
+import by.rowing.sanbaiteam.uikit.component.IosBackGestureHandler
 import org.koin.core.context.startKoin
 import platform.UIKit.UIViewController
 
@@ -21,5 +22,7 @@ fun mainViewController(): UIViewController {
             trainingModule,
         )
     }
-    return ComposeUIViewController { App() }
+    val controller = ComposeUIViewController { App() }
+    IosBackGestureHandler.attachToView(controller.view)
+    return controller
 }
