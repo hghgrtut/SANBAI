@@ -30,25 +30,21 @@ internal class AthletesRepositoryImpl(
         }
     }
 
-    override suspend fun getAllAthletesOnce(): List<AthleteEntity> =
-        withContext(Dispatchers.Default) { dao.getAllAthletes().first() }
+    override suspend fun getAllAthletesOnce(): List<AthleteEntity> = dao.getAllAthletes().first()
 
-    override suspend fun addAthlete(athlete: AthleteEntity): Long =
-        withContext(Dispatchers.Default) { dao.addAthlete(athlete = athlete) }
+    override suspend fun addAthlete(athlete: AthleteEntity): Long = dao.addAthlete(athlete = athlete)
 
-    override suspend fun getAthlete(athleteId: Long): AthleteEntity? =
-        withContext(Dispatchers.Default) { dao.getById(athleteId) }
+    override suspend fun getAthlete(athleteId: Long): AthleteEntity? = dao.getById(athleteId = athleteId)
 
-    override suspend fun updateAthlete(athlete: AthleteEntity) =
-        withContext(Dispatchers.Default) { dao.updateAthlete(athlete) }
+    override suspend fun updateAthlete(athlete: AthleteEntity) = dao.updateAthlete(athlete = athlete)
 
     override suspend fun getPersonalBests(athleteId: Long): List<AthletePersonalBestEntity> =
-        withContext(Dispatchers.Default) { personalBestDao.getByAthlete(athleteId) }
+        personalBestDao.getByAthlete(athleteId = athleteId)
 
     override suspend fun replacePersonalBests(
         athleteId: Long,
         bests: List<AthletePersonalBestEntity>,
-    ) = withContext(Dispatchers.Default) {
+    ) {
         personalBestDao.replaceAllForAthlete(
             athleteId = athleteId,
             bests = bests.map {
@@ -78,10 +74,9 @@ internal class AthletesRepositoryImpl(
 
     override suspend fun getAthleteNameMap(athleteIds: List<Long>): Map<Long, String> =
         withContext(Dispatchers.Default) {
-        if (athleteIds.isEmpty()) emptyMap() else dao.getAthletesByIds(athleteIds).associate { it.id to it.name }
-    }
+            if (athleteIds.isEmpty()) emptyMap() else dao.getAthletesByIds(athleteIds).associate { it.id to it.name }
+        }
 
-    override suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long? = withContext(Dispatchers.Default) {
-        dao.getAthleteBySpeedCoachSerial(serial)?.id
-    }
+    override suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long? =
+        dao.getAthleteBySpeedCoachSerial(serial = serial)?.id
 }

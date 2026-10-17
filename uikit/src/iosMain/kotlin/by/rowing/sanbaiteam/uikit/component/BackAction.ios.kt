@@ -6,15 +6,14 @@ import platform.UIKit.UINavigationController
 import platform.UIKit.UIViewController
 
 @Composable
-internal actual fun defaultBackAction(): () -> Unit {
-    return {
-        val root = UIApplication.sharedApplication.keyWindow?.rootViewController
-        findNavigationController(root)?.popViewControllerAnimated(true)
-    }
+internal actual fun defaultBackAction(): () -> Unit = {
+    findNavigationController(viewController = UIApplication.sharedApplication.keyWindow?.rootViewController)
+        ?.popViewControllerAnimated(animated = true)
 }
 
-private fun findNavigationController(viewController: UIViewController?): UINavigationController? {
-    if (viewController == null) return null
-    if (viewController is UINavigationController) return viewController
-    return findNavigationController(viewController.presentedViewController)
-}
+private fun findNavigationController(viewController: UIViewController?): UINavigationController? =
+    if (viewController == null || viewController is UINavigationController) {
+        viewController
+    } else {
+        findNavigationController(viewController = viewController.presentedViewController)
+    }

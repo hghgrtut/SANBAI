@@ -25,17 +25,15 @@ internal class TrainingRepository(
         pieces: List<TrainingAthletePieceEntity>,
         sourceDeviceSerial: String? = null,
         sourceSessionName: String? = null,
-    ): Long = withContext(Dispatchers.Default) {
-        dao.saveTrainingWithPieces(
-            training = TrainingEntity(
-                dateMillis = dateMillis,
-                type = type,
-                sourceDeviceSerial = sourceDeviceSerial,
-                sourceSessionName = sourceSessionName
-            ),
-            pieces = pieces
-        )
-    }
+    ): Long = dao.saveTrainingWithPieces(
+        training = TrainingEntity(
+            dateMillis = dateMillis,
+            type = type,
+            sourceDeviceSerial = sourceDeviceSerial,
+            sourceSessionName = sourceSessionName
+        ),
+        pieces = pieces
+    )
 
     suspend fun updateTrainingImportMetadata(
         trainingId: Long,
@@ -43,14 +41,12 @@ internal class TrainingRepository(
         deviceSerial: String?,
         sessionName: String?
     ) {
-        withContext(Dispatchers.Default) {
-            dao.updateImportMetadata(
-                trainingId = trainingId,
-                relativePath = relativePath,
-                deviceSerial = deviceSerial,
-                sessionName = sessionName
-            )
-        }
+        dao.updateImportMetadata(
+            trainingId = trainingId,
+            relativePath = relativePath,
+            deviceSerial = deviceSerial,
+            sessionName = sessionName
+        )
     }
 
     suspend fun getTrainingsList(): List<ListTrainingStateItem> = withContext(Dispatchers.Default) {
@@ -131,6 +127,7 @@ internal class TrainingRepository(
             notFound = false
         )
     }
+
     private fun formatWorkSummary(pieces: List<TrainingAthletePieceEntity>): String {
         if (pieces.isEmpty()) return ""
         val groups = LinkedHashMap<Int, Int>()

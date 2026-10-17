@@ -36,8 +36,8 @@ import by.rowing.sanbaiteam.training.resources.add_training_validation_select_at
 import by.rowing.sanbaiteam.uikit.component.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -236,7 +236,7 @@ internal class AddTrainingViewModel(
             changeState { copy(validationError = error) }
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(context = Dispatchers.Default) {
             val piecesToSave = state.crewAthletes.flatMap { crewAthlete ->
                 state.pieces.mapIndexed { index, piece ->
                     TrainingAthletePieceEntity(
@@ -253,32 +253,30 @@ internal class AddTrainingViewModel(
                     )
                 }
             }
-            withContext(Dispatchers.Default) {
-                val trainingId = trainingRepository.saveTraining(
-                    dateMillis = state.dateMillis,
-                    type = state.trainingType,
-                    pieces = piecesToSave,
-                    sourceDeviceSerial = state.pendingSourceSerial,
-                    sourceSessionName = state.pendingSourceSessionName,
+            val trainingId = trainingRepository.saveTraining(
+                dateMillis = state.dateMillis,
+                type = state.trainingType,
+                pieces = piecesToSave,
+                sourceDeviceSerial = state.pendingSourceSerial,
+                sourceSessionName = state.pendingSourceSessionName,
+            )
+            if (state.pendingRawCsvs.isNotEmpty()) {
+                val importSource = state.pendingImportSource ?: TrainingImportSource.SPEED_COACH
+                val mergedCsv = TrainingImportParsers.bySource(importSource).merge(state.pendingRawCsvs)
+                val relativePath = trainingImportStorage.saveCsv(
+                    trainingId = trainingId,
+                    source = importSource,
+                    serial = state.pendingSourceSerial,
+                    csvText = mergedCsv
                 )
-                if (state.pendingRawCsvs.isNotEmpty()) {
-                    val importSource = state.pendingImportSource ?: TrainingImportSource.SPEED_COACH
-                    val mergedCsv = TrainingImportParsers.bySource(importSource).merge(state.pendingRawCsvs)
-                    val relativePath = trainingImportStorage.saveCsv(
-                        trainingId = trainingId,
-                        source = importSource,
-                        serial = state.pendingSourceSerial,
-                        csvText = mergedCsv
-                    )
-                    trainingRepository.updateTrainingImportMetadata(
-                        trainingId = trainingId,
-                        relativePath = relativePath,
-                        deviceSerial = state.pendingSourceSerial,
-                        sessionName = state.pendingSourceSessionName
-                    )
-                }
+                trainingRepository.updateTrainingImportMetadata(
+                    trainingId = trainingId,
+                    relativePath = relativePath,
+                    deviceSerial = state.pendingSourceSerial,
+                    sessionName = state.pendingSourceSessionName
+                )
             }
-            composeNavigator.navigateBack()
+            Dispatchers.Main.immediate(composeNavigator::navigateBack)
         }
     }
 

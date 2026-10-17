@@ -5,7 +5,6 @@ import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
 /**
  * Перехватывает системное событие "Назад".
- * На Android делегирует в [androidx.activity.compose.BackHandler], на iOS — no-op.
  */
 @AllowDetektPublic
 @Composable
