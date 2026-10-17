@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalView
 import platform.Foundation.NSNotificationCenter
 import platform.UIKit.UIKeyboardWillHideNotification
 import platform.UIKit.UIKeyboardWillShowNotification
@@ -21,7 +20,6 @@ internal actual fun Modifier.clearFocusOnKeyboardDismiss(
     var keyboardAppearedSinceLastFocused by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
-    val rootView = LocalView.current
 
     DisposableEffect(Unit) {
         val showObserver = NSNotificationCenter.defaultCenter.addObserverForName(
