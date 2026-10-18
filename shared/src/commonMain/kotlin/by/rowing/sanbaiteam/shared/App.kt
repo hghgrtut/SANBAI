@@ -43,9 +43,7 @@ fun App(importUri: String? = null) {
             navController.navigate(route = TrainingNavGraphProvider.getAddTrainingRoute(importUri = uri))
         }
 
-        CompositionLocalProvider(
-            LocalClickableState provides clickableState,
-        ) {
+        CompositionLocalProvider(LocalClickableState provides clickableState) {
             NavHost(
                 navController = navController,
                 startDestination = MainNavigation.Root,

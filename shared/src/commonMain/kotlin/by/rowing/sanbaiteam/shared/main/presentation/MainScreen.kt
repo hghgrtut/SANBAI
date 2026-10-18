@@ -33,6 +33,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.shared.resources.Res
+import by.rowing.sanbaiteam.shared.resources.calculator_main_subtitle
+import by.rowing.sanbaiteam.shared.resources.calculator_title
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
@@ -40,6 +43,7 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerL
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXL
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun MainScreen(viewModel: MainViewModel) { MainScreenContent(viewModel) }
@@ -145,16 +149,16 @@ private fun NavigationGrid(
             isHighlighted = true
         )
         NavigationCard(
-            title = "Training Sessions",
-            subtitle = "Log and view workouts",
+            title = "Тренировки",
+            subtitle = "Просмотр тренировок",
             icon = Icons.Default.Star,
             iconBackgroundColor = ColorPalette.Green50,
             textColor = ColorPalette.Grey10,
             onClick = actions::navigateToTrainingsScreen
         )
         NavigationCard(
-            title = PlatformStrings.calculatorTitle,
-            subtitle = PlatformStrings.calculatorSubtitle,
+            title = stringResource(Res.string.calculator_title),
+            subtitle = stringResource(Res.string.calculator_main_subtitle),
             icon = Icons.Default.Info,
             iconBackgroundColor = ColorPalette.Orange50,
             textColor = ColorPalette.Grey10,

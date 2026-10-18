@@ -116,11 +116,13 @@ internal class ListTrainingViewModel(
                 handle = handle,
                 text = json
             )
-            val notice = if (success) {
-                UiText.of(Res.string.training_transfer_export_success)
-            } else {
-                UiText.of(Res.string.training_transfer_export_error)
-            }
+            val notice = UiText.of(
+                resource = if (success) {
+                    Res.string.training_transfer_export_success
+                } else {
+                    Res.string.training_transfer_export_error
+                }
+            )
             changeState { copy(transferNotice = notice) }
         }
     }

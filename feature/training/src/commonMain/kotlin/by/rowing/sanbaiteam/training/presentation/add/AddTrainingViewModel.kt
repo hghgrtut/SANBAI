@@ -6,6 +6,7 @@ import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -353,7 +354,7 @@ internal class AddTrainingViewModel(
                 recoveryHeartRate = interval.recoveryHeartRate,
                 distanceText = interval.distanceMeters.toString(),
                 timeText = RowingTimeFormat.formatDuration(interval.timeMillis),
-                strokeRateText = RowingTimeFormat.formatStrokeRate(interval.strokeRate),
+                strokeRateText = formatTenths(value = interval.strokeRate),
             )
         }
         val isFirstImport = state.pendingRawCsvs.isEmpty()

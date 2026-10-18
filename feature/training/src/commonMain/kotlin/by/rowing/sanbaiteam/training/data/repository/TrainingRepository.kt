@@ -4,6 +4,7 @@ import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -113,7 +114,7 @@ internal class TrainingRepository(
                         timeMillis = piece.timeMillis,
                         distanceMeters = piece.distanceMeters
                     ).orEmpty(),
-                    strokeRateFormatted = RowingTimeFormat.formatStrokeRate(piece.strokeRate),
+                    strokeRateFormatted = formatTenths(value = piece.strokeRate),
                     avgHeartRate = piece.avgHeartRate,
                     maxHeartRate = piece.maxHeartRate,
                     recoveryHeartRate = piece.recoveryHeartRate,

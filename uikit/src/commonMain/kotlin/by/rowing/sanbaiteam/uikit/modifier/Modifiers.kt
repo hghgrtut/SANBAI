@@ -66,10 +66,5 @@ internal inline fun Modifier.applyIfEnabled(
     builder: Modifier.() -> Modifier,
 ): Modifier = if (enabled == true) builder() else this
 
-/**
- * Сбрасывает фокус при скрытии экранной клавиатуры.
- * Платформенная реализация: на Android отслеживает видимость IME, на iOS — no-op.
- */
-internal expect fun Modifier.clearFocusOnKeyboardDismiss(
-    onKeyboardDismiss: () -> Unit = {},
-): Modifier
+/** Сбрасывает фокус при скрытии экранной клавиатуры. */
+internal expect fun Modifier.clearFocusOnKeyboardDismiss(onKeyboardDismiss: () -> Unit = {}): Modifier

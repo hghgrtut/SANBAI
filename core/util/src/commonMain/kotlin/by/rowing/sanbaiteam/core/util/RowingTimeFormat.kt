@@ -124,8 +124,6 @@ object RowingTimeFormat {
         return "${formatDuration(pace)} /500м"
     }
 
-    fun formatStrokeRate(strokeRate: Double): String = formatTenths(strokeRate)
-
     fun parseStrokeRate(input: String): Double? {
         val value = input.trim().replace(',', '.').toDoubleOrNull() ?: return null
         if (value < 0) return null

@@ -13,9 +13,7 @@ import platform.Foundation.NSNotificationCenter
 import platform.UIKit.UIKeyboardWillHideNotification
 import platform.UIKit.UIKeyboardWillShowNotification
 
-internal actual fun Modifier.clearFocusOnKeyboardDismiss(
-    onKeyboardDismiss: () -> Unit,
-): Modifier = composed {
+internal actual fun Modifier.clearFocusOnKeyboardDismiss(onKeyboardDismiss: () -> Unit): Modifier = composed {
     var isFocused by remember { mutableStateOf(false) }
     var keyboardAppearedSinceLastFocused by remember { mutableStateOf(false) }
 

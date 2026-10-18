@@ -13,9 +13,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsCompat
 
-internal actual fun Modifier.clearFocusOnKeyboardDismiss(
-    onKeyboardDismiss: () -> Unit,
-): Modifier = composed {
+internal actual fun Modifier.clearFocusOnKeyboardDismiss(onKeyboardDismiss: () -> Unit): Modifier = composed {
     var isFocused by remember { mutableStateOf(false) }
     var keyboardAppearedSinceLastFocused by remember { mutableStateOf(false) }
 

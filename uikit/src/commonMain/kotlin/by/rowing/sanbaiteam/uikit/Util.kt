@@ -9,9 +9,5 @@ import by.rowing.sanbaiteam.uikit.modifier.LocalClickableState
 @AllowDetektPublic
 @Composable
 fun ComposePreviewWrapper(content: @Composable () -> Unit) {
-    CompositionLocalProvider(
-        LocalClickableState provides ClickableState()
-    ) {
-        content.invoke()
-    }
+    CompositionLocalProvider(LocalClickableState provides ClickableState()) { content.invoke() }
 }

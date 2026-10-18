@@ -26,7 +26,7 @@ internal data class ButtonPreviewState(
 @Composable
 internal fun ButtonPreviewContent(
     state: ButtonPreviewState,
-    label: String = "РЎРѕРѕР±С‰РёС‚СЊ Рѕ РЅР°СЂСѓС€РµРЅРёРё",
+    label: String = "Button label",
 ) {
     CompositionLocalProvider(LocalClickableState provides ClickableState()) {
         Column(

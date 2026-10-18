@@ -18,7 +18,9 @@ internal actual fun rememberTrainingImportPicker(onFilesPicked: (List<String>) -
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris -> onFilesPicked(uris.map { it.toString() }) }
-    return remember(launcher) { { launcher.launch(ANY_MIME_TYPE) } }
+    return remember(launcher) {
+        { launcher.launch(ANY_MIME_TYPE) }
+    }
 }
 
 @Composable
@@ -26,7 +28,9 @@ internal actual fun rememberCreateBackupLauncher(onCreated: (String) -> Unit): (
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument(mimeType = JSON_APP_MIME_TYPE)
     ) { uri -> if (uri != null) onCreated(uri.toString()) }
-    return remember(launcher) { { fileName -> launcher.launch(fileName) } }
+    return remember(launcher) {
+        { fileName -> launcher.launch(fileName) }
+    }
 }
 
 @Composable
