@@ -41,6 +41,7 @@ android {
 dependencies {
 
     implementation(project(":uikit"))
+    implementation(project(":shared"))
     implementation(project(":core:util"))
     implementation(project(":core:annotation"))
     implementation(project(":core:navigation"))

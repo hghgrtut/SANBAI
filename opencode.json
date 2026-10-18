@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(.\\gradlew.bat:*)",
+      "Bash(./gradlew:*)",
+      "Bash(gradlew:*)",
+      "Bash(.\\mvnw.cmd:*)",
+      "Bash(./mvnw:*)",
+      "Bash(mvn:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run test:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(yarn build:*)",
+      "Bash(yarn test:*)",
+      "Bash(bun run build:*)",
+      "Bash(bun run test:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(./gradlew:*)",
+      "Bash(make:*)",
+      "Bash(cmake:*)",
+      "Bash(swift build:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(./gradlew.bat:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(pytest:*)",
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(cargo build:*)",
+      "Bash(cargo test:*)"
+    ]
+  }
+}

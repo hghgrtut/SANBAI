@@ -1,40 +1,65 @@
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.plugin.serialization)
 }
 
-android {
-    namespace = "by.rowing.sanbaiteam.calculator"
-    compileSdk = 37
-
-    defaultConfig {
+kotlin {
+    android {
+        namespace = "by.rowing.sanbaiteam.calculator"
+        compileSdk = 37
         minSdk = 25
+        androidResources {
+            enable = true
+        }
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+                }
+            }
+        }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "Calculator"
+            isStatic = true
+        }
     }
-    buildFeatures {
-        compose = true
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:util"))
+            implementation(project(":core:annotation"))
+            implementation(project(":core:navigation"))
+            implementation(project(":core:base"))
+            implementation(project(":uikit"))
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(libs.jetbrains.navigation.compose)
+            implementation(libs.jetbrains.lifecycle.viewmodel)
+            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 
-dependencies {
-    implementation(project(":core:util"))
-    implementation(project(":core:annotation"))
-    implementation(project(":core:navigation"))
-    implementation(project(":core:base"))
-    implementation(project(":uikit"))
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.foundation.layout)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.koin.core)
-    implementation(libs.koin.androidx.compose)
+compose.resources {
+    packageOfResClass = "by.rowing.sanbaiteam.calculator.resources"
 }
