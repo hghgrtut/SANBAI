@@ -19,18 +19,16 @@ ksp = "2.3.11"
 fragmentKtx = "1.9.1"
 gitlabArturboschDetekt = "1.23.8"
 serializationJson = "1.11.0"
-garminFit = "21.218.0"
 mockk = "1.14.11"
 composeMultiplatform = "1.10.0"
 jetbrainsNavigation = "2.9.0"
 jetbrainsLifecycle = "2.9.0"
 sqlite = "2.6.0"
-kotlinxDatetime = "0.6.2"
+kotlinxDatetime = "0.7.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-garmin-fit = { group = "com.garmin", name = "fit", version.ref = "garminFit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }

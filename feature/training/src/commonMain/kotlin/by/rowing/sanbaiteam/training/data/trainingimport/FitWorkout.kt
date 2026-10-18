@@ -23,6 +23,5 @@ internal data class FitRecord(
 
 /**
  * Decodes a Concept2 `.fit` workout into platform-neutral data.
- * Implemented on Android via the Garmin FIT SDK; unsupported on iOS.
  */
-internal expect fun decodeFitWorkout(bytes: ByteArray): FitWorkout
+internal fun decodeFitWorkout(bytes: ByteArray): FitWorkout = by.rowing.sanbaiteam.training.data.trainingimport.decodeFitWorkoutImpl(bytes)
