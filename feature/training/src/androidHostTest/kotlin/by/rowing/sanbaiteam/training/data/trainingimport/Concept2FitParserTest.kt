@@ -27,7 +27,7 @@ import com.garmin.fit.File as GarminFile
 internal class Concept2FitParserTest {
 
     @Test
-    fun parse_pm5IntervalWorkout_returnsOnlyActiveLapsWithRecoveryHeartRate() {
+    fun `parse pm5Workout returnsActiveLaps`() {
         val fixture = buildFixture()
 
         val parsed = Concept2FitParser.parse(fixture.bytes, null)
@@ -48,7 +48,7 @@ internal class Concept2FitParserTest {
     }
 
     @Test
-    fun parse_activeLapWithoutFollowingRest_hasNoRecoveryHeartRate() {
+    fun `parse lapWithoutRest hasNoRecoveryHeartRate`() {
         val fixture = buildFixture()
 
         val lastPiece = Concept2FitParser.parse(fixture.bytes, null).intervals.last()
@@ -59,7 +59,7 @@ internal class Concept2FitParserTest {
     }
 
     @Test
-    fun parse_recordOnLastLapEndTimestamp_isIncludedInLastLap() {
+    fun `parse recordOnLastLapEndTimestamp isIncluded`() {
         val fixture = buildFixture()
 
         val lastPiece = Concept2FitParser.parse(fixture.bytes, null).intervals.last()
@@ -68,7 +68,7 @@ internal class Concept2FitParserTest {
     }
 
     @Test
-    fun parse_restLapsAreStoredAsArchiveRows_withoutBecomingPieces() {
+    fun `parse restLapsAreStoredAsArchiveRows`() {
         val fixture = buildFixture()
 
         val parsed = Concept2FitParser.parse(fixture.bytes, null)
@@ -84,7 +84,7 @@ internal class Concept2FitParserTest {
     }
 
     @Test
-    fun parse_nonRowingFitFile_isRejected() {
+    fun `parse nonRowingFitFile isRejected`() {
         val bytes = encode(
             listOf(
                 fileId(START_MILLIS),
@@ -101,14 +101,14 @@ internal class Concept2FitParserTest {
     }
 
     @Test
-    fun parse_fileWithoutFitHeader_isRejected() {
+    fun `parse fileWithoutFitHeader isRejected`() {
         val bytes = "Interval Summaries:\n1,500.0".toByteArray()
 
         assertFailsWith<IllegalArgumentException> { Concept2FitParser.parse(bytes, null) }
     }
 
     @Test
-    fun matches_fitFileAndSpeedCoachCsv_areDetectedBySource() {
+    fun `matches files areDetectedBySource`() {
         assertTrue(Concept2FitParser.matches(buildFixture().bytes))
         assertTrue(SpeedCoachCsvParser.matches(speedCoachCsv().toByteArray()))
 
@@ -117,7 +117,7 @@ internal class Concept2FitParserTest {
     }
 
     @Test
-    fun parseAndMerge_twoFiles_concatenateLapArchives() {
+    fun `parseAndMerge twoFiles concatenateLapArchives`() {
         val first = Concept2FitParser.parse(buildFixture().bytes, null)
         val second = Concept2FitParser.parse(buildFixture().bytes, null)
 

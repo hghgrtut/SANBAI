@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.uikit.component
 
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -7,14 +8,15 @@ import kotlinx.cinterop.ObjCAction
 import kotlinx.cinterop.useContents
 import platform.CoreGraphics.CGPoint
 import platform.Foundation.NSSelectorFromString
+import platform.UIKit.UIGestureRecognizerStateEnded
 import platform.UIKit.UIPanGestureRecognizer
 import platform.UIKit.UIRectEdgeLeft
-import platform.UIKit.UIGestureRecognizerStateEnded
 import platform.UIKit.UIScreenEdgePanGestureRecognizer
 import platform.UIKit.UIView
 import platform.darwin.NSObject
 
 @OptIn(ExperimentalForeignApi::class)
+@AllowDetektPublic
 object IosBackGestureHandler {
 
     private var currentOnBack: (() -> Unit)? = null

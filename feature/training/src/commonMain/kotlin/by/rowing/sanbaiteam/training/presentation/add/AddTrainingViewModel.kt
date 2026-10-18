@@ -427,11 +427,15 @@ internal class AddTrainingViewModel(
     }
 
     private fun toTrainingDateMillis(startTimeMillis: Long): Long {
-        val date = Instant.fromEpochMilliseconds(startTimeMillis)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
+        val timezone = TimeZone.currentSystemDefault()
+        return Instant.fromEpochMilliseconds(startTimeMillis)
+            .toLocalDateTime(timeZone = timezone)
             .date
-        return date.atTime(hour = 12, minute = 0)
-            .toInstant(TimeZone.currentSystemDefault())
+            .atTime(
+                hour = 12,
+                minute = 0
+            )
+            .toInstant(timeZone = timezone)
             .toEpochMilliseconds()
     }
 

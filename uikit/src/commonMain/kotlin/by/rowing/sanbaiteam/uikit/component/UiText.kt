@@ -20,6 +20,9 @@ class UiText private constructor(
 
     companion object {
 
-        fun of(resource: StringResource, vararg args: Any): UiText = UiText(resource, args.toList())
+        fun of(
+            resource: StringResource,
+            vararg args: Any
+        ): UiText = UiText(resource, args.toList())
     }
 }

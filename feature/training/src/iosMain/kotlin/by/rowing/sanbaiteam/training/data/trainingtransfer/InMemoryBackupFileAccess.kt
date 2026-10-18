@@ -4,7 +4,10 @@ internal class InMemoryBackupFileAccess : BackupFileAccess {
 
     private val files = mutableMapOf<String, String>()
 
-    override suspend fun write(handle: String, text: String): Boolean {
+    override suspend fun write(
+        handle: String,
+        text: String
+    ): Boolean {
         files[handle] = text
         return true
     }

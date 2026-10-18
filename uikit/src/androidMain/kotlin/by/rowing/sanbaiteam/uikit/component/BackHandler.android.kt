@@ -5,7 +5,10 @@ import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
 @Composable
 @AllowDetektPublic
-actual fun BackHandler(enabled: Boolean, onBack: () -> Unit) {
+actual fun BackHandler(
+    enabled: Boolean,
+    onBack: () -> Unit
+) {
     androidx.activity.compose.BackHandler(
         enabled = enabled,
         onBack = onBack

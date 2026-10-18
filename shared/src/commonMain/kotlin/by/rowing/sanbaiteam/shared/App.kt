@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import by.rowing.sanbaiteam.athlete.presentation.navigation.AthletesNavGraphProvider
 import by.rowing.sanbaiteam.calculator.presentation.navigation.CalculatorNavGraphProvider
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigationEvent
 import by.rowing.sanbaiteam.shared.main.presentation.MainScreen
@@ -24,6 +25,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
+@AllowDetektPublic
 fun App(importUri: String? = null) {
     SANBAITeamTheme {
         val composeNavigator = koinInject<ComposeNavigator>()

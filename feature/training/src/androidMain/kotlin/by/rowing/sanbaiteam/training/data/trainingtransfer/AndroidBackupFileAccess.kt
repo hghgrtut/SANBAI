@@ -7,7 +7,10 @@ import kotlinx.coroutines.withContext
 
 internal class AndroidBackupFileAccess(private val context: Context) : BackupFileAccess {
 
-    override suspend fun write(handle: String, text: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun write(
+        handle: String,
+        text: String
+    ): Boolean = withContext(Dispatchers.IO) {
         runCatching {
             context.contentResolver.openOutputStream(Uri.parse(handle))
                 ?.use { stream -> stream.write(text.toByteArray()) }
