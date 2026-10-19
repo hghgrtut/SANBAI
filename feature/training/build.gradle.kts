@@ -61,7 +61,6 @@ kotlin {
             implementation(libs.kotlinx.datetime)
         }
         androidMain.dependencies {
-            implementation(libs.garmin.fit)
             implementation(libs.koin.android)
             implementation(libs.androidx.activity.compose)
         }
@@ -73,7 +72,6 @@ kotlin {
         matching { it.name == "androidHostTest" }.configureEach {
             dependencies {
                 implementation(kotlin("test"))
-                implementation(libs.garmin.fit)
             }
         }
     }

@@ -1,16 +1,18 @@
 package by.rowing.sanbaiteam.core.util
 
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
-import kotlinx.datetime.Instant
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 
 @AllowDetektPublic
 object TimeUtils {
 
     const val MILLIS_PER_SECOND = 1_000L
+    private const val MILLIS_PER_DAY = 86_400_000L
     private const val DATE_DIGITS_LENGTH = 8
 
     private val SHORT_MONTH_NAMES = listOf(
@@ -53,22 +55,27 @@ object TimeUtils {
         }
     }
 
-    private fun Long.toLocalDate(): LocalDate =
-        Instant.fromEpochMilliseconds(this)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-            .date
-
     fun isSameCalendarDay(
         firstMillis: Long,
         secondMillis: Long,
-    ): Boolean {
-        val first = Instant.fromEpochMilliseconds(firstMillis)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-            .date
-        val second = Instant.fromEpochMilliseconds(secondMillis)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-            .date
-        return first == second
+    ): Boolean = firstMillis.toLocalDate() == secondMillis.toLocalDate()
+
+    /**
+     * Локальная для epoch-миллисекунд.
+     *
+     * Намеренно не использует `Instant`: обращение к `Instant.Companion` не резолвится
+     * в iOS-сборке. Вместо этого берём UTC-дату по epoch-дням и корректируем её на ±1 день,
+     * сравнивая границы суток в нужной таймзоне.
+     */
+    private fun Long.toLocalDate(): LocalDate {
+        val zone = TimeZone.currentSystemDefault()
+        var date = LocalDate.fromEpochDays(floorDiv(MILLIS_PER_DAY).toInt())
+        if (date.atStartOfDayIn(zone).toEpochMilliseconds() > this) {
+            date = date.minus(1, DateTimeUnit.DAY)
+        } else if (date.plus(1, DateTimeUnit.DAY).atStartOfDayIn(zone).toEpochMilliseconds() <= this) {
+            date = date.plus(1, DateTimeUnit.DAY)
+        }
+        return date
     }
 }
 
