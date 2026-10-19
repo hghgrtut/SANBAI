@@ -53,13 +53,10 @@ internal class TrainingRepository(
     }
 
     suspend fun deleteTrainings(trainingIds: List<Long>) = withContext(Dispatchers.Default) {
-        if (trainingIds.isEmpty()) return@withContext
-        val csvPaths = dao.getTrainingEntitiesByIds(trainingIds)
-            .mapNotNull { it.sourceCsvRelativePath }
-        dao.deleteTrainingsWithPieces(trainingIds)
-        csvPaths.forEach { relativePath ->
+        dao.getCsvPathsByIds(trainingIds).forEach { relativePath ->
             runCatching { importStorage.deleteCsv(relativePath) }
         }
+        dao.deleteTrainingsWithPieces(trainingIds)
     }
 
     suspend fun getTrainingsList(): List<ListTrainingStateItem> = withContext(Dispatchers.Default) {

@@ -1,6 +1,7 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
-import kotlin.math.roundToInt
+import by.rowing.sanbaiteam.training.data.models.FitLap
+import by.rowing.sanbaiteam.training.data.models.FitRecord
 
 internal class ByteReader(internal val bytes: ByteArray) {
 
@@ -68,15 +69,20 @@ internal class DevFieldDefinition(
     val size: UByte
 )
 
-internal class MesgDefinition(
-    val localMesgNum: Int,
+internal class MessageDefinition(
+    val localMessageNumber: Int,
     val globalMessageNumber: UShort,
     val endianness: Int,
     val fieldDefinitions: List<FieldDefinition>,
     val devFieldDefinitions: List<DevFieldDefinition>
 ) {
+
     companion object {
-        fun read(reader: ByteReader, headerByte: Byte): MesgDefinition {
+
+        fun read(
+            reader: ByteReader,
+            headerByte: Byte
+        ): MessageDefinition {
             reader.readByte()
             val architecture = reader.readUByte().toInt()
             val endianness = if (architecture == 0) 0 else 1
@@ -101,8 +107,8 @@ internal class MesgDefinition(
                     devFields.add(DevFieldDefinition(num, size))
                 }
             }
-            return MesgDefinition(
-                localMesgNum = (headerByte.toInt() and LOCAL_MESG_NUM_MASK),
+            return MessageDefinition(
+                localMessageNumber = (headerByte.toInt() and LOCAL_MESG_NUM_MASK),
                 globalMessageNumber = global,
                 endianness = endianness,
                 fieldDefinitions = fields,
@@ -113,8 +119,8 @@ internal class MesgDefinition(
 }
 
 internal data class FitFileData(
-    var isRowing: Boolean = false,
-    var startTimeMillis: Long? = null,
+    val isRowing: Boolean = false,
+    val startTimeMillis: Long? = null,
     val laps: MutableList<FitLap> = mutableListOf(),
     val records: MutableList<FitRecord> = mutableListOf()
 )
@@ -132,55 +138,13 @@ internal class FieldCollector {
     var fileIdTimeCreated: Long? = null
 }
 
-internal fun fitTimestampToMillis(raw: UInt): Long {
-    if (raw == UInt.MAX_VALUE) return 0L
-    val seconds = raw.toLong() + FIT_EPOCH_OFFSET_SECONDS
-    return seconds * 1000L
-}
-
-internal fun scaleElapsed(raw: UInt): Double = raw.toDouble() / 1000.0
-
-internal fun scaleDistance(raw: UInt): Double = raw.toDouble() / 100.0
-
-internal fun decodeFitWorkoutImpl(bytes: ByteArray): FitWorkout {
-    if (bytes.size < FIT_HEADER_MIN_SIZE) {
-        throw IllegalArgumentException("File does not contain a FIT header.")
-    }
-    if (!bytes.hasFitMagic()) {
-        throw IllegalArgumentException("File does not contain a FIT header.")
-    }
-    val reader = ByteReader(bytes)
-    val header = FileHeader.read(reader)
-    if (!header.isValid) {
-        throw IllegalArgumentException("File does not contain a FIT header.")
-    }
-    val dataStart = reader.position
-    val dataEnd = dataStart + header.dataSize.toInt()
-    val fileData = readDataSection(bytes, dataStart, dataEnd)
-    if (!fileData.isRowing) {
-        throw IllegalArgumentException("FIT file does not contain a rowing workout.")
-    }
-    return FitWorkout(
-        isRowing = fileData.isRowing,
-        startTimeMillis = fileData.startTimeMillis,
-        laps = fileData.laps.toList(),
-        records = fileData.records.toList()
-    )
-}
-
-internal fun ByteArray.hasFitMagic(): Boolean = hasFitMagicAt(FIT_HEADER_MAGIC_OFFSET)
-
-internal fun ByteArray.hasFitMagicAt(pos: Int): Boolean {
-    if (pos + 4 > size) return false
-    return this[pos] == '.'.code.toByte() &&
-        this[pos + 1] == 'F'.code.toByte() &&
-        this[pos + 2] == 'I'.code.toByte() &&
-        this[pos + 3] == 'T'.code.toByte()
-}
-
-internal fun readDataSection(bytes: ByteArray, start: Int, end: Int): FitFileData {
-    val fileData = FitFileData()
-    val localDefs = arrayOfNulls<MesgDefinition>(16)
+internal fun readDataSection(
+    bytes: ByteArray,
+    start: Int,
+    end: Int
+): FitFileData {
+    var fileData = FitFileData()
+    val localDefinitions = arrayOfNulls<MessageDefinition>(16)
     val reader = ByteReader(bytes)
     reader.position = start
     while (reader.position < end) {
@@ -190,30 +154,28 @@ internal fun readDataSection(bytes: ByteArray, start: Int, end: Int): FitFileDat
         }
         if ((headerInt and DEFINITION_MASK) != 0) {
             val headerByte = reader.readByte()
-            val def = MesgDefinition.read(reader, headerByte)
-            val idx = def.localMesgNum and 0xF
-            if (idx >= 0 && idx < localDefs.size) {
-                localDefs[idx] = def
+            val def = MessageDefinition.read(reader, headerByte)
+            val idx = def.localMessageNumber and 0xF
+            if (idx >= 0 && idx < localDefinitions.size) {
+                localDefinitions[idx] = def
             }
             continue
         }
         val headerByte = reader.readByte()
         val local = headerByte.toInt() and LOCAL_MESG_NUM_MASK
-        val def = if (local >= 0 && local < localDefs.size) localDefs[local] else null
-        if (def == null) {
+        val definition = if (local >= 0 && local < localDefinitions.size) localDefinitions[local] else null
+        if (definition == null) {
             throw IllegalArgumentException("Missing FIT message definition.")
         }
-        val collector = readDataMessage(reader, def)
-        when (def.globalMessageNumber) {
-            MESG_SESSION -> {
-                val sport = collector.sport ?: SPORT_OTHER
-                val subSport = collector.subSport ?: SUB_SPORT_GENERIC
-                fileData.isRowing = (subSport == SUB_SPORT_INDOOR_ROWING || sport == SPORT_ROWING)
-                val startMs = collector.startTime ?: collector.timestamp
-                if (fileData.startTimeMillis == null) {
-                    fileData.startTimeMillis = startMs
-                }
-            }
+        val collector = readDataMessage(
+            reader = reader,
+            definition = definition
+        )
+        when (definition.globalMessageNumber) {
+            MESG_SESSION -> fileData = fileData.copy(
+                isRowing = (collector.subSport == SUB_SPORT_INDOOR_ROWING || collector.sport == SPORT_ROWING),
+                startTimeMillis = fileData.startTimeMillis ?: collector.startTime ?: collector.timestamp
+            )
             MESG_LAP -> {
                 val elapsedSec = collector.elapsed ?: 0.0
                 if (elapsedSec > 0.0) {
@@ -242,21 +204,31 @@ internal fun readDataSection(bytes: ByteArray, start: Int, end: Int): FitFileDat
     return fileData
 }
 
-internal fun readDataMessage(reader: ByteReader, def: MesgDefinition): FieldCollector {
+internal fun readDataMessage(
+    reader: ByteReader,
+    definition: MessageDefinition
+): FieldCollector {
     val collector = FieldCollector()
-    val le = (def.endianness == 0)
-    for (fieldDef in def.fieldDefinitions) {
-        val size = fieldDef.size.toInt()
+    val le = (definition.endianness == 0)
+    for (fieldDefinition in definition.fieldDefinitions) {
+        val size = fieldDefinition.size.toInt()
         val fieldStart = reader.position
         if (size > 0) {
-            readFieldValue(reader, collector, def.globalMessageNumber, fieldDef.num, size, le)
+            readFieldValue(
+                reader = reader,
+                collector = collector,
+                globalMessageNumber = definition.globalMessageNumber,
+                fieldNum = fieldDefinition.num,
+                size = size,
+                le = le
+            )
         }
         // Поле всегда занимает ровно `size` байт. Если обработчик прочитал не столько
         // (номер поля совпал, а тип/размер — нет), выравниваем позицию, иначе разъедется
         // весь дальнейший поток сообщений.
         reader.position = fieldStart + size
     }
-    for (dev in def.devFieldDefinitions) {
+    for (dev in definition.devFieldDefinitions) {
         reader.position += dev.size.toInt()
     }
     return collector
@@ -271,26 +243,66 @@ private fun readFieldValue(
     le: Boolean,
 ) {
     when (globalMessageNumber) {
-        MESG_FILE_ID -> readFileIdField(reader, collector, fieldNum, size, le)
-        MESG_SESSION -> readSessionField(reader, collector, fieldNum, size, le)
-        MESG_LAP -> readLapField(reader, collector, fieldNum, size, le)
-        MESG_RECORD -> readRecordField(reader, collector, fieldNum, size, le)
+        MESG_FILE_ID -> {
+            if (fieldNum == FIELD_FILE_ID_TIME_CREATED && size == 4) {
+                collector.fileIdTimeCreated = readTimestampOrNull(
+                    reader = reader,
+                    le = le
+                )
+            }
+        }
+
+        MESG_SESSION -> readSessionField(
+            reader = reader,
+            collector = collector,
+            num = fieldNum,
+            size = size,
+            le = le
+        )
+
+        MESG_LAP -> readLapField(
+            reader = reader,
+            collector = collector,
+            num = fieldNum,
+            size = size,
+            le = le
+        )
+
+        MESG_RECORD -> readRecordField(
+            reader = reader,
+            collector = collector,
+            num = fieldNum,
+            size = size,
+            le = le
+        )
         else -> Unit
     }
 }
 
-private fun readTimestampOrNull(reader: ByteReader, le: Boolean): Long? {
-    val raw = reader.readUInt(le)
-    return if (raw == UInt.MAX_VALUE) null else fitTimestampToMillis(raw)
-}
+private fun scaleElapsed(raw: UInt): Double = raw.toDouble() / 1000.0
 
-private fun readFileIdField(reader: ByteReader, collector: FieldCollector, num: UByte, size: Int, le: Boolean) {
-    if (num == FIELD_FILE_ID_TIME_CREATED && size == 4) {
-        collector.fileIdTimeCreated = readTimestampOrNull(reader, le)
+private fun scaleDistance(raw: UInt): Double = raw.toDouble() / 100.0
+
+private fun readTimestampOrNull(
+    reader: ByteReader,
+    le: Boolean
+): Long? {
+    val raw = reader.readUInt(le)
+    return if (raw == UInt.MAX_VALUE) {
+        null
+    } else {
+        val seconds = raw.toLong() + FIT_EPOCH_OFFSET_SECONDS
+        seconds * 1000L
     }
 }
 
-private fun readSessionField(reader: ByteReader, collector: FieldCollector, num: UByte, size: Int, le: Boolean) {
+private fun readSessionField(
+    reader: ByteReader,
+    collector: FieldCollector,
+    num: UByte,
+    size: Int,
+    le: Boolean
+) {
     when (num) {
         FIELD_SESSION_TIMESTAMP -> if (size == 4) {
             readTimestampOrNull(reader, le)?.let { collector.timestamp = it }
@@ -315,7 +327,13 @@ private fun readSessionField(reader: ByteReader, collector: FieldCollector, num:
     }
 }
 
-private fun readLapField(reader: ByteReader, collector: FieldCollector, num: UByte, size: Int, le: Boolean) {
+private fun readLapField(
+    reader: ByteReader,
+    collector: FieldCollector,
+    num: UByte,
+    size: Int,
+    le: Boolean
+) {
     when (num) {
         FIELD_LAP_TIMESTAMP -> if (size == 4) {
             readTimestampOrNull(reader, le)?.let { collector.timestamp = it }
@@ -337,7 +355,13 @@ private fun readLapField(reader: ByteReader, collector: FieldCollector, num: UBy
     }
 }
 
-private fun readRecordField(reader: ByteReader, collector: FieldCollector, num: UByte, size: Int, le: Boolean) {
+private fun readRecordField(
+    reader: ByteReader,
+    collector: FieldCollector,
+    num: UByte,
+    size: Int,
+    le: Boolean
+) {
     when (num) {
         FIELD_RECORD_TIMESTAMP -> if (size == 4) {
             readTimestampOrNull(reader, le)?.let { collector.timestamp = it }

@@ -14,22 +14,10 @@ internal class TrainingRepositoryDeleteTest {
     @Test
     fun `delete removes pieces trainings and stored csv files`() = runTest {
         val dao = RecordingTrainingDao(
-            trainings = listOf(
-                TrainingEntity(
-                    id = 1L,
-                    dateMillis = 1L,
-                    sourceCsvRelativePath = "speedcoach_imports/1_a.csv"
-                ),
-                TrainingEntity(
-                    id = 2L,
-                    dateMillis = 2L,
-                    sourceCsvRelativePath = null
-                ),
-                TrainingEntity(
-                    id = 3L,
-                    dateMillis = 3L,
-                    sourceCsvRelativePath = "rp3_imports/3_c.csv"
-                ),
+            csvPathsByIds = mapOf(
+                1L to "speedcoach_imports/1_a.csv",
+                2L to null,
+                3L to "rp3_imports/3_c.csv",
             )
         )
         val storage = FakeTrainingImportStorage()
@@ -41,8 +29,7 @@ internal class TrainingRepositoryDeleteTest {
 
         repository.deleteTrainings(listOf(1L, 3L))
 
-        assertEquals(listOf(listOf(1L, 3L)), dao.deletedPieceIds)
-        assertEquals(listOf(listOf(1L, 3L)), dao.deletedTrainingIds)
+        assertEquals(listOf(listOf(1L, 3L)), dao.deletedIds)
         assertEquals(
             listOf("speedcoach_imports/1_a.csv", "rp3_imports/3_c.csv"),
             storage.deletedPaths
@@ -51,7 +38,7 @@ internal class TrainingRepositoryDeleteTest {
 
     @Test
     fun `delete with empty ids does not touch database`() = runTest {
-        val dao = RecordingTrainingDao(trainings = emptyList())
+        val dao = RecordingTrainingDao(csvPathsByIds = emptyMap())
         val repository = TrainingRepository(
             dao = dao,
             athletesRepository = StubAthletesRepository(),
@@ -60,36 +47,48 @@ internal class TrainingRepositoryDeleteTest {
 
         repository.deleteTrainings(emptyList())
 
-        assertTrue(dao.deletedPieceIds.isEmpty())
-        assertTrue(dao.deletedTrainingIds.isEmpty())
+        assertTrue(dao.deletedIds.isEmpty())
     }
 
     private class RecordingTrainingDao(
-        private val trainings: List<TrainingEntity>,
+        private val csvPathsByIds: Map<Long, String?>,
     ) : TrainingDao {
 
-        val deletedPieceIds = mutableListOf<List<Long>>()
-        val deletedTrainingIds = mutableListOf<List<Long>>()
+        val deletedIds = mutableListOf<List<Long>>()
 
         override suspend fun insertTraining(training: TrainingEntity): Long = 1L
 
         override suspend fun insertPieces(pieces: List<TrainingAthletePieceEntity>) = Unit
 
-        override suspend fun getAllTrainingEntities(): List<TrainingEntity> = trainings
+        override suspend fun getAllTrainingEntities(): List<TrainingEntity> =
+            csvPathsByIds.map { (id, csvPath) ->
+                TrainingEntity(
+                    id = id,
+                    dateMillis = id,
+                    sourceCsvRelativePath = csvPath,
+                )
+            }
 
         override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
-            trainings.firstOrNull { it.id == trainingId }
+            csvPathsByIds[trainingId]?.let { csvPath ->
+                TrainingEntity(
+                    id = trainingId,
+                    dateMillis = trainingId,
+                    sourceCsvRelativePath = csvPath,
+                )
+            }
 
-        override suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity> =
-            trainings.filter { it.id in trainingIds }
+        override suspend fun getCsvPathsByIds(trainingIds: List<Long>): List<String> =
+            trainingIds.mapNotNull { csvPathsByIds[it] }
 
-        override suspend fun deletePiecesForTrainings(trainingIds: List<Long>) {
-            deletedPieceIds += trainingIds
+        override suspend fun deleteTrainingsWithPieces(trainingIds: List<Long>) {
+            if (trainingIds.isEmpty()) return
+            deletedIds += trainingIds
         }
 
-        override suspend fun deleteTrainings(trainingIds: List<Long>) {
-            deletedTrainingIds += trainingIds
-        }
+        override suspend fun deletePiecesForTrainings(trainingIds: List<Long>) {}
+
+        override suspend fun deleteTrainings(trainingIds: List<Long>) {}
 
         override suspend fun updateImportMetadata(
             trainingId: Long,

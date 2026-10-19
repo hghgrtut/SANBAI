@@ -88,13 +88,16 @@ internal class ListTrainingViewModel(
     }
 
     override fun onCancelSelection() {
-        changeState { copy(selectedTrainingIds = emptySet(), deleteConfirmationRequested = false) }
+        changeState {
+            copy(
+                selectedTrainingIds = emptySet(),
+                deleteConfirmationRequested = false
+            )
+        }
     }
 
     override fun onDeleteClick() {
-        if (state.isSelectionMode) {
-            changeState { copy(deleteConfirmationRequested = true) }
-        }
+        changeState { copy(deleteConfirmationRequested = true) }
     }
 
     override fun onDeleteDismiss() {
@@ -102,26 +105,11 @@ internal class ListTrainingViewModel(
     }
 
     override fun onDeleteConfirm() {
-        val trainingIds = state.selectedTrainingIds.toList()
-        if (trainingIds.isEmpty()) return
         changeState { copy(deleteConfirmationRequested = false) }
         viewModelScope.launch {
-            repository.deleteTrainings(trainingIds)
-            val trainings = repository.getTrainingsList()
-            changeState {
-                copy(items = trainings, selectedTrainingIds = emptySet())
-            }
-        }
-    }
-
-    private fun toggleSelection(trainingId: Long) {
-        changeState {
-            val updated = if (trainingId in selectedTrainingIds) {
-                selectedTrainingIds - trainingId
-            } else {
-                selectedTrainingIds + trainingId
-            }
-            copy(selectedTrainingIds = updated)
+            repository.deleteTrainings(state.selectedTrainingIds.toList())
+            reloadTrainings()
+            changeState { copy(selectedTrainingIds = emptySet()) }
         }
     }
 
@@ -197,6 +185,18 @@ internal class ListTrainingViewModel(
 
     override fun onDismissTransferNotice() {
         changeState { copy(transferNotice = null) }
+    }
+
+    private fun toggleSelection(trainingId: Long) {
+        changeState {
+            copy(
+                selectedTrainingIds = if (trainingId in selectedTrainingIds) {
+                    selectedTrainingIds - trainingId
+                } else {
+                    selectedTrainingIds + trainingId
+                }
+            )
+        }
     }
 
     private fun buildImportNotice(result: TrainingTransferResult?): UiText = result?.let {

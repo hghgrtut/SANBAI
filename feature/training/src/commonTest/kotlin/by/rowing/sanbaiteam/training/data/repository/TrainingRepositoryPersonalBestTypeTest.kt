@@ -163,12 +163,14 @@ internal class TrainingRepositoryPersonalBestTypeTest {
         override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
             training?.takeIf { it.id == trainingId }
 
-        override suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity> =
-            listOfNotNull(training).filter { it.id in trainingIds }
+        override suspend fun getCsvPathsByIds(trainingIds: List<Long>): List<String> =
+            listOfNotNull(training)
+                .filter { it.id in trainingIds }
+                .mapNotNull { it.sourceCsvRelativePath }
 
-        override suspend fun deletePiecesForTrainings(trainingIds: List<Long>) = Unit
+        override suspend fun deletePiecesForTrainings(trainingIds: List<Long>) {}
 
-        override suspend fun deleteTrainings(trainingIds: List<Long>) = Unit
+        override suspend fun deleteTrainings(trainingIds: List<Long>) {}
 
         override suspend fun updateImportMetadata(
             trainingId: Long,
