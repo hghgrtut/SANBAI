@@ -98,7 +98,7 @@ internal class MesgDefinition(
                 for (i in 0 until numDevFields) {
                     val num = reader.readUByte()
                     val size = reader.readUByte()
-                    reader.readUShort()
+                    reader.readUByte()
                     devFields.add(DevFieldDefinition(num, size))
                 }
             }
@@ -247,73 +247,109 @@ internal fun readDataMessage(reader: ByteReader, def: MesgDefinition): FieldColl
     val collector = FieldCollector()
     val le = (def.endianness == 0)
     for (fieldDef in def.fieldDefinitions) {
-        val num = fieldDef.num
         val size = fieldDef.size.toInt()
-        if (size <= 0) continue
-        when (num) {
-            FIELD_FILE_ID_TIME_CREATED -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) {
-                    collector.fileIdTimeCreated = fitTimestampToMillis(raw)
-                    if (collector.timestamp == null) collector.timestamp = collector.fileIdTimeCreated
-                } else {
-                    // skip
-                }
-            }
-            FIELD_SESSION_TIMESTAMP -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.timestamp = fitTimestampToMillis(raw)
-            }
-            FIELD_SESSION_START_TIME -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.startTime = fitTimestampToMillis(raw)
-            }
-            FIELD_SESSION_SPORT -> if (size == 1) collector.sport = reader.readUByte().toUShort()
-            FIELD_SESSION_SUB_SPORT -> if (size == 1) collector.subSport = reader.readUByte().toUShort()
-            FIELD_SESSION_TOTAL_ELAPSED_TIME -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.elapsed = scaleElapsed(raw)
-            }
-            FIELD_SESSION_TOTAL_DISTANCE -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.distance = scaleDistance(raw)
-            }
-            FIELD_LAP_TIMESTAMP -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.timestamp = fitTimestampToMillis(raw)
-            }
-            FIELD_LAP_START_TIME -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.startTime = fitTimestampToMillis(raw)
-            }
-            FIELD_LAP_TOTAL_ELAPSED_TIME -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.elapsed = scaleElapsed(raw)
-            }
-            FIELD_LAP_TOTAL_DISTANCE -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.distance = scaleDistance(raw)
-            }
-            FIELD_LAP_INTENSITY -> if (size == 1) collector.intensity = reader.readUByte()
-            FIELD_RECORD_TIMESTAMP -> if (size == 4) {
-                val raw = reader.readUInt(le)
-                if (raw != UInt.MAX_VALUE) collector.timestamp = fitTimestampToMillis(raw)
-            }
-            FIELD_RECORD_HEART_RATE -> if (size == 1) {
-                val v = reader.readUByte().toInt()
-                collector.heartRate = if (v == 0xFF) null else v
-            }
-            FIELD_RECORD_CADENCE -> if (size == 1) {
-                val v = reader.readUByte().toInt()
-                collector.cadence = if (v == 0xFF) null else v
-            }
-            else -> {
-                reader.position += size
-            }
+        val fieldStart = reader.position
+        if (size > 0) {
+            readFieldValue(reader, collector, def.globalMessageNumber, fieldDef.num, size, le)
         }
+        // Поле всегда занимает ровно `size` байт. Если обработчик прочитал не столько
+        // (номер поля совпал, а тип/размер — нет), выравниваем позицию, иначе разъедется
+        // весь дальнейший поток сообщений.
+        reader.position = fieldStart + size
     }
     for (dev in def.devFieldDefinitions) {
         reader.position += dev.size.toInt()
     }
     return collector
+}
+
+private fun readFieldValue(
+    reader: ByteReader,
+    collector: FieldCollector,
+    globalMessageNumber: UShort,
+    fieldNum: UByte,
+    size: Int,
+    le: Boolean,
+) {
+    when (globalMessageNumber) {
+        MESG_FILE_ID -> readFileIdField(reader, collector, fieldNum, size, le)
+        MESG_SESSION -> readSessionField(reader, collector, fieldNum, size, le)
+        MESG_LAP -> readLapField(reader, collector, fieldNum, size, le)
+        MESG_RECORD -> readRecordField(reader, collector, fieldNum, size, le)
+        else -> Unit
+    }
+}
+
+private fun readTimestampOrNull(reader: ByteReader, le: Boolean): Long? {
+    val raw = reader.readUInt(le)
+    return if (raw == UInt.MAX_VALUE) null else fitTimestampToMillis(raw)
+}
+
+private fun readFileIdField(reader: ByteReader, collector: FieldCollector, num: UByte, size: Int, le: Boolean) {
+    if (num == FIELD_FILE_ID_TIME_CREATED && size == 4) {
+        collector.fileIdTimeCreated = readTimestampOrNull(reader, le)
+    }
+}
+
+private fun readSessionField(reader: ByteReader, collector: FieldCollector, num: UByte, size: Int, le: Boolean) {
+    when (num) {
+        FIELD_SESSION_TIMESTAMP -> if (size == 4) {
+            readTimestampOrNull(reader, le)?.let { collector.timestamp = it }
+        }
+        FIELD_SESSION_START_TIME -> if (size == 4) {
+            readTimestampOrNull(reader, le)?.let { collector.startTime = it }
+        }
+        FIELD_SESSION_SPORT -> if (size == 1) {
+            collector.sport = reader.readUByte().toUShort()
+        }
+        FIELD_SESSION_SUB_SPORT -> if (size == 1) {
+            collector.subSport = reader.readUByte().toUShort()
+        }
+        FIELD_SESSION_TOTAL_ELAPSED_TIME -> if (size == 4) {
+            val raw = reader.readUInt(le)
+            if (raw != UInt.MAX_VALUE) collector.elapsed = scaleElapsed(raw)
+        }
+        FIELD_SESSION_TOTAL_DISTANCE -> if (size == 4) {
+            val raw = reader.readUInt(le)
+            if (raw != UInt.MAX_VALUE) collector.distance = scaleDistance(raw)
+        }
+    }
+}
+
+private fun readLapField(reader: ByteReader, collector: FieldCollector, num: UByte, size: Int, le: Boolean) {
+    when (num) {
+        FIELD_LAP_TIMESTAMP -> if (size == 4) {
+            readTimestampOrNull(reader, le)?.let { collector.timestamp = it }
+        }
+        FIELD_LAP_START_TIME -> if (size == 4) {
+            readTimestampOrNull(reader, le)?.let { collector.startTime = it }
+        }
+        FIELD_LAP_TOTAL_ELAPSED_TIME -> if (size == 4) {
+            val raw = reader.readUInt(le)
+            if (raw != UInt.MAX_VALUE) collector.elapsed = scaleElapsed(raw)
+        }
+        FIELD_LAP_TOTAL_DISTANCE -> if (size == 4) {
+            val raw = reader.readUInt(le)
+            if (raw != UInt.MAX_VALUE) collector.distance = scaleDistance(raw)
+        }
+        FIELD_LAP_INTENSITY -> if (size == 1) {
+            collector.intensity = reader.readUByte()
+        }
+    }
+}
+
+private fun readRecordField(reader: ByteReader, collector: FieldCollector, num: UByte, size: Int, le: Boolean) {
+    when (num) {
+        FIELD_RECORD_TIMESTAMP -> if (size == 4) {
+            readTimestampOrNull(reader, le)?.let { collector.timestamp = it }
+        }
+        FIELD_RECORD_HEART_RATE -> if (size == 1) {
+            val value = reader.readUByte().toInt()
+            collector.heartRate = if (value == 0xFF) null else value
+        }
+        FIELD_RECORD_CADENCE -> if (size == 1) {
+            val value = reader.readUByte().toInt()
+            collector.cadence = if (value == 0xFF) null else value
+        }
+    }
 }

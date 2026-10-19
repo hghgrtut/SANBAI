@@ -26,6 +26,7 @@ internal val FIELD_RECORD_TIMESTAMP = 253.toUByte()
 internal val FIELD_RECORD_HEART_RATE = 3.toUByte()
 internal val FIELD_RECORD_CADENCE = 4.toUByte()
 
+internal val MESG_FILE_ID = 0.toUShort()
 internal val MESG_SESSION = 18.toUShort()
 internal val MESG_LAP = 19.toUShort()
 internal val MESG_RECORD = 20.toUShort()
