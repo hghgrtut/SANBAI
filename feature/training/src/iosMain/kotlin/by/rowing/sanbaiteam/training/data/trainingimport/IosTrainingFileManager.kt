@@ -70,6 +70,11 @@ internal object IosTrainingFileManager {
     fun readText(relativePath: String): String? =
         readFileBytes(relativePath)?.decodeToString()
 
+    fun deleteFile(relativePath: String): Boolean {
+        val fullPath = resolvePath(relativePath)
+        return NSFileManager.defaultManager.removeItemAtPath(fullPath, error = null)
+    }
+
     /** Бросает [IllegalStateException], если запись не удалась (как IOException на Android). */
     fun writeText(relativePath: String, text: String) {
         if (!writeFileBytes(relativePath, text.encodeToByteArray())) {

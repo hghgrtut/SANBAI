@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
 import by.rowing.sanbaiteam.uikit.modifier.debounceClickable
 import by.rowing.sanbaiteam.uikit.resources.Res
@@ -88,8 +89,9 @@ internal fun Checkbox(
     }
 }
 
+@AllowDetektPublic
 @Composable
-internal fun Checkbox(
+fun Checkbox(
     modifier: Modifier = Modifier,
     checked: CheckedState,
     error: Boolean = false,
@@ -154,7 +156,8 @@ private val SHAPE = RoundedCornerShape(4.dp)
 private val RIPPLE_RADIUS = 19.dp
 private val ICON_SIZE = 16.dp
 
-internal enum class CheckedState {
+@AllowDetektPublic
+enum class CheckedState {
     CHECKED,
     UNCHECKED,
     INDETERMINATE,

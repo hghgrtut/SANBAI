@@ -20,4 +20,8 @@ internal class IosTrainingImportStorage : TrainingImportStorage {
 
     override fun readCsv(relativePath: String): String? =
         IosTrainingFileManager.readText(relativePath)
+
+    override fun deleteCsv(relativePath: String) {
+        IosTrainingFileManager.deleteFile(relativePath)
+    }
 }

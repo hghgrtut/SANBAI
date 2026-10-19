@@ -9,6 +9,7 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailState
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
@@ -18,6 +19,7 @@ import kotlinx.coroutines.withContext
 internal class TrainingRepository(
     private val dao: TrainingDao,
     private val athletesRepository: AthletesRepository,
+    private val importStorage: TrainingImportStorage,
 ) {
 
     suspend fun saveTraining(
@@ -48,6 +50,16 @@ internal class TrainingRepository(
             deviceSerial = deviceSerial,
             sessionName = sessionName
         )
+    }
+
+    suspend fun deleteTrainings(trainingIds: List<Long>) = withContext(Dispatchers.Default) {
+        if (trainingIds.isEmpty()) return@withContext
+        val csvPaths = dao.getTrainingEntitiesByIds(trainingIds)
+            .mapNotNull { it.sourceCsvRelativePath }
+        dao.deleteTrainingsWithPieces(trainingIds)
+        csvPaths.forEach { relativePath ->
+            runCatching { importStorage.deleteCsv(relativePath) }
+        }
     }
 
     suspend fun getTrainingsList(): List<ListTrainingStateItem> = withContext(Dispatchers.Default) {
