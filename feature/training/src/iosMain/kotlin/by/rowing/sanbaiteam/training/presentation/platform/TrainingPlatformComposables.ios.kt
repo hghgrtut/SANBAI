@@ -56,7 +56,9 @@ internal actual fun rememberTrainingImportPicker(onFilesPicked: (List<String>) -
         contentTypes = listOf(utType(UT_TYPE_DATA)),
         allowsMultipleSelection = true,
     )
-    return remember { { presenter() } }
+    return remember {
+        { presenter() }
+    }
 }
 
 /**
@@ -70,8 +72,7 @@ internal actual fun rememberCreateBackupLauncher(onCreated: (String) -> Unit): (
     val currentOnCreated by rememberUpdatedState(onCreated)
     return remember {
         { fileName: String ->
-            val root = topMostViewController()
-            if (root != null) {
+            topMostViewController()?.let { root ->
                 val tempPath = "${NSTemporaryDirectory()}backup_${NSUUID().UUIDString()}_$fileName"
                 currentOnCreated(tempPath)
                 presentShareSheetWhenReady(
@@ -96,7 +97,9 @@ internal actual fun rememberOpenBackupLauncher(onOpened: (String) -> Unit): () -
         contentTypes = listOf(utType(UT_TYPE_JSON), utType(UT_TYPE_TEXT)),
         allowsMultipleSelection = false,
     )
-    return remember { { presenter() } }
+    return remember {
+        { presenter() }
+    }
 }
 
 /**
@@ -141,7 +144,9 @@ internal actual fun rememberTrainingDatePicker(
         }
     }
 
-    return remember { { openDialog.value = true } }
+    return remember {
+        { openDialog.value = true }
+    }
 }
 
 @OptIn(ExperimentalForeignApi::class)
@@ -159,8 +164,7 @@ private fun rememberDocumentPickerPresenter(
     val delegateHolder = remember { DocumentPickerDelegateHolder() }
     return remember {
         {
-            val root = topMostViewController()
-            if (root != null) {
+            topMostViewController()?.let { root ->
                 val documentPicker = UIDocumentPickerViewController(
                     forOpeningContentTypes = contentTypes,
                     asCopy = true,
@@ -175,7 +179,11 @@ private fun rememberDocumentPickerPresenter(
                 // UIKit хранит delegate слабой ссылкой — держим сильную до завершения выбора.
                 delegateHolder.delegate = delegate
                 documentPicker.delegate = delegate
-                root.presentViewController(documentPicker, animated = true, completion = null)
+                root.presentViewController(
+                    documentPicker,
+                    animated = true,
+                    completion = null
+                )
             }
         }
     }
@@ -211,7 +219,11 @@ private fun presentShareSheetWhenReady(
             repeats = false,
         ) { timer ->
             timer?.invalidate()
-            presentShareSheetWhenReady(root = root, tempPath = tempPath, attemptsLeft = attemptsLeft - 1)
+            presentShareSheetWhenReady(
+                root = root,
+                tempPath = tempPath,
+                attemptsLeft = attemptsLeft - 1
+            )
         }
     }
 }
@@ -223,9 +235,16 @@ private fun presentShareSheet(root: UIViewController, tempPath: String) {
         applicationActivities = null,
     )
     shareSheet.completionWithItemsHandler = { _, _, _, _ ->
-        NSFileManager.defaultManager.removeItemAtPath(tempPath, error = null)
+        NSFileManager.defaultManager.removeItemAtPath(
+            tempPath,
+            error = null
+        )
     }
-    root.presentViewController(shareSheet, animated = true, completion = null)
+    root.presentViewController(
+        shareSheet,
+        animated = true,
+        completion = null
+    )
 }
 
 @OptIn(ExperimentalForeignApi::class)

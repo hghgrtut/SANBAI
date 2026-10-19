@@ -12,9 +12,8 @@ internal class IosTrainingFileReader : TrainingFileReader {
     override suspend fun readFiles(handles: List<String>): List<PickedImportFile> =
         withContext(Dispatchers.Default) {
             handles.mapNotNull { handle ->
-                val bytes = IosTrainingFileManager.readAbsoluteBytes(handle) ?: return@mapNotNull null
                 PickedImportFile(
-                    bytes = bytes,
+                    bytes = IosTrainingFileManager.readAbsoluteBytes(handle) ?: return@mapNotNull null,
                     fileName = handle.substringAfterLast('/'),
                 )
             }

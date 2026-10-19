@@ -55,17 +55,20 @@ object TimeUtils {
         }
     }
 
-    private fun Long.toLocalDate(): LocalDate =
-        toLocalDate(TimeZone.currentSystemDefault())
+    fun isSameCalendarDay(
+        firstMillis: Long,
+        secondMillis: Long,
+    ): Boolean = firstMillis.toLocalDate() == secondMillis.toLocalDate()
 
     /**
-     * Локальная дата в [zone] для epoch-миллисекунд.
+     * Локальная для epoch-миллисекунд.
      *
      * Намеренно не использует `Instant`: обращение к `Instant.Companion` не резолвится
      * в iOS-сборке. Вместо этого берём UTC-дату по epoch-дням и корректируем её на ±1 день,
      * сравнивая границы суток в нужной таймзоне.
      */
-    private fun Long.toLocalDate(zone: TimeZone): LocalDate {
+    private fun Long.toLocalDate(): LocalDate {
+        val zone = TimeZone.currentSystemDefault()
         var date = LocalDate.fromEpochDays(floorDiv(MILLIS_PER_DAY).toInt())
         if (date.atStartOfDayIn(zone).toEpochMilliseconds() > this) {
             date = date.minus(1, DateTimeUnit.DAY)
@@ -73,14 +76,6 @@ object TimeUtils {
             date = date.plus(1, DateTimeUnit.DAY)
         }
         return date
-    }
-
-    fun isSameCalendarDay(
-        firstMillis: Long,
-        secondMillis: Long,
-    ): Boolean {
-        val zone = TimeZone.currentSystemDefault()
-        return firstMillis.toLocalDate(zone) == secondMillis.toLocalDate(zone)
     }
 }
 

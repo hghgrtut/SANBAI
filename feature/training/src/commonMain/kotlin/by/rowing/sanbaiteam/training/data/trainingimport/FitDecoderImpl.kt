@@ -2,9 +2,8 @@ package by.rowing.sanbaiteam.training.data.trainingimport
 
 import kotlin.math.roundToInt
 
-internal class ByteReader(
-    internal val bytes: ByteArray
-) {
+internal class ByteReader(internal val bytes: ByteArray) {
+
     var position: Int = 0
 
     fun readByte(): Byte = bytes[position++]

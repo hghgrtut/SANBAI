@@ -43,7 +43,10 @@ internal class Concept2FitParserTest {
 
     @Test
     fun parse_sessionStart_isReportedAsWorkoutStart() {
-        val parsed = Concept2FitParser.parse(concept2FitSample(), fileName = null)
+        val parsed = Concept2FitParser.parse(
+            concept2FitSample(),
+            fileName = null
+        )
 
         assertEquals(fitMillis(START_TS), parsed.startTimeMillis)
     }
@@ -60,7 +63,11 @@ internal class Concept2FitParserTest {
     private fun concept2FitSample(): ByteArray {
         val data = FitWriter().apply {
             // file_id: fields 2, 3 and 5 must be skipped even though session/lap use those numbers.
-            definition(local = 0, global = 0, fields = listOf(0 to 1, 1 to 2, 2 to 2, 3 to 4, 4 to 4, 5 to 2))
+            definition(
+                local = 0,
+                global = 0,
+                fields = listOf(0 to 1, 1 to 2, 2 to 2, 3 to 4, 4 to 4, 5 to 2)
+            )
             dataMessage(
                 local = 0,
                 u8(4),
@@ -72,7 +79,11 @@ internal class Concept2FitParserTest {
             )
 
             // session: sport = fitness_equipment (4), sub_sport = indoor_rowing (14).
-            definition(local = 1, global = 18, fields = listOf(253 to 4, 2 to 4, 5 to 1, 6 to 1, 7 to 4, 9 to 4))
+            definition(
+                local = 1,
+                global = 18,
+                fields = listOf(253 to 4, 2 to 4, 5 to 1, 6 to 1, 7 to 4, 9 to 4)
+            )
             dataMessage(
                 local = 1,
                 u32(START_TS + 1_260),
@@ -84,7 +95,11 @@ internal class Concept2FitParserTest {
             )
 
             // laps: one active (intensity 0) and one rest (intensity 1).
-            definition(local = 2, global = 19, fields = listOf(253 to 4, 2 to 4, 7 to 4, 9 to 4, 23 to 1))
+            definition(
+                local = 2,
+                global = 19,
+                fields = listOf(253 to 4, 2 to 4, 7 to 4, 9 to 4, 23 to 1)
+            )
             dataMessage(
                 local = 2,
                 u32(START_TS + 900),
@@ -103,7 +118,11 @@ internal class Concept2FitParserTest {
             )
 
             // records: fields 5 (distance), 6 (speed) and 7 (power) do not exist in other messages.
-            definition(local = 3, global = 20, fields = listOf(253 to 4, 3 to 1, 4 to 1, 5 to 4, 6 to 2, 7 to 2))
+            definition(
+                local = 3,
+                global = 20,
+                fields = listOf(253 to 4, 3 to 1, 4 to 1, 5 to 4, 6 to 2, 7 to 2)
+            )
             dataMessage(
                 local = 3,
                 u32(START_TS + 10),
