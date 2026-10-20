@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="calculator_title">Калькулятор</string>
-    <string name="calculator_main_subtitle">Процент от рекорда и темп</string>
+
+    <string name="main_title">Санбай</string>
+    <string name="main_subtitle">Дневник гребли</string>
+    <string name="main_stats_athletes">Спортсмены</string>
+    <string name="main_stats_trainings">Тренировки</string>
+    <string name="main_add_training">Тренировка</string>
+    <string name="main_recent_trainings">Последние тренировки</string>
+    <string name="main_show_all">Все</string>
+    <string name="main_empty_trainings_title">Пока нет тренировок</string>
+    <string name="main_empty_trainings_hint">Добавьте тренировку — она появится здесь</string>
 </resources>
