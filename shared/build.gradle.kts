@@ -11,6 +11,7 @@ kotlin {
         namespace = "by.rowing.sanbaiteam.shared"
         compileSdk = 37
         minSdk = 25
+        androidResources { enable = true }
         compilations.configureEach {
             compileTaskProvider.configure {
                 compilerOptions {
