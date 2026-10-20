@@ -64,5 +64,10 @@
     <string name="training_transfer_export_error">Не удалось создать резервную копию.</string>
     <string name="training_transfer_import_result">Импортировано тренировок: %1$d, добавлено спортсменов: %2$d</string>
     <string name="training_transfer_import_error">Не удалось импортировать файл.</string>
+    <string name="training_selection_title">Выбрано: %1$d</string>
+    <string name="training_selection_cancel">Отменить выбор</string>
+    <string name="training_delete_action">Удалить</string>
+    <string name="training_delete_confirm_title">Удаление тренировок</string>
+    <string name="training_delete_confirm_message">Удалить выбранные тренировки (%1$d)?</string>
     <string name="ok">ОК</string>
 </resources>

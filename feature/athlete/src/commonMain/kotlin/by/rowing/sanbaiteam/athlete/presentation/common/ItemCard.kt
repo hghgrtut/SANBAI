@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.athlete.presentation.common
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,8 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing
 @Composable
 fun ItemCard(
     onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
+    selected: Boolean = false,
     content: @Composable (ColumnScope.() -> Unit)
 ) {
     Card(
@@ -24,14 +27,23 @@ fun ItemCard(
             .padding(
                 horizontal = Spacing.M,
                 vertical = Spacing.S
+            )
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = if (selected) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = SELECTED_CONTAINER_ALPHA)
+            } else {
+                MaterialTheme.colorScheme.surface
+            },
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
         shape = MaterialTheme.shapes.medium,
-        onClick = onClick,
         content = content
     )
 }
+
+private const val SELECTED_CONTAINER_ALPHA = 0.4f

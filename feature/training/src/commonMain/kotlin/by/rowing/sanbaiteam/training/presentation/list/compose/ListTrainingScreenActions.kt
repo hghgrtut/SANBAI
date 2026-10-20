@@ -12,6 +12,16 @@ internal interface ListTrainingScreenActions {
 
     fun onTrainingClick(trainingId: Long)
 
+    fun onTrainingLongClick(trainingId: Long)
+
+    fun onCancelSelection()
+
+    fun onDeleteClick()
+
+    fun onDeleteConfirm()
+
+    fun onDeleteDismiss()
+
     fun onExportClick()
 
     fun onExportPromptLaunched()
@@ -30,6 +40,11 @@ internal interface ListTrainingScreenActions {
             override fun onShowFiltersChange(showFilters: Boolean) {}
             override fun onAddTrainingClick() {}
             override fun onTrainingClick(trainingId: Long) {}
+            override fun onTrainingLongClick(trainingId: Long) {}
+            override fun onCancelSelection() {}
+            override fun onDeleteClick() {}
+            override fun onDeleteConfirm() {}
+            override fun onDeleteDismiss() {}
             override fun onExportClick() {}
             override fun onExportPromptLaunched() {}
             override fun onExportToHandle(handle: String) {}

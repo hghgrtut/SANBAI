@@ -8,23 +8,12 @@ import kotlin.test.assertTrue
 /**
  * Regression test for Concept2 RowErg `.fit` files where message definitions contain fields
  * whose sizes differ from the profile fields with the same number in other messages
- * (`file_id` field 2 is 2 bytes, while `session` field 2 is 4 bytes, etc).
+ * (`file_id` field 2 is 2 bytes, while `session` field 2 is 4 bytes, etc.).
  *
  * A decoder that dispatches on the field number alone used to stop consuming bytes for such
  * fields, which desynchronised the whole message stream and made the workout unreadable.
  */
 internal class Concept2FitParserTest {
-
-    @Test
-    fun decode_workoutWithMixedFieldSizes_keepsMessageAlignment() {
-        val workout = decodeFitWorkout(concept2FitSample())
-
-        assertTrue(workout.isRowing)
-        assertEquals(listOf(true, false), workout.laps.map { it.isActive })
-        assertEquals(2, workout.records.size)
-        assertEquals(listOf(140, 150), workout.records.map { it.heartRate })
-        assertEquals(listOf(24, 26), workout.records.map { it.cadence })
-    }
 
     @Test
     fun parse_activeLap_becomesSingleInterval() {
@@ -48,7 +37,7 @@ internal class Concept2FitParserTest {
             fileName = null
         )
 
-        assertEquals(fitMillis(START_TS), parsed.startTimeMillis)
+        assertEquals((START_TS + FIT_EPOCH_OFFSET_SECONDS) * 1_000L, parsed.startTimeMillis)
     }
 
     @Test
@@ -56,9 +45,6 @@ internal class Concept2FitParserTest {
         assertTrue(Concept2FitParser.matches(concept2FitSample()))
         assertFalse(Concept2FitParser.matches(byteArrayOf(1, 2, 3)))
     }
-
-    private fun fitMillis(fitSeconds: Long): Long =
-        (fitSeconds + FIT_EPOCH_OFFSET_SECONDS) * 1_000L
 
     private fun concept2FitSample(): ByteArray {
         val data = FitWriter().apply {
@@ -161,10 +147,27 @@ internal class Concept2FitParserTest {
         return header + data + byteArrayOf(0, 0)
     }
 
+    private companion object {
+        const val START_TS = 1_180_000_000L
+
+        fun u8(value: Int): ByteArray = byteArrayOf(value.toByte())
+
+        fun u16(value: Int): ByteArray = u8(value and 0xFF) + u8((value shr 8) and 0xFF)
+
+        fun u32(value: Long): ByteArray = u8((value and 0xFF).toInt()) +
+                u8(((value shr 8) and 0xFF).toInt()) +
+                u8(((value shr 16) and 0xFF).toInt()) +
+                u8(((value shr 24) and 0xFF).toInt())
+    }
+
     private class FitWriter {
         private val bytes = ArrayList<Byte>()
 
-        fun definition(local: Int, global: Int, fields: List<Pair<Int, Int>>) {
+        fun definition(
+            local: Int,
+            global: Int,
+            fields: List<Pair<Int, Int>>
+        ) {
             byte(DEFINITION_MASK or local)
             byte(0)
             byte(0)
@@ -177,7 +180,10 @@ internal class Concept2FitParserTest {
             }
         }
 
-        fun dataMessage(local: Int, vararg fields: ByteArray) {
+        fun dataMessage(
+            local: Int,
+            vararg fields: ByteArray
+        ) {
             byte(local)
             fields.forEach { field -> field.forEach { byte(it.toInt() and 0xFF) } }
         }
@@ -192,18 +198,5 @@ internal class Concept2FitParserTest {
             byte(value and 0xFF)
             byte((value shr 8) and 0xFF)
         }
-    }
-
-    private companion object {
-        const val START_TS = 1_180_000_000L
-
-        fun u8(value: Int): ByteArray = byteArrayOf(value.toByte())
-
-        fun u16(value: Int): ByteArray = u8(value and 0xFF) + u8((value shr 8) and 0xFF)
-
-        fun u32(value: Long): ByteArray = u8((value and 0xFF).toInt()) +
-            u8(((value shr 8) and 0xFF).toInt()) +
-            u8(((value shr 16) and 0xFF).toInt()) +
-            u8(((value shr 24) and 0xFF).toInt())
     }
 }

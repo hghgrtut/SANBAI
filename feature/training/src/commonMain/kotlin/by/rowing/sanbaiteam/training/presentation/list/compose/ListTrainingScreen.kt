@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.training.presentation.list.compose
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.FilterList
@@ -47,27 +49,37 @@ import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateI
 import by.rowing.sanbaiteam.training.presentation.platform.rememberCreateBackupLauncher
 import by.rowing.sanbaiteam.training.presentation.platform.rememberOpenBackupLauncher
 import by.rowing.sanbaiteam.training.resources.Res
+import by.rowing.sanbaiteam.training.resources.cancel
 import by.rowing.sanbaiteam.training.resources.ok
 import by.rowing.sanbaiteam.training.resources.training_add_some_training
 import by.rowing.sanbaiteam.training.resources.training_add_training
+import by.rowing.sanbaiteam.training.resources.training_delete_action
+import by.rowing.sanbaiteam.training.resources.training_delete_confirm_message
+import by.rowing.sanbaiteam.training.resources.training_delete_confirm_title
 import by.rowing.sanbaiteam.training.resources.training_list_title
 import by.rowing.sanbaiteam.training.resources.training_no_trainings
 import by.rowing.sanbaiteam.training.resources.training_search_no_results
 import by.rowing.sanbaiteam.training.resources.training_search_placeholder
+import by.rowing.sanbaiteam.training.resources.training_selection_cancel
+import by.rowing.sanbaiteam.training.resources.training_selection_title
 import by.rowing.sanbaiteam.training.resources.training_transfer_export_action
 import by.rowing.sanbaiteam.training.resources.training_transfer_import_action
 import by.rowing.sanbaiteam.training.resources.training_transfer_notice_title
 import by.rowing.sanbaiteam.uikit.component.BackHandler
+import by.rowing.sanbaiteam.uikit.component.Checkbox
+import by.rowing.sanbaiteam.uikit.component.CheckedState
 import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.UiText
 import by.rowing.sanbaiteam.uikit.component.button.Button
+import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerL
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXL
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
+import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
@@ -121,13 +133,17 @@ private fun ListTrainingScreenContent(
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
-            ListTrainingTopBarWithSearch(
+            ListTrainingTopBar(
                 actions = actions,
                 openBackupLauncher = openBackupLauncher,
                 state = state
             )
         },
-        floatingActionButton = { AddTrainingFAB(onAddTraining = actions::onAddTrainingClick) }
+        floatingActionButton = {
+            if (!state.isSelectionMode) {
+                AddTrainingFAB(onAddTraining = actions::onAddTrainingClick)
+            }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues = paddingValues),
@@ -144,6 +160,7 @@ private fun ListTrainingScreenContent(
             } else {
                 TrainingList(
                     trainings = filteredTrainings,
+                    selectedTrainingIds = state.selectedTrainingIds,
                     actions = actions
                 )
             }
@@ -155,6 +172,59 @@ private fun ListTrainingScreenContent(
             notice = notice
         )
     }
+    if (state.deleteConfirmationRequested) {
+        DeleteTrainingsConfirmDialog(
+            selectedCount = state.selectedTrainingIds.size,
+            onDismiss = actions::onDeleteDismiss,
+            onConfirm = actions::onDeleteConfirm
+        )
+    }
+}
+
+@Composable
+private fun ListTrainingTopBar(
+    state: ListTrainingState,
+    openBackupLauncher: () -> Unit,
+    actions: ListTrainingScreenActions
+) {
+    if (state.isSelectionMode) {
+        SelectionTopBar(
+            selectedCount = state.selectedTrainingIds.size,
+            actions = actions
+        )
+    } else {
+        ListTrainingTopBarWithSearch(
+            state = state,
+            openBackupLauncher = openBackupLauncher,
+            actions = actions
+        )
+    }
+}
+
+@Composable
+private fun SelectionTopBar(
+    selectedCount: Int,
+    actions: ListTrainingScreenActions
+) {
+    TopAppBar(
+        title = stringResource(Res.string.training_selection_title, selectedCount),
+        navigationIcon = {
+            IconButton(onClick = actions::onCancelSelection) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(Res.string.training_selection_cancel)
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = actions::onDeleteClick) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(Res.string.training_delete_action)
+                )
+            }
+        }
+    )
 }
 
 @Composable
@@ -327,27 +397,45 @@ private fun EmptyTrainingsState(onAddAthlete: () -> Unit) {
 @Composable
 private fun ListTrainingItem(
     item: ListTrainingStateItem,
-    onTrainingClick: (ListTrainingStateItem) -> Unit
+    isSelectionMode: Boolean,
+    selected: Boolean,
+    onTrainingClick: (ListTrainingStateItem) -> Unit,
+    onTrainingLongClick: (ListTrainingStateItem) -> Unit
 ) {
-    ItemCard(onClick = { onTrainingClick(item) }) {
-        Column(
+    ItemCard(
+        onClick = { onTrainingClick(item) },
+        onLongClick = { onTrainingLongClick(item) },
+        selected = selected
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(all = Spacing.M),
-            verticalArrangement = Arrangement.spacedBy(space = Spacing.S)
+            horizontalArrangement = Arrangement.spacedBy(space = Spacing.S),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = item.trainingWork,
-                style = TypographyPaletteSp.H1.copy(color = MaterialTheme.colorScheme.onSurface)
-            )
-            Text(
-                text = item.athletes.joinToString(),
-                style = TypographyPaletteSp.H3.copy(color = MaterialTheme.colorScheme.onSurface)
-            )
-            Text(
-                text = item.trainingDate,
-                style = TypographyPaletteSp.Body2Regular.copy(color = MaterialTheme.colorScheme.onSurface)
-            )
+            Column(
+                modifier = Modifier.weight(weight = 1f),
+                verticalArrangement = Arrangement.spacedBy(space = Spacing.S)
+            ) {
+                Text(
+                    text = item.trainingWork,
+                    style = TypographyPaletteSp.H1.copy(color = MaterialTheme.colorScheme.onSurface)
+                )
+                Text(
+                    text = item.athletes.joinToString(),
+                    style = TypographyPaletteSp.H3.copy(color = MaterialTheme.colorScheme.onSurface)
+                )
+                Text(
+                    text = item.trainingDate,
+                    style = TypographyPaletteSp.Body2Regular.copy(color = MaterialTheme.colorScheme.onSurface)
+                )
+            }
+            if (isSelectionMode) {
+                Checkbox(
+                    checked = if (selected) CheckedState.CHECKED else CheckedState.UNCHECKED
+                )
+            }
         }
     }
 }
@@ -355,8 +443,10 @@ private fun ListTrainingItem(
 @Composable
 private fun TrainingList(
     trainings: List<ListTrainingStateItem>,
+    selectedTrainingIds: Set<Long>,
     actions: ListTrainingScreenActions
 ) {
+    val isSelectionMode = selectedTrainingIds.isNotEmpty()
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(space = Spacing.S),
         contentPadding = PaddingValues(vertical = Spacing.S)
@@ -364,7 +454,10 @@ private fun TrainingList(
         items(trainings, key = { it.trainingId }) { training ->
             ListTrainingItem(
                 item = training,
-                onTrainingClick = { actions.onTrainingClick(training.trainingId) }
+                isSelectionMode = isSelectionMode,
+                selected = training.trainingId in selectedTrainingIds,
+                onTrainingClick = { actions.onTrainingClick(training.trainingId) },
+                onTrainingLongClick = { actions.onTrainingLongClick(training.trainingId) }
             )
         }
     }
@@ -408,6 +501,43 @@ private fun TransferDataAlert(
         text = { Text(text = notice.resolve()) },
         confirmButton = {
             TextButton(onClick = actions::onDismissTransferNotice) { Text(text = stringResource(Res.string.ok)) }
+        }
+    )
+}
+
+@Composable
+private fun DeleteTrainingsConfirmDialog(
+    selectedCount: Int,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(Res.string.training_delete_confirm_title),
+                style = TypographyPalette.H4
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(Res.string.training_delete_confirm_message, selectedCount),
+                style = TypographyPalette.Body1Regular
+            )
+        },
+        confirmButton = {
+            Button(
+                text = stringResource(Res.string.training_delete_action),
+                buttonColors = ButtonColors.attention,
+                debounceClick = onConfirm
+            )
+        },
+        dismissButton = {
+            Button(
+                text = stringResource(Res.string.cancel),
+                buttonColors = ButtonColors.text(),
+                debounceClick = onDismiss
+            )
         }
     )
 }

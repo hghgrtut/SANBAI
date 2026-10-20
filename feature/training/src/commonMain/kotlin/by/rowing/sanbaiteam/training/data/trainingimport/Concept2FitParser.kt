@@ -1,5 +1,8 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
+import by.rowing.sanbaiteam.training.data.models.FitLap
+import by.rowing.sanbaiteam.training.data.models.FitRecord
+import by.rowing.sanbaiteam.training.data.models.FitWorkout
 import kotlin.math.roundToInt
 
 /**
@@ -22,14 +25,7 @@ internal object Concept2FitParser : TrainingImportParser {
         bytes: ByteArray,
         fileName: String?
     ): ParsedTrainingImport {
-        if (!bytes.hasFitMagic()) {
-            throw IllegalArgumentException("File does not contain a FIT header.")
-        }
         val workout = decodeFitWorkout(bytes)
-        if (!workout.isRowing) {
-            throw IllegalArgumentException("FIT file does not contain a rowing workout.")
-        }
-
         val laps = workout.laps
         val records = workout.records.sortedBy { it.timestampMillis }
         val summaries = laps.mapIndexed { index, lap ->
@@ -91,6 +87,28 @@ internal object Concept2FitParser : TrainingImportParser {
         return (beforeHeartRate + (afterHeartRate - beforeHeartRate) * ratio).roundToInt()
     }
 
+    private fun decodeFitWorkout(bytes: ByteArray): FitWorkout {
+        if (bytes.size < FIT_HEADER_MIN_SIZE || !bytes.hasFitMagic()) {
+            throw IllegalArgumentException(FIT_FILE_HEADER_ERROR)
+        }
+        val reader = ByteReader(bytes)
+        val header = FileHeader.read(reader).takeIf { it.isValid }
+            ?: throw IllegalArgumentException(FIT_FILE_HEADER_ERROR)
+        val dataStart = reader.position
+        val dataEnd = dataStart + header.dataSize.toInt()
+        val fileData = readDataSection(
+            bytes = bytes,
+            start = dataStart,
+            end = dataEnd
+        ).takeIf { it.isRowing } ?: throw IllegalArgumentException(FIT_FILE_NOT_ROWING_ERROR)
+        return FitWorkout(
+            isRowing = fileData.isRowing,
+            startTimeMillis = fileData.startTimeMillis,
+            laps = fileData.laps.toList(),
+            records = fileData.records.toList()
+        )
+    }
+
     private fun List<FitRecord>.forLap(
         lap: FitLap,
         isLast: Boolean
@@ -115,4 +133,7 @@ internal object Concept2FitParser : TrainingImportParser {
     private const val FIT_MAGIC_F = 'F'.code.toByte()
     private const val FIT_MAGIC_I = 'I'.code.toByte()
     private const val FIT_MAGIC_T = 'T'.code.toByte()
+
+    private const val FIT_FILE_HEADER_ERROR = "File does not contain a FIT header."
+    private const val FIT_FILE_NOT_ROWING_ERROR = "FIT file does not contain a rowing workout."
 }

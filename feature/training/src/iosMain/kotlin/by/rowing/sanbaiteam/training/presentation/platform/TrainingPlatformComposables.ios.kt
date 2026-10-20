@@ -12,22 +12,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.DialogProperties
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.cancel
 import by.rowing.sanbaiteam.training.resources.ok
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSTimer
-import platform.Foundation.NSUUID
 import platform.Foundation.NSURL
-import platform.Foundation.lastPathComponent
+import platform.Foundation.NSUUID
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIDocumentPickerDelegateProtocol
@@ -35,6 +33,7 @@ import platform.UIKit.UIDocumentPickerViewController
 import platform.UIKit.UIViewController
 import platform.UniformTypeIdentifiers.UTType
 import platform.darwin.NSObject
+import kotlin.time.Instant
 
 private const val UT_TYPE_DATA = "public.data"
 private const val UT_TYPE_JSON = "public.json"
@@ -119,20 +118,20 @@ internal actual fun rememberTrainingDatePicker(
         DatePickerDialog(
             onDismissRequest = { openDialog.value = false },
             confirmButton = {
-                TextButton(onClick = {
-                    openDialog.value = false
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val date = Instant.fromEpochMilliseconds(millis)
-                        val components = date.toLocalDateTime(TimeZone.currentSystemDefault())
-                        onDatePicked(components.year, components.monthNumber, components.dayOfMonth)
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val date = Instant.fromEpochMilliseconds(epochMilliseconds = millis)
+                                .toLocalDateTime(timeZone = TimeZone.currentSystemDefault())
+                            onDatePicked(date.year, date.month.number, date.day)
+                        }
                     }
-                }) {
-                    Text(stringResource(Res.string.ok))
-                }
+                ) { Text(text = stringResource(resource = Res.string.ok)) }
             },
             dismissButton = {
                 TextButton(onClick = { openDialog.value = false }) {
-                    Text(stringResource(Res.string.cancel))
+                    Text(text = stringResource(resource = Res.string.cancel))
                 }
             },
             properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -212,7 +211,10 @@ private fun presentShareSheetWhenReady(
     attemptsLeft: Int,
 ) {
     if (NSFileManager.defaultManager.fileExistsAtPath(tempPath)) {
-        presentShareSheet(root = root, tempPath = tempPath)
+        presentShareSheet(
+            root = root,
+            tempPath = tempPath
+        )
     } else if (attemptsLeft > 0) {
         NSTimer.scheduledTimerWithTimeInterval(
             interval = SHARE_WAIT_INTERVAL_SECONDS,
@@ -229,7 +231,10 @@ private fun presentShareSheetWhenReady(
 }
 
 @OptIn(ExperimentalForeignApi::class)
-private fun presentShareSheet(root: UIViewController, tempPath: String) {
+private fun presentShareSheet(
+    root: UIViewController,
+    tempPath: String
+) {
     val shareSheet = UIActivityViewController(
         activityItems = listOf(NSURL.fileURLWithPath(tempPath)),
         applicationActivities = null,

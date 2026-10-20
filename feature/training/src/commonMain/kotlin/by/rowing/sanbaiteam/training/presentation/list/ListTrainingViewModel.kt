@@ -50,7 +50,11 @@ internal class ListTrainingViewModel(
     }
 
     override fun onBackClick() {
-        composeNavigator.navigateBack()
+        if (state.isSelectionMode) {
+            onCancelSelection()
+        } else {
+            composeNavigator.navigateBack()
+        }
     }
 
     override fun onSearchQueryChange(newQuery: String) {
@@ -69,10 +73,44 @@ internal class ListTrainingViewModel(
     }
 
     override fun onTrainingClick(trainingId: Long) {
-        TrainingNavigation.TrainingDetail(trainingId).navigateTo(
-            composeNavigator = composeNavigator,
-            navOptions = getReturnToScreenNavOptions<TrainingNavigation.TrainingList>()
-        )
+        if (state.isSelectionMode) {
+            toggleSelection(trainingId)
+        } else {
+            TrainingNavigation.TrainingDetail(trainingId).navigateTo(
+                composeNavigator = composeNavigator,
+                navOptions = getReturnToScreenNavOptions<TrainingNavigation.TrainingList>()
+            )
+        }
+    }
+
+    override fun onTrainingLongClick(trainingId: Long) {
+        changeState { copy(selectedTrainingIds = setOf(trainingId)) }
+    }
+
+    override fun onCancelSelection() {
+        changeState {
+            copy(
+                selectedTrainingIds = emptySet(),
+                deleteConfirmationRequested = false
+            )
+        }
+    }
+
+    override fun onDeleteClick() {
+        changeState { copy(deleteConfirmationRequested = true) }
+    }
+
+    override fun onDeleteDismiss() {
+        changeState { copy(deleteConfirmationRequested = false) }
+    }
+
+    override fun onDeleteConfirm() {
+        changeState { copy(deleteConfirmationRequested = false) }
+        viewModelScope.launch {
+            repository.deleteTrainings(state.selectedTrainingIds.toList())
+            reloadTrainings()
+            changeState { copy(selectedTrainingIds = emptySet()) }
+        }
     }
 
     override fun onExportClick() {
@@ -147,6 +185,18 @@ internal class ListTrainingViewModel(
 
     override fun onDismissTransferNotice() {
         changeState { copy(transferNotice = null) }
+    }
+
+    private fun toggleSelection(trainingId: Long) {
+        changeState {
+            copy(
+                selectedTrainingIds = if (trainingId in selectedTrainingIds) {
+                    selectedTrainingIds - trainingId
+                } else {
+                    selectedTrainingIds + trainingId
+                }
+            )
+        }
     }
 
     private fun buildImportNotice(result: TrainingTransferResult?): UiText = result?.let {

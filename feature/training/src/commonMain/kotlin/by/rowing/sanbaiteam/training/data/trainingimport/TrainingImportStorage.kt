@@ -10,4 +10,6 @@ internal interface TrainingImportStorage {
     ): String
 
     fun readCsv(relativePath: String): String?
+
+    fun deleteCsv(relativePath: String)
 }

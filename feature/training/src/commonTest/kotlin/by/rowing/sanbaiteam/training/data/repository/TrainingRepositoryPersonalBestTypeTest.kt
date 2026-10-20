@@ -9,6 +9,7 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
+import by.rowing.sanbaiteam.training.data.trainingimport.FakeTrainingImportStorage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
@@ -128,6 +129,7 @@ internal class TrainingRepositoryPersonalBestTypeTest {
             ),
         ),
         athletesRepository = athletesRepository,
+        importStorage = FakeTrainingImportStorage(),
     )
 
     private fun best(
@@ -160,6 +162,15 @@ internal class TrainingRepositoryPersonalBestTypeTest {
 
         override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
             training?.takeIf { it.id == trainingId }
+
+        override suspend fun getCsvPathsByIds(trainingIds: List<Long>): List<String> =
+            listOfNotNull(training)
+                .filter { it.id in trainingIds }
+                .mapNotNull { it.sourceCsvRelativePath }
+
+        override suspend fun deletePiecesForTrainings(trainingIds: List<Long>) {}
+
+        override suspend fun deleteTrainings(trainingIds: List<Long>) {}
 
         override suspend fun updateImportMetadata(
             trainingId: Long,

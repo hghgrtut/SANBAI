@@ -9,4 +9,9 @@ internal data class ListTrainingState(
     val transferNotice: UiText?,
     val isTransferring: Boolean,
     val exportPromptRequested: Boolean,
-)
+    val selectedTrainingIds: Set<Long> = emptySet(),
+    val deleteConfirmationRequested: Boolean = false,
+) {
+
+    val isSelectionMode: Boolean get() = selectedTrainingIds.isNotEmpty()
+}

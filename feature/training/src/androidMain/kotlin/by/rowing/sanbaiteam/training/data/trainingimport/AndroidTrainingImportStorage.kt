@@ -25,4 +25,8 @@ internal class AndroidTrainingImportStorage(private val context: Context) : Trai
         val file = File(context.filesDir, relativePath)
         return if (file.exists()) file.readText() else null
     }
+
+    override fun deleteCsv(relativePath: String) {
+        File(context.filesDir, relativePath).delete()
+    }
 }

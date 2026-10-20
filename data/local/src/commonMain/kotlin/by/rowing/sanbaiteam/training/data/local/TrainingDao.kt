@@ -34,6 +34,21 @@ interface TrainingDao {
     @Query("SELECT * FROM $TABLE_TRAINING WHERE id = :trainingId")
     suspend fun getTrainingById(trainingId: Long): TrainingEntity?
 
+    @Query("SELECT sourceCsvRelativePath FROM $TABLE_TRAINING WHERE id IN (:trainingIds) AND sourceCsvRelativePath IS NOT NULL")
+    suspend fun getCsvPathsByIds(trainingIds: List<Long>): List<String>
+
+    @Query("DELETE FROM $TABLE_TRAINING_ATHLETE_PIECE WHERE trainingId IN (:trainingIds)")
+    suspend fun deletePiecesForTrainings(trainingIds: List<Long>)
+
+    @Query("DELETE FROM $TABLE_TRAINING WHERE id IN (:trainingIds)")
+    suspend fun deleteTrainings(trainingIds: List<Long>)
+
+    @Transaction
+    suspend fun deleteTrainingsWithPieces(trainingIds: List<Long>) {
+        deletePiecesForTrainings(trainingIds)
+        deleteTrainings(trainingIds)
+    }
+
     @Query(
         """
         UPDATE $TABLE_TRAINING
