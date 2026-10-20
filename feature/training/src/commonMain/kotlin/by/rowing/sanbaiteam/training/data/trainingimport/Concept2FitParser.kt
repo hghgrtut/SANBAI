@@ -25,9 +25,7 @@ internal object Concept2FitParser : TrainingImportParser {
         bytes: ByteArray,
         fileName: String?
     ): ParsedTrainingImport {
-        val workout = decodeFitWorkout(bytes).takeIf { it.isRowing }
-            ?: throw IllegalArgumentException(FIT_FILE_NOT_ROWING_ERROR)
-
+        val workout = decodeFitWorkout(bytes)
         val laps = workout.laps
         val records = workout.records.sortedBy { it.timestampMillis }
         val summaries = laps.mapIndexed { index, lap ->
