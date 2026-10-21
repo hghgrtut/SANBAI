@@ -21,9 +21,7 @@ import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
 import by.rowing.sanbaiteam.uikit.theme.SANBAITeamTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-/**
- * Плейсхолдер загрузки: пульсирующий прямоугольник нужного размера.
- */
+/** Плейсхолдер загрузки: пульсирующий прямоугольник нужного размера. */
 @AllowDetektPublic
 @Composable
 fun Skeleton(

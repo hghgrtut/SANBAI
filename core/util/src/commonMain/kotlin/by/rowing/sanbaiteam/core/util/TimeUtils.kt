@@ -6,6 +6,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
+import kotlinx.datetime.number
 import kotlinx.datetime.plus
 
 @AllowDetektPublic
@@ -22,22 +23,22 @@ object TimeUtils {
 
     fun formatDate(timeInMillis: Long): String {
         val date = timeInMillis.toLocalDate()
-        val day = date.dayOfMonth.toString().padStart(2, '0')
-        val month = date.monthNumber.toString().padStart(2, '0')
+        val day = date.day.toString().padStart(2, '0')
+        val month = date.month.number.toString().padStart(2, '0')
         return "$day.$month.${date.year}"
     }
 
     fun formatDateWithMonthName(timeInMillis: Long): String {
         val date = timeInMillis.toLocalDate()
-        val day = date.dayOfMonth.toString().padStart(2, '0')
-        val month = SHORT_MONTH_NAMES[date.monthNumber - 1]
+        val day = date.day.toString().padStart(2, '0')
+        val month = SHORT_MONTH_NAMES[date.month.number - 1]
         return "$day $month ${date.year}"
     }
 
     fun formatDateDigits(timeInMillis: Long): String {
         val date = timeInMillis.toLocalDate()
-        val day = date.dayOfMonth.toString().padStart(2, '0')
-        val month = date.monthNumber.toString().padStart(2, '0')
+        val day = date.day.toString().padStart(2, '0')
+        val month = date.month.number.toString().padStart(2, '0')
         return "$day$month${date.year}"
     }
 
@@ -60,16 +61,15 @@ object TimeUtils {
         secondMillis: Long,
     ): Boolean = firstMillis.toLocalDate() == secondMillis.toLocalDate()
 
-    /**
-     * Полных лет на момент [nowTimeInMillis].
+    /** Полных лет на текущий момент.
      */
-    fun ageInYears(birthTimeInMillis: Long, nowTimeInMillis: Long): Int {
+    fun ageInYearsNow(birthTimeInMillis: Long): Int {
         val birth = birthTimeInMillis.toLocalDate()
-        val now = nowTimeInMillis.toLocalDate()
+        val now = nowInMillis().toLocalDate()
         val yearDiff = now.year - birth.year
-        val hasHadBirthday = now.monthNumber > birth.monthNumber ||
-            (now.monthNumber == birth.monthNumber && now.dayOfMonth >= birth.dayOfMonth)
-        return (if (hasHadBirthday) yearDiff else yearDiff - 1).coerceAtLeast(0)
+        val hasHadBirthday = now.month.number > birth.month.number ||
+                (now.month.number == birth.month.number && now.day >= birth.day)
+        return if (hasHadBirthday) yearDiff else yearDiff - 1
     }
 
     /**

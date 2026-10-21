@@ -88,10 +88,11 @@ import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Instant
 
 @Composable
 internal fun ListTrainingScreen(
@@ -377,7 +378,8 @@ private fun ListTrainingItem(
             }
             if (isSelectionMode) {
                 Checkbox(
-                    checked = if (selected) CheckedState.CHECKED else CheckedState.UNCHECKED
+                    checked = if (selected) CheckedState.CHECKED else CheckedState.UNCHECKED,
+                    click = { onTrainingClick(item) }
                 )
             }
         }
@@ -417,7 +419,10 @@ private fun TrainingList(
         verticalArrangement = Arrangement.spacedBy(space = Spacing.S),
         contentPadding = PaddingValues(vertical = Spacing.S)
     ) {
-        items(trainings, key = { it.trainingId }) { training ->
+        items(
+            items = trainings,
+            key = { it.trainingId }
+        ) { training ->
             ListTrainingItem(
                 item = training,
                 isSelectionMode = isSelectionMode,
@@ -593,7 +598,7 @@ private const val SKELETON_ITEM_COUNT = 5
 
 private fun suggestedBackupFileName(): String {
     val date = Instant.fromEpochMilliseconds(nowInMillis()).toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val month = date.monthNumber.toString().padStart(2, '0')
-    val day = date.dayOfMonth.toString().padStart(2, '0')
+    val month = date.month.number.toString().padStart(2, '0')
+    val day = date.day.toString().padStart(2, '0')
     return "sanbai-training-backup-${date.year}$month$day.json"
 }

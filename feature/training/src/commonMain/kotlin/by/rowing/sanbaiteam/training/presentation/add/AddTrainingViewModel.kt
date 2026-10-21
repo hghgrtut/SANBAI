@@ -37,15 +37,15 @@ import by.rowing.sanbaiteam.training.resources.add_training_validation_select_at
 import by.rowing.sanbaiteam.uikit.component.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import kotlin.time.Instant
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.roundToInt
+import kotlin.time.Instant
 
 internal class AddTrainingViewModel(
     private val athleteRepository: AthletesRepository,
@@ -277,7 +277,7 @@ internal class AddTrainingViewModel(
                     sessionName = state.pendingSourceSessionName
                 )
             }
-            Dispatchers.Main.immediate(composeNavigator::navigateBack)
+            withContext(Dispatchers.Main.immediate) { composeNavigator.navigateBack() }
         }
     }
 
@@ -445,8 +445,8 @@ internal class AddTrainingViewModel(
         dayOfMonth: Int
     ): Long = LocalDateTime(
         year = year,
-        monthNumber = month,
-        dayOfMonth = dayOfMonth,
+        month = month,
+        day = dayOfMonth,
         hour = 12,
         minute = 0,
     ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
