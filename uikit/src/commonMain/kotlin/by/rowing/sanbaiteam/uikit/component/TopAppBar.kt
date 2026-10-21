@@ -20,6 +20,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,7 +44,6 @@ import by.rowing.sanbaiteam.uikit.modifier.clickableIfProvided
 import by.rowing.sanbaiteam.uikit.resources.Res
 import by.rowing.sanbaiteam.uikit.resources.ic_check_16
 import by.rowing.sanbaiteam.uikit.resources.ic_chevron_left_24
-import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.DrawableResource
@@ -134,7 +134,7 @@ fun TopAppBar(
     backIconPainter: Painter? = null,
 ) {
     val containerColor by animateColorAsState(
-        targetValue = theme.containerColor,
+        targetValue = theme.colors().containerColor,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
     )
     TopAppBarInternal(
@@ -234,7 +234,7 @@ private fun TopAppBarInternalWithLabels(
                 Text(
                     text = leadingText,
                     style = TypographyPalette.Body1Regular,
-                    color = ColorPalette.Grey20,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -254,7 +254,7 @@ private fun TopAppBarInternalWithLabels(
                 Text(
                     text = trailingText,
                     style = TypographyPalette.Body1Regular,
-                    color = ColorPalette.Grey20,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
@@ -275,7 +275,7 @@ private fun TopAppBarInternalWithLabels(
 @Composable
 private fun DefaultNavigationIcon(
     modifier: Modifier = Modifier,
-    tint: Color = ColorPalette.Grey20,
+    tint: Color? = null,
     onNavIconClick: (() -> Unit)? = null,
     customIconPainter: Painter? = null
 ) {
@@ -297,7 +297,7 @@ private fun DefaultNavigationIcon(
                 modifier = Modifier.size(ICON_SIZE),
                 painter = customIconPainter ?: defaultIconPainter,
                 contentDescription = null,
-                tint = tint
+                tint = tint ?: MaterialTheme.colorScheme.onSurface
             )
         }
     )
@@ -306,25 +306,27 @@ private fun DefaultNavigationIcon(
 @OptIn(ExperimentalMaterial3Api::class)
 @AllowDetektPublic
 sealed interface TopAppBarTheme {
-    val containerColor: Color
-    val contentColor: Color
+    data object TRANSPARENT : TopAppBarTheme
+    data object LIGHT : TopAppBarTheme
+    data object DARK : TopAppBarTheme
+}
 
-    fun colors() = TopAppBarColors(containerColor, contentColor)
+@Composable
+private fun TopAppBarTheme.colors(): TopAppBarColors = when (this) {
+    TopAppBarTheme.TRANSPARENT -> TopAppBarColors(
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    )
 
-    data object TRANSPARENT : TopAppBarTheme {
-        override val containerColor = ColorPalette.Transparent
-        override val contentColor = ColorPalette.Grey20
-    }
+    TopAppBarTheme.LIGHT -> TopAppBarColors(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    )
 
-    data object LIGHT : TopAppBarTheme {
-        override val containerColor = ColorPalette.White
-        override val contentColor = ColorPalette.Grey20
-    }
-
-    data object DARK : TopAppBarTheme {
-        override val containerColor = ColorPalette.Grey20
-        override val contentColor = ColorPalette.White
-    }
+    TopAppBarTheme.DARK -> TopAppBarColors(
+        containerColor = MaterialTheme.colorScheme.inverseSurface,
+        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

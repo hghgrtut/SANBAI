@@ -51,5 +51,26 @@ object TrainingNavGraphProvider {
         )
     }
 
+    fun navigateToDetail(
+        composeNavigator: ComposeNavigator,
+        trainingId: Long,
+        navOptions: NavOptions,
+    ) {
+        TrainingNavigation.TrainingDetail(trainingId = trainingId).navigateTo(
+            composeNavigator = composeNavigator,
+            navOptions = navOptions
+        )
+    }
+
+    fun navigateToAdd(
+        composeNavigator: ComposeNavigator,
+        navOptions: NavOptions,
+    ) {
+        TrainingNavigation.TrainingAdd().navigateTo(
+            composeNavigator = composeNavigator,
+            navOptions = navOptions
+        )
+    }
+
     fun getAddTrainingRoute(importUri: String): Any = TrainingNavigation.TrainingAdd(importUri = importUri)
 }
