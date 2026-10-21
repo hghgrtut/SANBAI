@@ -11,6 +11,7 @@ internal data class ListTrainingState(
     val exportPromptRequested: Boolean,
     val selectedTrainingIds: Set<Long> = emptySet(),
     val deleteConfirmationRequested: Boolean = false,
+    val isLoading: Boolean = true,
 ) {
 
     val isSelectionMode: Boolean get() = selectedTrainingIds.isNotEmpty()

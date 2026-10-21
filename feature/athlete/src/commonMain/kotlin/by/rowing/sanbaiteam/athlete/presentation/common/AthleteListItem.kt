@@ -20,11 +20,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
+import by.rowing.sanbaiteam.athlete.resources.Res
+import by.rowing.sanbaiteam.athlete.resources.athletes_age_years
+import by.rowing.sanbaiteam.athlete.resources.athletes_gender_female_short
+import by.rowing.sanbaiteam.athlete.resources.athletes_gender_male_short
+import by.rowing.sanbaiteam.uikit.component.Badge
+import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
+import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 
 @Composable
@@ -43,7 +50,7 @@ internal fun AthleteListItem(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(AVATAR_SIZE)
                     .background(
                         color = getAvatarColor(athlete.name),
                         shape = CircleShape
@@ -51,69 +58,67 @@ internal fun AthleteListItem(
             ) {
                 Text(
                     text = athlete.initials,
-                    style = TypographyPaletteSp.H1.copy(color = Color.White),
+                    style = TypographyPalette.H1,
+                    color = ColorPalette.White,
                 )
             }
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(space = Spacing.S)
             ) {
                 Text(
                     text = athlete.name,
-                    style = TypographyPaletteSp.H3.copy(color = MaterialTheme.colorScheme.onSurface)
+                    style = TypographyPalette.H3,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-                InfoChip(
-                    icon = if (athlete.isMale) Icons.Default.Male else Icons.Default.Female,
-                    text = athlete.gender
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(space = Spacing.XS)) {
+                    Badge(
+                        text = stringResource(
+                            if (athlete.isMale) {
+                                Res.string.athletes_gender_male_short
+                            } else {
+                                Res.string.athletes_gender_female_short
+                            }
+                        ),
+                        icon = if (athlete.isMale) Icons.Default.Male else Icons.Default.Female,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    athlete.age?.let { age ->
+                        Badge(
+                            text = pluralStringResource(
+                                Res.plurals.athletes_age_years,
+                                age,
+                                age,
+                            )
+                        )
+                    }
+                }
             }
             Icon(
                 imageVector = Icons.Default.ChevronRight,
-                contentDescription = "View details",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(ICON_SIZE)
             )
         }
     }
 }
 
-@Composable
-private fun InfoChip(
-    icon: ImageVector,
-    text: String
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(space = Spacing.XS)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(14.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = text,
-            style = TypographyPaletteSp.Body3Regular.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-        )
-    }
-}
+private val AVATAR_SIZE = 60.dp
+private val ICON_SIZE = 20.dp
 
-private fun getAvatarColor(name: String): Color {
-    val colors = listOf(
-        Color(0xFFE91E63), // Pink
-        Color(0xFF9C27B0), // Purple
-        Color(0xFF673AB7), // Deep Purple
-        Color(0xFF3F51B5), // Indigo
-        Color(0xFF2196F3), // Blue
-        Color(0xFF00BCD4), // Cyan
-        Color(0xFF009688), // Teal
-        Color(0xFF4CAF50), // Green
-        Color(0xFF8BC34A), // Light Green
-        Color(0xFFCDDC39), // Lime
-        Color(0xFFFFC107), // Amber
-        Color(0xFFFF9800), // Orange
-        Color(0xFF795548), // Brown
-    )
-    return colors[abs(name.hashCode()) % colors.size]
-}
+/**
+ * Набор брендовых цветов с достаточным контрастом для белых инициалов.
+ */
+private val AVATAR_COLORS = listOf(
+    ColorPalette.Blue50,
+    ColorPalette.Blue30,
+    ColorPalette.Blue20,
+    ColorPalette.Grey20,
+    ColorPalette.Grey30,
+    ColorPalette.Red50,
+)
+
+private fun getAvatarColor(name: String): Color =
+    AVATAR_COLORS[abs(name.hashCode()) % AVATAR_COLORS.size]

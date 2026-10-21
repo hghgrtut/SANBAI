@@ -61,6 +61,18 @@ object TimeUtils {
     ): Boolean = firstMillis.toLocalDate() == secondMillis.toLocalDate()
 
     /**
+     * Полных лет на момент [nowTimeInMillis].
+     */
+    fun ageInYears(birthTimeInMillis: Long, nowTimeInMillis: Long): Int {
+        val birth = birthTimeInMillis.toLocalDate()
+        val now = nowTimeInMillis.toLocalDate()
+        val yearDiff = now.year - birth.year
+        val hasHadBirthday = now.monthNumber > birth.monthNumber ||
+            (now.monthNumber == birth.monthNumber && now.dayOfMonth >= birth.dayOfMonth)
+        return (if (hasHadBirthday) yearDiff else yearDiff - 1).coerceAtLeast(0)
+    }
+
+    /**
      * Локальная для epoch-миллисекунд.
      *
      * Намеренно не использует `Instant`: обращение к `Instant.Companion` не резолвится

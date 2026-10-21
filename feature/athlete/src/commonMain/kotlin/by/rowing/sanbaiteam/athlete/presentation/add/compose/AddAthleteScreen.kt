@@ -48,6 +48,8 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_placeholder
+import by.rowing.sanbaiteam.athlete.resources.athletes_detail_gender_label
+import by.rowing.sanbaiteam.athlete.resources.save
 import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
@@ -88,7 +90,7 @@ private fun AddAthleteTopBar(actions: AddAthleteScreenActions) {
             IconButton(onClick = actions::onSaveClick) {
                 Icon(
                     imageVector = Icons.Default.Save,
-                    contentDescription = "Сохранить",
+                    contentDescription = stringResource(Res.string.save),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -158,7 +160,7 @@ private fun AddAthleteForm(
             verticalSpacing = Spacing.S
         ) {
             Text(
-                text = "Пол спортсмена",
+                text = stringResource(Res.string.athletes_detail_gender_label),
                 style = TypographyPaletteSp.Body2Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

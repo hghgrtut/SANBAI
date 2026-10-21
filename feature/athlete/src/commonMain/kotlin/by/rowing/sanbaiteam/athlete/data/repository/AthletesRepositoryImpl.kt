@@ -6,6 +6,7 @@ import by.rowing.sanbaiteam.athlete.data.local.AthleteDao
 import by.rowing.sanbaiteam.athlete.data.local.AthletePersonalBestDao
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,10 @@ internal class AthletesRepositoryImpl(
                 dateOfBirth = TimeUtils.formatDateWithMonthName(athlete.dateOfBirth),
                 isMale = athlete.isMale,
                 speedCoachSerial = athlete.speedCoachSerial,
+                age = TimeUtils.ageInYears(
+                    birthTimeInMillis = athlete.dateOfBirth,
+                    nowTimeInMillis = nowInMillis(),
+                ),
             )
         }
     }

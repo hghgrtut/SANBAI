@@ -6,4 +6,5 @@ internal data class AthletesUiState(
     val items: List<AthleteItemModel>,
     val searchQuery: String,
     val showFilters: Boolean,
+    val isLoading: Boolean = true,
 )

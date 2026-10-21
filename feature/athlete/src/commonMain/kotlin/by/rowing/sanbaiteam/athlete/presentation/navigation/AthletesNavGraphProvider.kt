@@ -47,14 +47,4 @@ object AthletesNavGraphProvider {
             navOptions = navOptions
         )
     }
-
-    fun navigateToAdd(
-        composeNavigator: ComposeNavigator,
-        navOptions: NavOptions,
-    ) {
-        AthletesNavigation.AthletesAdd.navigateTo(
-            composeNavigator = composeNavigator,
-            navOptions = navOptions
-        )
-    }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,6 +23,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.TableRows
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,14 +38,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import by.rowing.sanbaiteam.athlete.presentation.common.ItemCard
 import by.rowing.sanbaiteam.core.util.nowInMillis
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
@@ -56,8 +58,14 @@ import by.rowing.sanbaiteam.training.resources.training_add_training
 import by.rowing.sanbaiteam.training.resources.training_delete_action
 import by.rowing.sanbaiteam.training.resources.training_delete_confirm_message
 import by.rowing.sanbaiteam.training.resources.training_delete_confirm_title
+import by.rowing.sanbaiteam.training.resources.training_filter_content_description
+import by.rowing.sanbaiteam.training.resources.training_filters_coming_soon
+import by.rowing.sanbaiteam.training.resources.training_filters_title
 import by.rowing.sanbaiteam.training.resources.training_list_title
 import by.rowing.sanbaiteam.training.resources.training_no_trainings
+import by.rowing.sanbaiteam.training.resources.training_search_clear
+import by.rowing.sanbaiteam.training.resources.training_search_content_description
+import by.rowing.sanbaiteam.training.resources.training_search_empty_title
 import by.rowing.sanbaiteam.training.resources.training_search_no_results
 import by.rowing.sanbaiteam.training.resources.training_search_placeholder
 import by.rowing.sanbaiteam.training.resources.training_selection_cancel
@@ -66,21 +74,20 @@ import by.rowing.sanbaiteam.training.resources.training_transfer_export_action
 import by.rowing.sanbaiteam.training.resources.training_transfer_import_action
 import by.rowing.sanbaiteam.training.resources.training_transfer_notice_title
 import by.rowing.sanbaiteam.uikit.component.BackHandler
+import by.rowing.sanbaiteam.uikit.component.Badge
 import by.rowing.sanbaiteam.uikit.component.Checkbox
 import by.rowing.sanbaiteam.uikit.component.CheckedState
 import by.rowing.sanbaiteam.uikit.component.DataCard
+import by.rowing.sanbaiteam.uikit.component.EmptyState
+import by.rowing.sanbaiteam.uikit.component.Skeleton
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.UiText
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
+import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerL
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXL
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -152,13 +159,14 @@ private fun ListTrainingScreenContent(
             if (state.showFilters) {
                 TrainingFilters()
             }
-            if (filteredTrainings.isEmpty()) {
-                EmptyTrainingList(
+            when {
+                state.isLoading -> TrainingListSkeleton()
+                filteredTrainings.isEmpty() -> EmptyTrainingList(
                     state = state,
                     actions = actions
                 )
-            } else {
-                TrainingList(
+
+                else -> TrainingList(
                     trainings = filteredTrainings,
                     selectedTrainingIds = state.selectedTrainingIds,
                     actions = actions
@@ -258,11 +266,11 @@ private fun ListTrainingTopBarWithSearch(
                 IconButton(onClick = { actions.onShowFiltersChange(!state.showFilters) }) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
-                        contentDescription = "Filter trainings",
+                        contentDescription = stringResource(Res.string.training_filter_content_description),
                         tint = if (state.showFilters) {
                             MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.onPrimaryContainer
+                            MaterialTheme.colorScheme.onSurfaceVariant
                         }
                     )
                 }
@@ -276,7 +284,7 @@ private fun ListTrainingTopBarWithSearch(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
+                    contentDescription = stringResource(Res.string.training_search_content_description)
                 )
             },
             trailingIcon = {
@@ -284,7 +292,7 @@ private fun ListTrainingTopBarWithSearch(
                     IconButton(onClick = { actions.onSearchQueryChange("") }) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Clear search"
+                            contentDescription = stringResource(Res.string.training_search_clear)
                         )
                     }
                 }
@@ -306,90 +314,14 @@ private fun TrainingFilters() {
         verticalSpacing = Spacing.SM
     ) {
         Text(
-            text = "Filters",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold
+            text = stringResource(Res.string.training_filters_title),
+            style = TypographyPalette.H4,
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = "Filter options coming soon...",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun NoSearchResultsState(searchQuery: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(all = Spacing.XL),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.SearchOff,
-            contentDescription = "No results",
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        SpacerL()
-        Text(
-            text = stringResource(Res.string.training_no_trainings),
-            style = TypographyPaletteSp.H2.copy(color = MaterialTheme.colorScheme.onSurface)
-        )
-        SpacerXS()
-        if (searchQuery.isNotEmpty()) {
-            Text(
-                text = stringResource(Res.string.training_search_no_results, searchQuery),
-                style = TypographyPaletteSp.Body2Medium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-private fun EmptyTrainingsState(onAddAthlete: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(all = Spacing.XL),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.TableRows,
-            contentDescription = "Нет тренировок",
-            modifier = Modifier.size(120.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-        )
-        SpacerL()
-        Text(
-            text = stringResource(Res.string.training_no_trainings),
-            style = TypographyPaletteSp.H4.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-        )
-        SpacerS()
-        Text(
-            text = stringResource(Res.string.training_add_some_training),
-            style = TypographyPaletteSp.Body2Medium.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-        )
-        SpacerXL()
-        Button(
-            text = stringResource(Res.string.training_add_training),
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Route,
-                    contentDescription = null
-                )
-            },
-            debounceClick = onAddAthlete
+            text = stringResource(Res.string.training_filters_coming_soon),
+            style = TypographyPalette.Body2Regular,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -416,20 +348,32 @@ private fun ListTrainingItem(
         ) {
             Column(
                 modifier = Modifier.weight(weight = 1f),
-                verticalArrangement = Arrangement.spacedBy(space = Spacing.S)
+                verticalArrangement = Arrangement.spacedBy(space = Spacing.XS)
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TrainingTypeBadge(type = item.trainingType)
+                    Text(
+                        text = item.trainingDate,
+                        style = TypographyPalette.Caption1Regular,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Text(
                     text = item.trainingWork,
-                    style = TypographyPaletteSp.H1.copy(color = MaterialTheme.colorScheme.onSurface)
+                    style = TypographyPalette.H1,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-                Text(
-                    text = item.athletes.joinToString(),
-                    style = TypographyPaletteSp.H3.copy(color = MaterialTheme.colorScheme.onSurface)
-                )
-                Text(
-                    text = item.trainingDate,
-                    style = TypographyPaletteSp.Body2Regular.copy(color = MaterialTheme.colorScheme.onSurface)
-                )
+                if (item.athletes.isNotEmpty()) {
+                    Text(
+                        text = item.athletes.joinToString(separator = ", "),
+                        style = TypographyPalette.Body2Regular,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             if (isSelectionMode) {
                 Checkbox(
@@ -438,6 +382,28 @@ private fun ListTrainingItem(
             }
         }
     }
+}
+
+@Composable
+private fun TrainingTypeBadge(type: TrainingPieceType) {
+    val colors = when (type) {
+        TrainingPieceType.CONCEPT_ROW_ERG,
+        TrainingPieceType.RP_3,
+        TrainingPieceType.CONCEPT_BIKE_ERG,
+        TrainingPieceType.WATT_BIKE -> ColorPalette.Blue95 to ColorPalette.Blue20
+
+        TrainingPieceType.SINGLE,
+        TrainingPieceType.DOUBLE,
+        TrainingPieceType.QUADRUPLE,
+        TrainingPieceType.PAIR,
+        TrainingPieceType.FOUR,
+        TrainingPieceType.EIGHT -> ColorPalette.Green50 to ColorPalette.Grey10
+    }
+    Badge(
+        text = stringResource(type.uiResId),
+        containerColor = colors.first,
+        contentColor = colors.second,
+    )
 }
 
 @Composable
@@ -464,14 +430,87 @@ private fun TrainingList(
 }
 
 @Composable
+private fun TrainingListSkeleton() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = Spacing.S),
+        verticalArrangement = Arrangement.spacedBy(space = Spacing.S),
+    ) {
+        repeat(times = SKELETON_ITEM_COUNT) {
+            TrainingSkeletonItem()
+        }
+    }
+}
+
+@Composable
+private fun TrainingSkeletonItem() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.M),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = Spacing._2XS),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(all = Spacing.M),
+            verticalArrangement = Arrangement.spacedBy(space = Spacing.S),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Skeleton(
+                    modifier = Modifier.size(
+                        width = SKELETON_BADGE_WIDTH,
+                        height = SKELETON_BADGE_HEIGHT,
+                    )
+                )
+                Skeleton(
+                    modifier = Modifier.size(
+                        width = SKELETON_DATE_WIDTH,
+                        height = SKELETON_DATE_HEIGHT,
+                    )
+                )
+            }
+            Skeleton(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = SKELETON_TITLE_FRACTION)
+                    .height(SKELETON_TITLE_HEIGHT)
+            )
+            Skeleton(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = SKELETON_SUBTITLE_FRACTION)
+                    .height(SKELETON_SUBTITLE_HEIGHT)
+            )
+        }
+    }
+}
+
+@Composable
 private fun EmptyTrainingList(
     state: ListTrainingState,
     actions: ListTrainingScreenActions
 ) {
     if (state.searchQuery.isNotEmpty()) {
-        NoSearchResultsState(searchQuery = state.searchQuery)
+        EmptyState(
+            modifier = Modifier.fillMaxSize(),
+            title = stringResource(Res.string.training_search_empty_title),
+            description = stringResource(Res.string.training_search_no_results, state.searchQuery),
+            icon = Icons.Default.SearchOff,
+        )
     } else {
-        EmptyTrainingsState(onAddAthlete = actions::onAddTrainingClick)
+        EmptyState(
+            modifier = Modifier.fillMaxSize(),
+            title = stringResource(Res.string.training_no_trainings),
+            description = stringResource(Res.string.training_add_some_training),
+            icon = Icons.Default.TableRows,
+            actionText = stringResource(Res.string.training_add_training),
+            onActionClick = actions::onAddTrainingClick,
+        )
     }
 }
 
@@ -541,6 +580,16 @@ private fun DeleteTrainingsConfirmDialog(
         }
     )
 }
+
+private val SKELETON_BADGE_WIDTH = 88.dp
+private val SKELETON_BADGE_HEIGHT = 20.dp
+private val SKELETON_DATE_WIDTH = 72.dp
+private val SKELETON_DATE_HEIGHT = 14.dp
+private val SKELETON_TITLE_HEIGHT = 28.dp
+private val SKELETON_SUBTITLE_HEIGHT = 16.dp
+private const val SKELETON_TITLE_FRACTION = 0.55f
+private const val SKELETON_SUBTITLE_FRACTION = 0.35f
+private const val SKELETON_ITEM_COUNT = 5
 
 private fun suggestedBackupFileName(): String {
     val date = Instant.fromEpochMilliseconds(nowInMillis()).toLocalDateTime(TimeZone.currentSystemDefault()).date

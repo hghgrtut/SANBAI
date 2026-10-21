@@ -3,9 +3,23 @@
     <string name="save">Сохранить</string>
     <string name="cancel">Отмена</string>
     <string name="athletes_list_title">Спортсмены</string>
-    <string name="athletes_search_placeholder">Поиск спорстсменов</string>
+    <string name="athletes_search_placeholder">Поиск спортсменов</string>
+    <string name="athletes_search_content_description">Поиск</string>
+    <string name="athletes_search_clear">Очистить поиск</string>
     <string name="athletes_search_no_results">Никого не найдено по запросу: %1$s</string>
+    <string name="athletes_search_empty_title">Ничего не найдено</string>
     <string name="athletes_no_athletes">Нет спортсменов</string>
+    <string name="athletes_filter_content_description">Фильтр спортсменов</string>
+    <string name="athletes_filters_title">Фильтры</string>
+    <string name="athletes_filters_coming_soon">Настройка фильтров скоро появится</string>
+    <string name="athletes_gender_male_short">М</string>
+    <string name="athletes_gender_female_short">Ж</string>
+    <plurals name="athletes_age_years">
+        <item quantity="one">%1$d год</item>
+        <item quantity="few">%1$d года</item>
+        <item quantity="many">%1$d лет</item>
+        <item quantity="other">%1$d лет</item>
+    </plurals>
     <string name="athletes_add_someone_to_team">Добавь кого-нибудь в команду</string>
     <string name="athletes_add_athlete">Добавить спортсмена</string>
     <string name="athletes_add_athlete_name_label">ФИО спортсмена</string>
