@@ -95,8 +95,8 @@ private fun MainScreenContent(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.M, vertical = Spacing.M),
-            verticalArrangement = Arrangement.spacedBy(Spacing.L),
+                .padding(all = Spacing.M),
+            verticalArrangement = Arrangement.spacedBy(space = Spacing.L),
         ) {
             DashboardHeader()
             StatsSection(

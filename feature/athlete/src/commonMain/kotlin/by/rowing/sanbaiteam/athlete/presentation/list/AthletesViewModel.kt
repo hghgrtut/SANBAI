@@ -23,7 +23,14 @@ internal class AthletesViewModel(
 
     init {
         viewModelScope.launch {
-            repository.allAthletes.collectLatest { changeState { copy(items = it) } }
+            repository.allAthletes.collectLatest { athletes ->
+                changeState {
+                    copy(
+                        items = athletes,
+                        isLoading = false,
+                    )
+                }
+            }
         }
     }
 

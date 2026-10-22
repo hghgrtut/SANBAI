@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -48,7 +54,12 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_placeholder
+import by.rowing.sanbaiteam.athlete.resources.athletes_add_preview_header
+import by.rowing.sanbaiteam.athlete.resources.athletes_add_section_main
+import by.rowing.sanbaiteam.athlete.resources.athletes_detail_gender_label
+import by.rowing.sanbaiteam.athlete.resources.save
 import by.rowing.sanbaiteam.uikit.component.DataCard
+import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.theme.Spacing
@@ -70,6 +81,7 @@ private fun AddAthleteScreenContent(
     state: AddAthleteState
 ) {
     Scaffold(
+        modifier = Modifier.imePadding(),
         topBar = { AddAthleteTopBar(actions = actions) }
     ) { paddingValues ->
         AddAthleteForm(
@@ -88,7 +100,7 @@ private fun AddAthleteTopBar(actions: AddAthleteScreenActions) {
             IconButton(onClick = actions::onSaveClick) {
                 Icon(
                     imageVector = Icons.Default.Save,
-                    contentDescription = "Сохранить",
+                    contentDescription = stringResource(Res.string.save),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -107,87 +119,152 @@ private fun AddAthleteForm(
         modifier = Modifier
             .padding(paddingValues)
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(Spacing.M),
         verticalArrangement = Arrangement.spacedBy(Spacing.M)
     ) {
-        TextField(
-            value = state.name,
-            onValueChange = actions::changeName,
-            label = stringResource(Res.string.athletes_add_athlete_name_label),
-            placeholder = stringResource(Res.string.athletes_add_athlete_name_placeholder),
-            error = state.nameError != null,
-            supportingText = state.nameError?.resolve(),
-            singleLine = true,
-            textStyle = TypographyPaletteSp.Body1Regular,
-            modifier = Modifier.fillMaxWidth(),
+        SectionHeader(title = stringResource(Res.string.athletes_add_section_main))
+        NameInput(
+            state = state,
+            onNameChange = actions::changeName
         )
-        TextField(
-            value = state.dateOfBirth,
-            onValueChange = actions::changeBirthDate,
-            label = stringResource(Res.string.athletes_add_athlete_birth_date_label),
-            placeholder = stringResource(Res.string.athletes_add_athlete_birth_date_placeholder),
-            supportingText = state.dateError?.resolve()
-                ?: stringResource(Res.string.athletes_add_athlete_birth_date_supporting_text),
-            error = state.dateError != null,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = TypographyPaletteSp.Body1Regular,
-            keyboardOptions = KeyboardOptions(
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            ),
-            visualTransformation = DateTransformation()
+        DateOfBirthInput(
+            state = state,
+            onBirthDateChange = actions::changeBirthDate
         )
-        TextField(
-            value = state.speedCoachSerial,
-            onValueChange = actions::changeSpeedCoachSerial,
-            label = stringResource(Res.string.athletes_add_athlete_speedcoach_serial_label),
-            placeholder = stringResource(Res.string.athletes_add_athlete_speedcoach_serial_placeholder),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = TypographyPaletteSp.Body1Regular,
-            keyboardOptions = KeyboardOptions(
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done,
-            )
+        SpeedCoachSerialInput(
+            state = state,
+            onSpeedCoachSerialChange = actions::changeSpeedCoachSerial
         )
-        DataCard(
-            modifier = Modifier.fillMaxWidth(),
-            verticalSpacing = Spacing.S
-        ) {
-            Text(
-                text = "Пол спортсмена",
-                style = TypographyPaletteSp.Body2Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
-                GenderOption(
-                    textRes = Res.string.athletes_add_athlete_gender_male,
-                    isSelected = state.isMale,
-                    onClick = { actions.changeGender(isMale = true) },
-                    icon = Icons.Default.Male
-                )
-                GenderOption(
-                    textRes = Res.string.athletes_add_athlete_gender_female,
-                    isSelected = !state.isMale,
-                    onClick = { actions.changeGender(isMale = false) },
-                    icon = Icons.Default.Female
-                )
-            }
-        }
-
-        AthleteListItem(
-            athlete = AthleteItemModel(
-                id = 0,
-                name = state.name,
-                dateOfBirth = state.dateOfBirth,
-                isMale = state.isMale,
-                speedCoachSerial = state.speedCoachSerial.ifBlank { null },
-            )
-        ) {}
+        SectionHeader(title = stringResource(Res.string.athletes_detail_gender_label))
+        GenderSelector(
+            state = state,
+            onChangeGender = actions::changeGender
+        )
+        SectionHeader(title = stringResource(Res.string.athletes_add_preview_header))
+        AthleteCardPreview(state = state)
     }
+}
+
+@Composable
+private fun NameInput(
+    state: AddAthleteState,
+    onNameChange: (String) -> Unit
+) {
+    TextField(
+        value = state.name,
+        onValueChange = onNameChange,
+        label = stringResource(Res.string.athletes_add_athlete_name_label),
+        placeholder = stringResource(Res.string.athletes_add_athlete_name_placeholder),
+        error = state.nameError != null,
+        supportingText = state.nameError?.resolve(),
+        singleLine = true,
+        textStyle = TypographyPaletteSp.Body1Regular,
+        leadingIcon = { FieldIcon(icon = Icons.Default.Person) },
+        keyboardOptions = KeyboardOptions(
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun DateOfBirthInput(
+    state: AddAthleteState,
+    onBirthDateChange: (String) -> Unit
+) {
+    TextField(
+        value = state.dateOfBirth,
+        onValueChange = onBirthDateChange,
+        label = stringResource(Res.string.athletes_add_athlete_birth_date_label),
+        placeholder = stringResource(Res.string.athletes_add_athlete_birth_date_placeholder),
+        supportingText = state.dateError?.resolve()
+            ?: stringResource(Res.string.athletes_add_athlete_birth_date_supporting_text),
+        error = state.dateError != null,
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+        textStyle = TypographyPaletteSp.Body1Regular,
+        leadingIcon = { FieldIcon(icon = Icons.Default.Cake) },
+        keyboardOptions = KeyboardOptions(
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next
+        ),
+        visualTransformation = DateTransformation()
+    )
+}
+
+@Composable
+private fun SpeedCoachSerialInput(
+    state: AddAthleteState,
+    onSpeedCoachSerialChange: (String) -> Unit
+) {
+    TextField(
+        value = state.speedCoachSerial,
+        onValueChange = onSpeedCoachSerialChange,
+        label = stringResource(Res.string.athletes_add_athlete_speedcoach_serial_label),
+        placeholder = stringResource(Res.string.athletes_add_athlete_speedcoach_serial_placeholder),
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+        textStyle = TypographyPaletteSp.Body1Regular,
+        leadingIcon = { FieldIcon(icon = Icons.Default.Numbers) },
+        keyboardOptions = KeyboardOptions(
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done,
+        )
+    )
+}
+
+@Composable
+private fun GenderSelector(
+    state: AddAthleteState,
+    onChangeGender: (isMale: Boolean) -> Unit
+) {
+    DataCard(
+        modifier = Modifier.fillMaxWidth(),
+        verticalSpacing = Spacing.S
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+            GenderOption(
+                textRes = Res.string.athletes_add_athlete_gender_male,
+                isSelected = state.isMale,
+                onClick = { onChangeGender(true) },
+                icon = Icons.Default.Male
+            )
+            GenderOption(
+                textRes = Res.string.athletes_add_athlete_gender_female,
+                isSelected = !state.isMale,
+                onClick = { onChangeGender(false) },
+                icon = Icons.Default.Female
+            )
+        }
+    }
+}
+
+@Composable
+private fun AthleteCardPreview(state: AddAthleteState) {
+    AthleteListItem(
+        athlete = AthleteItemModel(
+            id = 0,
+            name = state.name,
+            dateOfBirth = state.dateOfBirth,
+            isMale = state.isMale,
+            speedCoachSerial = state.speedCoachSerial.ifBlank { null },
+        )
+    ) {}
+}
+
+@Composable
+private fun FieldIcon(icon: ImageVector) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        modifier = Modifier.size(FIELD_ICON_SIZE),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
@@ -236,6 +313,8 @@ private fun GenderOption(
         }
     }
 }
+
+private val FIELD_ICON_SIZE = 20.dp
 
 private class DateTransformation : VisualTransformation {
 

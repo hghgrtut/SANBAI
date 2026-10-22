@@ -26,6 +26,7 @@ internal class AthletesRepositoryImpl(
                 dateOfBirth = TimeUtils.formatDateWithMonthName(athlete.dateOfBirth),
                 isMale = athlete.isMale,
                 speedCoachSerial = athlete.speedCoachSerial,
+                age = TimeUtils.ageInYearsNow(birthTimeInMillis = athlete.dateOfBirth),
             )
         }
     }

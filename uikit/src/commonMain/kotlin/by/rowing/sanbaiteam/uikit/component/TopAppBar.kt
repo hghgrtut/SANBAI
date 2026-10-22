@@ -44,10 +44,12 @@ import by.rowing.sanbaiteam.uikit.modifier.clickableIfProvided
 import by.rowing.sanbaiteam.uikit.resources.Res
 import by.rowing.sanbaiteam.uikit.resources.ic_check_16
 import by.rowing.sanbaiteam.uikit.resources.ic_chevron_left_24
+import by.rowing.sanbaiteam.uikit.resources.uikit_back
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val ICON_SIZE
@@ -296,7 +298,7 @@ private fun DefaultNavigationIcon(
             Icon(
                 modifier = Modifier.size(ICON_SIZE),
                 painter = customIconPainter ?: defaultIconPainter,
-                contentDescription = null,
+                contentDescription = stringResource(Res.string.uikit_back),
                 tint = tint ?: MaterialTheme.colorScheme.onSurface
             )
         }

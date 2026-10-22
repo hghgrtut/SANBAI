@@ -45,7 +45,12 @@ internal class ListTrainingViewModel(
     fun reloadTrainings() {
         viewModelScope.launch {
             val trainings = repository.getTrainingsList()
-            changeState { copy(items = trainings) }
+            changeState {
+                copy(
+                    items = trainings,
+                    isLoading = false,
+                )
+            }
         }
     }
 

@@ -2,26 +2,28 @@ package by.rowing.sanbaiteam.athlete.presentation.detail.compose
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +69,8 @@ import by.rowing.sanbaiteam.athlete.resources.cancel
 import by.rowing.sanbaiteam.athlete.resources.save
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.uikit.component.DataCard
+import by.rowing.sanbaiteam.uikit.component.EmptyState
+import by.rowing.sanbaiteam.uikit.component.Skeleton
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.button.Button
@@ -94,6 +98,7 @@ private fun AthleteDetailScreenContent(
     state: AthleteDetailState,
 ) {
     Scaffold(
+        modifier = Modifier.imePadding(),
         topBar = {
             RowDetailsTopBar(
                 state = state,
@@ -371,22 +376,65 @@ private fun NotLoadedRower(
     paddingValues: PaddingValues,
     state: AthleteDetailState
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues = paddingValues),
-        contentAlignment = Alignment.Center
-    ) {
-        if (state.notFound) {
-            Text(
-                text = stringResource(Res.string.athletes_detail_not_found),
-                style = TypographyPaletteSp.Body1Regular
-            )
-        } else {
-            CircularProgressIndicator()
+    if (state.notFound) {
+        EmptyState(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = paddingValues),
+            title = stringResource(Res.string.athletes_detail_not_found),
+            icon = Icons.Default.SearchOff,
+        )
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = paddingValues)
+                .padding(all = Spacing.M),
+            verticalArrangement = Arrangement.spacedBy(Spacing.M),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.M),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Skeleton(
+                    modifier = Modifier.size(SKELETON_AVATAR_SIZE),
+                    shape = CircleShape,
+                )
+                Column(
+                    modifier = Modifier.weight(weight = 1f),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.S),
+                ) {
+                    Skeleton(
+                        modifier = Modifier
+                            .fillMaxWidth(fraction = SKELETON_NAME_FRACTION)
+                            .height(SKELETON_NAME_HEIGHT)
+                    )
+                    Skeleton(
+                        modifier = Modifier
+                            .fillMaxWidth(fraction = SKELETON_BADGE_FRACTION)
+                            .height(SKELETON_BADGE_HEIGHT)
+                    )
+                }
+            }
+            repeat(times = SKELETON_CARD_COUNT) {
+                Skeleton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(SKELETON_CARD_HEIGHT),
+                    shape = MaterialTheme.shapes.medium,
+                )
+            }
         }
     }
 }
+
+private val SKELETON_AVATAR_SIZE = 60.dp
+private val SKELETON_NAME_HEIGHT = 20.dp
+private val SKELETON_BADGE_HEIGHT = 16.dp
+private val SKELETON_CARD_HEIGHT = 96.dp
+private const val SKELETON_NAME_FRACTION = 0.5f
+private const val SKELETON_BADGE_FRACTION = 0.3f
+private const val SKELETON_CARD_COUNT = 3
 
 @Composable
 private fun RecordErrorAlert(

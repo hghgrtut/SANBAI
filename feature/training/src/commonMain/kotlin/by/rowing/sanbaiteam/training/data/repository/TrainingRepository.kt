@@ -73,6 +73,7 @@ internal class TrainingRepository(
 
             ListTrainingStateItem(
                 trainingId = training.id,
+                trainingType = training.type,
                 trainingTypeResId = training.type.uiResId,
                 trainingDate = TimeUtils.formatDate(training.dateMillis),
                 trainingWork = formatWorkSummary(crewPieces),

@@ -2,13 +2,13 @@ package by.rowing.sanbaiteam.uikit.component
 
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
-import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
@@ -21,13 +21,29 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun Throbber(
     modifier: Modifier = Modifier,
     style: Throbber.Style = Throbber.Style.GREY,
+    color: Color = Color.Unspecified,
+    trackColor: Color = Color.Unspecified,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    val resolvedColor = if (color == Color.Unspecified) {
+        when (style) {
+            Throbber.Style.GREY -> colorScheme.onSurfaceVariant
+            Throbber.Style.YELLOW -> colorScheme.tertiary
+        }
+    } else {
+        color
+    }
+    val resolvedTrackColor = if (trackColor == Color.Unspecified) {
+        colorScheme.surfaceVariant
+    } else {
+        trackColor
+    }
     CircularProgressIndicator(
         modifier = Modifier
             .requiredSize(24.dp)
             .then(modifier),
-        color = style.color,
-        trackColor = style.backgroundColor,
+        color = resolvedColor,
+        trackColor = resolvedTrackColor,
         strokeWidth = 2.5.dp,
         strokeCap = StrokeCap.Round,
     )
@@ -36,18 +52,9 @@ fun Throbber(
 @AllowDetektPublic
 object Throbber {
 
-    enum class Style(
-        val color: Color,
-        val backgroundColor: Color,
-    ) {
-        GREY(
-            color = ColorPalette.Grey40,
-            backgroundColor = ColorPalette.Grey80,
-        ),
-        YELLOW(
-            color = ColorPalette.Yellow50New,
-            backgroundColor = ColorPalette.Grey80,
-        )
+    enum class Style {
+        GREY,
+        YELLOW,
     }
 }
 

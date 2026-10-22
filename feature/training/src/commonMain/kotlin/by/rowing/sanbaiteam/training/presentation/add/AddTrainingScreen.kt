@@ -8,11 +8,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Rowing
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -35,7 +40,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.presentation.platform.rememberTrainingDatePicker
@@ -45,6 +52,7 @@ import by.rowing.sanbaiteam.training.resources.add_training_athlete_header
 import by.rowing.sanbaiteam.training.resources.add_training_crew_header
 import by.rowing.sanbaiteam.training.resources.add_training_date_label
 import by.rowing.sanbaiteam.training.resources.add_training_delete_piece
+import by.rowing.sanbaiteam.training.resources.add_training_general_header
 import by.rowing.sanbaiteam.training.resources.add_training_import_csv
 import by.rowing.sanbaiteam.training.resources.add_training_import_notice_title
 import by.rowing.sanbaiteam.training.resources.add_training_pace_placeholder
@@ -67,6 +75,7 @@ import by.rowing.sanbaiteam.training.resources.add_training_validation_title
 import by.rowing.sanbaiteam.training.resources.cancel
 import by.rowing.sanbaiteam.training.resources.save
 import by.rowing.sanbaiteam.training.resources.training_detail_piece_number
+import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.button.Button
@@ -75,7 +84,6 @@ import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.number
 import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -87,6 +95,7 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
     ParseInitialTrainingFile(viewModel = viewModel)
 
     Scaffold(
+        modifier = Modifier.imePadding(),
         topBar = addTrainingToolbar(onBackClick = viewModel::onBackClick),
         floatingActionButton = {
             FloatingActionButton(
@@ -148,30 +157,26 @@ private fun AddTrainingDataInputs(
         modifier = Modifier
             .padding(paddingValues)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = Spacing.M)
+            .padding(all = Spacing.M),
+        verticalArrangement = Arrangement.spacedBy(space = Spacing.M)
     ) {
+        SectionHeader(title = stringResource(Res.string.add_training_general_header))
         TrainingTypeDropdown(
             state = state,
-            onTypeSelected = viewModel::changeTrainingType
+            onTypeSelected = viewModel::changeTrainingType,
+            leadingIcon = { FieldIcon(icon = Icons.Default.Rowing) }
         )
         Date(
             state = state,
             viewModel = viewModel
         )
-        Text(
-            text = stringResource(Res.string.add_training_crew_header),
-            style = TypographyPalette.H4
-        )
-        SpacerS()
+        SectionHeader(title = stringResource(Res.string.add_training_crew_header))
         AthleteDropdown(
             state = state,
-            onAthleteSelected = viewModel::changeAthleteId
+            onAthleteSelected = viewModel::changeAthleteId,
+            leadingIcon = { FieldIcon(icon = Icons.Default.Person) }
         )
-        Text(
-            text = stringResource(Res.string.add_training_pieces_header),
-            style = TypographyPalette.H4
-        )
-        SpacerS()
+        SectionHeader(title = stringResource(Res.string.add_training_pieces_header))
         TrainingPieces(
             state = state,
             viewModel = viewModel
@@ -182,9 +187,7 @@ private fun AddTrainingDataInputs(
             debounceClick = viewModel::addPiece
         )
         Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = Spacing.M),
+            modifier = Modifier.fillMaxWidth(),
             text = stringResource(Res.string.add_training_import_csv),
             debounceClick = launchImport
         )
@@ -214,55 +217,57 @@ private fun TrainingPieces(
     state: AddTrainingState,
     viewModel: AddTrainingViewModel
 ) {
-    state.pieces.forEachIndexed { pieceIndex, piece ->
-        PieceForm(
-            index = pieceIndex,
-            piece = piece,
-            canRemove = state.pieces.size > 1,
-            onDistanceChange = { newDistance ->
-                viewModel.changePieceDistance(
-                    pieceLocalId = piece.localId,
-                    text = newDistance
-                )
-            },
-            onTimeChange = { newTime ->
-                viewModel.changePieceTime(
-                    pieceLocalId = piece.localId,
-                    text = newTime
-                )
-            },
-            onStrokeRateChange = { newStrokeRate ->
-                viewModel.changePieceStrokeRate(
-                    pieceLocalId = piece.localId,
-                    text = newStrokeRate
-                )
-            },
-            onAvgHeartRateChange = { newValue ->
-                viewModel.changePieceAvgHeartRate(
-                    pieceLocalId = piece.localId,
-                    text = newValue
-                )
-            },
-            onMaxHeartRateChange = { newValue ->
-                viewModel.changePieceMaxHeartRate(
-                    pieceLocalId = piece.localId,
-                    text = newValue
-                )
-            },
-            onRecoveryHeartRateChange = { newValue ->
-                viewModel.changePieceRecoveryHeartRate(
-                    pieceLocalId = piece.localId,
-                    text = newValue
-                )
-            },
-            onLactateChange = { newValue ->
-                viewModel.changePieceLactate(
-                    pieceLocalId = piece.localId,
-                    text = newValue
-                )
-            },
-            onRemove = { viewModel.removePiece(pieceLocalId = piece.localId) }
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(space = Spacing.S)) {
+        state.pieces.forEachIndexed { pieceIndex, piece ->
+            PieceForm(
+                index = pieceIndex,
+                piece = piece,
+                canRemove = state.pieces.size > 1,
+                onDistanceChange = { newDistance ->
+                    viewModel.changePieceDistance(
+                        pieceLocalId = piece.localId,
+                        text = newDistance
+                    )
+                },
+                onTimeChange = { newTime ->
+                    viewModel.changePieceTime(
+                        pieceLocalId = piece.localId,
+                        text = newTime
+                    )
+                },
+                onStrokeRateChange = { newStrokeRate ->
+                    viewModel.changePieceStrokeRate(
+                        pieceLocalId = piece.localId,
+                        text = newStrokeRate
+                    )
+                },
+                onAvgHeartRateChange = { newValue ->
+                    viewModel.changePieceAvgHeartRate(
+                        pieceLocalId = piece.localId,
+                        text = newValue
+                    )
+                },
+                onMaxHeartRateChange = { newValue ->
+                    viewModel.changePieceMaxHeartRate(
+                        pieceLocalId = piece.localId,
+                        text = newValue
+                    )
+                },
+                onRecoveryHeartRateChange = { newValue ->
+                    viewModel.changePieceRecoveryHeartRate(
+                        pieceLocalId = piece.localId,
+                        text = newValue
+                    )
+                },
+                onLactateChange = { newValue ->
+                    viewModel.changePieceLactate(
+                        pieceLocalId = piece.localId,
+                        text = newValue
+                    )
+                },
+                onRemove = { viewModel.removePiece(pieceLocalId = piece.localId) }
+            )
+        }
     }
 }
 
@@ -278,7 +283,6 @@ private fun Date(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = Spacing.M)
             .clickable(onClick = launchDatePicker)
     ) {
         TextField(
@@ -286,6 +290,7 @@ private fun Date(
             onValueChange = {},
             label = stringResource(Res.string.add_training_date_label),
             textStyle = TypographyPalette.Body1Regular,
+            leadingIcon = { FieldIcon(icon = Icons.Default.CalendarMonth) },
             enabled = false,
             modifier = Modifier.fillMaxWidth()
         )
@@ -299,6 +304,8 @@ private fun SaveIcon() {
         contentDescription = stringResource(Res.string.save)
     )
 }
+
+private val FIELD_ICON_SIZE = 20.dp
 
 private val CompactFieldContentPadding = PaddingValues(
     horizontal = Spacing.S,
@@ -324,10 +331,11 @@ private fun PieceForm(
         distanceMeters = piece.distanceMeters
     ) ?: stringResource(Res.string.add_training_pace_placeholder)
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = Spacing.S),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier.padding(Spacing.S),
@@ -450,6 +458,16 @@ private fun HeartRateLactateBlock(
 }
 
 @Composable
+private fun FieldIcon(icon: ImageVector) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        modifier = Modifier.size(FIELD_ICON_SIZE),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
 private fun DataInputRow(content: @Composable (RowScope.() -> Unit)) = Row(
     modifier = Modifier.fillMaxWidth(),
     horizontalArrangement = Arrangement.spacedBy(Spacing.XS),
@@ -471,7 +489,8 @@ private fun RemovePieceButton(onRemove: () -> Unit) {
 @Composable
 private fun AthleteDropdown(
     state: AddTrainingState,
-    onAthleteSelected: (crewId: Long, athleteId: Long) -> Unit
+    onAthleteSelected: (crewId: Long, athleteId: Long) -> Unit,
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     val rowers = state.rowersCatalog
     val selectedRower = state.crewAthletes.first()
@@ -481,7 +500,8 @@ private fun AthleteDropdown(
         items = rowers,
         label = stringResource(Res.string.add_training_athlete_header),
         itemText = { rower -> rower.name },
-        onItemSelected = { rower -> onAthleteSelected(selectedRower.crewId, rower.id) }
+        onItemSelected = { rower -> onAthleteSelected(selectedRower.crewId, rower.id) },
+        leadingIcon = leadingIcon,
     )
 }
 
@@ -489,13 +509,15 @@ private fun AthleteDropdown(
 @Composable
 private fun TrainingTypeDropdown(
     state: AddTrainingState,
-    onTypeSelected: (trainingType: TrainingPieceType) -> Unit
+    onTypeSelected: (trainingType: TrainingPieceType) -> Unit,
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     ExposedSelectionDropdown(
         selectedLabel = stringResource(state.trainingType.uiResId),
         items = TrainingPieceType.entries,
         itemText = { trainingType -> stringResource(trainingType.uiResId) },
-        onItemSelected = onTypeSelected
+        onItemSelected = onTypeSelected,
+        leadingIcon = leadingIcon,
     )
 }
 
@@ -506,7 +528,8 @@ private fun <T> ExposedSelectionDropdown(
     items: List<T>,
     itemText: @Composable (item: T) -> String,
     onItemSelected: (item: T) -> Unit,
-    label: String? = null
+    label: String? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -520,6 +543,7 @@ private fun <T> ExposedSelectionDropdown(
             readOnly = true,
             label = label,
             textStyle = TypographyPalette.Body1Regular,
+            leadingIcon = leadingIcon,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
