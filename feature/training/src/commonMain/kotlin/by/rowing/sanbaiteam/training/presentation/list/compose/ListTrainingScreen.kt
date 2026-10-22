@@ -1,5 +1,13 @@
 package by.rowing.sanbaiteam.training.presentation.list.compose
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -148,7 +156,11 @@ private fun ListTrainingScreenContent(
             )
         },
         floatingActionButton = {
-            if (!state.isSelectionMode) {
+            AnimatedVisibility(
+                visible = !state.isSelectionMode,
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut(),
+            ) {
                 AddTrainingFAB(onAddTraining = actions::onAddTrainingClick)
             }
         }
@@ -160,18 +172,32 @@ private fun ListTrainingScreenContent(
             if (state.showFilters) {
                 TrainingFilters()
             }
-            when {
-                state.isLoading -> TrainingListSkeleton()
-                filteredTrainings.isEmpty() -> EmptyTrainingList(
-                    state = state,
-                    actions = actions
-                )
+            val contentState = when {
+                state.isLoading -> TrainingListContentState.LOADING
+                filteredTrainings.isEmpty() -> TrainingListContentState.EMPTY
+                else -> TrainingListContentState.CONTENT
+            }
+            AnimatedContent(
+                targetState = contentState,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(durationMillis = CONTENT_FADE_IN_MILLIS)) togetherWith
+                        fadeOut(animationSpec = tween(durationMillis = CONTENT_FADE_OUT_MILLIS))
+                },
+                label = "trainingListContent"
+            ) { targetState ->
+                when (targetState) {
+                    TrainingListContentState.LOADING -> TrainingListSkeleton()
+                    TrainingListContentState.EMPTY -> EmptyTrainingList(
+                        state = state,
+                        actions = actions
+                    )
 
-                else -> TrainingList(
-                    trainings = filteredTrainings,
-                    selectedTrainingIds = state.selectedTrainingIds,
-                    actions = actions
-                )
+                    TrainingListContentState.CONTENT -> TrainingList(
+                        trainings = filteredTrainings,
+                        selectedTrainingIds = state.selectedTrainingIds,
+                        actions = actions
+                    )
+                }
             }
         }
     }
@@ -329,6 +355,7 @@ private fun TrainingFilters() {
 
 @Composable
 private fun ListTrainingItem(
+    modifier: Modifier = Modifier,
     item: ListTrainingStateItem,
     isSelectionMode: Boolean,
     selected: Boolean,
@@ -336,6 +363,7 @@ private fun ListTrainingItem(
     onTrainingLongClick: (ListTrainingStateItem) -> Unit
 ) {
     ItemCard(
+        modifier = modifier,
         onClick = { onTrainingClick(item) },
         onLongClick = { onTrainingLongClick(item) },
         selected = selected
@@ -376,7 +404,11 @@ private fun ListTrainingItem(
                     )
                 }
             }
-            if (isSelectionMode) {
+            AnimatedVisibility(
+                visible = isSelectionMode,
+                enter = fadeIn() + scaleIn(initialScale = CHECKBOX_ENTER_SCALE),
+                exit = fadeOut() + scaleOut(targetScale = CHECKBOX_ENTER_SCALE),
+            ) {
                 Checkbox(
                     checked = if (selected) CheckedState.CHECKED else CheckedState.UNCHECKED,
                     click = { onTrainingClick(item) }
@@ -424,6 +456,7 @@ private fun TrainingList(
             key = { it.trainingId }
         ) { training ->
             ListTrainingItem(
+                modifier = Modifier.animateItem(),
                 item = training,
                 isSelectionMode = isSelectionMode,
                 selected = training.trainingId in selectedTrainingIds,
@@ -585,6 +618,16 @@ private fun DeleteTrainingsConfirmDialog(
         }
     )
 }
+
+private enum class TrainingListContentState {
+    LOADING,
+    EMPTY,
+    CONTENT,
+}
+
+private const val CONTENT_FADE_IN_MILLIS = 220
+private const val CONTENT_FADE_OUT_MILLIS = 140
+private const val CHECKBOX_ENTER_SCALE = 0.7f
 
 private val SKELETON_BADGE_WIDTH = 88.dp
 private val SKELETON_BADGE_HEIGHT = 20.dp

@@ -22,6 +22,8 @@
     </plurals>
     <string name="athletes_add_someone_to_team">Добавь кого-нибудь в команду</string>
     <string name="athletes_add_athlete">Добавить спортсмена</string>
+    <string name="athletes_add_section_main">Данные спортсмена</string>
+    <string name="athletes_add_preview_header">Предпросмотр карточки</string>
     <string name="athletes_add_athlete_name_label">ФИО спортсмена</string>
     <string name="athletes_add_athlete_name_placeholder">Иванов Иван Иванович</string>
     <string name="athletes_add_athlete_birth_date_label">Дата рождения</string>

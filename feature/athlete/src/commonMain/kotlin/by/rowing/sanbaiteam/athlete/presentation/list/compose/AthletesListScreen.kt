@@ -1,5 +1,10 @@
 package by.rowing.sanbaiteam.athlete.presentation.list.compose
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -106,17 +111,31 @@ private fun AthleteListScreenContent(
                 )
             }
 
-            when {
-                state.isLoading -> AthleteListSkeleton()
-                filteredAthletes.isEmpty() -> EmptyAthletesContent(
-                    state = state,
-                    actions = actions
-                )
+            val contentState = when {
+                state.isLoading -> AthleteListContentState.LOADING
+                filteredAthletes.isEmpty() -> AthleteListContentState.EMPTY
+                else -> AthleteListContentState.CONTENT
+            }
+            AnimatedContent(
+                targetState = contentState,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(durationMillis = CONTENT_FADE_IN_MILLIS)) togetherWith
+                        fadeOut(animationSpec = tween(durationMillis = CONTENT_FADE_OUT_MILLIS))
+                },
+                label = "athleteListContent"
+            ) { targetState ->
+                when (targetState) {
+                    AthleteListContentState.LOADING -> AthleteListSkeleton()
+                    AthleteListContentState.EMPTY -> EmptyAthletesContent(
+                        state = state,
+                        actions = actions
+                    )
 
-                else -> AthleteList(
-                    athletes = filteredAthletes,
-                    actions = actions
-                )
+                    AthleteListContentState.CONTENT -> AthleteList(
+                        athletes = filteredAthletes,
+                        actions = actions
+                    )
+                }
             }
         }
     }
@@ -133,6 +152,7 @@ private fun AthleteList(
     ) {
         items(athletes, key = { it.id }) { athlete ->
             AthleteListItem(
+                modifier = Modifier.animateItem(),
                 athlete = athlete,
                 onAthleteClick = { actions.onAthleteClick(athlete.id) }
             )
@@ -289,6 +309,15 @@ private fun AthleteFilters(modifier: Modifier = Modifier) {
         )
     }
 }
+
+private enum class AthleteListContentState {
+    LOADING,
+    EMPTY,
+    CONTENT,
+}
+
+private const val CONTENT_FADE_IN_MILLIS = 220
+private const val CONTENT_FADE_OUT_MILLIS = 140
 
 private val SKELETON_AVATAR_SIZE = 60.dp
 private val SKELETON_NAME_HEIGHT = 20.dp

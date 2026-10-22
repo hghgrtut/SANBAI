@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
@@ -35,7 +36,6 @@ import by.rowing.sanbaiteam.uikit.modifier.debounceClickable
 import by.rowing.sanbaiteam.uikit.resources.Res
 import by.rowing.sanbaiteam.uikit.resources.ic_check_16
 import by.rowing.sanbaiteam.uikit.resources.ic_minus_16
-import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.painterResource
@@ -75,14 +75,22 @@ internal fun Checkbox(
             Text(
                 text = label,
                 style = TypographyPalette.Body2Regular,
-                color = if (enabled) ColorPalette.Grey20 else ColorPalette.Grey70,
+                color = if (enabled) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_LABEL_ALPHA)
+                },
             )
 
             if (subtitle.isNotBlank()) {
                 Text(
                     text = subtitle,
                     style = TypographyPalette.Body3Regular,
-                    color = if (enabled) ColorPalette.Grey50 else ColorPalette.Grey70
+                    color = if (enabled) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = DISABLED_LABEL_ALPHA)
+                    }
                 )
             }
         }
@@ -153,6 +161,9 @@ fun Checkbox(
 }
 
 private val SHAPE = RoundedCornerShape(4.dp)
+private const val DISABLED_LABEL_ALPHA = 0.5f
+private const val DISABLED_BORDER_ALPHA = 0.3f
+private const val DISABLED_BACKGROUND_ALPHA = 0.12f
 private val RIPPLE_RADIUS = 19.dp
 private val ICON_SIZE = 16.dp
 
@@ -169,40 +180,42 @@ private class CheckboxColors(
     val iconTint: Color,
 )
 
+@Composable
 private fun CheckboxColors(
     checked: CheckedState,
     error: Boolean,
     enabled: Boolean,
-): CheckboxColors = when {
-    error -> CheckboxColors(
-        border = ColorPalette.Red50,
-        background = ColorPalette.Transparent,
-        iconTint = ColorPalette.Transparent,
-    )
+): CheckboxColors {
+    val colorScheme = MaterialTheme.colorScheme
+    return when {
+        error -> CheckboxColors(
+            border = colorScheme.error,
+            background = Color.Transparent,
+            iconTint = Color.Transparent,
+        )
 
-    !enabled && checked == CheckedState.UNCHECKED -> CheckboxColors(
-        border = ColorPalette.Grey80,
-        background = ColorPalette.Transparent,
-        iconTint = ColorPalette.Transparent,
-    )
+        !enabled && checked == CheckedState.UNCHECKED -> CheckboxColors(
+            border = colorScheme.onSurface.copy(alpha = DISABLED_BORDER_ALPHA),
+            background = Color.Transparent,
+            iconTint = Color.Transparent,
+        )
 
-    !enabled -> CheckboxColors(
-        border = ColorPalette.Grey90,
-        background = ColorPalette.Grey90,
-        iconTint = ColorPalette.Grey60,
-    )
+        !enabled -> CheckboxColors(
+            border = colorScheme.onSurface.copy(alpha = DISABLED_BACKGROUND_ALPHA),
+            background = colorScheme.onSurface.copy(alpha = DISABLED_BACKGROUND_ALPHA),
+            iconTint = colorScheme.surface,
+        )
 
-    else -> when (checked) {
-        CheckedState.UNCHECKED -> CheckboxColors(
-            border = ColorPalette.Grey20,
-            background = ColorPalette.Transparent,
-            iconTint = ColorPalette.Transparent,
+        checked == CheckedState.UNCHECKED -> CheckboxColors(
+            border = colorScheme.outline,
+            background = Color.Transparent,
+            iconTint = Color.Transparent,
         )
 
         else -> CheckboxColors(
-            border = ColorPalette.Grey20,
-            background = ColorPalette.Grey20,
-            iconTint = ColorPalette.White,
+            border = colorScheme.primary,
+            background = colorScheme.primary,
+            iconTint = colorScheme.onPrimary,
         )
     }
 }

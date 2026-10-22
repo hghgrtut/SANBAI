@@ -6,15 +6,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.formatTenths
@@ -32,7 +33,9 @@ import by.rowing.sanbaiteam.training.resources.training_detail_piece_number
 import by.rowing.sanbaiteam.training.resources.training_detail_stroke_rate
 import by.rowing.sanbaiteam.training.resources.training_detail_title
 import by.rowing.sanbaiteam.uikit.component.DataCard
+import by.rowing.sanbaiteam.uikit.component.EmptyState
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
+import by.rowing.sanbaiteam.uikit.component.Skeleton
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -40,6 +43,13 @@ import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import org.jetbrains.compose.resources.stringResource
 
 private const val MISSING_VALUE = "—"
+
+private val SKELETON_CAPTION_HEIGHT = 16.dp
+private val SKELETON_DATE_HEIGHT = 28.dp
+private val SKELETON_CARD_HEIGHT = 96.dp
+private const val SKELETON_TITLE_FRACTION = 0.3f
+private const val SKELETON_DATE_FRACTION = 0.55f
+private const val SKELETON_CARD_COUNT = 3
 
 @Composable
 internal fun TrainingDetailScreen(viewModel: TrainingDetailViewModel) {
@@ -78,27 +88,42 @@ private fun TrainingLoader(paddingValues: PaddingValues) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) { CircularProgressIndicator() }
+            .padding(paddingValues)
+            .padding(horizontal = Spacing.M),
+        verticalArrangement = Arrangement.spacedBy(Spacing.M)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.S)) {
+            Skeleton(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = SKELETON_TITLE_FRACTION)
+                    .height(SKELETON_CAPTION_HEIGHT)
+            )
+            Skeleton(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = SKELETON_DATE_FRACTION)
+                    .height(SKELETON_DATE_HEIGHT)
+            )
+        }
+        repeat(times = SKELETON_CARD_COUNT) {
+            Skeleton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(SKELETON_CARD_HEIGHT),
+                shape = MaterialTheme.shapes.medium,
+            )
+        }
+    }
 }
 
 @Composable
 private fun TrainingNotFound(paddingValues: PaddingValues) {
-    Column(
+    EmptyState(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
-            .padding(Spacing.M),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(Res.string.training_detail_not_found),
-            style = TypographyPaletteSp.Body1Regular
-        )
-    }
+            .padding(paddingValues),
+        title = stringResource(Res.string.training_detail_not_found),
+        icon = Icons.Default.SearchOff,
+    )
 }
 
 @Composable
@@ -149,7 +174,9 @@ private fun Training(
             key = { it.order }
         ) { piece ->
             DataCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItem(),
                 verticalSpacing = 0.dp
             ) { PieceResultRow(piece = piece) }
         }

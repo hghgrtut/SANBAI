@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -122,6 +123,8 @@ fun Button(
             Throbber(
                 modifier = Modifier.layoutId(LayoutId.THROBBER),
                 style = buttonColors.throbberStyle,
+                color = textColor,
+                trackColor = textColor.copy(alpha = THROBBER_TRACK_ALPHA),
             )
         }
     }
@@ -262,6 +265,10 @@ private fun ProvideContentColor(
 }
 
 private val ICON_SIZE = 24.dp
+private const val DISABLED_TEXT_ALPHA = 0.38f
+private const val DISABLED_BACKGROUND_ALPHA = 0.12f
+private const val DISABLED_BORDER_ALPHA = 0.24f
+private const val THROBBER_TRACK_ALPHA = 0.24f
 
 @AllowDetektPublic
 enum class ButtonSize(
@@ -308,11 +315,12 @@ constructor(
     internal fun text(enabled: Boolean) = if (enabled) enabledText else disabledText
 
     companion object {
+        @Composable
         fun primary(
-            enabledText: Color = ColorPalette.White,
-            disabledText: Color = ColorPalette.Grey60,
-            enabledBackground: Color = ColorPalette.Grey20,
-            disabledBackground: Color = ColorPalette.Grey90,
+            enabledText: Color = MaterialTheme.colorScheme.inverseOnSurface,
+            disabledText: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_TEXT_ALPHA),
+            enabledBackground: Color = MaterialTheme.colorScheme.inverseSurface,
+            disabledBackground: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_BACKGROUND_ALPHA),
             enabledBorderColor: Color = enabledBackground,
             disabledBorderColor: Color = disabledBackground,
             throbberStyle: Throbber.Style = Throbber.Style.GREY,
@@ -326,13 +334,14 @@ constructor(
             throbberStyle = throbberStyle,
         )
 
+        @Composable
         fun secondary(
-            enabledText: Color = ColorPalette.Grey20,
-            disabledText: Color = ColorPalette.Grey60,
+            enabledText: Color = MaterialTheme.colorScheme.onSurface,
+            disabledText: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_TEXT_ALPHA),
             enabledBackground: Color = Color.Unspecified,
-            disabledBackground: Color = ColorPalette.Grey90,
+            disabledBackground: Color = Color.Unspecified,
             enabledBorderColor: Color = enabledText,
-            disabledBorderColor: Color = disabledBackground,
+            disabledBorderColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_BORDER_ALPHA),
             throbberStyle: Throbber.Style = Throbber.Style.GREY,
         ) = ButtonColors(
             enabledText = enabledText,
@@ -344,9 +353,10 @@ constructor(
             throbberStyle = throbberStyle,
         )
 
+        @Composable
         fun text(
-            enabledText: Color = ColorPalette.Grey20,
-            disabledText: Color = ColorPalette.Grey60,
+            enabledText: Color = MaterialTheme.colorScheme.onSurface,
+            disabledText: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_TEXT_ALPHA),
             throbberStyle: Throbber.Style = Throbber.Style.GREY,
         ) = ButtonColors(
             enabledText = enabledText,
@@ -358,86 +368,80 @@ constructor(
             throbberStyle = throbberStyle,
         )
 
-        val default = primary(
-            enabledText = ColorPalette.White,
-            disabledText = ColorPalette.Grey60,
-            enabledBackground = ColorPalette.Grey20,
-            disabledBackground = ColorPalette.Grey90,
-        )
-        val inverse = primary(
-            enabledText = ColorPalette.Grey20,
-            disabledText = ColorPalette.Grey70,
-            enabledBackground = ColorPalette.White,
-            disabledBackground = ColorPalette.Grey40,
-        )
+        val default: ButtonColors
+            @Composable get() = primary()
 
-        val accent = primary(
-            enabledText = ColorPalette.White,
-            disabledText = ColorPalette.Grey60,
-            enabledBackground = ColorPalette.Blue50,
-            disabledBackground = ColorPalette.Grey90,
-        )
+        val inverse: ButtonColors
+            @Composable get() = primary(
+                enabledText = MaterialTheme.colorScheme.onSurface,
+                disabledText = MaterialTheme.colorScheme.onSurfaceVariant,
+                enabledBackground = MaterialTheme.colorScheme.surface,
+                disabledBackground = MaterialTheme.colorScheme.surfaceVariant,
+                enabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            )
 
-        val brand = primary(
-            enabledText = ColorPalette.Grey20,
-            disabledText = ColorPalette.Grey60,
-            enabledBackground = ColorPalette.Yellow50New,
-            disabledBackground = ColorPalette.Grey90,
-        )
+        val accent: ButtonColors
+            @Composable get() = primary(
+                enabledText = MaterialTheme.colorScheme.onPrimary,
+                enabledBackground = MaterialTheme.colorScheme.primary,
+            )
 
-        val attention = primary(
-            enabledText = ColorPalette.White,
-            disabledText = ColorPalette.Grey60,
-            enabledBackground = ColorPalette.Red50,
-            disabledBackground = ColorPalette.Grey90,
-        )
+        val brand: ButtonColors
+            @Composable get() = primary(
+                enabledText = MaterialTheme.colorScheme.onTertiaryContainer,
+                enabledBackground = MaterialTheme.colorScheme.tertiaryContainer,
+            )
 
-        val secondaryDefault = secondary(
-            enabledText = ColorPalette.Grey20,
-            disabledText = ColorPalette.Grey60,
-        )
-        val secondaryInverse = secondary(
-            enabledText = ColorPalette.White,
-            disabledText = ColorPalette.Grey40,
-            disabledBackground = Color.Unspecified,
-            disabledBorderColor = ColorPalette.Grey40,
-        )
-        val secondaryAccent = secondary(
-            enabledText = ColorPalette.Blue60,
-            disabledText = ColorPalette.Grey60,
-        )
-        val secondaryBrand = secondary(
-            enabledText = ColorPalette.Yellow50,
-            disabledText = ColorPalette.Grey40,
-            disabledBackground = Color.Unspecified,
-            disabledBorderColor = ColorPalette.Grey40,
-            throbberStyle = Throbber.Style.YELLOW,
-        )
-        val secondaryAttention = secondary(
-            enabledText = ColorPalette.Red50,
-            disabledText = ColorPalette.Grey60,
-        )
+        val attention: ButtonColors
+            @Composable get() = primary(
+                enabledText = MaterialTheme.colorScheme.onError,
+                enabledBackground = MaterialTheme.colorScheme.error,
+            )
 
-        val textDefault = text(
-            enabledText = ColorPalette.Grey20,
-            disabledText = ColorPalette.Grey60,
-        )
-        val textInverse = text(
-            enabledText = ColorPalette.White,
-            disabledText = ColorPalette.Grey40,
-        )
-        val textAccent = text(
-            enabledText = ColorPalette.Blue60,
-            disabledText = ColorPalette.Grey60,
-        )
-        val textBrand = text(
-            enabledText = ColorPalette.Yellow50New,
-            disabledText = ColorPalette.Grey40,
-        )
-        val textAttention = text(
-            enabledText = ColorPalette.Red50,
-            disabledText = ColorPalette.Grey60,
-        )
+        val secondaryDefault: ButtonColors
+            @Composable get() = secondary()
+
+        val secondaryInverse: ButtonColors
+            @Composable get() = secondary(
+                enabledText = MaterialTheme.colorScheme.inverseOnSurface,
+                disabledText = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = DISABLED_TEXT_ALPHA),
+                disabledBorderColor = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = DISABLED_BORDER_ALPHA),
+            )
+
+        val secondaryAccent: ButtonColors
+            @Composable get() = secondary(
+                enabledText = MaterialTheme.colorScheme.primary,
+                enabledBorderColor = MaterialTheme.colorScheme.primary,
+            )
+
+        val secondaryBrand: ButtonColors
+            @Composable get() = secondary(
+                enabledText = MaterialTheme.colorScheme.tertiary,
+                enabledBorderColor = MaterialTheme.colorScheme.tertiary,
+                throbberStyle = Throbber.Style.YELLOW,
+            )
+
+        val secondaryAttention: ButtonColors
+            @Composable get() = secondary(
+                enabledText = MaterialTheme.colorScheme.error,
+                enabledBorderColor = MaterialTheme.colorScheme.error,
+            )
+
+        val textDefault: ButtonColors
+            @Composable get() = text()
+
+        val textInverse: ButtonColors
+            @Composable get() = text(enabledText = MaterialTheme.colorScheme.inverseOnSurface)
+
+        val textAccent: ButtonColors
+            @Composable get() = text(enabledText = MaterialTheme.colorScheme.primary)
+
+        val textBrand: ButtonColors
+            @Composable get() = text(enabledText = MaterialTheme.colorScheme.tertiary)
+
+        val textAttention: ButtonColors
+            @Composable get() = text(enabledText = MaterialTheme.colorScheme.error)
     }
 }
 

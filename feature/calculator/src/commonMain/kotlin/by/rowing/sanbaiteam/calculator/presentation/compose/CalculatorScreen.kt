@@ -1,16 +1,26 @@
 package by.rowing.sanbaiteam.calculator.presentation.compose
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Percent
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -18,8 +28,12 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.calculator.presentation.CalculatorMode
 import by.rowing.sanbaiteam.calculator.presentation.CalculatorState
 import by.rowing.sanbaiteam.calculator.presentation.CalculatorViewModel
@@ -44,7 +58,6 @@ import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerM
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import org.jetbrains.compose.resources.stringResource
@@ -75,7 +88,10 @@ private fun CalculatorScreenContent(
     onCalculate: () -> Unit,
     onClearError: () -> Unit,
 ) {
-    Scaffold(topBar = calculatorScreenTopBar(onBackClick = onBackClick)) { paddingValues ->
+    Scaffold(
+        modifier = Modifier.imePadding(),
+        topBar = calculatorScreenTopBar(onBackClick = onBackClick)
+    ) { paddingValues ->
         CalculatorScreenContent(
             paddingValues = paddingValues,
             state = state,
@@ -137,6 +153,7 @@ private fun CalculatorScreenContent(
             label = stringResource(Res.string.calculator_record_pace_label),
             placeholder = stringResource(Res.string.calculator_pace_placeholder),
             textStyle = TypographyPaletteSp.Body1Regular,
+            leadingIcon = { FieldIcon(icon = Icons.Default.Timer) },
             keyboardOptions = KeyboardOptions.time(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -153,11 +170,7 @@ private fun CalculatorScreenContent(
             debounceClick = onCalculate
         )
 
-        if (state.resultText.isNotBlank()) {
-            CalculatorResult(state = state)
-        }
-
-        SpacerM()
+        CalculatorResult(state = state)
     }
 }
 
@@ -166,6 +179,12 @@ private fun CalculatorModeSelector(
     state: CalculatorState,
     onModeChange: (CalculatorMode) -> Unit
 ) {
+    val colors = SegmentedButtonDefaults.colors(
+        activeContainerColor = MaterialTheme.colorScheme.primary,
+        activeContentColor = MaterialTheme.colorScheme.onPrimary,
+        inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         val calculatorModes = listOf(
             CalculatorMode.PaceToPercent to Res.string.calculator_mode_percent,
@@ -180,7 +199,14 @@ private fun CalculatorModeSelector(
                     index = index,
                     count = calculatorModesCount
                 ),
-                label = { Text(stringResource(titleRes)) }
+                colors = colors,
+                modifier = Modifier.weight(1f),
+                label = {
+                    Text(
+                        text = stringResource(titleRes),
+                        style = TypographyPalette.Body2Medium
+                    )
+                }
             )
         }
     }
@@ -199,6 +225,7 @@ private fun CalculatorInputField(
                 onValueChange = onPaceChange,
                 label = stringResource(Res.string.calculator_pace_label),
                 placeholder = stringResource(Res.string.calculator_pace_placeholder),
+                leadingIcon = { FieldIcon(icon = Icons.Default.Timer) },
                 keyboardOptions = KeyboardOptions.time(),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -210,6 +237,7 @@ private fun CalculatorInputField(
                 onValueChange = onPercentChange,
                 label = stringResource(Res.string.calculator_percent_label),
                 placeholder = stringResource(Res.string.calculator_percent_placeholder),
+                leadingIcon = { FieldIcon(icon = Icons.Default.Percent) },
                 keyboardOptions = KeyboardOptions.decimal(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -219,18 +247,55 @@ private fun CalculatorInputField(
 
 @Composable
 private fun CalculatorResult(state: CalculatorState) {
-    Column {
-        Text(
-            modifier = Modifier.padding(top = Spacing.S),
-            text = stringResource(Res.string.calculator_result_label),
-            style = TypographyPalette.Body2Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = state.resultText,
-            style = TypographyPaletteSp.H2
-        )
+    val isVisible = state.resultText.isNotBlank()
+    val progress by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = RESULT_ANIMATION_DURATION),
+        label = "calculatorResultAppearance"
+    )
+    if (progress > 0f) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    alpha = progress
+                    translationY = (1f - progress) * RESULT_ANIMATION_OFFSET.toPx()
+                },
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.M),
+                verticalArrangement = Arrangement.spacedBy(Spacing.XS)
+            ) {
+                Text(
+                    text = stringResource(Res.string.calculator_result_label),
+                    style = TypographyPalette.Body2Medium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = state.resultText,
+                    style = TypographyPalette.H1,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun FieldIcon(icon: ImageVector) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        modifier = Modifier.size(FIELD_ICON_SIZE),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 @Composable
@@ -261,3 +326,7 @@ private fun InputErrorAlert(
         }
     )
 }
+
+private val FIELD_ICON_SIZE = 20.dp
+private val RESULT_ANIMATION_OFFSET = 12.dp
+private const val RESULT_ANIMATION_DURATION = 260

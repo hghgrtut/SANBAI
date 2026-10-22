@@ -36,10 +36,14 @@ import kotlin.math.abs
 
 @Composable
 internal fun AthleteListItem(
+    modifier: Modifier = Modifier,
     athlete: AthleteItemModel,
     onAthleteClick: (AthleteItemModel) -> Unit,
 ) {
-    ItemCard(onClick = { onAthleteClick(athlete) }) {
+    ItemCard(
+        modifier = modifier,
+        onClick = { onAthleteClick(athlete) },
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

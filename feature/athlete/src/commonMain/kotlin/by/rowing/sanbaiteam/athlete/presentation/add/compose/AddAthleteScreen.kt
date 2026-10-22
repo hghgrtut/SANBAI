@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -48,9 +54,12 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_placeholder
+import by.rowing.sanbaiteam.athlete.resources.athletes_add_preview_header
+import by.rowing.sanbaiteam.athlete.resources.athletes_add_section_main
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_gender_label
 import by.rowing.sanbaiteam.athlete.resources.save
 import by.rowing.sanbaiteam.uikit.component.DataCard
+import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.theme.Spacing
@@ -72,6 +81,7 @@ private fun AddAthleteScreenContent(
     state: AddAthleteState
 ) {
     Scaffold(
+        modifier = Modifier.imePadding(),
         topBar = { AddAthleteTopBar(actions = actions) }
     ) { paddingValues ->
         AddAthleteForm(
@@ -109,9 +119,11 @@ private fun AddAthleteForm(
         modifier = Modifier
             .padding(paddingValues)
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(Spacing.M),
         verticalArrangement = Arrangement.spacedBy(Spacing.M)
     ) {
+        SectionHeader(title = stringResource(Res.string.athletes_add_section_main))
         TextField(
             value = state.name,
             onValueChange = actions::changeName,
@@ -121,6 +133,12 @@ private fun AddAthleteForm(
             supportingText = state.nameError?.resolve(),
             singleLine = true,
             textStyle = TypographyPaletteSp.Body1Regular,
+            leadingIcon = { FieldIcon(icon = Icons.Default.Person) },
+            keyboardOptions = KeyboardOptions(
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next,
+            ),
             modifier = Modifier.fillMaxWidth(),
         )
         TextField(
@@ -134,10 +152,11 @@ private fun AddAthleteForm(
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             textStyle = TypographyPaletteSp.Body1Regular,
+            leadingIcon = { FieldIcon(icon = Icons.Default.Cake) },
             keyboardOptions = KeyboardOptions(
                 autoCorrectEnabled = false,
                 keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Next
             ),
             visualTransformation = DateTransformation()
         )
@@ -149,21 +168,18 @@ private fun AddAthleteForm(
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             textStyle = TypographyPaletteSp.Body1Regular,
+            leadingIcon = { FieldIcon(icon = Icons.Default.Numbers) },
             keyboardOptions = KeyboardOptions(
                 autoCorrectEnabled = false,
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done,
             )
         )
+        SectionHeader(title = stringResource(Res.string.athletes_detail_gender_label))
         DataCard(
             modifier = Modifier.fillMaxWidth(),
             verticalSpacing = Spacing.S
         ) {
-            Text(
-                text = stringResource(Res.string.athletes_detail_gender_label),
-                style = TypographyPaletteSp.Body2Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
                 GenderOption(
                     textRes = Res.string.athletes_add_athlete_gender_male,
@@ -179,7 +195,7 @@ private fun AddAthleteForm(
                 )
             }
         }
-
+        SectionHeader(title = stringResource(Res.string.athletes_add_preview_header))
         AthleteListItem(
             athlete = AthleteItemModel(
                 id = 0,
@@ -190,6 +206,16 @@ private fun AddAthleteForm(
             )
         ) {}
     }
+}
+
+@Composable
+private fun FieldIcon(icon: ImageVector) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        modifier = Modifier.size(FIELD_ICON_SIZE),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
@@ -238,6 +264,8 @@ private fun GenderOption(
         }
     }
 }
+
+private val FIELD_ICON_SIZE = 20.dp
 
 private class DateTransformation : VisualTransformation {
 
