@@ -57,7 +57,12 @@ private const val SKELETON_ANIMATION_DURATION = 900
 private fun SkeletonPreview() {
     ComposePreviewWrapper {
         SANBAITeamTheme {
-            Skeleton(modifier = Modifier.size(width = 200.dp, height = 24.dp))
+            Skeleton(
+                modifier = Modifier.size(
+                    width = 200.dp,
+                    height = 24.dp
+                    )
+                )
         }
     }
 }
