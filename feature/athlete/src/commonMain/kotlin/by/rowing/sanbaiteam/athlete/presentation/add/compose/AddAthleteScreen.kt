@@ -124,88 +124,137 @@ private fun AddAthleteForm(
         verticalArrangement = Arrangement.spacedBy(Spacing.M)
     ) {
         SectionHeader(title = stringResource(Res.string.athletes_add_section_main))
-        TextField(
-            value = state.name,
-            onValueChange = actions::changeName,
-            label = stringResource(Res.string.athletes_add_athlete_name_label),
-            placeholder = stringResource(Res.string.athletes_add_athlete_name_placeholder),
-            error = state.nameError != null,
-            supportingText = state.nameError?.resolve(),
-            singleLine = true,
-            textStyle = TypographyPaletteSp.Body1Regular,
-            leadingIcon = { FieldIcon(icon = Icons.Default.Person) },
-            keyboardOptions = KeyboardOptions(
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next,
-            ),
-            modifier = Modifier.fillMaxWidth(),
+        NameInput(
+            state = state,
+            onNameChange = actions::changeName
         )
-        TextField(
-            value = state.dateOfBirth,
-            onValueChange = actions::changeBirthDate,
-            label = stringResource(Res.string.athletes_add_athlete_birth_date_label),
-            placeholder = stringResource(Res.string.athletes_add_athlete_birth_date_placeholder),
-            supportingText = state.dateError?.resolve()
-                ?: stringResource(Res.string.athletes_add_athlete_birth_date_supporting_text),
-            error = state.dateError != null,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = TypographyPaletteSp.Body1Regular,
-            leadingIcon = { FieldIcon(icon = Icons.Default.Cake) },
-            keyboardOptions = KeyboardOptions(
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
-            ),
-            visualTransformation = DateTransformation()
+        DateOfBirthInput(
+            state = state,
+            onBirthDateChange = actions::changeBirthDate
         )
-        TextField(
-            value = state.speedCoachSerial,
-            onValueChange = actions::changeSpeedCoachSerial,
-            label = stringResource(Res.string.athletes_add_athlete_speedcoach_serial_label),
-            placeholder = stringResource(Res.string.athletes_add_athlete_speedcoach_serial_placeholder),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = TypographyPaletteSp.Body1Regular,
-            leadingIcon = { FieldIcon(icon = Icons.Default.Numbers) },
-            keyboardOptions = KeyboardOptions(
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done,
-            )
+        SpeedCoachSerialInput(
+            state = state,
+            onSpeedCoachSerialChange = actions::changeSpeedCoachSerial
         )
         SectionHeader(title = stringResource(Res.string.athletes_detail_gender_label))
-        DataCard(
-            modifier = Modifier.fillMaxWidth(),
-            verticalSpacing = Spacing.S
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
-                GenderOption(
-                    textRes = Res.string.athletes_add_athlete_gender_male,
-                    isSelected = state.isMale,
-                    onClick = { actions.changeGender(isMale = true) },
-                    icon = Icons.Default.Male
-                )
-                GenderOption(
-                    textRes = Res.string.athletes_add_athlete_gender_female,
-                    isSelected = !state.isMale,
-                    onClick = { actions.changeGender(isMale = false) },
-                    icon = Icons.Default.Female
-                )
-            }
-        }
+        GenderSelector(
+            state = state,
+            onChangeGender = actions::changeGender
+        )
         SectionHeader(title = stringResource(Res.string.athletes_add_preview_header))
-        AthleteListItem(
-            athlete = AthleteItemModel(
-                id = 0,
-                name = state.name,
-                dateOfBirth = state.dateOfBirth,
-                isMale = state.isMale,
-                speedCoachSerial = state.speedCoachSerial.ifBlank { null },
-            )
-        ) {}
+        AthleteCardPreview(state = state)
     }
+}
+
+@Composable
+private fun NameInput(
+    state: AddAthleteState,
+    onNameChange: (String) -> Unit
+) {
+    TextField(
+        value = state.name,
+        onValueChange = onNameChange,
+        label = stringResource(Res.string.athletes_add_athlete_name_label),
+        placeholder = stringResource(Res.string.athletes_add_athlete_name_placeholder),
+        error = state.nameError != null,
+        supportingText = state.nameError?.resolve(),
+        singleLine = true,
+        textStyle = TypographyPaletteSp.Body1Regular,
+        leadingIcon = { FieldIcon(icon = Icons.Default.Person) },
+        keyboardOptions = KeyboardOptions(
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun DateOfBirthInput(
+    state: AddAthleteState,
+    onBirthDateChange: (String) -> Unit
+) {
+    TextField(
+        value = state.dateOfBirth,
+        onValueChange = onBirthDateChange,
+        label = stringResource(Res.string.athletes_add_athlete_birth_date_label),
+        placeholder = stringResource(Res.string.athletes_add_athlete_birth_date_placeholder),
+        supportingText = state.dateError?.resolve()
+            ?: stringResource(Res.string.athletes_add_athlete_birth_date_supporting_text),
+        error = state.dateError != null,
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+        textStyle = TypographyPaletteSp.Body1Regular,
+        leadingIcon = { FieldIcon(icon = Icons.Default.Cake) },
+        keyboardOptions = KeyboardOptions(
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next
+        ),
+        visualTransformation = DateTransformation()
+    )
+}
+
+@Composable
+private fun SpeedCoachSerialInput(
+    state: AddAthleteState,
+    onSpeedCoachSerialChange: (String) -> Unit
+) {
+    TextField(
+        value = state.speedCoachSerial,
+        onValueChange = onSpeedCoachSerialChange,
+        label = stringResource(Res.string.athletes_add_athlete_speedcoach_serial_label),
+        placeholder = stringResource(Res.string.athletes_add_athlete_speedcoach_serial_placeholder),
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+        textStyle = TypographyPaletteSp.Body1Regular,
+        leadingIcon = { FieldIcon(icon = Icons.Default.Numbers) },
+        keyboardOptions = KeyboardOptions(
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done,
+        )
+    )
+}
+
+@Composable
+private fun GenderSelector(
+    state: AddAthleteState,
+    onChangeGender: (isMale: Boolean) -> Unit
+) {
+    DataCard(
+        modifier = Modifier.fillMaxWidth(),
+        verticalSpacing = Spacing.S
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+            GenderOption(
+                textRes = Res.string.athletes_add_athlete_gender_male,
+                isSelected = state.isMale,
+                onClick = { onChangeGender(true) },
+                icon = Icons.Default.Male
+            )
+            GenderOption(
+                textRes = Res.string.athletes_add_athlete_gender_female,
+                isSelected = !state.isMale,
+                onClick = { onChangeGender(false) },
+                icon = Icons.Default.Female
+            )
+        }
+    }
+}
+
+@Composable
+private fun AthleteCardPreview(state: AddAthleteState) {
+    AthleteListItem(
+        athlete = AthleteItemModel(
+            id = 0,
+            name = state.name,
+            dateOfBirth = state.dateOfBirth,
+            isMale = state.isMale,
+            speedCoachSerial = state.speedCoachSerial.ifBlank { null },
+        )
+    ) {}
 }
 
 @Composable

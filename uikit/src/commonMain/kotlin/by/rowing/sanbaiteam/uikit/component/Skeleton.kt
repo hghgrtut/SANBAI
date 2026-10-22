@@ -61,8 +61,8 @@ private fun SkeletonPreview() {
                 modifier = Modifier.size(
                     width = 200.dp,
                     height = 24.dp
-                    )
                 )
+            )
         }
     }
 }
