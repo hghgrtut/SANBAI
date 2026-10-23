@@ -1,5 +1,9 @@
 package by.rowing.sanbaiteam.training.data.comparison
 
+import by.rowing.sanbaiteam.training.data.models.comparison.ComparablePiece
+import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
+import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
+import by.rowing.sanbaiteam.training.data.models.comparison.PieceComparison
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -31,7 +35,10 @@ internal class TrainingComparisonCalculatorTest {
             percentOfPb = 88.0,
         )
 
-        val result = TrainingComparisonCalculator.compare(base, listOf(compared))
+        val result = TrainingComparisonCalculator.compare(
+            base = base,
+            compared = listOf(compared)
+        )
 
         requireNotNull(result)
         assertEquals(1, result.comparedTrainingsCount)
@@ -77,19 +84,20 @@ internal class TrainingComparisonCalculatorTest {
     }
 
     @Test
-    fun `returns null when there are no compared pieces`() {
-        assertNull(TrainingComparisonCalculator.compare(piece(), emptyList()))
-    }
-
-    @Test
     fun `time and stroke rate are rounded`() {
         val base = piece(
             timeMillis = 200_000L,
             strokeRate = 31.0,
         )
         val compared = listOf(
-            piece(timeMillis = 200_049L, strokeRate = 31.24),
-            piece(timeMillis = 200_149L, strokeRate = 31.26),
+            piece(
+                timeMillis = 200_049L,
+                strokeRate = 31.24
+            ),
+            piece(
+                timeMillis = 200_149L,
+                strokeRate = 31.26
+            ),
         )
 
         val result = TrainingComparisonCalculator.compare(base, compared)

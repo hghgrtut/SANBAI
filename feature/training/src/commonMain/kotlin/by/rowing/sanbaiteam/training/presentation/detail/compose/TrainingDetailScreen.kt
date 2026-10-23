@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,31 +56,25 @@ private const val SKELETON_CARD_COUNT = 3
 internal fun TrainingDetailScreen(viewModel: TrainingDetailViewModel) {
     TrainingDetailContent(
         state = viewModel.state,
-        onBackClick = viewModel::onBackClick,
-        onCompareClick = viewModel::onCompareClick,
-        onToggleComparison = viewModel::onToggleComparison,
-        onClearComparison = viewModel::onClearComparison,
+        actions = viewModel,
     )
 }
 
 @Composable
 private fun TrainingDetailContent(
     state: TrainingDetailState,
-    onBackClick: () -> Unit,
-    onCompareClick: () -> Unit,
-    onToggleComparison: (Int) -> Unit,
-    onClearComparison: () -> Unit,
+    actions: TrainingDetailActions,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = stringResource(Res.string.training_detail_title),
-                onNavIconClick = onBackClick,
+                onNavIconClick = actions::onBackClick,
                 actions = {
                     if (!state.isLoading && !state.notFound) {
-                        IconButton(onClick = onCompareClick) {
+                        IconButton(onClick = actions::onCompareClick) {
                             Icon(
-                                imageVector = Icons.Default.CompareArrows,
+                                imageVector = Icons.AutoMirrored.Filled.CompareArrows,
                                 contentDescription = stringResource(Res.string.training_detail_compare_action),
                                 tint = if (state.comparedTrainingIds.isNotEmpty()) {
                                     MaterialTheme.colorScheme.primary
@@ -100,9 +94,7 @@ private fun TrainingDetailContent(
             else -> Training(
                 paddingValues = paddingValues,
                 state = state,
-                onCompareClick = onCompareClick,
-                onToggleComparison = onToggleComparison,
-                onClearComparison = onClearComparison,
+                actions = actions,
             )
         }
     }
@@ -155,9 +147,7 @@ private fun TrainingNotFound(paddingValues: PaddingValues) {
 private fun Training(
     paddingValues: PaddingValues,
     state: TrainingDetailState,
-    onCompareClick: () -> Unit,
-    onToggleComparison: (Int) -> Unit,
-    onClearComparison: () -> Unit,
+    actions: TrainingDetailActions,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -181,8 +171,8 @@ private fun Training(
                 if (state.comparedTrainingIds.isNotEmpty()) {
                     ComparisonChip(
                         count = state.comparedTrainingIds.size,
-                        onClick = onCompareClick,
-                        onClear = onClearComparison,
+                        onClick = actions::onCompareClick,
+                        onClear = actions::onClearComparison,
                     )
                 }
             }
@@ -219,7 +209,7 @@ private fun Training(
                 TrainingPieceCard(
                     piece = piece,
                     expanded = piece.order in state.expandedComparisonOrders,
-                    onToggleComparison = { onToggleComparison(piece.order) },
+                    onToggleComparison = { actions.onToggleComparison(piece.order) },
                 )
             }
         }
@@ -241,13 +231,14 @@ private fun ComparisonChip(
         Row(
             modifier = Modifier
                 .clickable(onClick = onClick)
-                .padding(start = Spacing.S, top = Spacing.XS, bottom = Spacing.XS, end = Spacing.XS),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.XS),
+                .padding(start = Spacing.XS)
+                .padding(all = Spacing.XS),
+            horizontalArrangement = Arrangement.spacedBy(space = Spacing.XS),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 modifier = Modifier.size(16.dp),
-                imageVector = Icons.Default.CompareArrows,
+                imageVector = Icons.AutoMirrored.Filled.CompareArrows,
                 contentDescription = null,
             )
             Text(

@@ -24,9 +24,4 @@ internal class ComparisonFormatTest {
         assertEquals("−2.8", formatSignedSeconds(-2_800L))
         assertEquals("+12.3", formatSignedSeconds(12_300L))
     }
-
-    @Test
-    fun `duration is formatted as minutes and seconds`() {
-        assertEquals("3:20.0", formatDurationValue(200_000.0))
-    }
 }

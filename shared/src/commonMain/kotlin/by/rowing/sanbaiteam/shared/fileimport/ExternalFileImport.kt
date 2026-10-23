@@ -26,6 +26,9 @@ object ExternalFileImport {
     }
 
     fun consume(uri: String) {
-        pendingUriState.compareAndSet(expect = uri, update = null)
+        pendingUriState.compareAndSet(
+            expect = uri,
+            update = null
+        )
     }
 }

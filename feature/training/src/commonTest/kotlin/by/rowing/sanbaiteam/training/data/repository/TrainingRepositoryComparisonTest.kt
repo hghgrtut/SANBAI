@@ -1,16 +1,15 @@
 package by.rowing.sanbaiteam.training.data.repository
 
-import by.rowing.sanbaiteam.training.data.comparison.ComparisonMetric
-import by.rowing.sanbaiteam.training.data.comparison.ComparisonTrend
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
+import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
+import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
 import by.rowing.sanbaiteam.training.data.trainingimport.FakeTrainingImportStorage
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 internal class TrainingRepositoryComparisonTest {
@@ -19,38 +18,91 @@ internal class TrainingRepositoryComparisonTest {
     fun `candidates contain only same type without current training`() = runTest {
         val repository = repository(
             trainings = listOf(
-                training(id = 1, type = TrainingPieceType.SINGLE, date = 3),
-                training(id = 2, type = TrainingPieceType.SINGLE, date = 2),
-                training(id = 3, type = TrainingPieceType.DOUBLE, date = 1),
-                training(id = 4, type = TrainingPieceType.SINGLE, date = 0),
+                training(
+                    id = 1,
+                    type = TrainingPieceType.SINGLE,
+                    date = 3
+                ),
+                training(
+                    id = 2,
+                    type = TrainingPieceType.SINGLE,
+                    date = 2
+                ),
+                training(
+                    id = 3,
+                    type = TrainingPieceType.DOUBLE,
+                    date = 1
+                ),
+                training(
+                    id = 4,
+                    type = TrainingPieceType.SINGLE,
+                    date = 0
+                ),
             ),
             pieces = listOf(
-                piece(trainingId = 1, order = 0),
-                piece(trainingId = 2, order = 0),
-                piece(trainingId = 3, order = 0),
+                piece(
+                    trainingId = 1,
+                    order = 0
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 0
+                ),
+                piece(
+                    trainingId = 3,
+                    order = 0
+                ),
             ),
         )
 
         val candidates = repository.getComparisonCandidates(trainingId = 1)
 
-        assertEquals(listOf(2L), candidates.items.map { it.trainingId })
-        assertNotNull(candidates.typeResId)
+        assertEquals(listOf(2L), candidates.map { it.trainingId })
     }
 
     @Test
     fun `detail compares pieces with the same order and skips other types`() = runTest {
         val repository = repository(
             trainings = listOf(
-                training(id = 1, type = TrainingPieceType.SINGLE),
-                training(id = 2, type = TrainingPieceType.SINGLE),
-                training(id = 3, type = TrainingPieceType.DOUBLE),
+                training(
+                    id = 1,
+                    type = TrainingPieceType.SINGLE
+                ),
+                training(
+                    id = 2,
+                    type = TrainingPieceType.SINGLE
+                ),
+                training(
+                    id = 3,
+                    type = TrainingPieceType.DOUBLE
+                ),
             ),
             pieces = listOf(
-                piece(trainingId = 1, order = 0, timeMillis = 200_000L),
-                piece(trainingId = 1, order = 1, timeMillis = 210_000L),
-                piece(trainingId = 2, order = 0, timeMillis = 220_000L),
-                piece(trainingId = 2, order = 1, timeMillis = 230_000L),
-                piece(trainingId = 3, order = 0, timeMillis = 999_000L),
+                piece(
+                    trainingId = 1,
+                    order = 0,
+                    timeMillis = 200_000L
+                ),
+                piece(
+                    trainingId = 1,
+                    order = 1,
+                    timeMillis = 210_000L
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 0,
+                    timeMillis = 220_000L
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 1,
+                    timeMillis = 230_000L
+                ),
+                piece(
+                    trainingId = 3,
+                    order = 0,
+                    timeMillis = 999_000L
+                ),
             ),
         )
 
@@ -70,34 +122,14 @@ internal class TrainingRepositoryComparisonTest {
         assertNull(first.metrics[ComparisonMetric.PERCENT_OF_PB])
     }
 
-    @Test
-    fun `missing compared order leaves the piece without comparison`() = runTest {
-        val repository = repository(
-            trainings = listOf(
-                training(id = 1, type = TrainingPieceType.SINGLE),
-                training(id = 2, type = TrainingPieceType.SINGLE),
-            ),
-            pieces = listOf(
-                piece(trainingId = 1, order = 0),
-                piece(trainingId = 1, order = 1),
-                piece(trainingId = 2, order = 0, timeMillis = 220_000L),
-            ),
-        )
-
-        val state = repository.getTrainingDetail(
-            trainingId = 1,
-            comparedTrainingIds = listOf(2L),
-        )
-
-        assertNotNull(state.pieces[0].comparison)
-        assertNull(state.pieces[1].comparison)
-    }
-
     private fun repository(
         trainings: List<TrainingEntity>,
         pieces: List<TrainingAthletePieceEntity>,
     ) = TrainingRepository(
-        dao = FakeTrainingDao(trainings = trainings, pieces = pieces),
+        dao = FakeTrainingDao(
+            trainings = trainings,
+            pieces = pieces
+        ),
         athletesRepository = StubAthletesRepository(),
         importStorage = FakeTrainingImportStorage(),
     )

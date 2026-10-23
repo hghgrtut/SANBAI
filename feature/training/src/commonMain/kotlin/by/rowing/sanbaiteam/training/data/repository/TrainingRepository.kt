@@ -6,13 +6,12 @@ import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.formatTenths
-import by.rowing.sanbaiteam.training.data.comparison.ComparablePiece
 import by.rowing.sanbaiteam.training.data.comparison.TrainingComparisonCalculator
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
-import by.rowing.sanbaiteam.training.data.models.TrainingComparisonCandidates
+import by.rowing.sanbaiteam.training.data.models.comparison.ComparablePiece
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailState
@@ -64,29 +63,15 @@ internal class TrainingRepository(
     }
 
     suspend fun getTrainingsList(): List<ListTrainingStateItem> = withContext(Dispatchers.Default) {
-        val items = mutableListOf<ListTrainingStateItem>()
-        for (training in dao.getAllTrainingEntities()) {
-            toListItem(training)?.let(items::add)
-        }
-        items
+        dao.getAllTrainingEntities().mapNotNull { training -> toListItem(training) }
     }
 
-    suspend fun getComparisonCandidates(trainingId: Long): TrainingComparisonCandidates =
+    suspend fun getComparisonCandidates(trainingId: Long): List<ListTrainingStateItem> =
         withContext(Dispatchers.Default) {
-            val base = dao.getTrainingById(trainingId)
-                ?: return@withContext TrainingComparisonCandidates(
-                    typeResId = null,
-                    items = emptyList(),
-                )
-            val items = mutableListOf<ListTrainingStateItem>()
-            for (training in dao.getAllTrainingEntities()) {
-                if (training.id == trainingId || training.type != base.type) continue
-                toListItem(training)?.let(items::add)
+            val baseType = dao.getTrainingById(trainingId)?.type ?: return@withContext emptyList()
+            dao.getAllTrainingEntities().mapNotNull { training ->
+                if (training.type != baseType || training.id == trainingId) null else toListItem(training)
             }
-            TrainingComparisonCandidates(
-                typeResId = base.type.uiResId,
-                items = items,
-            )
         }
 
     suspend fun getTrainingDetail(
@@ -100,7 +85,6 @@ internal class TrainingRepository(
 
         val pieces = dao.getPiecesForTraining(trainingId)
         val baseAthleteIds = pieces.map { it.athleteId }.distinct()
-        val baseCrewPieces = crewPieces(pieces)
         val comparedSources = loadComparedSources(
             base = training,
             comparedTrainingIds = comparedTrainingIds,
@@ -133,7 +117,7 @@ internal class TrainingRepository(
             typeResId = training.type.uiResId,
             athleteNames = baseAthleteIds.mapNotNull { nameMap[it] },
             pieces = buildDetailPieces(
-                baseCrewPieces = baseCrewPieces,
+                baseCrewPieces = pieces,
                 baseAthleteIds = baseAthleteIds,
                 personalBests = personalBests,
                 comparedByOrder = comparedByOrder,
@@ -188,21 +172,15 @@ internal class TrainingRepository(
     private suspend fun loadComparedSources(
         base: TrainingEntity,
         comparedTrainingIds: List<Long>,
-    ): List<ComparedTrainingSource> {
-        val sources = mutableListOf<ComparedTrainingSource>()
-        for (trainingId in comparedTrainingIds.distinct()) {
-            if (trainingId == base.id) continue
-            val training = dao.getTrainingById(trainingId) ?: continue
-            if (training.type != base.type) continue
-            val pieces = dao.getPiecesForTraining(trainingId)
-            if (pieces.isEmpty()) continue
-            sources += ComparedTrainingSource(
-                trainingId = trainingId,
-                athleteIds = pieces.map { it.athleteId }.distinct(),
-                crewPieces = crewPieces(pieces),
-            )
-        }
-        return sources
+    ): List<ComparedTrainingSource> = comparedTrainingIds.distinct().mapNotNull { trainingId ->
+        if (trainingId == base.id) return@mapNotNull null
+        dao.getTrainingById(trainingId)?.takeIf { it.type == base.type } ?: return@mapNotNull null
+        val pieces = dao.getPiecesForTraining(trainingId).ifEmpty { return@mapNotNull null }
+        ComparedTrainingSource(
+            trainingId = trainingId,
+            athleteIds = pieces.map { it.athleteId }.distinct(),
+            crewPieces = pieces,
+        )
     }
 
     private suspend fun toListItem(training: TrainingEntity): ListTrainingStateItem? {
@@ -212,23 +190,15 @@ internal class TrainingRepository(
         val athleteIds = pieces.map { it.athleteId }.distinct()
         val nameMap = athletesRepository.getAthleteNameMap(athleteIds)
         val athleteNames = athleteIds.mapNotNull { nameMap[it] }
-        val crewPieces = crewPieces(pieces)
 
         return ListTrainingStateItem(
             trainingId = training.id,
             trainingType = training.type,
             trainingTypeResId = training.type.uiResId,
             trainingDate = TimeUtils.formatDate(training.dateMillis),
-            trainingWork = formatWorkSummary(crewPieces),
+            trainingWork = formatWorkSummary(pieces),
             athletes = athleteNames
         )
-    }
-
-    private fun crewPieces(pieces: List<TrainingAthletePieceEntity>): List<TrainingAthletePieceEntity> {
-        val firstAthleteId = pieces.firstOrNull()?.athleteId ?: return emptyList()
-        return pieces
-            .filter { it.athleteId == firstAthleteId }
-            .sortedBy { it.order }
     }
 
     private fun personalBestPercent(
@@ -237,12 +207,12 @@ internal class TrainingRepository(
         personalBests: Map<Long, AthletePersonalBestEntity>,
     ): Double? {
         val crewPercents = athleteIds.mapNotNull { athleteId ->
-            val pb = personalBests[athleteId] ?: return@mapNotNull null
+            val personalBest = personalBests[athleteId] ?: return@mapNotNull null
             PersonalBestPercent.calculate(
                 pieceDistanceMeters = piece.distanceMeters,
                 pieceTimeMillis = piece.timeMillis,
-                pbDistanceMeters = pb.distanceMeters,
-                pbTimeMillis = pb.timeMillis,
+                pbDistanceMeters = personalBest.distanceMeters,
+                pbTimeMillis = personalBest.timeMillis,
             )
         }
         return PersonalBestPercent.average(crewPercents)

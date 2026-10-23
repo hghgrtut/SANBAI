@@ -1,6 +1,6 @@
 package by.rowing.sanbaiteam.training.presentation.detail.models
 
-import by.rowing.sanbaiteam.training.data.comparison.PieceComparison
+import by.rowing.sanbaiteam.training.data.models.comparison.PieceComparison
 import org.jetbrains.compose.resources.StringResource
 
 internal data class TrainingDetailState(

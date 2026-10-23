@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CompareArrows
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -89,13 +89,9 @@ private fun TrainingCompareContent(
                     .padding(paddingValues),
                 title = stringResource(Res.string.training_compare_empty_title),
                 description = stringResource(Res.string.training_compare_empty_description),
-                icon = Icons.Default.CompareArrows,
-                actionText = if (state.hasAppliedComparison) {
-                    stringResource(Res.string.training_compare_reset)
-                } else {
-                    null
-                },
-                onActionClick = if (state.hasAppliedComparison) onReset else null,
+                icon = Icons.AutoMirrored.Filled.CompareArrows,
+                actionText = stringResource(Res.string.training_compare_reset).takeIf { state.hasAppliedComparison },
+                onActionClick = onReset.takeIf { state.hasAppliedComparison }
             )
 
             else -> LazyColumn(

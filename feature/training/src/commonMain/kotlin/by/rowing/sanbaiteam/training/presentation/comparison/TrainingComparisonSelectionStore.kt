@@ -1,19 +1,9 @@
 package by.rowing.sanbaiteam.training.presentation.comparison
 
+import by.rowing.sanbaiteam.training.presentation.comparison.models.TrainingComparisonSelection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
-internal data class TrainingComparisonSelection(
-    val trainingId: Long,
-    val comparedTrainingIds: Set<Long>,
-)
-
-internal fun TrainingComparisonSelection?.comparedTrainingIdsFor(trainingId: Long): Set<Long> =
-    this
-        ?.takeIf { it.trainingId == trainingId }
-        ?.comparedTrainingIds
-        .orEmpty()
 
 /**
  * Хранит выбранные для сравнения тренировки в рамках текущей сессии.
@@ -25,18 +15,23 @@ internal class TrainingComparisonSelectionStore {
 
     val selection: StateFlow<TrainingComparisonSelection?> = _selection.asStateFlow()
 
-    fun select(trainingId: Long, comparedTrainingIds: Collection<Long>) {
-        val normalized = comparedTrainingIds
+    fun select(
+        trainingId: Long,
+        comparedTrainingIds: Collection<Long>
+    ) {
+        _selection.value = comparedTrainingIds
             .filterNot { it == trainingId }
             .toSet()
-        _selection.value = normalized
             .takeIf { it.isNotEmpty() }
-            ?.let { TrainingComparisonSelection(trainingId, it) }
+            ?.let { comparedTrainingIds ->
+                TrainingComparisonSelection(
+                    trainingId = trainingId,
+                    comparedTrainingIds = comparedTrainingIds
+                )
+            }
     }
 
-    fun clear(trainingId: Long) {
-        if (_selection.value?.trainingId == trainingId) {
-            _selection.value = null
-        }
+    fun clear() {
+        _selection.value = null
     }
 }

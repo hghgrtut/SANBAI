@@ -6,7 +6,7 @@ import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOption
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.presentation.comparison.TrainingComparisonSelectionStore
-import by.rowing.sanbaiteam.training.presentation.comparison.comparedTrainingIdsFor
+import by.rowing.sanbaiteam.training.presentation.detail.compose.TrainingDetailActions
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailState
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavigation
 import kotlinx.coroutines.flow.collectLatest
@@ -21,14 +21,14 @@ internal class TrainingDetailViewModel(
     private val trainingId: Long,
 ) : ComposeBaseViewModel<TrainingDetailState>(
     initialState = TrainingDetailState(trainingId = trainingId)
-) {
+), TrainingDetailActions {
 
     private var isClosing = false
 
     init {
         viewModelScope.launch {
             comparisonSelectionStore.selection
-                .map { selection -> selection.comparedTrainingIdsFor(trainingId) }
+                .map { selection -> selection?.comparedTrainingIdsFor(trainingId).orEmpty() }
                 .distinctUntilChanged()
                 .collectLatest { comparedTrainingIds ->
                     load(comparedTrainingIds)
@@ -36,37 +36,38 @@ internal class TrainingDetailViewModel(
         }
     }
 
-    fun onBackClick() {
+    override fun onBackClick() {
         isClosing = true
-        comparisonSelectionStore.clear(trainingId)
+        onClearComparison()
         composeNavigator.navigateBack()
     }
 
-    fun onCompareClick() {
+    override fun onCompareClick() {
         TrainingNavigation.TrainingCompare(trainingId = trainingId).navigateTo(
             composeNavigator = composeNavigator,
             navOptions = getReturnToScreenNavOptions<TrainingNavigation.TrainingDetail>(),
         )
     }
 
-    fun onToggleComparison(order: Int) {
+    override fun onToggleComparison(order: Int) {
         changeState {
-            val expandedOrders = if (order in expandedComparisonOrders) {
-                expandedComparisonOrders - order
-            } else {
-                expandedComparisonOrders + order
-            }
-            copy(expandedComparisonOrders = expandedOrders)
+            copy(
+                expandedComparisonOrders = if (order in expandedComparisonOrders) {
+                    expandedComparisonOrders - order
+                } else {
+                    expandedComparisonOrders + order
+                }
+            )
         }
     }
 
-    fun onClearComparison() {
-        comparisonSelectionStore.clear(trainingId)
+    override fun onClearComparison() {
+        comparisonSelectionStore.clear()
     }
 
     override fun onCleared() {
         isClosing = true
-        comparisonSelectionStore.clear(trainingId)
+        onClearComparison()
         super.onCleared()
     }
 

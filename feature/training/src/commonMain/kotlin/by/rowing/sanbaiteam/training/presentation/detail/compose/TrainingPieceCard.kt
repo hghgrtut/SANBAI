@@ -22,10 +22,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
+import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.formatTenths
-import by.rowing.sanbaiteam.training.data.comparison.ComparisonMetric
-import by.rowing.sanbaiteam.training.data.comparison.ComparisonTrend
-import by.rowing.sanbaiteam.training.data.comparison.MetricComparison
+import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
+import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
+import by.rowing.sanbaiteam.training.data.models.comparison.MetricComparison
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_detail_avg_heart_rate_label
@@ -89,12 +90,18 @@ internal fun TrainingPieceCard(
             modifier = Modifier.padding(top = Spacing.XS),
             verticalArrangement = Arrangement.spacedBy(Spacing._2XS)
         ) {
-            PieceMetricRows(piece = piece, expanded = expanded)
+            PieceMetricRows(
+                piece = piece,
+                expanded = expanded
+            )
         }
         if (comparison != null) {
             TextButton(
                 onClick = onToggleComparison,
-                contentPadding = PaddingValues(horizontal = 0.dp, vertical = Spacing.XS)
+                contentPadding = PaddingValues(
+                    horizontal = 0.dp,
+                    vertical = Spacing.XS
+                )
             ) {
                 Text(
                     text = stringResource(
@@ -118,10 +125,26 @@ private fun PieceMetricRows(
     expanded: Boolean,
 ) {
     val metrics = piece.comparison?.metrics.orEmpty()
-    DistanceMetricRow(piece = piece, metrics = metrics, expanded = expanded)
-    TimeMetricRow(piece = piece, metrics = metrics, expanded = expanded)
-    PaceMetricRow(piece = piece, metrics = metrics, expanded = expanded)
-    StrokeRateMetricRow(piece = piece, metrics = metrics, expanded = expanded)
+    DistanceMetricRow(
+        piece = piece,
+        metrics = metrics,
+        expanded = expanded
+    )
+    TimeMetricRow(
+        piece = piece,
+        metrics = metrics,
+        expanded = expanded
+    )
+    PaceMetricRow(
+        piece = piece,
+        metrics = metrics,
+        expanded = expanded
+    )
+    StrokeRateMetricRow(
+        piece = piece,
+        metrics = metrics,
+        expanded = expanded
+    )
     HeartRateMetricRow(
         label = stringResource(Res.string.training_detail_avg_heart_rate_label),
         baseValue = piece.avgHeartRate,
@@ -140,8 +163,16 @@ private fun PieceMetricRows(
         comparison = metrics[ComparisonMetric.RECOVERY_HEART_RATE],
         expanded = expanded
     )
-    LactateMetricRow(piece = piece, metrics = metrics, expanded = expanded)
-    PercentOfPbMetricRow(piece = piece, metrics = metrics, expanded = expanded)
+    LactateMetricRow(
+        piece = piece,
+        metrics = metrics,
+        expanded = expanded
+    )
+    PercentOfPbMetricRow(
+        piece = piece,
+        metrics = metrics,
+        expanded = expanded
+    )
 }
 
 @Composable
@@ -178,7 +209,7 @@ private fun TimeMetricRow(
     TrainingMetricRow(
         label = stringResource(Res.string.training_detail_time_label),
         baseValue = piece.timeFormatted,
-        averageValue = comparison?.let { formatDurationValue(it.average) },
+        averageValue = comparison?.let { RowingTimeFormat.formatDuration(it.average.roundToLong()) },
         deltaValue = comparison?.delta?.let {
             stringResource(
                 Res.string.training_detail_delta_seconds,
@@ -203,7 +234,7 @@ private fun PaceMetricRow(
         averageValue = comparison?.let {
             stringResource(
                 Res.string.training_detail_pace_average,
-                formatDurationValue(it.average)
+                RowingTimeFormat.formatDuration(it.average.roundToLong())
             )
         },
         deltaValue = comparison?.delta?.let {
@@ -252,7 +283,7 @@ private fun HeartRateMetricRow(
     TrainingMetricRow(
         label = label,
         baseValue = baseValue?.toString() ?: MISSING_VALUE,
-        averageValue = comparison?.let { it.average.roundToInt().toString() },
+        averageValue = comparison?.average?.roundToInt()?.toString(),
         deltaValue = comparison?.delta?.let { formatSignedInt(it.roundToInt()) },
         trend = comparison?.trend ?: ComparisonTrend.NEUTRAL,
         compare = expanded
@@ -359,9 +390,8 @@ private fun comparisonTrendColor(trend: ComparisonTrend): Color = when (trend) {
 }
 
 @Composable
-private fun comparisonCaption(count: Int): String =
-    if (count == 1) {
-        stringResource(Res.string.training_detail_compare_with_training)
-    } else {
-        pluralStringResource(Res.plurals.training_detail_compare_average, count, count)
-    }
+private fun comparisonCaption(count: Int): String = if (count == 1) {
+    stringResource(Res.string.training_detail_compare_with_training)
+} else {
+    pluralStringResource(Res.plurals.training_detail_compare_average, count, count)
+}

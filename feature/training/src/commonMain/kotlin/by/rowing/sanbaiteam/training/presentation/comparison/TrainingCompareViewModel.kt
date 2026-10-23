@@ -12,22 +12,19 @@ internal class TrainingCompareViewModel(
     private val composeNavigator: ComposeNavigator,
     private val comparisonSelectionStore: TrainingComparisonSelectionStore,
     private val trainingId: Long,
-) : ComposeBaseViewModel<TrainingCompareState>(
-    initialState = TrainingCompareState()
-) {
+) : ComposeBaseViewModel<TrainingCompareState>(initialState = TrainingCompareState()) {
 
     init {
         viewModelScope.launch {
             val candidates = repository.getComparisonCandidates(trainingId)
-            val availableIds = candidates.items.map { it.trainingId }.toSet()
-            val storedSelection = comparisonSelectionStore.selection.value
-                .comparedTrainingIdsFor(trainingId)
+            val availableIds = candidates.map { it.trainingId }.toSet()
+            val storedSelection = comparisonSelectionStore.selection.value?.comparedTrainingIdsFor(trainingId).orEmpty()
             val selectedIds = storedSelection.intersect(availableIds)
 
             changeState {
                 TrainingCompareState(
-                    typeResId = candidates.typeResId,
-                    items = candidates.items,
+                    typeResId = candidates.firstOrNull()?.trainingTypeResId,
+                    items = candidates,
                     selectedIds = selectedIds,
                     hasAppliedComparison = storedSelection.isNotEmpty(),
                     isLoading = false,
@@ -38,12 +35,13 @@ internal class TrainingCompareViewModel(
 
     fun onToggleSelection(selectedTrainingId: Long) {
         changeState {
-            val selectedIds = if (selectedTrainingId in selectedIds) {
-                selectedIds - selectedTrainingId
-            } else {
-                selectedIds + selectedTrainingId
-            }
-            copy(selectedIds = selectedIds)
+            copy(
+                selectedIds = if (selectedTrainingId in selectedIds) {
+                    selectedIds - selectedTrainingId
+                } else {
+                    selectedIds + selectedTrainingId
+                }
+            )
         }
     }
 
@@ -57,7 +55,7 @@ internal class TrainingCompareViewModel(
     }
 
     fun onReset() {
-        comparisonSelectionStore.clear(trainingId)
+        comparisonSelectionStore.clear()
         composeNavigator.navigateBack()
     }
 
