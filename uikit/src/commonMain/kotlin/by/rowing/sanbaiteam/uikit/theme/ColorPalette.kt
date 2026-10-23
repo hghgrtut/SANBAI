@@ -24,6 +24,7 @@ object ColorPalette {
     val Yellow50New = Color(color = 0xFFFFEA00)
     val Yellow50 = Color(color = 0xFFF6F32E)
     val Green50 = Color(color = 0xFF25DE21)
+    val Green30 = Color(color = 0xFF1B7F1B)
     val Blue95 = Color(color = 0xFFEBF4FF)
     val Blue60 = Color(color = 0xFF3393FF)
     val Blue50 = Color(color = 0xFF0078FF)

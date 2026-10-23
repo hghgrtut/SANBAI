@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.presentation.detail.compose
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,41 +9,41 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.training.presentation.detail.TrainingDetailViewModel
-import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailState
 import by.rowing.sanbaiteam.training.resources.Res
+import by.rowing.sanbaiteam.training.resources.training_detail_compare_action
+import by.rowing.sanbaiteam.training.resources.training_detail_compare_clear
+import by.rowing.sanbaiteam.training.resources.training_detail_compare_count
 import by.rowing.sanbaiteam.training.resources.training_detail_crew_header
-import by.rowing.sanbaiteam.training.resources.training_detail_distance
-import by.rowing.sanbaiteam.training.resources.training_detail_heart_rate
-import by.rowing.sanbaiteam.training.resources.training_detail_lactate
 import by.rowing.sanbaiteam.training.resources.training_detail_not_found
-import by.rowing.sanbaiteam.training.resources.training_detail_percent_of_pb
-import by.rowing.sanbaiteam.training.resources.training_detail_piece_number
-import by.rowing.sanbaiteam.training.resources.training_detail_stroke_rate
 import by.rowing.sanbaiteam.training.resources.training_detail_title
 import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.EmptyState
-import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.component.Skeleton
+import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-
-private const val MISSING_VALUE = "—"
 
 private val SKELETON_CAPTION_HEIGHT = 16.dp
 private val SKELETON_DATE_HEIGHT = 28.dp
@@ -55,20 +56,41 @@ private const val SKELETON_CARD_COUNT = 3
 internal fun TrainingDetailScreen(viewModel: TrainingDetailViewModel) {
     TrainingDetailContent(
         state = viewModel.state,
-        onBackClick = viewModel::onBackClick
+        onBackClick = viewModel::onBackClick,
+        onCompareClick = viewModel::onCompareClick,
+        onToggleComparison = viewModel::onToggleComparison,
+        onClearComparison = viewModel::onClearComparison,
     )
 }
 
 @Composable
 private fun TrainingDetailContent(
     state: TrainingDetailState,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onCompareClick: () -> Unit,
+    onToggleComparison: (Int) -> Unit,
+    onClearComparison: () -> Unit,
 ) {
     Scaffold(
         topBar = {
-            SimpleTopAppBar(
+            TopAppBar(
                 title = stringResource(Res.string.training_detail_title),
-                onNavIconClick = onBackClick
+                onNavIconClick = onBackClick,
+                actions = {
+                    if (!state.isLoading && !state.notFound) {
+                        IconButton(onClick = onCompareClick) {
+                            Icon(
+                                imageVector = Icons.Default.CompareArrows,
+                                contentDescription = stringResource(Res.string.training_detail_compare_action),
+                                tint = if (state.comparedTrainingIds.isNotEmpty()) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
+                            )
+                        }
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -77,7 +99,10 @@ private fun TrainingDetailContent(
             state.notFound -> TrainingNotFound(paddingValues = paddingValues)
             else -> Training(
                 paddingValues = paddingValues,
-                state = state
+                state = state,
+                onCompareClick = onCompareClick,
+                onToggleComparison = onToggleComparison,
+                onClearComparison = onClearComparison,
             )
         }
     }
@@ -129,7 +154,10 @@ private fun TrainingNotFound(paddingValues: PaddingValues) {
 @Composable
 private fun Training(
     paddingValues: PaddingValues,
-    state: TrainingDetailState
+    state: TrainingDetailState,
+    onCompareClick: () -> Unit,
+    onToggleComparison: (Int) -> Unit,
+    onClearComparison: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -139,16 +167,25 @@ private fun Training(
         verticalArrangement = Arrangement.spacedBy(Spacing.M)
     ) {
         item {
-            Text(
-                modifier = Modifier.padding(bottom = Spacing.XS),
-                text = state.typeResId?.let { stringResource(it) }.orEmpty(),
-                style = TypographyPalette.Body2Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = state.dateFormatted,
-                style = TypographyPaletteSp.H2
-            )
+            Column {
+                Text(
+                    modifier = Modifier.padding(bottom = Spacing.XS),
+                    text = state.typeResId?.let { stringResource(it) }.orEmpty(),
+                    style = TypographyPalette.Body2Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = state.dateFormatted,
+                    style = TypographyPaletteSp.H2
+                )
+                if (state.comparedTrainingIds.isNotEmpty()) {
+                    ComparisonChip(
+                        count = state.comparedTrainingIds.size,
+                        onClick = onCompareClick,
+                        onClear = onClearComparison,
+                    )
+                }
+            }
         }
         item {
             DataCard(
@@ -178,76 +215,59 @@ private fun Training(
                     .fillMaxWidth()
                     .animateItem(),
                 verticalSpacing = 0.dp
-            ) { PieceResultRow(piece = piece) }
+            ) {
+                TrainingPieceCard(
+                    piece = piece,
+                    expanded = piece.order in state.expandedComparisonOrders,
+                    onToggleComparison = { onToggleComparison(piece.order) },
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun PieceResultRow(piece: TrainingDetailPiece) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = Spacing._2XS)
+private fun ComparisonChip(
+    count: Int,
+    onClick: () -> Unit,
+    onClear: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.padding(top = Spacing.S),
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     ) {
-        Text(
-            text = stringResource(Res.string.training_detail_piece_number, piece.order),
-            style = TypographyPalette.Body2Medium
-        )
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(start = Spacing.S, top = Spacing.XS, bottom = Spacing.XS, end = Spacing.XS),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.XS),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = stringResource(Res.string.training_detail_distance, piece.distanceMeters),
-                style = TypographyPaletteSp.Body2Regular
+            Icon(
+                modifier = Modifier.size(16.dp),
+                imageVector = Icons.Default.CompareArrows,
+                contentDescription = null,
             )
             Text(
-                text = piece.timeFormatted,
-                style = TypographyPaletteSp.Body2Regular
-            )
-        }
-        val pieceDataStyle = TypographyPaletteSp.Body2Regular.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = piece.paceFormatted.ifEmpty { MISSING_VALUE },
-                style = pieceDataStyle
-            )
-            Text(
-                text = stringResource(
-                    Res.string.training_detail_stroke_rate,
-                    piece.strokeRateFormatted
+                text = pluralStringResource(
+                    Res.plurals.training_detail_compare_count,
+                    count,
+                    count,
                 ),
-                style = pieceDataStyle
+                style = TypographyPalette.Caption1Medium,
             )
+            IconButton(
+                modifier = Modifier.size(24.dp),
+                onClick = onClear,
+            ) {
+                Icon(
+                    modifier = Modifier.size(16.dp),
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(Res.string.training_detail_compare_clear),
+                )
+            }
         }
-        SpacerXS()
-        Text(
-            text = piece.heartRateText(),
-            style = pieceDataStyle
-        )
-        Text(
-            text = stringResource(
-                Res.string.training_detail_percent_of_pb,
-                piece.percentOfPbFormatted
-            ),
-            style = pieceDataStyle
-        )
     }
 }
-
-@Composable
-private fun TrainingDetailPiece.heartRateText(): String =
-    stringResource(
-        Res.string.training_detail_heart_rate,
-        formatHeartRate(avgHeartRate),
-        formatHeartRate(maxHeartRate),
-        formatHeartRate(recoveryHeartRate)
-    ) + (lactate?.let { lactateValue ->
-        stringResource(Res.string.training_detail_lactate, formatTenths(lactateValue))
-    } ?: "")
-
-private fun formatHeartRate(value: Int?): String = value?.toString() ?: MISSING_VALUE

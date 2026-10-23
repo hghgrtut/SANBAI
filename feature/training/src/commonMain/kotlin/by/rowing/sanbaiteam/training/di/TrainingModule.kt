@@ -5,6 +5,8 @@ import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboardImpl
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingViewModel
+import by.rowing.sanbaiteam.training.presentation.comparison.TrainingCompareViewModel
+import by.rowing.sanbaiteam.training.presentation.comparison.TrainingComparisonSelectionStore
 import by.rowing.sanbaiteam.training.presentation.detail.TrainingDetailViewModel
 import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import org.koin.core.module.dsl.singleOf
@@ -17,10 +19,12 @@ val trainingModule = module {
 
     singleOf(::TrainingRepository)
     singleOf(::TrainingTransferRepository)
+    singleOf(::TrainingComparisonSelectionStore)
     single<TrainingDashboard> { TrainingDashboardImpl(repository = get()) }
 
     viewModelOf(::ListTrainingViewModel)
     viewModelOf(::TrainingDetailViewModel)
+    viewModelOf(::TrainingCompareViewModel)
     viewModel {
         AddTrainingViewModel(
             athleteRepository = get(),
