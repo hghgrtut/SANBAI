@@ -3,6 +3,8 @@ package by.rowing.sanbaiteam.shared
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,6 +15,7 @@ import by.rowing.sanbaiteam.calculator.presentation.navigation.CalculatorNavGrap
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigationEvent
+import by.rowing.sanbaiteam.shared.fileimport.ExternalFileImport
 import by.rowing.sanbaiteam.shared.main.presentation.MainScreen
 import by.rowing.sanbaiteam.shared.main.presentation.MainViewModel
 import by.rowing.sanbaiteam.shared.main.presentation.navigation.MainNavigation
@@ -40,9 +43,12 @@ fun App(importUri: String? = null) {
                 )
             }
         }
-        LaunchedEffect(importUri) {
-            val uri = importUri ?: return@LaunchedEffect
+        val externalImportUri by ExternalFileImport.pendingUri.collectAsState()
+        val effectiveImportUri = externalImportUri ?: importUri
+        LaunchedEffect(effectiveImportUri) {
+            val uri = effectiveImportUri ?: return@LaunchedEffect
             navController.navigate(route = TrainingNavGraphProvider.getAddTrainingRoute(importUri = uri))
+            ExternalFileImport.consume(uri)
         }
 
         CompositionLocalProvider(LocalClickableState provides clickableState) {

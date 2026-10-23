@@ -20,7 +20,7 @@ import org.jetbrains.compose.ui.tooling.preview.PreviewParameterProvider
 
 internal data class ButtonPreviewState(
     val backgroundColor: Color,
-    val buttonColors: ButtonColors,
+    val buttonColors: @Composable () -> ButtonColors,
 )
 
 @Composable
@@ -40,7 +40,7 @@ internal fun ButtonPreviewContent(
                 modifier = Modifier.fillMaxWidth(),
                 text = label,
                 debounceClick = {},
-                buttonColors = state.buttonColors,
+                buttonColors = state.buttonColors(),
                 leadingIcon = { Icon(Res.drawable.ic_check_16) },
                 trailingIcon = { Icon(Res.drawable.ic_close_16) },
                 size = ButtonSize.LARGE,
@@ -49,7 +49,7 @@ internal fun ButtonPreviewContent(
                 Button(
                     text = label,
                     debounceClick = {},
-                    buttonColors = state.buttonColors,
+                    buttonColors = state.buttonColors(),
                     leadingIcon = { Icon(Res.drawable.ic_check_16) },
                     size = size,
                 )
@@ -59,7 +59,7 @@ internal fun ButtonPreviewContent(
                     text = label,
                     debounceClick = {},
                     enabled = false,
-                    buttonColors = state.buttonColors,
+                    buttonColors = state.buttonColors(),
                     leadingIcon = { Icon(Res.drawable.ic_check_16) },
                     size = size,
                 )
@@ -69,7 +69,7 @@ internal fun ButtonPreviewContent(
                     text = label,
                     debounceClick = {},
                     loading = true,
-                    buttonColors = state.buttonColors,
+                    buttonColors = state.buttonColors(),
                     leadingIcon = { Icon(Res.drawable.ic_check_16) },
                     size = size,
                 )
@@ -81,23 +81,23 @@ internal fun ButtonPreviewContent(
 internal class PrimaryButtonPreviewProvider : PreviewParameterProvider<ButtonPreviewState> {
     override val values = sequenceOf(
         ButtonPreviewState(
-            buttonColors = ButtonColors.default,
+            buttonColors = { ButtonColors.default },
             backgroundColor = Color.White,
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.inverse,
+            buttonColors = { ButtonColors.inverse },
             backgroundColor = Color.Black,
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.accent,
+            buttonColors = { ButtonColors.accent },
             backgroundColor = Color.White,
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.brand,
+            buttonColors = { ButtonColors.brand },
             backgroundColor = Color.White,
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.attention,
+            buttonColors = { ButtonColors.attention },
             backgroundColor = Color.White,
         ),
     )
@@ -106,23 +106,23 @@ internal class PrimaryButtonPreviewProvider : PreviewParameterProvider<ButtonPre
 internal class SecondaryButtonPreviewProvider : PreviewParameterProvider<ButtonPreviewState> {
     override val values = sequenceOf(
         ButtonPreviewState(
-            buttonColors = ButtonColors.secondaryDefault,
+            buttonColors = { ButtonColors.secondaryDefault },
             backgroundColor = Color.White
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.secondaryInverse,
+            buttonColors = { ButtonColors.secondaryInverse },
             backgroundColor = Color.Black
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.secondaryAccent,
+            buttonColors = { ButtonColors.secondaryAccent },
             backgroundColor = Color.White
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.secondaryBrand,
+            buttonColors = { ButtonColors.secondaryBrand },
             backgroundColor = Color.Black
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.secondaryAttention,
+            buttonColors = { ButtonColors.secondaryAttention },
             backgroundColor = Color.White
         ),
     )
@@ -131,23 +131,23 @@ internal class SecondaryButtonPreviewProvider : PreviewParameterProvider<ButtonP
 internal class TextButtonPreviewProvider : PreviewParameterProvider<ButtonPreviewState> {
     override val values = sequenceOf(
         ButtonPreviewState(
-            buttonColors = ButtonColors.textDefault,
+            buttonColors = { ButtonColors.textDefault },
             backgroundColor = Color.White
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.textInverse,
+            buttonColors = { ButtonColors.textInverse },
             backgroundColor = Color.Black
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.textAccent,
+            buttonColors = { ButtonColors.textAccent },
             backgroundColor = Color.White
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.textBrand,
+            buttonColors = { ButtonColors.textBrand },
             backgroundColor = Color.Black
         ),
         ButtonPreviewState(
-            buttonColors = ButtonColors.textAttention,
+            buttonColors = { ButtonColors.textAttention },
             backgroundColor = Color.White
         ),
     )

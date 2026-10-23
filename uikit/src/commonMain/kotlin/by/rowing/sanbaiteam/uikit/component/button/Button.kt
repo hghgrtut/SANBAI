@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -262,6 +263,7 @@ private fun ProvideContentColor(
 }
 
 private val ICON_SIZE = 24.dp
+private const val DISABLED_TEXT_ALPHA = 0.38f
 
 @AllowDetektPublic
 enum class ButtonSize(
@@ -344,9 +346,10 @@ constructor(
             throbberStyle = throbberStyle,
         )
 
+        @Composable
         fun text(
-            enabledText: Color = ColorPalette.Grey20,
-            disabledText: Color = ColorPalette.Grey60,
+            enabledText: Color = MaterialTheme.colorScheme.onSurface,
+            disabledText: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_TEXT_ALPHA),
             throbberStyle: Throbber.Style = Throbber.Style.GREY,
         ) = ButtonColors(
             enabledText = enabledText,
@@ -418,26 +421,32 @@ constructor(
             disabledText = ColorPalette.Grey60,
         )
 
-        val textDefault = text(
-            enabledText = ColorPalette.Grey20,
-            disabledText = ColorPalette.Grey60,
-        )
-        val textInverse = text(
-            enabledText = ColorPalette.White,
-            disabledText = ColorPalette.Grey40,
-        )
-        val textAccent = text(
-            enabledText = ColorPalette.Blue60,
-            disabledText = ColorPalette.Grey60,
-        )
-        val textBrand = text(
-            enabledText = ColorPalette.Yellow50New,
-            disabledText = ColorPalette.Grey40,
-        )
-        val textAttention = text(
-            enabledText = ColorPalette.Red50,
-            disabledText = ColorPalette.Grey60,
-        )
+        val textDefault: ButtonColors
+            @Composable get() = text()
+
+        val textInverse: ButtonColors
+            @Composable get() = text(
+                enabledText = ColorPalette.White,
+                disabledText = ColorPalette.Grey40,
+            )
+
+        val textAccent: ButtonColors
+            @Composable get() = text(
+                enabledText = ColorPalette.Blue60,
+                disabledText = ColorPalette.Grey60,
+            )
+
+        val textBrand: ButtonColors
+            @Composable get() = text(
+                enabledText = ColorPalette.Yellow50New,
+                disabledText = ColorPalette.Grey40,
+            )
+
+        val textAttention: ButtonColors
+            @Composable get() = text(
+                enabledText = ColorPalette.Red50,
+                disabledText = ColorPalette.Grey60,
+            )
     }
 }
 
