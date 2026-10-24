@@ -49,12 +49,5 @@ object PersonalBestPercent {
         return ((pace + 50) / 100) * 100
     }
 
-    fun format(percent: Double?): String =
-        percent?.let { "${formatTenths(it)}%" } ?: "—"
-
-    fun average(percents: Collection<Double>): Double? {
-        if (percents.isEmpty()) return null
-        val avg = percents.sum() / percents.size
-        return (avg * 10).roundToInt() / 10.0
-    }
+    fun format(percent: Double?): String = percent?.let { "${formatTenths(it)}%" } ?: "—"
 }

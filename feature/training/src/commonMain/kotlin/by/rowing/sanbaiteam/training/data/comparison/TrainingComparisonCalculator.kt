@@ -1,6 +1,7 @@
 package by.rowing.sanbaiteam.training.data.comparison
 
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
+import by.rowing.sanbaiteam.core.util.roundToTenths
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparablePiece
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
@@ -16,7 +17,6 @@ import kotlin.math.roundToLong
 internal object TrainingComparisonCalculator {
 
     private const val MILLIS_PER_TENTH = 100.0
-    private const val TENTHS_IN_ONE = 10.0
 
     fun compare(
         base: ComparablePiece,
@@ -117,32 +117,16 @@ internal object TrainingComparisonCalculator {
         round: (Double) -> Double = { it },
     ) {
         if (values.isEmpty()) return
-        val average = values.map { (it as Number).toDouble() }.average()
-        metrics[metric] = comparison(
-            average = round(average),
-            base = base?.let { (it as Number).toDouble() },
-            higherIsBetter = higherIsBetter,
-        )
-    }
-
-    private fun comparison(
-        average: Double,
-        base: Double?,
-        higherIsBetter: Boolean?,
-    ): MetricComparison {
-        val delta = base?.let { it - average }
-        val trend = when {
-            delta == null || delta == 0.0 || higherIsBetter == null -> ComparisonTrend.NEUTRAL
-            higherIsBetter -> if (delta > 0) ComparisonTrend.BETTER else ComparisonTrend.WORSE
-            else -> if (delta < 0) ComparisonTrend.BETTER else ComparisonTrend.WORSE
-        }
-        return MetricComparison(
+        val average = round(values.map { (it as Number).toDouble() }.average())
+        val delta = base?.let { (it as Number).toDouble() }?.let { it - average }
+        metrics[metric] = MetricComparison(
             average = average,
             delta = delta,
-            trend = trend,
+            trend = when {
+                delta == null || delta == 0.0 || higherIsBetter == null -> ComparisonTrend.NEUTRAL
+                higherIsBetter -> if (delta > 0) ComparisonTrend.BETTER else ComparisonTrend.WORSE
+                else -> if (delta < 0) ComparisonTrend.BETTER else ComparisonTrend.WORSE
+            },
         )
     }
-
-    private fun Double.roundToTenths(): Double =
-        (this * TENTHS_IN_ONE).roundToInt() / TENTHS_IN_ONE
 }

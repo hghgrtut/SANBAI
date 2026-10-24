@@ -1,6 +1,5 @@
 package by.rowing.sanbaiteam.training.presentation.comparison
 
-import by.rowing.sanbaiteam.training.presentation.comparison.models.TrainingComparisonSelection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,9 +10,9 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 internal class TrainingComparisonSelectionStore {
 
-    private val _selection = MutableStateFlow<TrainingComparisonSelection?>(null)
+    private val _selection = MutableStateFlow<Set<Long>?>(null)
 
-    val selection: StateFlow<TrainingComparisonSelection?> = _selection.asStateFlow()
+    val selection: StateFlow<Set<Long>?> = _selection.asStateFlow()
 
     fun select(
         trainingId: Long,
@@ -23,12 +22,6 @@ internal class TrainingComparisonSelectionStore {
             .filterNot { it == trainingId }
             .toSet()
             .takeIf { it.isNotEmpty() }
-            ?.let { comparedTrainingIds ->
-                TrainingComparisonSelection(
-                    trainingId = trainingId,
-                    comparedTrainingIds = comparedTrainingIds
-                )
-            }
     }
 
     fun clear() {

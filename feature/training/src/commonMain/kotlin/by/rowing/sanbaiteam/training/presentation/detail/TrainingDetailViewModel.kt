@@ -28,11 +28,9 @@ internal class TrainingDetailViewModel(
     init {
         viewModelScope.launch {
             comparisonSelectionStore.selection
-                .map { selection -> selection?.comparedTrainingIdsFor(trainingId).orEmpty() }
+                .map { selection -> selection.orEmpty() }
                 .distinctUntilChanged()
-                .collectLatest { comparedTrainingIds ->
-                    load(comparedTrainingIds)
-                }
+                .collectLatest { comparedTrainingIds -> load(comparedTrainingIds = comparedTrainingIds) }
         }
     }
 

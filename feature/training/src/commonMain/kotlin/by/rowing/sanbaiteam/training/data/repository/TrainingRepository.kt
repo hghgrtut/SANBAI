@@ -6,6 +6,7 @@ import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.formatTenths
+import by.rowing.sanbaiteam.core.util.roundToTenths
 import by.rowing.sanbaiteam.training.data.comparison.TrainingComparisonCalculator
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
@@ -100,9 +101,19 @@ internal class TrainingRepository(
         val comparedByOrder = comparedSources
             .flatMap { source ->
                 source.crewPieces.map { piece ->
-                    piece.order to source.toComparablePiece(
-                        piece = piece,
-                        personalBests = personalBests,
+                    piece.order to ComparablePiece(
+                        distanceMeters = piece.distanceMeters,
+                        timeMillis = piece.timeMillis,
+                        strokeRate = piece.strokeRate,
+                        avgHeartRate = piece.avgHeartRate,
+                        maxHeartRate = piece.maxHeartRate,
+                        recoveryHeartRate = piece.recoveryHeartRate,
+                        lactate = piece.lactate,
+                        percentOfPb = personalBestPercent(
+                            piece = piece,
+                            athleteIds = source.athleteIds,
+                            personalBests = personalBests,
+                        ),
                     )
                 }
             }
@@ -205,8 +216,7 @@ internal class TrainingRepository(
         piece: TrainingAthletePieceEntity,
         athleteIds: List<Long>,
         personalBests: Map<Long, AthletePersonalBestEntity>,
-    ): Double? {
-        val crewPercents = athleteIds.mapNotNull { athleteId ->
+    ): Double? = athleteIds.mapNotNull { athleteId ->
             val personalBest = personalBests[athleteId] ?: return@mapNotNull null
             PersonalBestPercent.calculate(
                 pieceDistanceMeters = piece.distanceMeters,
@@ -214,27 +224,7 @@ internal class TrainingRepository(
                 pbDistanceMeters = personalBest.distanceMeters,
                 pbTimeMillis = personalBest.timeMillis,
             )
-        }
-        return PersonalBestPercent.average(crewPercents)
-    }
-
-    private fun ComparedTrainingSource.toComparablePiece(
-        piece: TrainingAthletePieceEntity,
-        personalBests: Map<Long, AthletePersonalBestEntity>,
-    ): ComparablePiece = ComparablePiece(
-        distanceMeters = piece.distanceMeters,
-        timeMillis = piece.timeMillis,
-        strokeRate = piece.strokeRate,
-        avgHeartRate = piece.avgHeartRate,
-        maxHeartRate = piece.maxHeartRate,
-        recoveryHeartRate = piece.recoveryHeartRate,
-        lactate = piece.lactate,
-        percentOfPb = personalBestPercent(
-            piece = piece,
-            athleteIds = athleteIds,
-            personalBests = personalBests,
-        ),
-    )
+    }.average().takeIf { !it.isNaN() }?.roundToTenths()
 
     private fun formatWorkSummary(pieces: List<TrainingAthletePieceEntity>): String {
         if (pieces.isEmpty()) return ""

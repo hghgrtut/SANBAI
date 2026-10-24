@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.athlete.presentation.common.ItemCard
+import by.rowing.sanbaiteam.training.presentation.comparison.TrainingCompareActions
 import by.rowing.sanbaiteam.training.presentation.comparison.TrainingCompareViewModel
 import by.rowing.sanbaiteam.training.presentation.comparison.models.TrainingCompareState
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
@@ -50,33 +51,27 @@ private const val SKELETON_CARD_COUNT = 3
 internal fun TrainingCompareScreen(viewModel: TrainingCompareViewModel) {
     TrainingCompareContent(
         state = viewModel.state,
-        onBack = viewModel::onBack,
-        onToggle = viewModel::onToggleSelection,
-        onConfirm = viewModel::onConfirm,
-        onReset = viewModel::onReset,
+        actions = viewModel,
     )
 }
 
 @Composable
 private fun TrainingCompareContent(
     state: TrainingCompareState,
-    onBack: () -> Unit,
-    onToggle: (Long) -> Unit,
-    onConfirm: () -> Unit,
-    onReset: () -> Unit,
+    actions: TrainingCompareActions,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = stringResource(Res.string.training_compare_title),
-                onNavIconClick = onBack,
+                onNavIconClick = actions::onBack,
             )
         },
         bottomBar = {
             if (!state.isLoading && state.items.isNotEmpty() && state.selectedIds.isNotEmpty()) {
                 CompareBottomBar(
                     selectedCount = state.selectedIds.size,
-                    onConfirm = onConfirm,
+                    onConfirm = actions::onConfirm,
                 )
             }
         }
@@ -91,7 +86,7 @@ private fun TrainingCompareContent(
                 description = stringResource(Res.string.training_compare_empty_description),
                 icon = Icons.AutoMirrored.Filled.CompareArrows,
                 actionText = stringResource(Res.string.training_compare_reset).takeIf { state.hasAppliedComparison },
-                onActionClick = onReset.takeIf { state.hasAppliedComparison }
+                onActionClick = actions::onReset.takeIf { state.hasAppliedComparison }
             )
 
             else -> LazyColumn(
@@ -103,7 +98,7 @@ private fun TrainingCompareContent(
                 item {
                     CompareHeader(
                         state = state,
-                        onReset = onReset,
+                        onReset = actions::onReset,
                     )
                 }
                 items(
@@ -113,7 +108,7 @@ private fun TrainingCompareContent(
                     CompareTrainingItem(
                         item = item,
                         selected = item.trainingId in state.selectedIds,
-                        onToggle = onToggle,
+                        onToggle = actions::onToggleSelection,
                     )
                 }
             }
