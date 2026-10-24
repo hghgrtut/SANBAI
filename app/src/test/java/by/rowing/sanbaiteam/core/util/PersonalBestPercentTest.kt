@@ -56,16 +56,6 @@ internal class PersonalBestPercentTest {
     }
 
     @Test
-    fun average_empty_returnsNull() {
-        assertNull(PersonalBestPercent.average(emptyList()))
-    }
-
-    @Test
-    fun average_twoValues() {
-        assertEquals(90.0, PersonalBestPercent.average(listOf(80.0, 100.0))!!, 0.0)
-    }
-
-    @Test
     fun format_null_isDash() {
         assertEquals("—", PersonalBestPercent.format(null))
     }

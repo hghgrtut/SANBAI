@@ -15,4 +15,7 @@ internal sealed interface TrainingNavigation {
 
     @Serializable
     data class TrainingDetail(val trainingId: Long) : NavigationDestination<Unit>
+
+    @Serializable
+    data class TrainingCompare(val trainingId: Long) : NavigationDestination<Unit>
 }
