@@ -105,7 +105,7 @@ internal object Rp3CsvParser : TrainingImportParser {
             distanceMeters = (last().distanceMeters - distanceBoundary).roundToInt(),
             timeMillis = ((last().timeSeconds - boundaryTime) * MILLIS_PER_SECOND).roundToLong(),
             strokeRate = if (strokeRates.isEmpty()) 0.0 else strokeRates.average(),
-            avgHeartRate = if (heartRates.isEmpty()) null else heartRates.average().roundToInt(),
+            avgHeartRate = heartRates.avg()?.roundToInt(),
             maxHeartRate = heartRates.maxOrNull(),
             recoveryHeartRate = null,
         )

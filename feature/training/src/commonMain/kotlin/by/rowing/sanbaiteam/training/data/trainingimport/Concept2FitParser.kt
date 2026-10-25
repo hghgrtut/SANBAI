@@ -46,8 +46,8 @@ internal object Concept2FitParser : TrainingImportParser {
             TrainingImportInterval(
                 distanceMeters = lap.distanceMeters.roundToInt(),
                 timeMillis = lap.elapsedMillis,
-                strokeRate = summary.cadences.avg()?.toDouble() ?: 0.0,
-                avgHeartRate = summary.heartRates.avg(),
+                strokeRate = summary.cadences.avg() ?: 0.0,
+                avgHeartRate = summary.heartRates.avg()?.roundToInt(),
                 maxHeartRate = summary.heartRates.maxOrNull(),
                 recoveryHeartRate = readRecoveryHeartRate(
                     restLap = laps.getOrNull(index + 1),

@@ -3,10 +3,13 @@ package by.rowing.sanbaiteam.training.data.trainingimport
 import by.rowing.sanbaiteam.training.data.models.FitLap
 import by.rowing.sanbaiteam.training.data.models.FitRecord
 import by.rowing.sanbaiteam.training.data.models.FitWorkout
-import kotlin.math.roundToInt
 
 /** Shared FIT decoding helpers used by every FIT based parser. */
 internal object FitWorkoutReader {
+
+    const val FIT_FILE_NOT_ROWING_ERROR = "FIT file does not contain a rowing workout."
+
+    private const val FIT_FILE_HEADER_ERROR = "File does not contain a FIT header."
 
     fun decode(bytes: ByteArray): FitWorkout {
         if (bytes.size < FIT_HEADER_MIN_SIZE || !bytes.hasFitMagic()) {
@@ -33,9 +36,6 @@ internal object FitWorkoutReader {
             records = fileData.records.toList()
         )
     }
-
-    const val FIT_FILE_HEADER_ERROR = "File does not contain a FIT header."
-    const val FIT_FILE_NOT_ROWING_ERROR = "FIT file does not contain a rowing workout."
 }
 
 internal fun ByteArray.hasFitMagic(): Boolean = size > FIT_HEADER_MAGIC_OFFSET + 3 &&
@@ -56,7 +56,7 @@ internal fun List<FitRecord>.forLap(
     record.timestampMillis >= lap.startMillis && isBeforeEnd
 }
 
-internal fun List<Int>.avg(): Int? = takeIf { it.isNotEmpty() }?.average()?.roundToInt()
+internal fun List<Int>.avg(): Double? = takeIf { it.isNotEmpty() }?.average()
 
 private const val FIT_MAGIC_DOT = '.'.code.toByte()
 private const val FIT_MAGIC_F = 'F'.code.toByte()

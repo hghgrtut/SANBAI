@@ -49,13 +49,7 @@ interface TrainingDao {
         deleteTrainings(trainingIds)
     }
 
-    @Query(
-        """
-        UPDATE $TABLE_TRAINING
-        SET sourceFileRelativePath = :relativePath
-        WHERE id = :trainingId
-        """
-    )
+    @Query("UPDATE $TABLE_TRAINING SET sourceFileRelativePath = :relativePath WHERE id = :trainingId")
     suspend fun updateImportMetadata(
         trainingId: Long,
         relativePath: String?,
