@@ -10,7 +10,7 @@ internal data class TrainingBackup(
     val trainings: List<BackupTraining> = emptyList(),
 ) {
     companion object {
-        const val FORMAT_VERSION = 1
+        const val FORMAT_VERSION = 2
     }
 }
 
@@ -25,9 +25,9 @@ internal data class BackupAthlete(
 internal data class BackupTraining(
     val dateMillis: Long,
     val type: String,
-    val sourceDeviceSerial: String? = null,
-    val sourceSessionName: String? = null,
-    val sourceCsvContent: String? = null,
+    val source: String? = null,
+    val sourceFileBase64: String? = null,
+    val sourceFileExtension: String? = null,
     val pieces: List<BackupPiece> = emptyList(),
 )
 

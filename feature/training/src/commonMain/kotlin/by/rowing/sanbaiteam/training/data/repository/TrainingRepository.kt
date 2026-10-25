@@ -30,14 +30,10 @@ internal class TrainingRepository(
         dateMillis: Long,
         type: TrainingPieceType,
         pieces: List<TrainingAthletePieceEntity>,
-        sourceDeviceSerial: String? = null,
-        sourceSessionName: String? = null,
     ): Long = dao.saveTrainingWithPieces(
         training = TrainingEntity(
             dateMillis = dateMillis,
             type = type,
-            sourceDeviceSerial = sourceDeviceSerial,
-            sourceSessionName = sourceSessionName
         ),
         pieces = pieces
     )
@@ -45,20 +41,16 @@ internal class TrainingRepository(
     suspend fun updateTrainingImportMetadata(
         trainingId: Long,
         relativePath: String?,
-        deviceSerial: String?,
-        sessionName: String?
     ) {
         dao.updateImportMetadata(
             trainingId = trainingId,
             relativePath = relativePath,
-            deviceSerial = deviceSerial,
-            sessionName = sessionName
         )
     }
 
     suspend fun deleteTrainings(trainingIds: List<Long>) = withContext(Dispatchers.Default) {
-        dao.getCsvPathsByIds(trainingIds).forEach { relativePath ->
-            runCatching { importStorage.deleteCsv(relativePath) }
+        dao.getImportPathsByIds(trainingIds).forEach { relativePath ->
+            runCatching { importStorage.deleteImportFile(relativePath) }
         }
         dao.deleteTrainingsWithPieces(trainingIds)
     }

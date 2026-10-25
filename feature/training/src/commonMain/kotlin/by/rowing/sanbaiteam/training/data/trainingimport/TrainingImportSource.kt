@@ -5,16 +5,7 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 internal enum class TrainingImportSource(val storageFolder: String) {
     SPEED_COACH("speedcoach_imports"),
     CONCEPT2_FIT("concept2_imports"),
-    RP3_CSV("rp3_imports");
-
-    companion object {
-
-        fun byCsvContent(csvText: String): TrainingImportSource = when {
-            Concept2LapCsv.isArchive(csvText) -> CONCEPT2_FIT
-            Rp3CsvParser.hasRp3CsvContent(csvText) -> RP3_CSV
-            else -> SPEED_COACH
-        }
-    }
+    RP3_CSV("rp3_imports")
 }
 
 internal fun TrainingImportSource.impliedTrainingType(): TrainingPieceType = when (this) {

@@ -65,7 +65,7 @@ internal class TrainingRepositoryDeleteTest {
                 TrainingEntity(
                     id = id,
                     dateMillis = id,
-                    sourceCsvRelativePath = csvPath,
+                    sourceFileRelativePath = csvPath,
                 )
             }
 
@@ -74,11 +74,11 @@ internal class TrainingRepositoryDeleteTest {
                 TrainingEntity(
                     id = trainingId,
                     dateMillis = trainingId,
-                    sourceCsvRelativePath = csvPath,
+                    sourceFileRelativePath = csvPath,
                 )
             }
 
-        override suspend fun getCsvPathsByIds(trainingIds: List<Long>): List<String> =
+        override suspend fun getImportPathsByIds(trainingIds: List<Long>): List<String> =
             trainingIds.mapNotNull { csvPathsByIds[it] }
 
         override suspend fun deleteTrainingsWithPieces(trainingIds: List<Long>) {
@@ -93,8 +93,6 @@ internal class TrainingRepositoryDeleteTest {
         override suspend fun updateImportMetadata(
             trainingId: Long,
             relativePath: String?,
-            deviceSerial: String?,
-            sessionName: String?,
         ) = Unit
 
         override suspend fun getPiecesForTraining(trainingId: Long): List<TrainingAthletePieceEntity> =

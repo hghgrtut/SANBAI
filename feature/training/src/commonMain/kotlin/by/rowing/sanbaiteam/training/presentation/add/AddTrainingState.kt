@@ -12,11 +12,11 @@ internal data class AddTrainingState(
     val crewAthletes: List<AddCrewAthlete> = listOf(AddCrewAthlete()),
     val pieces: List<AddPieceDraft> = listOf(AddPieceDraft()),
     val validationError: UiText? = null,
-    val pendingRawCsvs: List<String> = emptyList(),
+    val pendingRawFiles: List<ByteArray> = emptyList(),
+    val pendingFileExtension: String? = null,
     val pendingImportSource: TrainingImportSource? = null,
     val trainingType: TrainingPieceType = TrainingPieceType.SINGLE,
     val pendingSourceSerial: String? = null,
-    val pendingSourceSessionName: String? = null,
     val importNotice: UiText? = null,
     val showSaveDialog: Boolean = false
 ) {

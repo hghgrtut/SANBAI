@@ -10,15 +10,13 @@ internal interface TrainingImportParser {
         bytes: ByteArray,
         fileName: String?
     ): ParsedTrainingImport
-
-    fun merge(csvTexts: List<String>): String
 }
 
-internal data class ParsedTrainingImport(
+internal class ParsedTrainingImport(
     val source: TrainingImportSource,
-    val csvText: String,
+    val rawFile: ByteArray,
+    val fileExtension: String,
     val deviceSerial: String?,
-    val sessionName: String?,
     val startTimeMillis: Long?,
     val intervals: List<TrainingImportInterval>,
 )

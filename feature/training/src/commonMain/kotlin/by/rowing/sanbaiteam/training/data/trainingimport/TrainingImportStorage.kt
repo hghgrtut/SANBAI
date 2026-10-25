@@ -2,14 +2,15 @@ package by.rowing.sanbaiteam.training.data.trainingimport
 
 internal interface TrainingImportStorage {
 
-    fun saveCsv(
+    fun saveImportFile(
         trainingId: Long,
         source: TrainingImportSource,
         serial: String?,
-        csvText: String
+        fileExtension: String,
+        bytes: ByteArray
     ): String
 
-    fun readCsv(relativePath: String): String?
+    fun readImportFile(relativePath: String): ByteArray?
 
-    fun deleteCsv(relativePath: String)
+    fun deleteImportFile(relativePath: String)
 }

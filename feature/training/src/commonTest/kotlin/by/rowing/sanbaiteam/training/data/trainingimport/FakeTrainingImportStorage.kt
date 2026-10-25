@@ -2,24 +2,25 @@ package by.rowing.sanbaiteam.training.data.trainingimport
 
 internal class FakeTrainingImportStorage : TrainingImportStorage {
 
-    val savedCsv = mutableMapOf<String, String>()
+    val savedFiles = mutableMapOf<String, ByteArray>()
     val deletedPaths = mutableListOf<String>()
 
-    override fun saveCsv(
+    override fun saveImportFile(
         trainingId: Long,
         source: TrainingImportSource,
         serial: String?,
-        csvText: String
+        fileExtension: String,
+        bytes: ByteArray
     ): String {
-        val relativePath = "${source.storageFolder}/${trainingId}_${serial ?: "unknown"}.csv"
-        savedCsv[relativePath] = csvText
+        val relativePath = "${source.storageFolder}/${trainingId}_${serial ?: "unknown"}.$fileExtension"
+        savedFiles[relativePath] = bytes
         return relativePath
     }
 
-    override fun readCsv(relativePath: String): String? = savedCsv[relativePath]
+    override fun readImportFile(relativePath: String): ByteArray? = savedFiles[relativePath]
 
-    override fun deleteCsv(relativePath: String) {
+    override fun deleteImportFile(relativePath: String) {
         deletedPaths += relativePath
-        savedCsv.remove(relativePath)
+        savedFiles.remove(relativePath)
     }
 }

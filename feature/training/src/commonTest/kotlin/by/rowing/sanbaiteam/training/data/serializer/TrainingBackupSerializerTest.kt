@@ -30,8 +30,8 @@ internal class TrainingBackupSerializerTest {
                 BackupTraining(
                     dateMillis = 100L,
                     type = "SINGLE",
-                    sourceDeviceSerial = "2693559",
-                    sourceSessionName = "Утренняя",
+                    sourceFileBase64 = "AAECAwQ=",
+                    sourceFileExtension = "fit",
                     pieces = listOf(
                         BackupPiece(
                             athleteIndex = 0,

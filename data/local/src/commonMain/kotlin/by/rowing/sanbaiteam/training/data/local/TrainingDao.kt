@@ -34,8 +34,8 @@ interface TrainingDao {
     @Query("SELECT * FROM $TABLE_TRAINING WHERE id = :trainingId")
     suspend fun getTrainingById(trainingId: Long): TrainingEntity?
 
-    @Query("SELECT sourceCsvRelativePath FROM $TABLE_TRAINING WHERE id IN (:trainingIds) AND sourceCsvRelativePath IS NOT NULL")
-    suspend fun getCsvPathsByIds(trainingIds: List<Long>): List<String>
+    @Query("SELECT sourceFileRelativePath FROM $TABLE_TRAINING WHERE id IN (:trainingIds) AND sourceFileRelativePath IS NOT NULL")
+    suspend fun getImportPathsByIds(trainingIds: List<Long>): List<String>
 
     @Query("DELETE FROM $TABLE_TRAINING_ATHLETE_PIECE WHERE trainingId IN (:trainingIds)")
     suspend fun deletePiecesForTrainings(trainingIds: List<Long>)
@@ -52,17 +52,13 @@ interface TrainingDao {
     @Query(
         """
         UPDATE $TABLE_TRAINING
-        SET sourceCsvRelativePath = :relativePath,
-            sourceDeviceSerial = :deviceSerial,
-            sourceSessionName = :sessionName
+        SET sourceFileRelativePath = :relativePath
         WHERE id = :trainingId
         """
     )
     suspend fun updateImportMetadata(
         trainingId: Long,
         relativePath: String?,
-        deviceSerial: String?,
-        sessionName: String?,
     )
 
     @Query(

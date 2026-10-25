@@ -172,7 +172,7 @@ internal class TrainingRepositoryComparisonTest {
         override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
             trainings.firstOrNull { it.id == trainingId }
 
-        override suspend fun getCsvPathsByIds(trainingIds: List<Long>): List<String> = emptyList()
+        override suspend fun getImportPathsByIds(trainingIds: List<Long>): List<String> = emptyList()
 
         override suspend fun deletePiecesForTrainings(trainingIds: List<Long>) = Unit
 
@@ -181,8 +181,6 @@ internal class TrainingRepositoryComparisonTest {
         override suspend fun updateImportMetadata(
             trainingId: Long,
             relativePath: String?,
-            deviceSerial: String?,
-            sessionName: String?,
         ) = Unit
 
         override suspend fun getPiecesForTraining(trainingId: Long): List<TrainingAthletePieceEntity> =

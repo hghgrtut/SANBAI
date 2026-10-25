@@ -5,28 +5,29 @@ import java.io.File
 
 internal class AndroidTrainingImportStorage(private val context: Context) : TrainingImportStorage {
 
-    override fun saveCsv(
+    override fun saveImportFile(
         trainingId: Long,
         source: TrainingImportSource,
         serial: String?,
-        csvText: String
+        fileExtension: String,
+        bytes: ByteArray
     ): String {
         val dir = File(context.filesDir, source.storageFolder)
         if (!dir.exists()) {
             dir.mkdirs()
         }
-        val fileName = "${trainingId}_${serial?.ifBlank { null } ?: "unknown"}_${System.currentTimeMillis()}.csv"
+        val safeExtension = fileExtension.trimStart('.').ifBlank { FIT_FILE_EXTENSION }
+        val deviceSerial = serial?.ifBlank { null } ?: "unknown"
+        val fileName = "${trainingId}_${deviceSerial}_${System.currentTimeMillis()}.$safeExtension"
         val file = File(dir, fileName)
-        file.writeText(csvText)
+        file.writeBytes(bytes)
         return "${source.storageFolder}/$fileName"
     }
 
-    override fun readCsv(relativePath: String): String? {
-        val file = File(context.filesDir, relativePath)
-        return if (file.exists()) file.readText() else null
-    }
+    override fun readImportFile(relativePath: String): ByteArray? =
+        File(context.filesDir, relativePath).takeIf { file -> file.exists() }?.readBytes()
 
-    override fun deleteCsv(relativePath: String) {
+    override fun deleteImportFile(relativePath: String) {
         File(context.filesDir, relativePath).delete()
     }
 }
