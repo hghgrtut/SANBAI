@@ -11,8 +11,10 @@ import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
+import by.rowing.sanbaiteam.training.data.trainingimport.FIT_FILE_EXTENSION
 import by.rowing.sanbaiteam.training.data.trainingimport.ParsedTrainingImport
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingFileReader
+import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportContainer
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportParsers
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
@@ -258,23 +260,25 @@ internal class AddTrainingViewModel(
                 dateMillis = state.dateMillis,
                 type = state.trainingType,
                 pieces = piecesToSave,
-                sourceDeviceSerial = state.pendingSourceSerial,
-                sourceSessionName = state.pendingSourceSessionName,
             )
-            if (state.pendingRawCsvs.isNotEmpty()) {
+            if (state.pendingRawFiles.isNotEmpty()) {
                 val importSource = state.pendingImportSource ?: TrainingImportSource.SPEED_COACH
-                val mergedCsv = TrainingImportParsers.bySource(importSource).merge(state.pendingRawCsvs)
-                val relativePath = trainingImportStorage.saveCsv(
+                val packed = TrainingImportContainer.pack(state.pendingRawFiles)
+                val fileExtension = if (state.pendingRawFiles.size == 1) {
+                    state.pendingFileExtension ?: FIT_FILE_EXTENSION
+                } else {
+                    TrainingImportContainer.EXTENSION
+                }
+                val relativePath = trainingImportStorage.saveImportFile(
                     trainingId = trainingId,
                     source = importSource,
                     serial = state.pendingSourceSerial,
-                    csvText = mergedCsv
+                    fileExtension = fileExtension,
+                    bytes = packed
                 )
                 trainingRepository.updateTrainingImportMetadata(
                     trainingId = trainingId,
                     relativePath = relativePath,
-                    deviceSerial = state.pendingSourceSerial,
-                    sessionName = state.pendingSourceSessionName
                 )
             }
             withContext(Dispatchers.Main.immediate) { composeNavigator.navigateBack() }
@@ -310,8 +314,8 @@ internal class AddTrainingViewModel(
             val importSource = sources.filterNotNull().distinct().singleOrNull()
             val error = when {
                 fileContents.size < handles.size -> UiText.of(Res.string.add_training_import_read_error)
-                importSource == null -> UiText.of(Res.string.add_training_import_unsupported_format)
-                sources.size > 1 -> UiText.of(Res.string.add_training_import_mixed_sources)
+                sources.any { it == null } -> UiText.of(Res.string.add_training_import_unsupported_format)
+                importSource == null -> UiText.of(Res.string.add_training_import_mixed_sources)
                 else -> null
             }
             if (error != null) {
@@ -320,14 +324,18 @@ internal class AddTrainingViewModel(
             }
             val parser = TrainingImportParsers.bySource(checkNotNull(importSource))
             fileContents.forEach { file ->
-                runCatching {
-                    parser.parse(
-                        bytes = file.bytes,
-                        fileName = file.fileName
-                    )
-                }.getOrNull()?.let { parsed -> applyParsedImport(parsed) } ?: run {
-                    changeState { copy(importNotice = UiText.of(Res.string.add_training_import_parse_error)) }
-                    return@launch
+                TrainingImportContainer.unpackOrSingle(file.bytes).forEach { part ->
+                    runCatching {
+                        parser.parse(
+                            bytes = part,
+                            fileName = file.fileName
+                        )
+                    }.getOrNull()?.let { parsed -> applyParsedImport(parsed) } ?: run {
+                        changeState {
+                            copy(importNotice = UiText.of(Res.string.add_training_import_parse_error))
+                        }
+                        return@launch
+                    }
                 }
             }
         }
@@ -357,7 +365,7 @@ internal class AddTrainingViewModel(
                 strokeRateText = formatTenths(value = interval.strokeRate),
             )
         }
-        val isFirstImport = state.pendingRawCsvs.isEmpty()
+        val isFirstImport = state.pendingRawFiles.isEmpty()
 
         if (isFirstImport) {
             val parsedAthleteId = parsed.deviceSerial
@@ -371,10 +379,10 @@ internal class AddTrainingViewModel(
                     crewAthletes = listOf(AddCrewAthlete(rowerId = parsedAthleteId)),
                     pieces = newPieces.ifEmpty { listOf(AddPieceDraft()) },
                     trainingType = parsed.source.impliedTrainingType(),
-                    pendingRawCsvs = listOf(parsed.csvText),
+                    pendingRawFiles = listOf(parsed.rawFile),
+                    pendingFileExtension = parsed.fileExtension,
                     pendingImportSource = parsed.source,
                     pendingSourceSerial = parsed.deviceSerial,
-                    pendingSourceSessionName = parsed.sessionName,
                     importNotice = buildImportNotice(
                         fileCount = 1,
                         pieceCount = newPieces.size,
@@ -385,12 +393,12 @@ internal class AddTrainingViewModel(
                 )
             }
         } else {
-            val fileCount = state.pendingRawCsvs.size + 1
+            val fileCount = state.pendingRawFiles.size + 1
             val pieceCount = state.pieces.size + newPieces.size
             changeState {
                 copy(
                     pieces = pieces + newPieces,
-                    pendingRawCsvs = pendingRawCsvs + parsed.csvText,
+                    pendingRawFiles = pendingRawFiles + parsed.rawFile,
                     importNotice = buildImportNotice(
                         fileCount = fileCount,
                         pieceCount = pieceCount,

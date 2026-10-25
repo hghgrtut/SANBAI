@@ -7,10 +7,12 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
 import by.rowing.sanbaiteam.training.data.models.TrainingTransferResult
+import by.rowing.sanbaiteam.training.data.trainingimport.FIT_FILE_EXTENSION
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.io.encoding.Base64
 
 internal class TrainingTransferRepository(
     private val trainingDao: TrainingDao,
@@ -46,9 +48,13 @@ internal class TrainingTransferRepository(
                 BackupTraining(
                     dateMillis = training.dateMillis,
                     type = training.type.name,
-                    sourceDeviceSerial = training.sourceDeviceSerial,
-                    sourceSessionName = training.sourceSessionName,
-                    sourceCsvContent = training.sourceCsvRelativePath?.let { importStorage.readCsv(it) },
+                    source = training.sourceFileRelativePath?.let(::sourceByPath)?.name,
+                    sourceFileBase64 = training.sourceFileRelativePath
+                        ?.let { importStorage.readImportFile(it) }
+                        ?.let { Base64.encode(it) },
+                    sourceFileExtension = training.sourceFileRelativePath
+                        ?.substringAfterLast('.', "")
+                        ?.takeIf { it.isNotBlank() },
                     pieces = pieces.map { piece ->
                         BackupPiece(
                             athleteIndex = athleteIndexInExportData.getValue(piece.athleteId),
@@ -122,24 +128,17 @@ internal class TrainingTransferRepository(
                     dateMillis = training.dateMillis,
                     type = runCatching { TrainingPieceType.valueOf(training.type) }
                         .getOrDefault(TrainingPieceType.SINGLE),
-                    sourceDeviceSerial = training.sourceDeviceSerial,
-                    sourceSessionName = training.sourceSessionName,
                 ),
                 pieces = pieces
             )
 
-            if (training.sourceCsvContent != null) {
-                val csvRelativePath = importStorage.saveCsv(
-                    trainingId = newTrainingId,
-                    source = TrainingImportSource.byCsvContent(training.sourceCsvContent),
-                    serial = training.sourceDeviceSerial,
-                    csvText = training.sourceCsvContent,
-                )
+            restoreImportFile(
+                trainingId = newTrainingId,
+                training = training
+            )?.let { relativePath ->
                 trainingDao.updateImportMetadata(
                     trainingId = newTrainingId,
-                    relativePath = csvRelativePath,
-                    deviceSerial = training.sourceDeviceSerial,
-                    sessionName = training.sourceSessionName,
+                    relativePath = relativePath,
                 )
             }
             trainingsImported++
@@ -150,4 +149,27 @@ internal class TrainingTransferRepository(
             athletesCreated = athletesCreated,
         )
     }
+
+    private fun restoreImportFile(
+        trainingId: Long,
+        training: BackupTraining,
+    ): String? = importStorage.saveImportFile(
+        bytes = Base64.decode(source = training.sourceFileBase64 ?: return null),
+        trainingId = trainingId,
+        source = sourceOf(training),
+        serial = null,
+        fileExtension = training.sourceFileExtension?.takeIf { it.isNotBlank() } ?: FIT_FILE_EXTENSION,
+    )
+
+    private fun sourceOf(training: BackupTraining): TrainingImportSource = training.source?.let { name ->
+        runCatching { TrainingImportSource.valueOf(name) }.getOrNull()
+    } ?: when (runCatching { TrainingPieceType.valueOf(training.type) }.getOrNull()) {
+        TrainingPieceType.CONCEPT_ROW_ERG -> TrainingImportSource.CONCEPT2_FIT
+        TrainingPieceType.RP_3 -> TrainingImportSource.RP3_CSV
+        else -> TrainingImportSource.SPEED_COACH
+    }
+
+    private fun sourceByPath(relativePath: String): TrainingImportSource =
+        TrainingImportSource.entries.firstOrNull { relativePath.startsWith(it.storageFolder) }
+            ?: TrainingImportSource.SPEED_COACH
 }

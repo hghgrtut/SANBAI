@@ -37,10 +37,8 @@ internal object IosTrainingFileManager {
             ?: error("Cannot resolve path: $relativePath")
     }
 
-    fun readText(relativePath: String): String? =
-        NSData.dataWithContentsOfURL(url = NSURL.fileURLWithPath(path = resolvePath(relativePath)))
-            ?.toByteArray()
-            ?.decodeToString()
+    fun readBytes(relativePath: String): ByteArray? =
+        NSData.dataWithContentsOfURL(url = NSURL.fileURLWithPath(path = resolvePath(relativePath)))?.toByteArray()
 
     fun deleteFile(relativePath: String) {
         NSFileManager.defaultManager.removeItemAtPath(
@@ -50,11 +48,21 @@ internal object IosTrainingFileManager {
     }
 
     /** Бросает [IllegalStateException], если запись не удалась (как IOException на Android). */
-    fun writeText(
+    fun writeBytes(
         relativePath: String,
-        text: String
+        bytes: ByteArray
     ) {
-        if (!writeFile(relativePath, text.encodeToByteArray().toNSData())) {
+        NSFileManager.defaultManager.createDirectoryAtURL(
+            url = NSURL.fileURLWithPath(resolvePath(relativePath.substringBeforeLast('/', ""))),
+            withIntermediateDirectories = true,
+            attributes = null,
+            error = null,
+        )
+        val isSuccessfulWrite = bytes.toNSData().writeToURL(
+            url = NSURL.fileURLWithPath(resolvePath(relativePath = relativePath)),
+            atomically = true
+        )
+        if (!isSuccessfulWrite) {
             error("Cannot write file: $relativePath")
         }
     }
@@ -77,22 +85,6 @@ internal object IosTrainingFileManager {
 
     /** Текущее время в мс (wall clock, как System.currentTimeMillis() на Android). */
     fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970() * 1000.0).toLong()
-
-    private fun writeFile(
-        relativePath: String,
-        data: NSData
-    ): Boolean {
-        NSFileManager.defaultManager.createDirectoryAtURL(
-            url = NSURL.fileURLWithPath(
-                resolvePath(relativePath.substringBeforeLast('/', ""))
-            ),
-            withIntermediateDirectories = true,
-            attributes = null,
-            error = null,
-        )
-        val url = NSURL.fileURLWithPath(resolvePath(relativePath = relativePath))
-        return data.writeToURL(url, atomically = true)
-    }
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)

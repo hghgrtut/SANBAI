@@ -26,8 +26,8 @@ internal class TrainingBackupSerializerTest {
                 BackupTraining(
                     dateMillis = 500L,
                     type = TrainingPieceType.SINGLE.name,
-                    sourceDeviceSerial = "2693559",
-                    sourceSessionName = "Утренняя",
+                    sourceFileBase64 = "AAECAwQ=",
+                    sourceFileExtension = "fit",
                     pieces = listOf(
                         BackupPiece(
                             athleteIndex = 0,
@@ -77,8 +77,7 @@ internal class TrainingBackupSerializerTest {
 
         val decoded = TrainingBackupSerializer.decode(json)
 
-        assertNull(decoded.trainings[0].sourceDeviceSerial)
-        assertNull(decoded.trainings[0].sourceSessionName)
+        assertNull(decoded.trainings[0].sourceFileBase64)
         assertNull(decoded.trainings[0].pieces[0].avgHeartRate)
         assertNull(decoded.trainings[0].pieces[0].maxHeartRate)
         assertNull(decoded.trainings[0].pieces[0].recoveryHeartRate)
@@ -89,7 +88,7 @@ internal class TrainingBackupSerializerTest {
     fun decode_ignoreUnknownKeys() {
         val json = """
             {
-              "formatVersion": 1,
+              "formatVersion": 2,
               "exportedAtMillis": 1,
               "unknownField": true,
               "athletes": [],

@@ -19,7 +19,6 @@ internal class Rp3CsvParserTest {
 
         assertEquals(TrainingImportSource.RP3_CSV, import.source)
         assertNull(import.deviceSerial)
-        assertNull(import.sessionName)
         assertEquals(2, import.intervals.size)
 
         val first = import.intervals[0]
@@ -43,7 +42,7 @@ internal class Rp3CsvParserTest {
     fun parse_keepsRawCsvTextUntouched() {
         val csv = rp3Csv()
 
-        assertEquals(csv, Rp3CsvParser.parse(csv.encodeToByteArray(), null).csvText)
+        assertTrue(csv.encodeToByteArray().contentEquals(Rp3CsvParser.parse(csv.encodeToByteArray(), null).rawFile))
     }
 
     @Test
@@ -77,57 +76,11 @@ internal class Rp3CsvParserTest {
     }
 
     @Test
-    fun byCsvContent_rp3Archive_returnsRp3Source() {
-        assertEquals(TrainingImportSource.RP3_CSV, TrainingImportSource.byCsvContent(rp3Csv()))
-    }
-
-    @Test
     fun parse_unsupportedContent_throws() {
         assertFailsWith<IllegalArgumentException> {
             Rp3CsvParser.parse("some,other,csv".encodeToByteArray(), null)
         }
     }
-
-    @Test
-    fun merge_singleCsv_returnsSameText() {
-        val csv = mergeSampleCsv(rows = 2)
-
-        assertEquals(csv, Rp3CsvParser.merge(listOf(csv)))
-    }
-
-    @Test
-    fun merge_twoCsvs_keepsSingleHeaderAndRenumbersIntervals() {
-        val first = mergeSampleCsv(rows = 2)
-        val second = mergeSampleCsv(rows = 1)
-
-        val merged = Rp3CsvParser.merge(listOf(first, second))
-        val lines = merged.lines()
-
-        assertEquals(HEADER, lines[0])
-        assertEquals(4, lines.size)
-
-        assertEquals("1", lines[1].splitRp3Row()[1])
-        assertEquals("1", lines[2].splitRp3Row()[1])
-        assertEquals("2", lines[3].splitRp3Row()[1])
-        assertEquals("1,2,3", lines[1].splitRp3Row()[22])
-    }
-
-    private fun mergeSampleCsv(rows: Int): String = buildString {
-        appendLine(HEADER)
-        repeat(rows) { index ->
-            val strokeNumber = index + 1
-            appendLine(
-                row(
-                    intervalId = 555,
-                    strokeNumber = strokeNumber,
-                    strokeRate = 20.0,
-                    time = strokeNumber.toDouble(),
-                    distance = strokeNumber * 10.0,
-                    pulse = 100
-                )
-            )
-        }
-    }.trimEnd()
 
     private fun rp3Csv(): String = buildString {
         appendLine(HEADER)

@@ -67,45 +67,12 @@ internal object Rp3CsvParser : TrainingImportParser {
 
         return ParsedTrainingImport(
             source = source,
-            csvText = csvText,
+            rawFile = bytes,
+            fileExtension = CSV_FILE_EXTENSION,
             deviceSerial = null,
-            sessionName = null,
             startTimeMillis = parseStartTimeMillis(fileName),
             intervals = rows.toIntervals(),
         )
-    }
-
-    override fun merge(csvTexts: List<String>): String {
-        require(csvTexts.isNotEmpty()) { "At least one CSV is required." }
-        if (csvTexts.size == 1) return csvTexts.first()
-
-        val header = csvTexts.first().normalizeLines().find { it.isNotBlank() }?.splitRp3Row()
-            ?: return csvTexts.first()
-        val intervalIndex = header.indexOf(COLUMN_INTERVAL_ID)
-        if (intervalIndex < 0) return csvTexts.first()
-
-        val result = mutableListOf(CsvWriter.row(*header.toTypedArray()))
-        var nextIntervalId = 0L
-
-        for (csvText in csvTexts) {
-            val lines = csvText.normalizeLines()
-            val sourceHeaderIndex = lines.indexOfFirst { it.isNotBlank() }
-            val idByOriginalId = mutableMapOf<String, Long>()
-            lines.asSequence()
-                .drop(sourceHeaderIndex + 1)
-                .filter { it.isNotBlank() }
-                .forEach { line ->
-                    val columns = line.splitRp3Row().toMutableList()
-                    if (columns.size > intervalIndex) {
-                        val originalId = columns[intervalIndex].trim()
-                        val newId = idByOriginalId.getOrPut(originalId) { ++nextIntervalId }
-                        columns[intervalIndex] = newId.toString()
-                    }
-                    result += CsvWriter.row(*columns.toTypedArray())
-                }
-        }
-
-        return result.joinToString("\n")
     }
 
     private fun List<StrokeRow>.toIntervals(): List<TrainingImportInterval> {
@@ -138,7 +105,7 @@ internal object Rp3CsvParser : TrainingImportParser {
             distanceMeters = (last().distanceMeters - distanceBoundary).roundToInt(),
             timeMillis = ((last().timeSeconds - boundaryTime) * MILLIS_PER_SECOND).roundToLong(),
             strokeRate = if (strokeRates.isEmpty()) 0.0 else strokeRates.average(),
-            avgHeartRate = if (heartRates.isEmpty()) null else heartRates.average().roundToInt(),
+            avgHeartRate = heartRates.avg()?.roundToInt(),
             maxHeartRate = heartRates.maxOrNull(),
             recoveryHeartRate = null,
         )
@@ -173,10 +140,10 @@ internal object Rp3CsvParser : TrainingImportParser {
         return runCatching {
             LocalDateTime(
                 year = date.substring(0, 4).toInt(),
-                monthNumber = date.substring(4, 6).toInt(),
-                dayOfMonth = date.substring(6, 8).toInt(),
+                month = date.substring(4, 6).toInt(),
+                day = date.substring(6, 8).toInt(),
                 hour = date.substring(8, 10).toInt(),
-                minute = date.substring(10, 12).toInt(),
+                minute = date.substring(10, 12).toInt()
             ).toInstant(TimeZone.UTC).toEpochMilliseconds()
         }.getOrNull()
     }

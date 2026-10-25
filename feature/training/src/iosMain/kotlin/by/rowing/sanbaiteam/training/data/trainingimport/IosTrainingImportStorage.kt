@@ -1,27 +1,29 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
 /**
- * iOS-реализация хранилища CSV-импортов.
- * Файлы сохраняются в Documents/<storageFolder>/ и переживают перезапуск приложения.
+ * iOS-реализация хранилища импортов. Файлы сохраняются в Documents/<storageFolder>/ и переживают перезапуск приложения.
  */
 internal class IosTrainingImportStorage : TrainingImportStorage {
 
-    override fun saveCsv(
+    override fun saveImportFile(
         trainingId: Long,
         source: TrainingImportSource,
         serial: String?,
-        csvText: String
+        fileExtension: String,
+        bytes: ByteArray
     ): String {
-        val fileName = "${trainingId}_${serial?.ifBlank { null } ?: "unknown"}_${IosTrainingFileManager.currentTimeMillis()}.csv"
+        val safeExtension = fileExtension.trimStart('.').ifBlank { FIT_FILE_EXTENSION }
+        val fileName = "${trainingId}_${serial?.ifBlank { null } ?: "unknown"}_" +
+                "${IosTrainingFileManager.currentTimeMillis()}.$safeExtension"
         val relativePath = "${source.storageFolder}/$fileName"
-        IosTrainingFileManager.writeText(relativePath, csvText)
+        IosTrainingFileManager.writeBytes(relativePath, bytes)
         return relativePath
     }
 
-    override fun readCsv(relativePath: String): String? =
-        IosTrainingFileManager.readText(relativePath)
+    override fun readImportFile(relativePath: String): ByteArray? =
+        IosTrainingFileManager.readBytes(relativePath)
 
-    override fun deleteCsv(relativePath: String) {
+    override fun deleteImportFile(relativePath: String) {
         IosTrainingFileManager.deleteFile(relativePath)
     }
 }
