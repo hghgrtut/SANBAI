@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
+import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.presentation.comparison.TrainingComparisonSelectionStore
 import by.rowing.sanbaiteam.training.presentation.detail.compose.TrainingDetailActions
@@ -61,6 +62,20 @@ internal class TrainingDetailViewModel(
 
     override fun onClearComparison() {
         comparisonSelectionStore.clear()
+    }
+
+    override fun onChartClick(
+        order: Int,
+        metric: TrainingChartMetric
+    ) {
+        TrainingNavigation.TrainingChart(
+            trainingId = trainingId,
+            order = order,
+            metric = metric.name,
+        ).navigateTo(
+            composeNavigator = composeNavigator,
+            navOptions = getReturnToScreenNavOptions<TrainingNavigation.TrainingDetail>(),
+        )
     }
 
     override fun onCleared() {

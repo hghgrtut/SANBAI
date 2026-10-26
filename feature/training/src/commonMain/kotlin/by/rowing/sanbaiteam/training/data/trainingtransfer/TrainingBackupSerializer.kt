@@ -42,6 +42,8 @@ internal data class BackupPiece(
     val maxHeartRate: Int? = null,
     val recoveryHeartRate: Int? = null,
     val lactate: Double? = null,
+    val sourceFileIndex: Int? = null,
+    val sourceIntervalIndex: Int? = null,
 )
 
 internal object TrainingBackupSerializer {

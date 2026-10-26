@@ -25,6 +25,7 @@ internal object Rp3CsvParser : TrainingImportParser {
     private const val COLUMN_TIME = "time"
     private const val COLUMN_DISTANCE = "distance"
     private const val COLUMN_PULSE = "pulse"
+    private const val COLUMN_ESTIMATED_500M_TIME = "estimated_500m_time"
 
     private val FILE_NAME_DATE_REGEX = Regex("^(\\d{12})")
 
@@ -42,40 +43,45 @@ internal object Rp3CsvParser : TrainingImportParser {
             throwParseError()
         }
 
-        val lines = csvText.normalizeLines()
-        val headerIndex = lines.indexOfFirst { it.trimStart(BOM).trimStart().startsWith(HEADER_PREFIX) }
-        val header = lines[headerIndex].splitRp3Row()
-        val columns = header.withIndex().associate { (index, name) -> name.trim() to index }
-        val (intervalIndex, timeIndex, distanceIndex, strokeRateIndex, pulseIndex) =
-            listOf(COLUMN_INTERVAL_ID, COLUMN_TIME, COLUMN_DISTANCE, COLUMN_STROKE_RATE, COLUMN_PULSE).map { column ->
-                columns[column] ?: throwParseError("Missing RP3 column $column.")
-            }
-
-        val rows = lines.asSequence()
-            .drop(headerIndex + 1)
-            .mapNotNull { line ->
-                line.parseStroke(
-                    intervalIndex,
-                    timeIndex,
-                    distanceIndex,
-                    strokeRateIndex,
-                    pulseIndex
-                )
-            }
-            .toList()
-            .ifEmpty { throwParseError() }
-
         return ParsedTrainingImport(
             source = source,
             rawFile = bytes,
             fileExtension = CSV_FILE_EXTENSION,
             deviceSerial = null,
             startTimeMillis = parseStartTimeMillis(fileName),
-            intervals = rows.toIntervals(),
+            intervals = readStrokes(csvText).toIntervals(),
         )
     }
 
-    private fun List<StrokeRow>.toIntervals(): List<TrainingImportInterval> {
+    internal fun readStrokes(csvText: String): List<Rp3StrokeRow> {
+        if (!hasRp3CsvContent(csvText)) {
+            throwParseError()
+        }
+        val lines = csvText.normalizeLines()
+        val headerIndex = lines.indexOfFirst { it.trimStart(BOM).trimStart().startsWith(HEADER_PREFIX) }
+        val header = lines[headerIndex].splitRp3Row()
+        val columns = header.withIndex().associate { (index, name) -> name.trim() to index }
+
+        fun getColumnIndex(columnName: String): Int = columns[columnName]
+            ?: throwParseError("Missing RP3 column $columnName.")
+
+        return lines.asSequence()
+            .drop(headerIndex + 1)
+            .mapNotNull { line ->
+                line.parseStroke(
+                    intervalIndex = getColumnIndex(columnName = COLUMN_INTERVAL_ID),
+                    timeIndex = getColumnIndex(columnName = COLUMN_TIME),
+                    distanceIndex = getColumnIndex(columnName = COLUMN_DISTANCE),
+                    strokeRateIndex = getColumnIndex(columnName = COLUMN_STROKE_RATE),
+                    pulseIndex = getColumnIndex(columnName = COLUMN_PULSE),
+                    estimated500mIndex = getColumnIndex(columnName = COLUMN_ESTIMATED_500M_TIME),
+                )
+            }
+            .toList()
+            .ifEmpty { throwParseError() }
+    }
+
+    private fun List<Rp3StrokeRow>.toIntervals(): List<TrainingImportInterval> {
         val intervals = mutableListOf<TrainingImportInterval>()
         var startIndex = 0
         while (startIndex < size) {
@@ -93,7 +99,7 @@ internal object Rp3CsvParser : TrainingImportParser {
         return intervals
     }
 
-    private fun List<StrokeRow>.toInterval(
+    private fun List<Rp3StrokeRow>.toInterval(
         boundaryDistance: Double,
         boundaryTime: Double
     ): TrainingImportInterval {
@@ -116,8 +122,9 @@ internal object Rp3CsvParser : TrainingImportParser {
         timeIndex: Int,
         distanceIndex: Int,
         strokeRateIndex: Int,
-        pulseIndex: Int
-    ): StrokeRow? {
+        pulseIndex: Int,
+        estimated500mIndex: Int,
+    ): Rp3StrokeRow? {
         if (isBlank()) return null
         val columns = splitRp3Row()
         if (columns.size <= maxOf(intervalIndex, timeIndex, distanceIndex, strokeRateIndex, pulseIndex)) {
@@ -126,12 +133,13 @@ internal object Rp3CsvParser : TrainingImportParser {
         val intervalId = columns[intervalIndex].trim()
         val time = columns[timeIndex].trim().toDoubleOrNull() ?: return null
         val distance = columns[distanceIndex].trim().toDoubleOrNull() ?: return null
-        return StrokeRow(
+        return Rp3StrokeRow(
             intervalId = intervalId,
             timeSeconds = time,
             distanceMeters = distance,
             strokeRate = columns[strokeRateIndex].trim().toDoubleOrNull(),
             pulse = columns[pulseIndex].trim().toDoubleOrNull()?.roundToInt()?.takeIf { it > 0 },
+            estimated500mTimeSeconds = columns[estimated500mIndex].trim().toDoubleOrNull()?.takeIf { it > 0 },
         )
     }
 
@@ -155,18 +163,19 @@ internal object Rp3CsvParser : TrainingImportParser {
         .replace('\r', '\n')
         .split('\n')
 
-    private data class StrokeRow(
+    internal data class Rp3StrokeRow(
         val intervalId: String,
         val timeSeconds: Double,
         val distanceMeters: Double,
         val strokeRate: Double?,
         val pulse: Int?,
+        val estimated500mTimeSeconds: Double? = null,
     )
 
     private const val MILLIS_PER_SECOND = 1000L
 }
 
-internal fun String.splitRp3Row(): List<String> {
+private fun String.splitRp3Row(): List<String> {
     val result = mutableListOf<String>()
     val current = StringBuilder()
     var inQuotes = false

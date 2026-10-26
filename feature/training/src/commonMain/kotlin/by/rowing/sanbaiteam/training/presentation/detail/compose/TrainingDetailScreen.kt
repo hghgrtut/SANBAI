@@ -209,7 +209,7 @@ private fun Training(
                 TrainingPieceCard(
                     piece = piece,
                     expanded = piece.order in state.expandedComparisonOrders,
-                    onToggleComparison = { actions.onToggleComparison(piece.order) },
+                    actions = actions,
                 )
             }
         }

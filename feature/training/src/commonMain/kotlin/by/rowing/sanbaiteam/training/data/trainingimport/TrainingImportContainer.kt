@@ -2,7 +2,6 @@ package by.rowing.sanbaiteam.training.data.trainingimport
 
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportContainer.EXTENSION
 
-
 /**
  * Binary container that keeps the original `.fit` (or `.csv`) files of a multi-source import.
  *

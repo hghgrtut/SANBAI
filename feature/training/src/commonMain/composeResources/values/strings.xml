@@ -62,10 +62,10 @@
     <string name="training_detail_distance">%1$d м</string>
     <string name="training_detail_distance_label">Дистанция</string>
     <string name="training_detail_time_label">Время</string>
-    <string name="training_detail_pace_label">Темп</string>
+    <string name="training_detail_pace_label">Скорость</string>
     <string name="training_detail_pace_average">%1$s /500м</string>
     <string name="training_detail_stroke_rate">%1$s гр/мин</string>
-    <string name="training_detail_stroke_rate_label">Гребки</string>
+    <string name="training_detail_stroke_rate_label">SPM</string>
     <string name="training_detail_avg_heart_rate_label">Ср. ЧСС</string>
     <string name="training_detail_max_heart_rate_label">Макс. ЧСС</string>
     <string name="training_detail_recovery_heart_rate_label">Восст. ЧСС</string>
@@ -110,5 +110,24 @@
     <string name="training_delete_action">Удалить</string>
     <string name="training_delete_confirm_title">Удаление тренировок</string>
     <string name="training_delete_confirm_message">Удалить выбранные тренировки (%1$d)?</string>
+    <string name="training_detail_chart_speed">График скорости</string>
+    <string name="training_detail_chart_stroke_rate">График частоты гребков</string>
+    <string name="training_detail_chart_heart_rate">График ЧСС</string>
+    <string name="training_chart_title">График отрезка %1$d</string>
+    <string name="training_chart_metric_speed">Скорость</string>
+    <string name="training_chart_metric_stroke_rate">SPM</string>
+    <string name="training_chart_metric_heart_rate">ЧСС</string>
+    <string name="training_chart_average">Сред.</string>
+    <string name="training_chart_best">Лучший</string>
+    <string name="training_chart_max">Макс.</string>
+    <string name="training_chart_faster">быстрее →</string>
+    <string name="training_chart_pace_value">%1$s /500 м</string>
+    <string name="training_chart_stroke_rate_value">%1$s греб./мин</string>
+    <string name="training_chart_heart_rate_value">%1$d уд./мин</string>
+    <string name="training_chart_empty_metric">Нет данных для этого показателя</string>
+    <string name="training_chart_source_unavailable">Не удалось прочитать исходный файл</string>
+    <string name="training_chart_piece_not_found">Отрезок не найден</string>
+    <string name="training_chart_time_axis_description">Время сверху вниз</string>
+    <string name="training_chart_value_axis_description">Значения слева направо</string>
     <string name="ok">ОК</string>
 </resources>

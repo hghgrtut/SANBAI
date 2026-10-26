@@ -18,4 +18,11 @@ internal sealed interface TrainingNavigation {
 
     @Serializable
     data class TrainingCompare(val trainingId: Long) : NavigationDestination<Unit>
+
+    @Serializable
+    data class TrainingChart(
+        val trainingId: Long,
+        val order: Int,
+        val metric: String,
+    ) : NavigationDestination<Unit>
 }

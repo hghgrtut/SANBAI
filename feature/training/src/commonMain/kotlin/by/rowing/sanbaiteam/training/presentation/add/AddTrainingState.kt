@@ -48,6 +48,8 @@ internal data class AddPieceDraft(
     val timeText: String = "",
     val strokeRateText: String = "",
     val lactateText: String = "",
+    val sourceFileIndex: Int? = null,
+    val sourceIntervalIndex: Int? = null,
 ) {
     companion object {
         private var localIdSeq = 1L

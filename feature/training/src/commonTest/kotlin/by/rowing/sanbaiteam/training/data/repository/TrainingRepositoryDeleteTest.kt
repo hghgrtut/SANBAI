@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.data.repository
 
+import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
@@ -25,6 +26,7 @@ internal class TrainingRepositoryDeleteTest {
             dao = dao,
             athletesRepository = StubAthletesRepository(),
             importStorage = storage,
+            chartReader = TrainingChartReader(),
         )
 
         repository.deleteTrainings(listOf(1L, 3L))
@@ -43,6 +45,7 @@ internal class TrainingRepositoryDeleteTest {
             dao = dao,
             athletesRepository = StubAthletesRepository(),
             importStorage = FakeTrainingImportStorage(),
+            chartReader = TrainingChartReader(),
         )
 
         repository.deleteTrainings(emptyList())

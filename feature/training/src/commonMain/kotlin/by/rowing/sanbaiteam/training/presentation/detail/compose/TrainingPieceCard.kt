@@ -6,8 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.formatTenths
+import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
 import by.rowing.sanbaiteam.training.data.models.comparison.MetricComparison
@@ -61,11 +66,13 @@ import kotlin.math.roundToLong
 
 private const val MISSING_VALUE = "—"
 
+private val CHART_ICON_SIZE = 20.dp
+
 @Composable
 internal fun TrainingPieceCard(
     piece: TrainingDetailPiece,
     expanded: Boolean,
-    onToggleComparison: () -> Unit,
+    actions: TrainingDetailActions,
 ) {
     val comparison = piece.comparison
     Column(
@@ -95,25 +102,52 @@ internal fun TrainingPieceCard(
                 expanded = expanded
             )
         }
-        if (comparison != null) {
-            TextButton(
-                onClick = onToggleComparison,
-                contentPadding = PaddingValues(
-                    horizontal = 0.dp,
-                    vertical = Spacing.XS
-                )
+        if (comparison != null || piece.chartMetrics.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = stringResource(
-                        if (expanded) {
-                            Res.string.training_detail_compare_hide
-                        } else {
-                            Res.string.training_detail_compare_show
+                if ((comparison?.comparedTrainingsCount ?: 0) > 0) {
+                    TextButton(
+                        onClick = { actions.onToggleComparison(piece.order) },
+                        contentPadding = PaddingValues(
+                            horizontal = 0.dp,
+                            vertical = Spacing.XS
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (expanded) {
+                                    Res.string.training_detail_compare_hide
+                                } else {
+                                    Res.string.training_detail_compare_show
+                                }
+                            ),
+                            style = TypographyPalette.Body2Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                TrainingChartMetric.entries
+                    .filter { it in piece.chartMetrics }
+                    .forEach { metric ->
+                        IconButton(
+                            onClick = {
+                                actions.onChartClick(
+                                    order = piece.order,
+                                    metric = metric
+                                )
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(size = CHART_ICON_SIZE),
+                                imageVector = metric.icon,
+                                contentDescription = stringResource(metric.description),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
-                    ),
-                    style = TypographyPalette.Body2Medium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                    }
             }
         }
     }
