@@ -21,7 +21,7 @@ object RowingTimeFormat {
     fun formatDuration(timeMillis: Long): String {
         if (timeMillis < 0) return "0:00.0"
         val tenths = (timeMillis + MILLIS_PER_TENTH / 2) / MILLIS_PER_TENTH % TENTH_PER_SECOND
-        return "${formatDurationMmSs(timeMillis = timeMillis)}}.$tenths"
+        return "${formatDurationMmSs(timeMillis = timeMillis)}.$tenths"
     }
 
     fun formatDurationMmSs(timeMillis: Long): String {

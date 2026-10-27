@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.formatTenths
-import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
 import by.rowing.sanbaiteam.training.data.models.comparison.MetricComparison
@@ -102,12 +101,13 @@ internal fun TrainingPieceCard(
                 expanded = expanded
             )
         }
-        if (comparison != null || piece.chartMetrics.isNotEmpty()) {
+        val hasTrainingsInComparison = (comparison?.comparedTrainingsCount ?: 0) > 0
+        if (hasTrainingsInComparison || piece.chartMetrics.isNotEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if ((comparison?.comparedTrainingsCount ?: 0) > 0) {
+                if (hasTrainingsInComparison) {
                     TextButton(
                         onClick = { actions.onToggleComparison(piece.order) },
                         contentPadding = PaddingValues(
@@ -129,25 +129,23 @@ internal fun TrainingPieceCard(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                TrainingChartMetric.entries
-                    .filter { it in piece.chartMetrics }
-                    .forEach { metric ->
-                        IconButton(
-                            onClick = {
-                                actions.onChartClick(
-                                    order = piece.order,
-                                    metric = metric
-                                )
-                            }
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(size = CHART_ICON_SIZE),
-                                imageVector = metric.icon,
-                                contentDescription = stringResource(metric.description),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                piece.chartMetrics.forEach { metric ->
+                    IconButton(
+                        onClick = {
+                            actions.onChartClick(
+                                order = piece.order,
+                                metric = metric
                             )
                         }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(size = CHART_ICON_SIZE),
+                            imageVector = metric.icon,
+                            contentDescription = stringResource(metric.description),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
+                }
             }
         }
     }
