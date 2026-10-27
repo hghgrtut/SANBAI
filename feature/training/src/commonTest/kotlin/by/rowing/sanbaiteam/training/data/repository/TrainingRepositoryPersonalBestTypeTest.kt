@@ -5,6 +5,7 @@ import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
+import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -130,6 +131,7 @@ internal class TrainingRepositoryPersonalBestTypeTest {
         ),
         athletesRepository = athletesRepository,
         importStorage = FakeTrainingImportStorage(),
+        chartReader = TrainingChartReader(),
     )
 
     private fun best(

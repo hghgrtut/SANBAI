@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.data.repository
 
+import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -132,6 +133,7 @@ internal class TrainingRepositoryComparisonTest {
         ),
         athletesRepository = StubAthletesRepository(),
         importStorage = FakeTrainingImportStorage(),
+        chartReader = TrainingChartReader(),
     )
 
     private fun training(

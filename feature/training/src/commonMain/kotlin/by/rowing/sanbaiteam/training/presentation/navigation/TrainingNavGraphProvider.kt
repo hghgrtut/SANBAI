@@ -8,6 +8,8 @@ import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingScreen
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingViewModel
+import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartViewModel
+import by.rowing.sanbaiteam.training.presentation.chart.compose.TrainingChartScreen
 import by.rowing.sanbaiteam.training.presentation.comparison.TrainingCompareViewModel
 import by.rowing.sanbaiteam.training.presentation.comparison.compose.TrainingCompareScreen
 import by.rowing.sanbaiteam.training.presentation.detail.TrainingDetailViewModel
@@ -45,6 +47,14 @@ object TrainingNavGraphProvider {
             val trainingId = backStackEntry.toRoute<TrainingNavigation.TrainingCompare>().trainingId
             TrainingCompareScreen(
                 viewModel = koinViewModel<TrainingCompareViewModel> { parametersOf(navigator, trainingId) }
+            )
+        }
+        builder.composable<TrainingNavigation.TrainingChart> { backStackEntry ->
+            val route = backStackEntry.toRoute<TrainingNavigation.TrainingChart>()
+            TrainingChartScreen(
+                viewModel = koinViewModel<TrainingChartViewModel> {
+                    parametersOf(navigator, route.trainingId, route.order, route.metric)
+                }
             )
         }
     }

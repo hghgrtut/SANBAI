@@ -13,6 +13,7 @@ kotlin {
         androidResources {
             enable = true
         }
+        withHostTest {}
         compilations.configureEach {
             compileTaskProvider.configure {
                 compilerOptions {

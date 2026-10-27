@@ -7,11 +7,14 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.core.util.roundToTenths
+import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.comparison.TrainingComparisonCalculator
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
+import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
+import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartResult
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparablePiece
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
@@ -24,6 +27,7 @@ internal class TrainingRepository(
     private val dao: TrainingDao,
     private val athletesRepository: AthletesRepository,
     private val importStorage: TrainingImportStorage,
+    private val chartReader: TrainingChartReader,
 ) {
 
     suspend fun saveTraining(
@@ -124,6 +128,10 @@ internal class TrainingRepository(
                 baseAthleteIds = baseAthleteIds,
                 personalBests = personalBests,
                 comparedByOrder = comparedByOrder,
+                chartMetricsByOrder = loadChartMetrics(
+                    training = training,
+                    pieces = pieces,
+                ),
             ),
             comparedTrainingIds = comparedSources.map { it.trainingId },
             isLoading = false,
@@ -131,11 +139,57 @@ internal class TrainingRepository(
         )
     }
 
+    suspend fun getTrainingChart(
+        trainingId: Long,
+        order: Int,
+    ): TrainingChartResult = withContext(Dispatchers.Default) {
+        val training = dao.getTrainingById(trainingId) ?: return@withContext TrainingChartResult.PieceNotFound
+        val piece = dao.getPiecesForTraining(trainingId).firstOrNull { it.order == order - 1 }
+            ?: return@withContext TrainingChartResult.PieceNotFound
+        TrainingChartResult.Success(
+            data = chartReader.read(
+                sourceFileIndex = piece.sourceFileIndex ?: return@withContext TrainingChartResult.SourceUnavailable,
+                sourceFileBytes = getTrainingSourceBytes(training = training)
+                    ?: return@withContext TrainingChartResult.SourceUnavailable,
+                sourceIntervalIndex = piece.sourceIntervalIndex
+                    ?: return@withContext TrainingChartResult.SourceUnavailable,
+            ) ?: return@withContext TrainingChartResult.SourceUnavailable
+        )
+    }
+
+    private fun loadChartMetrics(
+        training: TrainingEntity,
+        pieces: List<TrainingAthletePieceEntity>,
+    ): Map<Int, Set<TrainingChartMetric>> {
+        if (pieces.all { it.sourceFileIndex == null || it.sourceIntervalIndex == null }) {
+            return emptyMap()
+        }
+        val sourceBytes = getTrainingSourceBytes(training = training) ?: return emptyMap()
+        val cache = mutableMapOf<Pair<Int, Int>, Set<TrainingChartMetric>>()
+        return pieces
+            .mapNotNull { piece ->
+                val fileIndex = piece.sourceFileIndex ?: return@mapNotNull null
+                val intervalIndex = piece.sourceIntervalIndex ?: return@mapNotNull null
+                piece.order to cache.getOrPut(fileIndex to intervalIndex) {
+                    chartReader.read(
+                        sourceFileBytes = sourceBytes,
+                        sourceFileIndex = fileIndex,
+                        sourceIntervalIndex = intervalIndex,
+                    )?.availableMetrics.orEmpty()
+                }
+            }
+            .toMap()
+    }
+
+    private fun getTrainingSourceBytes(training: TrainingEntity): ByteArray? =
+        training.sourceFileRelativePath?.let { importStorage.readImportFile(it) }
+
     private fun buildDetailPieces(
         baseCrewPieces: List<TrainingAthletePieceEntity>,
         baseAthleteIds: List<Long>,
         personalBests: Map<Long, AthletePersonalBestEntity>,
         comparedByOrder: Map<Int, List<ComparablePiece>>,
+        chartMetricsByOrder: Map<Int, Set<TrainingChartMetric>>,
     ): List<TrainingDetailPiece> = baseCrewPieces.map { piece ->
         val percentOfPb = personalBestPercent(
             piece = piece,
@@ -156,6 +210,7 @@ internal class TrainingRepository(
             recoveryHeartRate = piece.recoveryHeartRate,
             lactate = piece.lactate,
             percentOfPbFormatted = PersonalBestPercent.format(percentOfPb),
+            chartMetrics = chartMetricsByOrder[piece.order].orEmpty(),
             comparison = TrainingComparisonCalculator.compare(
                 base = ComparablePiece(
                     distanceMeters = piece.distanceMeters,
@@ -209,13 +264,13 @@ internal class TrainingRepository(
         athleteIds: List<Long>,
         personalBests: Map<Long, AthletePersonalBestEntity>,
     ): Double? = athleteIds.mapNotNull { athleteId ->
-            val personalBest = personalBests[athleteId] ?: return@mapNotNull null
-            PersonalBestPercent.calculate(
-                pieceDistanceMeters = piece.distanceMeters,
-                pieceTimeMillis = piece.timeMillis,
-                pbDistanceMeters = personalBest.distanceMeters,
-                pbTimeMillis = personalBest.timeMillis,
-            )
+        val personalBest = personalBests[athleteId] ?: return@mapNotNull null
+        PersonalBestPercent.calculate(
+            pieceDistanceMeters = piece.distanceMeters,
+            pieceTimeMillis = piece.timeMillis,
+            pbDistanceMeters = personalBest.distanceMeters,
+            pbTimeMillis = personalBest.timeMillis,
+        )
     }.average().takeIf { !it.isNaN() }?.roundToTenths()
 
     private fun formatWorkSummary(pieces: List<TrainingAthletePieceEntity>): String {

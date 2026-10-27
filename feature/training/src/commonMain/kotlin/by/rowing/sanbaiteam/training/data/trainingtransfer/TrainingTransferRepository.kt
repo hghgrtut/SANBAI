@@ -66,6 +66,8 @@ internal class TrainingTransferRepository(
                             maxHeartRate = piece.maxHeartRate,
                             recoveryHeartRate = piece.recoveryHeartRate,
                             lactate = piece.lactate,
+                            sourceFileIndex = piece.sourceFileIndex,
+                            sourceIntervalIndex = piece.sourceIntervalIndex,
                         )
                     }
                 )
@@ -119,6 +121,8 @@ internal class TrainingTransferRepository(
                     maxHeartRate = piece.maxHeartRate,
                     recoveryHeartRate = piece.recoveryHeartRate,
                     lactate = piece.lactate,
+                    sourceFileIndex = piece.sourceFileIndex,
+                    sourceIntervalIndex = piece.sourceIntervalIndex,
                 )
             }
             if (pieces.isEmpty()) continue

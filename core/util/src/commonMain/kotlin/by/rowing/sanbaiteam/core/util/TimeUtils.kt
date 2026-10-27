@@ -13,6 +13,8 @@ import kotlinx.datetime.plus
 object TimeUtils {
 
     const val MILLIS_PER_SECOND = 1_000L
+    const val SECONDS_PER_MINUTE = 60L
+
     private const val MILLIS_PER_DAY = 86_400_000L
     private const val DATE_DIGITS_LENGTH = 8
 

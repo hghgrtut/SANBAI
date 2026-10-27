@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.migration.Migration
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.local.AthleteDao
@@ -33,10 +35,21 @@ internal abstract class RowingDatabase : RoomDatabase() {
 
     companion object {
 
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         const val DATABASE_NAME = "rowing_database"
 
-        val MIGRATIONS: Array<Migration> = arrayOf()
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    "ALTER TABLE `${TrainingDao.TABLE_TRAINING_ATHLETE_PIECE}` ADD COLUMN `sourceFileIndex` INTEGER"
+                )
+                connection.execSQL(
+                    "ALTER TABLE `${TrainingDao.TABLE_TRAINING_ATHLETE_PIECE}` ADD COLUMN `sourceIntervalIndex` INTEGER"
+                )
+            }
+        }
+
+        val MIGRATIONS = arrayOf(MIGRATION_1_2)
     }
 }
 

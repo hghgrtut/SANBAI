@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -209,10 +210,11 @@ private fun Training(
                 TrainingPieceCard(
                     piece = piece,
                     expanded = piece.order in state.expandedComparisonOrders,
-                    onToggleComparison = { actions.onToggleComparison(piece.order) },
+                    actions = actions,
                 )
             }
         }
+        item { Spacer(modifier = Modifier.height(height = Spacing._2XS)) }
     }
 }
 

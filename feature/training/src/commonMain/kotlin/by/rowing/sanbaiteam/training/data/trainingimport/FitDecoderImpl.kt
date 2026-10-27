@@ -143,6 +143,8 @@ internal class FieldCollector {
     var intensity: UByte? = null
     var heartRate: Int? = null
     var cadence: Int? = null
+    var speed: Double? = null
+    var enhancedSpeed: Double? = null
     var sport: UShort? = null
     var subSport: UShort? = null
     var manufacturer: UShort? = null
@@ -254,7 +256,9 @@ private fun applyCollector(
                 FitRecord(
                     timestampMillis = collector.timestamp ?: return fileData,
                     heartRate = collector.heartRate?.takeIf { it > 0 },
-                    cadence = collector.cadence?.takeIf { it > 0 }
+                    cadence = collector.cadence?.takeIf { it > 0 },
+                    distanceMeters = collector.distance?.takeIf { it >= 0.0 },
+                    speedMetersPerSecond = (collector.speed ?: collector.enhancedSpeed)?.takeIf { it >= 0.0 },
                 )
             )
         }
@@ -371,6 +375,8 @@ private fun readFieldValue(
 private fun scaleElapsed(raw: UInt): Double = raw.toDouble() / 1000.0
 
 private fun scaleDistance(raw: UInt): Double = raw.toDouble() / 100.0
+
+private fun scaleSpeed(raw: UInt): Double = raw.toDouble() / 1000.0
 
 private fun fitSecondsToMillis(seconds: Long): Long = (seconds + FIT_EPOCH_OFFSET_SECONDS) * 1000L
 
@@ -545,6 +551,27 @@ private fun readRecordField(
 
         FIELD_RECORD_CADENCE -> if (size == 1) {
             collector.cadence = reader.readUByte().toInt().takeIf { it != 0xFF }
+        }
+
+        FIELD_RECORD_DISTANCE -> if (size == 4) {
+            val raw = reader.readUInt(le)
+            if (raw != UInt.MAX_VALUE) {
+                collector.distance = scaleDistance(raw)
+            }
+        }
+
+        FIELD_RECORD_SPEED -> if (size == 2) {
+            val raw = reader.readUShort(le)
+            if (raw != UShort.MAX_VALUE) {
+                collector.speed = scaleSpeed(raw.toUInt())
+            }
+        }
+
+        FIELD_RECORD_ENHANCED_SPEED -> if (size == 4) {
+            val raw = reader.readUInt(le)
+            if (raw != UInt.MAX_VALUE) {
+                collector.enhancedSpeed = scaleSpeed(raw)
+            }
         }
     }
 }

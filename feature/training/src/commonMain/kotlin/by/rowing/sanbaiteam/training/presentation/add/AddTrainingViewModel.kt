@@ -211,6 +211,8 @@ internal class AddTrainingViewModel(
                     timeText = template.timeText,
                     strokeRateText = template.strokeRateText,
                     lactateText = template.lactateText,
+                    sourceFileIndex = null,
+                    sourceIntervalIndex = null,
                 )
             } else {
                 AddPieceDraft()
@@ -253,6 +255,8 @@ internal class AddTrainingViewModel(
                         maxHeartRate = piece.maxHeartRate,
                         recoveryHeartRate = piece.recoveryHeartRate,
                         lactate = parseLactateFromText(piece.lactateText) ?: piece.lactate,
+                        sourceFileIndex = piece.sourceFileIndex,
+                        sourceIntervalIndex = piece.sourceIntervalIndex,
                     )
                 }
             }
@@ -323,6 +327,7 @@ internal class AddTrainingViewModel(
                 return@launch
             }
             val parser = TrainingImportParsers.bySource(checkNotNull(importSource))
+            var fileIndex = state.pendingRawFiles.size
             fileContents.forEach { file ->
                 TrainingImportContainer.unpackOrSingle(file.bytes).forEach { part ->
                     runCatching {
@@ -330,7 +335,13 @@ internal class AddTrainingViewModel(
                             bytes = part,
                             fileName = file.fileName
                         )
-                    }.getOrNull()?.let { parsed -> applyParsedImport(parsed) } ?: run {
+                    }.getOrNull()?.let { parsed ->
+                        applyParsedImport(
+                            parsed = parsed,
+                            fileIndex = fileIndex
+                        )
+                        fileIndex++
+                    } ?: run {
                         changeState {
                             copy(importNotice = UiText.of(Res.string.add_training_import_parse_error))
                         }
@@ -351,8 +362,11 @@ internal class AddTrainingViewModel(
         return (value * 10).roundToInt() / 10.0
     }
 
-    private suspend fun applyParsedImport(parsed: ParsedTrainingImport) {
-        val newPieces = parsed.intervals.map { interval ->
+    private suspend fun applyParsedImport(
+        parsed: ParsedTrainingImport,
+        fileIndex: Int,
+    ) {
+        val newPieces = parsed.intervals.mapIndexed { intervalIndex, interval ->
             AddPieceDraft(
                 distanceMeters = interval.distanceMeters,
                 timeMillis = interval.timeMillis,
@@ -363,6 +377,8 @@ internal class AddTrainingViewModel(
                 distanceText = interval.distanceMeters.toString(),
                 timeText = RowingTimeFormat.formatDuration(interval.timeMillis),
                 strokeRateText = formatTenths(value = interval.strokeRate),
+                sourceFileIndex = fileIndex,
+                sourceIntervalIndex = intervalIndex,
             )
         }
         val isFirstImport = state.pendingRawFiles.isEmpty()

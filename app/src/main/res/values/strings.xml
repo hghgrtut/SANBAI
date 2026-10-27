@@ -1,5 +1,3 @@
 <resources>
     <string name="app_name">SANBAI Team</string>
-    <string name="calculator_title">Калькулятор</string>
-    <string name="calculator_main_subtitle">Процент от рекорда и темп</string>
 </resources>
