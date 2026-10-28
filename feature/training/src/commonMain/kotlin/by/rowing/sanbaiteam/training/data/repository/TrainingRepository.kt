@@ -60,15 +60,17 @@ internal class TrainingRepository(
     }
 
     suspend fun getTrainingsList(): List<ListTrainingStateItem> = withContext(Dispatchers.Default) {
-        dao.getAllTrainingEntities().mapNotNull { training -> toListItem(training) }
+        toListItems(trainings = dao.getAllTrainingEntities())
     }
 
     suspend fun getComparisonCandidates(trainingId: Long): List<ListTrainingStateItem> =
         withContext(Dispatchers.Default) {
             val baseType = dao.getTrainingById(trainingId)?.type ?: return@withContext emptyList()
-            dao.getAllTrainingEntities().mapNotNull { training ->
-                if (training.type != baseType || training.id == trainingId) null else toListItem(training)
-            }
+            toListItems(
+                trainings = dao.getAllTrainingEntities().filter { training ->
+                    training.type == baseType && training.id != trainingId
+                }
+            )
         }
 
     suspend fun getTrainingDetail(
@@ -241,12 +243,32 @@ internal class TrainingRepository(
         )
     }
 
-    private suspend fun toListItem(training: TrainingEntity): ListTrainingStateItem? {
-        val pieces = dao.getPiecesForTraining(training.id)
+    private suspend fun toListItems(trainings: List<TrainingEntity>): List<ListTrainingStateItem> {
+        if (trainings.isEmpty()) return emptyList()
+        val piecesByTrainingId = dao.getPiecesForTrainings(trainings.map { it.id })
+            .groupBy { it.trainingId }
+        val nameMap = athletesRepository.getAthleteNameMap(
+            athleteIds = piecesByTrainingId.values
+                .flatMap { pieces -> pieces.map { it.athleteId } }
+                .distinct()
+        )
+        return trainings.mapNotNull { training ->
+            toListItem(
+                training = training,
+                pieces = piecesByTrainingId[training.id].orEmpty(),
+                nameMap = nameMap,
+            )
+        }
+    }
+
+    private fun toListItem(
+        training: TrainingEntity,
+        pieces: List<TrainingAthletePieceEntity>,
+        nameMap: Map<Long, String>,
+    ): ListTrainingStateItem? {
         if (pieces.isEmpty()) return null
 
         val athleteIds = pieces.map { it.athleteId }.distinct()
-        val nameMap = athletesRepository.getAthleteNameMap(athleteIds)
         val athleteNames = athleteIds.mapNotNull { nameMap[it] }
 
         return ListTrainingStateItem(
@@ -254,7 +276,10 @@ internal class TrainingRepository(
             trainingType = training.type,
             trainingTypeResId = training.type.uiResId,
             trainingDate = TimeUtils.formatDate(training.dateMillis),
-            trainingWork = formatWorkSummary(pieces),
+            trainingWork = formatWorkSummary(
+                type = training.type,
+                pieces = pieces
+            ),
             athletes = athleteNames
         )
     }
@@ -273,15 +298,43 @@ internal class TrainingRepository(
         )
     }.average().takeIf { !it.isNaN() }?.roundToTenths()
 
-    private fun formatWorkSummary(pieces: List<TrainingAthletePieceEntity>): String {
-        if (pieces.isEmpty()) return ""
-        val groups = LinkedHashMap<Int, Int>()
+    private fun formatWorkSummary(
+        type: TrainingPieceType,
+        pieces: List<TrainingAthletePieceEntity>,
+    ): String {
+        val useTime = type in TYPES_WITH_TIME_DISPLAYED
+        val groups = LinkedHashMap<Long, Int>()
         for (piece in pieces) {
-            groups[piece.distanceMeters] = (groups[piece.distanceMeters] ?: 0) + 1
+            val value = if (useTime) {
+                (piece.timeMillis + TimeUtils.MILLIS_PER_SECOND / 2) / TimeUtils.MILLIS_PER_SECOND
+            } else {
+                piece.distanceMeters.toLong()
+            }
+            groups[value] = (groups[value] ?: 0) + 1
         }
-        return groups.entries.joinToString(separator = " + ") { (distance, count) ->
-            (if (count > 1) "$count×" else "") + "${distance}м"
+        return groups.entries.joinToString(separator = " + ") { (value, count) ->
+            (if (count > 1) "$count×" else "") + (if (useTime) formatWorkTime(seconds = value) else "${value}м")
         }
+    }
+
+    private fun formatWorkTime(seconds: Long): String {
+        val minutes = seconds / TimeUtils.SECONDS_PER_MINUTE
+        val remainderSeconds = seconds % TimeUtils.SECONDS_PER_MINUTE
+        return if (minutes > 0 && remainderSeconds == 0L) {
+            "$minutes мин"
+        } else {
+            RowingTimeFormat.formatDurationMmSs(timeMillis = seconds * TimeUtils.MILLIS_PER_SECOND)
+        }
+    }
+
+    companion object {
+
+        private val TYPES_WITH_TIME_DISPLAYED = listOf(
+            TrainingPieceType.CONCEPT_ROW_ERG,
+            TrainingPieceType.RP_3,
+            TrainingPieceType.CONCEPT_BIKE_ERG,
+            TrainingPieceType.WATT_BIKE
+        )
     }
 
     private data class ComparedTrainingSource(

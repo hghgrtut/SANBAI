@@ -171,6 +171,9 @@ internal class TrainingRepositoryComparisonTest {
 
         override suspend fun getAllTrainingEntities(): List<TrainingEntity> = trainings
 
+        override suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity> =
+            trainings.filter { it.id in trainingIds }
+
         override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
             trainings.firstOrNull { it.id == trainingId }
 
@@ -188,6 +191,11 @@ internal class TrainingRepositoryComparisonTest {
         override suspend fun getPiecesForTraining(trainingId: Long): List<TrainingAthletePieceEntity> =
             pieces
                 .filter { it.trainingId == trainingId }
+                .sortedWith(compareBy({ it.athleteId }, { it.order }))
+
+        override suspend fun getPiecesForTrainings(trainingIds: List<Long>): List<TrainingAthletePieceEntity> =
+            pieces
+                .filter { it.trainingId in trainingIds }
                 .sortedWith(compareBy({ it.athleteId }, { it.order }))
 
         override suspend fun getAthleteIdsInTraining(trainingId: Long): List<Long> =

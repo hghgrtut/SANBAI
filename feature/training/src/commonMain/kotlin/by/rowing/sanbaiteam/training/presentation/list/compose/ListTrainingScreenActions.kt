@@ -22,7 +22,9 @@ internal interface ListTrainingScreenActions {
 
     fun onDeleteDismiss()
 
-    fun onExportClick()
+    fun onExportSelectedClick()
+
+    fun onToggleSelectAllClick(trainingIds: List<Long>)
 
     fun onExportPromptLaunched()
 
@@ -31,25 +33,4 @@ internal interface ListTrainingScreenActions {
     fun onImportFromHandle(handle: String)
 
     fun onDismissTransferNotice()
-
-    companion object {
-
-        fun empty() = object : ListTrainingScreenActions {
-            override fun onBackClick() {}
-            override fun onSearchQueryChange(newQuery: String) {}
-            override fun onShowFiltersChange(showFilters: Boolean) {}
-            override fun onAddTrainingClick() {}
-            override fun onTrainingClick(trainingId: Long) {}
-            override fun onTrainingLongClick(trainingId: Long) {}
-            override fun onCancelSelection() {}
-            override fun onDeleteClick() {}
-            override fun onDeleteConfirm() {}
-            override fun onDeleteDismiss() {}
-            override fun onExportClick() {}
-            override fun onExportPromptLaunched() {}
-            override fun onExportToHandle(handle: String) {}
-            override fun onImportFromHandle(handle: String) {}
-            override fun onDismissTransferNotice() {}
-        }
-    }
 }

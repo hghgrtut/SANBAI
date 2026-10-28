@@ -20,11 +20,12 @@ internal class TrainingTransferRepository(
     private val importStorage: TrainingImportStorage,
 ) {
 
-    suspend fun exportAllBackup(): TrainingBackup = withContext(Dispatchers.Default) {
+    suspend fun exportSelectedBackup(trainingIds: Set<Long>): TrainingBackup = withContext(Dispatchers.Default) {
         val athletesById = athletesRepository.getAllAthletesOnce().associateBy { it.id }
-        val trainingsWithPieces = trainingDao.getAllTrainingEntities().map { training ->
-            training to trainingDao.getPiecesForTraining(training.id)
-        }
+        val trainings = trainingDao.getTrainingEntitiesByIds(trainingIds.toList())
+        val piecesByTrainingId = trainingDao.getPiecesForTrainings(trainings.map { it.id })
+            .groupBy { it.trainingId }
+        val trainingsWithPieces = trainings.map { training -> training to piecesByTrainingId[training.id].orEmpty() }
 
         val athleteIndexInExportData = LinkedHashMap<Long, Int>()
         val backupAthletes = mutableListOf<BackupAthlete>()

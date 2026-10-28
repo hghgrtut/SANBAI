@@ -99,7 +99,6 @@
     <string name="training_compare_empty_title">Нет тренировок для сравнения</string>
     <string name="training_compare_empty_description">Добавьте ещё тренировку этого типа</string>
     <string name="training_transfer_notice_title">Перенос данных</string>
-    <string name="training_transfer_export_action">Экспорт тренировок</string>
     <string name="training_transfer_import_action">Импорт тренировок</string>
     <string name="training_transfer_export_success">Резервная копия сохранена.</string>
     <string name="training_transfer_export_error">Не удалось создать резервную копию.</string>
@@ -107,6 +106,9 @@
     <string name="training_transfer_import_error">Не удалось импортировать файл.</string>
     <string name="training_selection_title">Выбрано: %1$d</string>
     <string name="training_selection_cancel">Отменить выбор</string>
+    <string name="training_selection_select_all">Выбрать все</string>
+    <string name="training_selection_clear_all">Снять выбор со всех</string>
+    <string name="training_transfer_export_selected_action">Поделиться выбранными тренировками</string>
     <string name="training_delete_action">Удалить</string>
     <string name="training_delete_confirm_title">Удаление тренировок</string>
     <string name="training_delete_confirm_message">Удалить выбранные тренировки (%1$d)?</string>

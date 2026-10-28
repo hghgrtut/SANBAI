@@ -72,6 +72,9 @@ internal class TrainingRepositoryDeleteTest {
                 )
             }
 
+        override suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity> =
+            getAllTrainingEntities().filter { it.id in trainingIds }
+
         override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
             csvPathsByIds[trainingId]?.let { csvPath ->
                 TrainingEntity(
@@ -99,6 +102,9 @@ internal class TrainingRepositoryDeleteTest {
         ) = Unit
 
         override suspend fun getPiecesForTraining(trainingId: Long): List<TrainingAthletePieceEntity> =
+            emptyList()
+
+        override suspend fun getPiecesForTrainings(trainingIds: List<Long>): List<TrainingAthletePieceEntity> =
             emptyList()
 
         override suspend fun getAthleteIdsInTraining(trainingId: Long): List<Long> = emptyList()
