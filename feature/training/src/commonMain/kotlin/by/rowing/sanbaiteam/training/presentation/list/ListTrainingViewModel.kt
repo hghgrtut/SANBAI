@@ -54,7 +54,7 @@ internal class ListTrainingViewModel(
         }
     }
 
-    override fun onBackClick() {
+    override fun navigateBack() {
         if (state.isSelectionMode) {
             onCancelSelection()
         } else {

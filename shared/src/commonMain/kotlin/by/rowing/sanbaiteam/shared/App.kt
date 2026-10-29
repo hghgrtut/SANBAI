@@ -8,13 +8,13 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import by.rowing.sanbaiteam.athlete.presentation.navigation.AthletesNavGraphProvider
 import by.rowing.sanbaiteam.calculator.presentation.navigation.CalculatorNavGraphProvider
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigationEvent
+import by.rowing.sanbaiteam.core.presentation.compose.composable
 import by.rowing.sanbaiteam.shared.fileimport.ExternalFileImport
 import by.rowing.sanbaiteam.shared.main.presentation.MainScreen
 import by.rowing.sanbaiteam.shared.main.presentation.MainViewModel
@@ -63,10 +63,11 @@ fun App(importUri: String? = null) {
 
 private val navigationBuilder: (ComposeNavigator) -> NavGraphBuilder.() -> Unit = { composeNavigator ->
     {
-        composable<MainNavigation.Root> {
-            val viewModel = koinViewModel<MainViewModel> { parametersOf(composeNavigator) }
-            MainScreen(viewModel = viewModel)
-        }
+        composable<MainNavigation.Root, MainViewModel>(
+            viewModelFactory = {
+                koinViewModel<MainViewModel> { parametersOf(composeNavigator) }
+            }
+        ) { viewModel -> MainScreen(viewModel = viewModel) }
         AthletesNavGraphProvider.athletesNavGraph(
             builder = this,
             navigator = composeNavigator

@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.training.presentation.add
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
+import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
@@ -64,7 +65,7 @@ internal class AddTrainingViewModel(
             dateFormatted = TimeUtils.formatDate(dateMillis)
         )
     }
-) {
+), NavigateBackAware {
 
     private var pendingInitialImportUri: String? = importUri
 
@@ -77,6 +78,10 @@ internal class AddTrainingViewModel(
         if (!importUri.isNullOrBlank()) {
             changeState { copy(importNotice = UiText.of(Res.string.add_training_import_ready)) }
         }
+    }
+
+    override fun navigateBack() {
+        composeNavigator.navigateBack()
     }
 
     fun consumeInitialImportUri(): String? = pendingInitialImportUri.also { pendingInitialImportUri = null }
@@ -287,10 +292,6 @@ internal class AddTrainingViewModel(
             }
             withContext(Dispatchers.Main.immediate) { composeNavigator.navigateBack() }
         }
-    }
-
-    fun onBackClick() {
-        composeNavigator.navigateBack()
     }
 
     fun clearValidationError() {

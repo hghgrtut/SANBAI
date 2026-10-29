@@ -2,11 +2,11 @@ package by.rowing.sanbaiteam.calculator.presentation.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
-import androidx.navigation.compose.composable
 import by.rowing.sanbaiteam.calculator.presentation.CalculatorViewModel
 import by.rowing.sanbaiteam.calculator.presentation.compose.CalculatorScreen
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
+import by.rowing.sanbaiteam.core.presentation.compose.composable
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -17,11 +17,11 @@ object CalculatorNavGraphProvider {
         builder: NavGraphBuilder,
         navigator: ComposeNavigator,
     ) {
-        builder.composable<CalculatorNavigation.Calculator> {
-            CalculatorScreen(
-                viewModel = koinViewModel<CalculatorViewModel> { parametersOf(navigator) }
-            )
-        }
+        builder.composable<CalculatorNavigation.Calculator, CalculatorViewModel>(
+            viewModelFactory = {
+                koinViewModel<CalculatorViewModel> { parametersOf(navigator) }
+            }
+        ) { viewModel -> CalculatorScreen(viewModel = viewModel) }
     }
 
     fun navigateToRoot(

@@ -64,7 +64,7 @@ private fun TrainingCompareContent(
         topBar = {
             TopAppBar(
                 title = stringResource(Res.string.training_compare_title),
-                onNavIconClick = actions::onBack,
+                onNavIconClick = actions::navigateBack,
             )
         },
         bottomBar = {

@@ -34,7 +34,7 @@ internal class AthletesViewModel(
         }
     }
 
-    override fun onBackClick() {
+    override fun navigateBack() {
         composeNavigator.navigateBack()
     }
 

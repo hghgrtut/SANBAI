@@ -5,6 +5,7 @@ import by.rowing.sanbaiteam.calculator.resources.calculator_error_pace
 import by.rowing.sanbaiteam.calculator.resources.calculator_error_percent
 import by.rowing.sanbaiteam.calculator.resources.calculator_error_record_pace
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
+import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
@@ -12,9 +13,9 @@ import by.rowing.sanbaiteam.uikit.component.UiText
 
 internal class CalculatorViewModel(
     private val composeNavigator: ComposeNavigator,
-) : ComposeBaseViewModel<CalculatorState>(initialState = CalculatorState()) {
+) : ComposeBaseViewModel<CalculatorState>(initialState = CalculatorState()), NavigateBackAware {
 
-    fun onBackClick() {
+    override fun navigateBack() {
         composeNavigator.navigateBack()
     }
 
