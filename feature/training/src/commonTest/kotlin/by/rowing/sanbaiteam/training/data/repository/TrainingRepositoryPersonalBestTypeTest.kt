@@ -162,6 +162,9 @@ internal class TrainingRepositoryPersonalBestTypeTest {
 
         override suspend fun getAllTrainingEntities(): List<TrainingEntity> = listOfNotNull(training)
 
+        override suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity> =
+            listOfNotNull(training).filter { it.id in trainingIds }
+
         override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
             training?.takeIf { it.id == trainingId }
 
@@ -181,6 +184,9 @@ internal class TrainingRepositoryPersonalBestTypeTest {
 
         override suspend fun getPiecesForTraining(trainingId: Long): List<TrainingAthletePieceEntity> =
             pieces.filter { it.trainingId == trainingId }
+
+        override suspend fun getPiecesForTrainings(trainingIds: List<Long>): List<TrainingAthletePieceEntity> =
+            pieces.filter { it.trainingId in trainingIds }
 
         override suspend fun getAthleteIdsInTraining(trainingId: Long): List<Long> =
             pieces.filter { it.trainingId == trainingId }.map { it.athleteId }.distinct()

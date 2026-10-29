@@ -23,12 +23,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableRows
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -77,8 +79,10 @@ import by.rowing.sanbaiteam.training.resources.training_search_empty_title
 import by.rowing.sanbaiteam.training.resources.training_search_no_results
 import by.rowing.sanbaiteam.training.resources.training_search_placeholder
 import by.rowing.sanbaiteam.training.resources.training_selection_cancel
+import by.rowing.sanbaiteam.training.resources.training_selection_clear_all
+import by.rowing.sanbaiteam.training.resources.training_selection_select_all
 import by.rowing.sanbaiteam.training.resources.training_selection_title
-import by.rowing.sanbaiteam.training.resources.training_transfer_export_action
+import by.rowing.sanbaiteam.training.resources.training_transfer_export_selected_action
 import by.rowing.sanbaiteam.training.resources.training_transfer_import_action
 import by.rowing.sanbaiteam.training.resources.training_transfer_notice_title
 import by.rowing.sanbaiteam.uikit.component.Badge
@@ -149,7 +153,8 @@ private fun ListTrainingScreenContent(
             ListTrainingTopBar(
                 actions = actions,
                 openBackupLauncher = openBackupLauncher,
-                state = state
+                state = state,
+                visibleTrainingIds = filteredTrainings.map { training -> training.trainingId },
             )
         },
         floatingActionButton = {
@@ -216,12 +221,14 @@ private fun ListTrainingScreenContent(
 @Composable
 private fun ListTrainingTopBar(
     state: ListTrainingState,
+    visibleTrainingIds: List<Long>,
     openBackupLauncher: () -> Unit,
     actions: ListTrainingScreenActions
 ) {
     if (state.isSelectionMode) {
         SelectionTopBar(
-            selectedCount = state.selectedTrainingIds.size,
+            state = state,
+            visibleTrainingIds = visibleTrainingIds,
             actions = actions
         )
     } else {
@@ -235,11 +242,14 @@ private fun ListTrainingTopBar(
 
 @Composable
 private fun SelectionTopBar(
-    selectedCount: Int,
+    state: ListTrainingState,
+    visibleTrainingIds: List<Long>,
     actions: ListTrainingScreenActions
 ) {
+    val allVisibleSelected = visibleTrainingIds.isNotEmpty() &&
+            visibleTrainingIds.all { trainingId -> trainingId in state.selectedTrainingIds }
     TopAppBar(
-        title = stringResource(Res.string.training_selection_title, selectedCount),
+        title = stringResource(Res.string.training_selection_title, state.selectedTrainingIds.size),
         navigationIcon = {
             IconButton(onClick = actions::onCancelSelection) {
                 Icon(
@@ -249,6 +259,30 @@ private fun SelectionTopBar(
             }
         },
         actions = {
+            IconButton(
+                onClick = { actions.onToggleSelectAllClick(visibleTrainingIds) },
+                enabled = visibleTrainingIds.isNotEmpty()
+            ) {
+                Icon(
+                    imageVector = if (allVisibleSelected) Icons.Default.Deselect else Icons.Default.SelectAll,
+                    contentDescription = stringResource(
+                        if (allVisibleSelected) {
+                            Res.string.training_selection_clear_all
+                        } else {
+                            Res.string.training_selection_select_all
+                        }
+                    )
+                )
+            }
+            IconButton(
+                onClick = actions::onExportSelectedClick,
+                enabled = !state.isTransferring
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = stringResource(Res.string.training_transfer_export_selected_action)
+                )
+            }
             IconButton(onClick = actions::onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
@@ -270,15 +304,6 @@ private fun ListTrainingTopBarWithSearch(
             title = stringResource(Res.string.training_list_title),
             actions = {
                 IconButton(
-                    onClick = actions::onExportClick,
-                    enabled = !state.isTransferring
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FileDownload,
-                        contentDescription = stringResource(Res.string.training_transfer_export_action)
-                    )
-                }
-                IconButton(
                     onClick = openBackupLauncher,
                     enabled = !state.isTransferring
                 ) {
@@ -291,11 +316,7 @@ private fun ListTrainingTopBarWithSearch(
                     Icon(
                         imageVector = Icons.Default.FilterList,
                         contentDescription = stringResource(Res.string.training_filter_content_description),
-                        tint = if (state.showFilters) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                        tint = MaterialTheme.colorScheme.run { if (state.showFilters) primary else onSurfaceVariant }
                     )
                 }
             },

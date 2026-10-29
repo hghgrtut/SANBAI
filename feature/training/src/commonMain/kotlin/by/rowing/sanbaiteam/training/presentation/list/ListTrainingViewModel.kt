@@ -101,6 +101,20 @@ internal class ListTrainingViewModel(
         }
     }
 
+    override fun onToggleSelectAllClick(trainingIds: List<Long>) {
+        if (trainingIds.isEmpty()) return
+        changeState {
+            val allSelected = trainingIds.all { trainingId -> trainingId in selectedTrainingIds }
+            copy(
+                selectedTrainingIds = if (allSelected) {
+                    emptySet()
+                } else {
+                    selectedTrainingIds + trainingIds
+                }
+            )
+        }
+    }
+
     override fun onDeleteClick() {
         changeState { copy(deleteConfirmationRequested = true) }
     }
@@ -118,11 +132,13 @@ internal class ListTrainingViewModel(
         }
     }
 
-    override fun onExportClick() {
+    override fun onExportSelectedClick() {
         if (state.isTransferring) return
+        val selectedIds = state.selectedTrainingIds
+        if (selectedIds.isEmpty()) return
         changeState { copy(isTransferring = true) }
         viewModelScope.launch {
-            runCatching { trainingTransferRepository.exportAllBackup() }
+            runCatching { trainingTransferRepository.exportSelectedBackup(selectedIds) }
                 .onSuccess { backup ->
                     pendingExportJson = TrainingBackupSerializer.encode(backup)
                     changeState {

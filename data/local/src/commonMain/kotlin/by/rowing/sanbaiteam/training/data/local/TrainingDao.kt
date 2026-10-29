@@ -31,6 +31,9 @@ interface TrainingDao {
     @Query("SELECT * FROM $TABLE_TRAINING ORDER BY dateMillis DESC")
     suspend fun getAllTrainingEntities(): List<TrainingEntity>
 
+    @Query("SELECT * FROM $TABLE_TRAINING WHERE id IN (:trainingIds) ORDER BY dateMillis DESC")
+    suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity>
+
     @Query("SELECT * FROM $TABLE_TRAINING WHERE id = :trainingId")
     suspend fun getTrainingById(trainingId: Long): TrainingEntity?
 
@@ -63,6 +66,15 @@ interface TrainingDao {
         """
     )
     suspend fun getPiecesForTraining(trainingId: Long): List<TrainingAthletePieceEntity>
+
+    @Query(
+        """
+        SELECT * FROM $TABLE_TRAINING_ATHLETE_PIECE
+        WHERE trainingId IN (:trainingIds)
+        ORDER BY trainingId, athleteId, `order`
+        """
+    )
+    suspend fun getPiecesForTrainings(trainingIds: List<Long>): List<TrainingAthletePieceEntity>
 
     @Query(
         """
