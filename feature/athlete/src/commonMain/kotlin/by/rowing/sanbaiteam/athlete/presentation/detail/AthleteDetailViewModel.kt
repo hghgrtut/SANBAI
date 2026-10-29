@@ -30,7 +30,7 @@ internal class AthleteDetailViewModel(
         viewModelScope.launch { loadAthlete() }
     }
 
-    override fun onBackClick() {
+    override fun navigateBack() {
         composeNavigator.navigateBack()
     }
 
@@ -58,7 +58,7 @@ internal class AthleteDetailViewModel(
                 )
             )
             savePersonalBests()
-            onBackClick()
+            navigateBack()
         }
     }
 

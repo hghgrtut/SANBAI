@@ -96,7 +96,7 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
 
     Scaffold(
         modifier = Modifier.imePadding(),
-        topBar = addTrainingToolbar(onBackClick = viewModel::onBackClick),
+        topBar = addTrainingToolbar(onBackClick = viewModel::navigateBack),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = viewModel::showSaveTrainingDialog,

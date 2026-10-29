@@ -85,7 +85,6 @@ import by.rowing.sanbaiteam.training.resources.training_selection_title
 import by.rowing.sanbaiteam.training.resources.training_transfer_export_selected_action
 import by.rowing.sanbaiteam.training.resources.training_transfer_import_action
 import by.rowing.sanbaiteam.training.resources.training_transfer_notice_title
-import by.rowing.sanbaiteam.uikit.component.BackHandler
 import by.rowing.sanbaiteam.uikit.component.Badge
 import by.rowing.sanbaiteam.uikit.component.Checkbox
 import by.rowing.sanbaiteam.uikit.component.CheckedState
@@ -147,8 +146,6 @@ private fun ListTrainingScreenContent(
             actions.onExportPromptLaunched()
         }
     }
-
-    BackHandler { actions.onBackClick() }
 
     Scaffold(
         modifier = Modifier.imePadding(),
@@ -323,7 +320,7 @@ private fun ListTrainingTopBarWithSearch(
                     )
                 }
             },
-            onNavIconClick = actions::onBackClick
+            onNavIconClick = actions::navigateBack
         )
         TextField(
             value = state.searchQuery,

@@ -105,7 +105,7 @@ private fun AddAthleteTopBar(actions: AddAthleteScreenActions) {
                 )
             }
         },
-        onNavIconClick = actions::onBackClick
+        onNavIconClick = actions::navigateBack
     )
 }
 

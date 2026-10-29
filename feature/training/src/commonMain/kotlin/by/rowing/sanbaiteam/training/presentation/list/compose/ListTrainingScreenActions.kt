@@ -1,8 +1,8 @@
 package by.rowing.sanbaiteam.training.presentation.list.compose
 
-internal interface ListTrainingScreenActions {
+import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 
-    fun onBackClick()
+internal interface ListTrainingScreenActions : NavigateBackAware {
 
     fun onSearchQueryChange(newQuery: String)
 

@@ -259,7 +259,7 @@ private fun AthleteListTopBarWithSearch(
                     )
                 }
             },
-            onNavIconClick = actions::onBackClick
+            onNavIconClick = actions::navigateBack
         )
         TextField(
             value = state.searchQuery,

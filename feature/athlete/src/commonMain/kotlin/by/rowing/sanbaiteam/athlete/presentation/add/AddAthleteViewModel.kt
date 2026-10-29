@@ -27,7 +27,7 @@ internal class AddAthleteViewModel(
     )
 ), AddAthleteScreenActions {
 
-    override fun onBackClick() {
+    override fun navigateBack() {
         composeNavigator.navigateBack()
     }
 
@@ -90,7 +90,7 @@ internal class AddAthleteViewModel(
                     speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null }
                 )
             )
-            onBackClick()
+            navigateBack()
         }
     }
 

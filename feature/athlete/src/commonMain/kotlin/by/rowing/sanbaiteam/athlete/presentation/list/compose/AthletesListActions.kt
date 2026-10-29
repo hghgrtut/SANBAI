@@ -1,8 +1,8 @@
 package by.rowing.sanbaiteam.athlete.presentation.list.compose
 
-internal interface AthletesListActions {
+import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 
-    fun onBackClick()
+internal interface AthletesListActions : NavigateBackAware {
 
     fun onSearchQueryChange(newQuery: String)
 
@@ -14,13 +14,13 @@ internal interface AthletesListActions {
 
     companion object {
 
-        fun empty() = object : AthletesListActions {
+        fun empty(): AthletesListActions =
+            object : AthletesListActions, NavigateBackAware by NavigateBackAware.empty() {
 
-            override fun onBackClick() {}
-            override fun onSearchQueryChange(newQuery: String) {}
-            override fun onShowFiltersChange(showFilters: Boolean) {}
-            override fun onAddAthleteClick() {}
-            override fun onAthleteClick(athleteId: Long) {}
-        }
+                override fun onSearchQueryChange(newQuery: String) {}
+                override fun onShowFiltersChange(showFilters: Boolean) {}
+                override fun onAddAthleteClick() {}
+                override fun onAthleteClick(athleteId: Long) {}
+            }
     }
 }

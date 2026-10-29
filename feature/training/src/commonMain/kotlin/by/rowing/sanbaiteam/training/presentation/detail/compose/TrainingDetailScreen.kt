@@ -70,7 +70,7 @@ private fun TrainingDetailContent(
         topBar = {
             TopAppBar(
                 title = stringResource(Res.string.training_detail_title),
-                onNavIconClick = actions::onBackClick,
+                onNavIconClick = actions::navigateBack,
                 actions = {
                     if (!state.isLoading && !state.notFound) {
                         IconButton(onClick = actions::onCompareClick) {

@@ -2,24 +2,19 @@ package by.rowing.sanbaiteam.training.presentation.comparison
 
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
+import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.presentation.comparison.models.TrainingCompareState
 import kotlinx.coroutines.launch
-
-internal interface TrainingCompareActions {
-    fun onToggleSelection(selectedTrainingId: Long)
-    fun onConfirm()
-    fun onReset()
-    fun onBack()
-}
 
 internal class TrainingCompareViewModel(
     private val repository: TrainingRepository,
     private val composeNavigator: ComposeNavigator,
     private val comparisonSelectionStore: TrainingComparisonSelectionStore,
     private val trainingId: Long,
-) : ComposeBaseViewModel<TrainingCompareState>(initialState = TrainingCompareState()), TrainingCompareActions {
+) : ComposeBaseViewModel<TrainingCompareState>(initialState = TrainingCompareState()), TrainingCompareActions,
+    NavigateBackAware {
 
     init {
         viewModelScope.launch {
@@ -66,7 +61,7 @@ internal class TrainingCompareViewModel(
         composeNavigator.navigateBack()
     }
 
-    override fun onBack() {
+    override fun navigateBack() {
         composeNavigator.navigateBack()
     }
 }

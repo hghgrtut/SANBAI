@@ -66,7 +66,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun CalculatorScreen(viewModel: CalculatorViewModel) {
     CalculatorScreenContent(
         state = viewModel.state,
-        onBackClick = viewModel::onBackClick,
+        onBackClick = viewModel::navigateBack,
         onModeChange = viewModel::changeMode,
         onRecordPaceChange = viewModel::changeRecordPace,
         onPaceChange = viewModel::changePace,

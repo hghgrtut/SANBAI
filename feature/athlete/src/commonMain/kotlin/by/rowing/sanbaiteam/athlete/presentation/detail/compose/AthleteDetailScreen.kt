@@ -146,7 +146,7 @@ private fun RowDetailsTopBar(
                 }
             }
         },
-        onNavIconClick = actions::onBackClick
+        onNavIconClick = actions::navigateBack
     )
 }
 
