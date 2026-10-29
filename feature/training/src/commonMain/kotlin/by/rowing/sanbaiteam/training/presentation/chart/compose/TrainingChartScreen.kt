@@ -72,7 +72,7 @@ private fun TrainingChartContent(
         topBar = {
             TopAppBar(
                 title = stringResource(Res.string.training_chart_title, state.order),
-                onNavIconClick = actions::onBackClick,
+                onNavIconClick = actions::navigateBack,
             )
         }
     ) { paddingValues ->

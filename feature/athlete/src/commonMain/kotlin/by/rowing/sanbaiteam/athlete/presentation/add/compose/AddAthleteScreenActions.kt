@@ -1,8 +1,8 @@
 package by.rowing.sanbaiteam.athlete.presentation.add.compose
 
-internal interface AddAthleteScreenActions {
+import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 
-    fun onBackClick()
+internal interface AddAthleteScreenActions : NavigateBackAware {
 
     fun onSaveClick()
 
@@ -16,14 +16,14 @@ internal interface AddAthleteScreenActions {
 
     companion object {
 
-        fun empty() = object : AddAthleteScreenActions {
+        fun empty(): AddAthleteScreenActions =
+            object : AddAthleteScreenActions, NavigateBackAware by NavigateBackAware.empty() {
 
-            override fun onBackClick() {}
-            override fun onSaveClick() {}
-            override fun changeName(newName: String) {}
-            override fun changeBirthDate(newDate: String) {}
-            override fun changeSpeedCoachSerial(newSerial: String) {}
-            override fun changeGender(isMale: Boolean) {}
-        }
+                override fun onSaveClick() {}
+                override fun changeName(newName: String) {}
+                override fun changeBirthDate(newDate: String) {}
+                override fun changeSpeedCoachSerial(newSerial: String) {}
+                override fun changeGender(isMale: Boolean) {}
+            }
     }
 }

@@ -9,13 +9,6 @@ import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.presentation.chart.models.TrainingChartState
 import kotlinx.coroutines.launch
 
-internal interface TrainingChartActions {
-
-    fun onBackClick()
-
-    fun onMetricSelected(metric: TrainingChartMetric)
-}
-
 internal class TrainingChartViewModel(
     private val repository: TrainingRepository,
     private val composeNavigator: ComposeNavigator,
@@ -60,7 +53,7 @@ internal class TrainingChartViewModel(
         }
     }
 
-    override fun onBackClick() {
+    override fun navigateBack() {
         composeNavigator.navigateBack()
     }
 

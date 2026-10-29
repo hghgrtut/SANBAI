@@ -2,10 +2,9 @@ package by.rowing.sanbaiteam.training.presentation.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
-import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
+import by.rowing.sanbaiteam.core.presentation.compose.composable
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingScreen
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartViewModel
@@ -26,37 +25,33 @@ object TrainingNavGraphProvider {
         builder: NavGraphBuilder,
         navigator: ComposeNavigator
     ) {
-        builder.composable<TrainingNavigation.TrainingList> {
-            ListTrainingScreen(viewModel = koinViewModel<ListTrainingViewModel> { parametersOf(navigator) })
-        }
-        builder.composable<TrainingNavigation.TrainingAdd> { backStackEntry ->
-            val route = backStackEntry.toRoute<TrainingNavigation.TrainingAdd>()
-            AddTrainingScreen(
-                viewModel = koinViewModel<AddTrainingViewModel> {
-                    parametersOf(navigator, route.importUri)
-                }
-            )
-        }
-        builder.composable<TrainingNavigation.TrainingDetail> { backStackEntry ->
-            val trainingId = backStackEntry.toRoute<TrainingNavigation.TrainingDetail>().trainingId
-            TrainingDetailScreen(
-                viewModel = koinViewModel<TrainingDetailViewModel> { parametersOf(navigator, trainingId) }
-            )
-        }
-        builder.composable<TrainingNavigation.TrainingCompare> { backStackEntry ->
-            val trainingId = backStackEntry.toRoute<TrainingNavigation.TrainingCompare>().trainingId
-            TrainingCompareScreen(
-                viewModel = koinViewModel<TrainingCompareViewModel> { parametersOf(navigator, trainingId) }
-            )
-        }
-        builder.composable<TrainingNavigation.TrainingChart> { backStackEntry ->
-            val route = backStackEntry.toRoute<TrainingNavigation.TrainingChart>()
-            TrainingChartScreen(
-                viewModel = koinViewModel<TrainingChartViewModel> {
+        builder.composable<TrainingNavigation.TrainingList, ListTrainingViewModel>(
+            viewModelFactory = {
+                koinViewModel<ListTrainingViewModel> { parametersOf(navigator) }
+            }
+        ) { viewModel -> ListTrainingScreen(viewModel = viewModel) }
+        builder.composable<TrainingNavigation.TrainingAdd, AddTrainingViewModel>(
+            viewModelFactory = { route ->
+                koinViewModel<AddTrainingViewModel> { parametersOf(navigator, route.importUri) }
+            }
+        ) { viewModel -> AddTrainingScreen(viewModel = viewModel) }
+        builder.composable<TrainingNavigation.TrainingDetail, TrainingDetailViewModel>(
+            viewModelFactory = { route ->
+                koinViewModel<TrainingDetailViewModel> { parametersOf(navigator, route.trainingId) }
+            }
+        ) { viewModel -> TrainingDetailScreen(viewModel = viewModel) }
+        builder.composable<TrainingNavigation.TrainingCompare, TrainingCompareViewModel>(
+            viewModelFactory = { route ->
+                koinViewModel<TrainingCompareViewModel> { parametersOf(navigator, route.trainingId) }
+            }
+        ) { viewModel -> TrainingCompareScreen(viewModel = viewModel) }
+        builder.composable<TrainingNavigation.TrainingChart, TrainingChartViewModel>(
+            viewModelFactory = { route ->
+                koinViewModel<TrainingChartViewModel> {
                     parametersOf(navigator, route.trainingId, route.order, route.metric)
                 }
-            )
-        }
+            }
+        ) { viewModel -> TrainingChartScreen(viewModel = viewModel) }
     }
 
     fun navigateToRoot(

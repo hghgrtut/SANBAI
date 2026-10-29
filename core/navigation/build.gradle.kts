@@ -26,6 +26,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:annotation"))
+            api(project(":uikit"))
             implementation(compose.runtime)
             implementation(compose.ui)
             implementation(libs.jetbrains.navigation.compose)

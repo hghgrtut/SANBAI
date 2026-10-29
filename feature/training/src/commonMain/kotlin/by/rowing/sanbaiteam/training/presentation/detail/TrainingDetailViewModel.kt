@@ -35,7 +35,7 @@ internal class TrainingDetailViewModel(
         }
     }
 
-    override fun onBackClick() {
+    override fun navigateBack() {
         isClosing = true
         onClearComparison()
         composeNavigator.navigateBack()

@@ -1,10 +1,9 @@
 package by.rowing.sanbaiteam.athlete.presentation.detail
 
+import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 
-internal interface AthleteDetailScreenActions {
-
-    fun onBackClick()
+internal interface AthleteDetailScreenActions : NavigateBackAware {
 
     fun onSaveClick()
 
@@ -38,32 +37,37 @@ internal interface AthleteDetailScreenActions {
     fun clearRecordsError()
 
     companion object {
-        fun empty() = object : AthleteDetailScreenActions {
-            override fun onBackClick() {}
-            override fun onSaveClick() {}
-            override fun changeName(newName: String) {}
-            override fun changeBirthDate(newDate: String) {}
-            override fun changeGender(isMale: Boolean) {}
-            override fun changeSpeedCoachSerial(newSerial: String) {}
-            override fun addRecord(type: TrainingPieceType) {}
-            override fun removeRecord(
-                type: TrainingPieceType,
-                localId: Long
-            ) {
+
+        fun empty(): AthleteDetailScreenActions =
+            object : AthleteDetailScreenActions, NavigateBackAware by NavigateBackAware.empty() {
+
+                override fun onSaveClick() {}
+                override fun changeName(newName: String) {}
+                override fun changeBirthDate(newDate: String) {}
+                override fun changeGender(isMale: Boolean) {}
+                override fun changeSpeedCoachSerial(newSerial: String) {}
+                override fun addRecord(type: TrainingPieceType) {}
+                override fun removeRecord(
+                    type: TrainingPieceType,
+                    localId: Long
+                ) {
+                }
+
+                override fun changeRecordDistance(
+                    type: TrainingPieceType,
+                    localId: Long,
+                    text: String
+                ) {
+                }
+
+                override fun changeRecordTime(
+                    type: TrainingPieceType,
+                    localId: Long,
+                    text: String
+                ) {
+                }
+
+                override fun clearRecordsError() {}
             }
-            override fun changeRecordDistance(
-                type: TrainingPieceType,
-                localId: Long,
-                text: String
-            ) {
-            }
-            override fun changeRecordTime(
-                type: TrainingPieceType,
-                localId: Long,
-                text: String
-            ) {
-            }
-            override fun clearRecordsError() {}
-        }
     }
 }
