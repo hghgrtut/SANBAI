@@ -19,6 +19,7 @@ import by.rowing.sanbaiteam.training.data.models.comparison.ComparablePiece
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailState
+import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingPieceItem
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -280,7 +281,16 @@ internal class TrainingRepository(
                 type = training.type,
                 pieces = pieces
             ),
-            athletes = athleteNames
+            athletes = athleteNames,
+            dateMillis = training.dateMillis,
+            athleteIds = athleteIds,
+            pieces = pieces.map { piece ->
+                ListTrainingPieceItem(
+                    distanceMeters = piece.distanceMeters,
+                    timeMillis = piece.timeMillis,
+                    lactate = piece.lactate,
+                )
+            },
         )
     }
 

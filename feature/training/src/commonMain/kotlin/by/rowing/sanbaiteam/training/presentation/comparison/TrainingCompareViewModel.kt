@@ -1,6 +1,8 @@
 package by.rowing.sanbaiteam.training.presentation.comparison
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
+import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
@@ -12,27 +14,15 @@ internal class TrainingCompareViewModel(
     private val repository: TrainingRepository,
     private val composeNavigator: ComposeNavigator,
     private val comparisonSelectionStore: TrainingComparisonSelectionStore,
+    private val athletesRepository: AthletesRepository,
     private val trainingId: Long,
 ) : ComposeBaseViewModel<TrainingCompareState>(initialState = TrainingCompareState()), TrainingCompareActions,
     NavigateBackAware {
 
-    init {
-        viewModelScope.launch {
-            val candidates = repository.getComparisonCandidates(trainingId)
-            val availableIds = candidates.map { it.trainingId }.toSet()
-            val storedSelection = comparisonSelectionStore.selection.value.orEmpty()
-            val selectedIds = storedSelection.intersect(availableIds)
-
-            changeState {
-                TrainingCompareState(
-                    typeResId = candidates.firstOrNull()?.trainingTypeResId,
-                    items = candidates,
-                    selectedIds = selectedIds,
-                    hasAppliedComparison = storedSelection.isNotEmpty(),
-                    isLoading = false,
-                )
-            }
-        }
+    override fun onCreated(source: LifecycleOwner) {
+        super.onCreated(source)
+        loadCandidates()
+        loadAthleteCatalog()
     }
 
     override fun onToggleSelection(selectedTrainingId: Long) {
@@ -63,5 +53,32 @@ internal class TrainingCompareViewModel(
 
     override fun navigateBack() {
         composeNavigator.navigateBack()
+    }
+
+    private fun loadCandidates() {
+        viewModelScope.launch {
+            val candidates = repository.getComparisonCandidates(trainingId)
+            val availableIds = candidates.map { it.trainingId }.toSet()
+            val storedSelection = comparisonSelectionStore.selection.value.orEmpty()
+            val selectedIds = storedSelection.intersect(availableIds)
+
+            changeState {
+                copy(
+                    typeResId = candidates.firstOrNull()?.trainingTypeResId,
+                    items = candidates,
+                    selectedIds = selectedIds,
+                    hasAppliedComparison = storedSelection.isNotEmpty(),
+                    isLoading = false,
+                )
+            }
+        }
+    }
+
+    private fun loadAthleteCatalog() {
+        viewModelScope.launch {
+            athletesRepository.allAthletes.collect { athletes ->
+                changeState { copy(athleteCatalog = athletes) }
+            }
+        }
     }
 }

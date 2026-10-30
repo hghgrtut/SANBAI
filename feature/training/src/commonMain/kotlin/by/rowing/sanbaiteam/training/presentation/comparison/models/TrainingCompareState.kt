@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.presentation.comparison.models
 
+import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
 import org.jetbrains.compose.resources.StringResource
 
@@ -9,4 +10,5 @@ internal data class TrainingCompareState(
     val selectedIds: Set<Long> = emptySet(),
     val hasAppliedComparison: Boolean = false,
     val isLoading: Boolean = true,
+    val athleteCatalog: List<AthleteItemModel> = emptyList(),
 )
