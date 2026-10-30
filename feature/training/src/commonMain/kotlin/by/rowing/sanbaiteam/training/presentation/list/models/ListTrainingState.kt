@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.presentation.list.models
 
+import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.uikit.component.UiText
 
 internal data class ListTrainingState(
@@ -12,6 +13,7 @@ internal data class ListTrainingState(
     val selectedTrainingIds: Set<Long> = emptySet(),
     val deleteConfirmationRequested: Boolean = false,
     val isLoading: Boolean = true,
+    val athleteCatalog: List<AthleteItemModel> = emptyList(),
 ) {
 
     val isSelectionMode: Boolean get() = selectedTrainingIds.isNotEmpty()

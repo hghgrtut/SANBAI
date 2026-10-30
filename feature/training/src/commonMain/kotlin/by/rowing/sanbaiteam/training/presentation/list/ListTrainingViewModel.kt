@@ -1,6 +1,8 @@
 package by.rowing.sanbaiteam.training.presentation.list
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
+import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
@@ -24,6 +26,7 @@ internal class ListTrainingViewModel(
     private val repository: TrainingRepository,
     private val trainingTransferRepository: TrainingTransferRepository,
     private val backupFileAccess: BackupFileAccess,
+    private val athletesRepository: AthletesRepository,
     private val composeNavigator: ComposeNavigator
 ) : ComposeBaseViewModel<ListTrainingState>(
     initialState = ListTrainingState(
@@ -38,20 +41,10 @@ internal class ListTrainingViewModel(
 
     private var pendingExportJson: String? = null
 
-    init {
+    override fun onCreated(source: LifecycleOwner) {
+        super.onCreated(source)
         reloadTrainings()
-    }
-
-    fun reloadTrainings() {
-        viewModelScope.launch {
-            val trainings = repository.getTrainingsList()
-            changeState {
-                copy(
-                    items = trainings,
-                    isLoading = false,
-                )
-            }
-        }
+        loadAthleteCatalog()
     }
 
     override fun navigateBack() {
@@ -206,6 +199,26 @@ internal class ListTrainingViewModel(
 
     override fun onDismissTransferNotice() {
         changeState { copy(transferNotice = null) }
+    }
+
+    fun reloadTrainings() {
+        viewModelScope.launch {
+            val trainings = repository.getTrainingsList()
+            changeState {
+                copy(
+                    items = trainings,
+                    isLoading = false,
+                )
+            }
+        }
+    }
+
+    private fun loadAthleteCatalog() {
+        viewModelScope.launch {
+            athletesRepository.allAthletes.collect { athletes ->
+                changeState { copy(athleteCatalog = athletes) }
+            }
+        }
     }
 
     private fun toggleSelection(trainingId: Long) {

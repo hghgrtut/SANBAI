@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="uikit_back">Назад</string>
+    <string name="uikit_close">Закрыть</string>
+    <string name="uikit_range_from">От</string>
+    <string name="uikit_range_to">До</string>
 </resources>
