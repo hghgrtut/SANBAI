@@ -72,7 +72,14 @@ internal class AddTrainingViewModel(
     init {
         viewModelScope.launch {
             athleteRepository.allAthletes.collectLatest { athletes ->
-                changeState { copy(rowersCatalog = athletes) }
+                changeState {
+                    copy(
+                        rowersCatalog = athletes,
+                        crewAthletes = athletes.singleOrNull()?.id?.let { theOnlyRowerId ->
+                            listOfNotNull(crewAthletes.firstOrNull()?.copy(rowerId = theOnlyRowerId))
+                        } ?: crewAthletes,
+                    )
+                }
             }
         }
         if (!importUri.isNullOrBlank()) {

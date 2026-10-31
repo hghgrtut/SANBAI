@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.presentation.list
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
@@ -41,7 +42,8 @@ internal class ListTrainingViewModel(
 
     private var pendingExportJson: String? = null
 
-    init {
+    override fun onCreated(source: LifecycleOwner) {
+        super.onCreated(source)
         reloadTrainings()
         loadAthleteCatalog()
     }
