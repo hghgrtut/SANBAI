@@ -9,4 +9,5 @@ internal fun Module.databaseDaos() {
     single { get<RowingDatabase>().athleteDao() }
     single { get<RowingDatabase>().athletePersonalBestDao() }
     single { get<RowingDatabase>().trainingDao() }
+    single { get<RowingDatabase>().savedTrainingFilterDao() }
 }

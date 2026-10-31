@@ -1,12 +1,12 @@
 package by.rowing.sanbaiteam.training.presentation.list
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.training.data.models.TrainingTransferResult
+import by.rowing.sanbaiteam.training.data.repository.SavedTrainingFiltersRepository
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.data.trainingtransfer.BackupFileAccess
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingBackupSerializer
@@ -15,6 +15,8 @@ import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
 import by.rowing.sanbaiteam.training.presentation.list.compose.ListTrainingScreenActions
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
+import by.rowing.sanbaiteam.training.presentation.list.models.QuickFilterDialog
+import by.rowing.sanbaiteam.training.presentation.list.models.QuickFilterOverwrite
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavigation
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_transfer_export_error
@@ -29,6 +31,7 @@ internal class ListTrainingViewModel(
     private val trainingTransferRepository: TrainingTransferRepository,
     private val backupFileAccess: BackupFileAccess,
     private val athletesRepository: AthletesRepository,
+    private val savedFiltersRepository: SavedTrainingFiltersRepository,
     private val composeNavigator: ComposeNavigator
 ) : ComposeBaseViewModel<ListTrainingState>(
     initialState = ListTrainingState(
@@ -42,10 +45,10 @@ internal class ListTrainingViewModel(
 
     private var pendingExportJson: String? = null
 
-    override fun onCreated(source: LifecycleOwner) {
-        super.onCreated(source)
+    init {
         reloadTrainings()
         loadAthleteCatalog()
+        loadSavedFilters()
     }
 
     override fun navigateBack() {
@@ -78,6 +81,125 @@ internal class ListTrainingViewModel(
 
     override fun onLactateFilterToggle() {
         applyFilter(filter = state.filter.copy(lactateOnly = !state.filter.lactateOnly))
+    }
+
+    override fun onQuickFilterApply(filterId: Long) {
+        val savedFilter = state.savedFilters.firstOrNull { saved -> saved.id == filterId } ?: return
+        applyFilter(
+            filter = state.filter.applyPreset(savedFilter.filter),
+            activeQuickFilterId = filterId,
+        )
+    }
+
+    override fun onQuickFilterSaveClick() {
+        if (!state.filter.isEmpty) {
+            changeState { copy(quickFilterDialog = QuickFilterDialog.Save) }
+        }
+    }
+
+    override fun onQuickFilterSave(name: String) {
+        val normalizedName = name.trim()
+        if (normalizedName.isEmpty()) return
+        val filter = state.filter
+        state.savedFilters.firstOrNull { saved ->
+            saved.name.equals(
+                other = normalizedName,
+                ignoreCase = true
+            )
+        }?.let {
+            changeState {
+                copy(
+                    quickFilterOverwrite = QuickFilterOverwrite(
+                        name = normalizedName,
+                        filter = filter
+                    )
+                )
+            }
+            return
+        }
+        viewModelScope.launch {
+            val filterId = savedFiltersRepository.create(
+                name = normalizedName,
+                filter = filter,
+            )
+            changeState {
+                copy(
+                    quickFilterDialog = null,
+                    activeQuickFilterId = filterId,
+                )
+            }
+        }
+    }
+
+    override fun onQuickFilterOverwriteConfirm() {
+        val overwrite = state.quickFilterOverwrite ?: return
+        val existing = state.savedFilters.firstOrNull { saved ->
+            saved.name.equals(overwrite.name, ignoreCase = true)
+        } ?: return
+        viewModelScope.launch {
+            savedFiltersRepository.overwrite(
+                id = existing.id,
+                filter = overwrite.filter
+            )
+            changeState {
+                copy(
+                    quickFilterDialog = null,
+                    quickFilterOverwrite = null,
+                    activeQuickFilterId = existing.id,
+                )
+            }
+        }
+    }
+
+    override fun onQuickFilterOverwriteDismiss() {
+        changeState { copy(quickFilterOverwrite = null) }
+    }
+
+    override fun onQuickFilterManageClick(filterId: Long) {
+        if (state.savedFilters.none { saved -> saved.id == filterId }) return
+        changeState { copy(quickFilterDialog = QuickFilterDialog.Manage(filterId = filterId)) }
+    }
+
+    override fun onQuickFilterRename(filterId: Long, name: String) {
+        val normalizedName = name.trim()
+        if (normalizedName.isEmpty()) return
+        val nameTaken = state.savedFilters.any { saved ->
+            saved.id != filterId && saved.name.equals(normalizedName, ignoreCase = true)
+        }
+        if (nameTaken) return
+        viewModelScope.launch {
+            savedFiltersRepository.rename(
+                id = filterId,
+                name = normalizedName
+            )
+            changeState { copy(quickFilterDialog = null) }
+        }
+    }
+
+    override fun onQuickFilterDeleteClick(filterId: Long) {
+        changeState { copy(quickFilterDeleteId = filterId) }
+    }
+
+    override fun onQuickFilterDeleteConfirm() {
+        val filterId = state.quickFilterDeleteId ?: return
+        viewModelScope.launch {
+            savedFiltersRepository.delete(id = filterId)
+            changeState {
+                copy(
+                    quickFilterDeleteId = null,
+                    quickFilterDialog = null,
+                    activeQuickFilterId = activeQuickFilterId.takeIf { activeId -> activeId != filterId },
+                )
+            }
+        }
+    }
+
+    override fun onQuickFilterDeleteDismiss() {
+        changeState { copy(quickFilterDeleteId = null) }
+    }
+
+    override fun onQuickFilterDialogDismiss() {
+        changeState { copy(quickFilterDialog = null) }
     }
 
     override fun onShowFiltersChange(showFilters: Boolean) {
@@ -242,6 +364,21 @@ internal class ListTrainingViewModel(
         }
     }
 
+    private fun loadSavedFilters() {
+        viewModelScope.launch {
+            savedFiltersRepository.savedFilters.collect { savedFilters ->
+                changeState {
+                    copy(
+                        savedFilters = savedFilters,
+                        activeQuickFilterId = activeQuickFilterId?.takeIf { activeId ->
+                            savedFilters.any { saved -> saved.id == activeId }
+                        },
+                    )
+                }
+            }
+        }
+    }
+
     private fun toggleSelection(trainingId: Long) {
         changeState {
             copy(
@@ -254,11 +391,15 @@ internal class ListTrainingViewModel(
         }
     }
 
-    private fun applyFilter(filter: TrainingFilter) {
+    private fun applyFilter(
+        filter: TrainingFilter,
+        activeQuickFilterId: Long? = null,
+    ) {
         changeState {
             copy(
                 filter = filter,
                 activeFilterSheet = null,
+                activeQuickFilterId = activeQuickFilterId,
             )
         }
     }

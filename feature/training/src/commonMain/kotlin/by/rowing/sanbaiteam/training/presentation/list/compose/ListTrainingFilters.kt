@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -69,6 +73,7 @@ import by.rowing.sanbaiteam.training.resources.training_filters_apply
 import by.rowing.sanbaiteam.training.resources.training_filters_reset_all
 import by.rowing.sanbaiteam.training.resources.training_filters_reset_parameter
 import by.rowing.sanbaiteam.training.resources.training_filters_title
+import by.rowing.sanbaiteam.training.resources.training_quick_filter_save_action
 import by.rowing.sanbaiteam.uikit.component.BottomSheet
 import by.rowing.sanbaiteam.uikit.component.Chip
 import by.rowing.sanbaiteam.uikit.component.ChipRow
@@ -127,7 +132,22 @@ internal fun TrainingFiltersPanel(
             ) {
                 Text(text = stringResource(Res.string.training_filters_reset_all))
             }
+            IconButton(
+                onClick = actions::onQuickFilterSaveClick,
+                enabled = !filter.isEmpty,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.BookmarkAdd,
+                    contentDescription = stringResource(Res.string.training_quick_filter_save_action),
+                    tint = MaterialTheme.colorScheme.run { if (filter.isEmpty) onSurfaceVariant else primary },
+                )
+            }
         }
+        TrainingQuickFiltersRow(
+            savedFilters = state.savedFilters,
+            activeQuickFilterId = state.activeQuickFilterId,
+            actions = actions,
+        )
         ChipRow(contentPadding = PaddingValues(0.dp)) {
             for (parameter in TrainingFilterParameter.entries) {
                 FilterParameterChip(
@@ -491,7 +511,7 @@ private fun FilterSheetFooter(
 }
 
 @Composable
-private fun TrainingFilterParameter.chipLabel(
+internal fun TrainingFilterParameter.chipLabel(
     filter: TrainingFilter,
     athleteNames: Map<Long, String>,
 ): String = when (this) {

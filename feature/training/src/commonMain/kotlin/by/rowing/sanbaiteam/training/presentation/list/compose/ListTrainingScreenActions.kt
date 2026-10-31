@@ -18,6 +18,28 @@ internal interface ListTrainingScreenActions : NavigateBackAware {
 
     fun onLactateFilterToggle()
 
+    fun onQuickFilterApply(filterId: Long)
+
+    fun onQuickFilterSaveClick()
+
+    fun onQuickFilterSave(name: String)
+
+    fun onQuickFilterOverwriteConfirm()
+
+    fun onQuickFilterOverwriteDismiss()
+
+    fun onQuickFilterManageClick(filterId: Long)
+
+    fun onQuickFilterRename(filterId: Long, name: String)
+
+    fun onQuickFilterDeleteClick(filterId: Long)
+
+    fun onQuickFilterDeleteConfirm()
+
+    fun onQuickFilterDeleteDismiss()
+
+    fun onQuickFilterDialogDismiss()
+
     fun onShowFiltersChange(showFilters: Boolean)
 
     fun onAddTrainingClick()

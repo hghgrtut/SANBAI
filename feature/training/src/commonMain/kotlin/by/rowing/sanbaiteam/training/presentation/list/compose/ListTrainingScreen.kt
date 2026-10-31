@@ -183,6 +183,10 @@ private fun ListTrainingScreenContent(
             actions = actions,
         )
     }
+    TrainingQuickFilterDialogs(
+        state = state,
+        actions = actions,
+    )
     state.transferNotice?.let { notice ->
         TransferDataAlert(
             actions = actions,

@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.training.di
 import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboard
 import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboardImpl
+import by.rowing.sanbaiteam.training.data.repository.SavedTrainingFiltersRepository
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingViewModel
@@ -21,6 +22,7 @@ val trainingModule = module {
 
     singleOf(::TrainingChartReader)
     singleOf(::TrainingRepository)
+    singleOf(::SavedTrainingFiltersRepository)
     singleOf(::TrainingTransferRepository)
     singleOf(::TrainingComparisonSelectionStore)
     single<TrainingDashboard> { TrainingDashboardImpl(repository = get()) }
