@@ -118,7 +118,10 @@ fun Chip(
                 modifier = Modifier
                     .size(ICON_SIZE)
                     .clip(CLEAR_SHAPE)
-                    .clickable(enabled = enabled, onClick = onClearClick),
+                    .clickable(
+                        enabled = enabled,
+                        onClick = onClearClick
+                    ),
                 tint = contentColor,
             )
         }
@@ -126,17 +129,20 @@ fun Chip(
 }
 
 @Composable
-private fun chipContainerColor(selected: Boolean, enabled: Boolean): Color {
-    val colorScheme = MaterialTheme.colorScheme
-    return when {
-        !enabled -> colorScheme.surfaceVariant.copy(alpha = DISABLED_ALPHA)
-        selected -> colorScheme.primaryContainer
-        else -> colorScheme.surface
-    }
+private fun chipContainerColor(
+    selected: Boolean,
+    enabled: Boolean
+): Color = when {
+    !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = DISABLED_ALPHA)
+    selected -> MaterialTheme.colorScheme.primaryContainer
+    else -> MaterialTheme.colorScheme.surface
 }
 
 @Composable
-private fun chipContentColor(selected: Boolean, enabled: Boolean): Color {
+private fun chipContentColor(
+    selected: Boolean,
+    enabled: Boolean
+): Color {
     val colorScheme = MaterialTheme.colorScheme
     return when {
         !enabled -> colorScheme.onSurfaceVariant.copy(alpha = DISABLED_ALPHA)
@@ -146,13 +152,13 @@ private fun chipContentColor(selected: Boolean, enabled: Boolean): Color {
 }
 
 @Composable
-private fun chipBorderColor(selected: Boolean, enabled: Boolean): Color {
-    val colorScheme = MaterialTheme.colorScheme
-    return when {
-        !enabled -> colorScheme.outlineVariant.copy(alpha = DISABLED_ALPHA)
-        selected -> Color.Transparent
-        else -> colorScheme.outlineVariant
-    }
+private fun chipBorderColor(
+    selected: Boolean,
+    enabled: Boolean
+): Color = when {
+    !enabled -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = DISABLED_ALPHA)
+    selected -> Color.Transparent
+    else -> MaterialTheme.colorScheme.outlineVariant
 }
 
 private val CHIP_SHAPE = RoundedCornerShape(percent = 50)
@@ -169,7 +175,10 @@ private fun ChipPreview() {
                 modifier = Modifier.padding(Spacing.M),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.S),
             ) {
-                Chip(text = "Спортсмен", onClick = {})
+                Chip(
+                    text = "Спортсмен",
+                    onClick = {}
+                )
                 Chip(
                     text = "Тип: Одиночка",
                     selected = true,

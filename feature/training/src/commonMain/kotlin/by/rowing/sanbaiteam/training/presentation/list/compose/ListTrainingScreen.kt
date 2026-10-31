@@ -27,14 +27,14 @@ import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Route
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableRows
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +55,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import by.rowing.sanbaiteam.athlete.presentation.common.ItemCard
 import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
+import by.rowing.sanbaiteam.training.presentation.filter.applyTrainingFilter
 import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
@@ -68,16 +69,13 @@ import by.rowing.sanbaiteam.training.resources.training_add_training
 import by.rowing.sanbaiteam.training.resources.training_delete_action
 import by.rowing.sanbaiteam.training.resources.training_delete_confirm_message
 import by.rowing.sanbaiteam.training.resources.training_delete_confirm_title
+import by.rowing.sanbaiteam.training.resources.training_filter_active_badge
 import by.rowing.sanbaiteam.training.resources.training_filter_content_description
-import by.rowing.sanbaiteam.training.resources.training_filters_coming_soon
-import by.rowing.sanbaiteam.training.resources.training_filters_title
+import by.rowing.sanbaiteam.training.resources.training_filters_empty_action
+import by.rowing.sanbaiteam.training.resources.training_filters_empty_description
+import by.rowing.sanbaiteam.training.resources.training_filters_empty_title
 import by.rowing.sanbaiteam.training.resources.training_list_title
 import by.rowing.sanbaiteam.training.resources.training_no_trainings
-import by.rowing.sanbaiteam.training.resources.training_search_clear
-import by.rowing.sanbaiteam.training.resources.training_search_content_description
-import by.rowing.sanbaiteam.training.resources.training_search_empty_title
-import by.rowing.sanbaiteam.training.resources.training_search_no_results
-import by.rowing.sanbaiteam.training.resources.training_search_placeholder
 import by.rowing.sanbaiteam.training.resources.training_selection_cancel
 import by.rowing.sanbaiteam.training.resources.training_selection_clear_all
 import by.rowing.sanbaiteam.training.resources.training_selection_select_all
@@ -88,10 +86,8 @@ import by.rowing.sanbaiteam.training.resources.training_transfer_notice_title
 import by.rowing.sanbaiteam.uikit.component.Badge
 import by.rowing.sanbaiteam.uikit.component.Checkbox
 import by.rowing.sanbaiteam.uikit.component.CheckedState
-import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.EmptyState
 import by.rowing.sanbaiteam.uikit.component.Skeleton
-import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.UiText
 import by.rowing.sanbaiteam.uikit.component.button.Button
@@ -104,6 +100,21 @@ import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Instant
+import androidx.compose.material3.Badge as MaterialBadge
+
+private const val CONTENT_FADE_IN_MILLIS = 220
+private const val CONTENT_FADE_OUT_MILLIS = 140
+private const val CHECKBOX_ENTER_SCALE = 0.7f
+
+private val SKELETON_BADGE_WIDTH = 88.dp
+private val SKELETON_BADGE_HEIGHT = 20.dp
+private val SKELETON_DATE_WIDTH = 72.dp
+private val SKELETON_DATE_HEIGHT = 14.dp
+private val SKELETON_TITLE_HEIGHT = 28.dp
+private val SKELETON_SUBTITLE_HEIGHT = 16.dp
+private const val SKELETON_TITLE_FRACTION = 0.55f
+private const val SKELETON_SUBTITLE_FRACTION = 0.35f
+private const val SKELETON_ITEM_COUNT = 5
 
 @Composable
 internal fun ListTrainingScreen(
@@ -131,10 +142,8 @@ private fun ListTrainingScreenContent(
     state: ListTrainingState,
     actions: ListTrainingScreenActions
 ) {
-    val filteredTrainings = remember(state.searchQuery, state.items) {
-        state.items.filter { training ->
-            training.athletes.any { it.contains(state.searchQuery, ignoreCase = true) }
-        }
+    val filteredTrainings = remember(state.filter, state.items) {
+        state.items.applyTrainingFilter(trainingFilter = state.filter)
     }
 
     val createBackupLauncher = rememberCreateBackupLauncher(onCreated = actions::onExportToHandle)
@@ -157,51 +166,22 @@ private fun ListTrainingScreenContent(
                 visibleTrainingIds = filteredTrainings.map { training -> training.trainingId },
             )
         },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = !state.isSelectionMode,
-                enter = fadeIn() + scaleIn(),
-                exit = fadeOut() + scaleOut(),
-            ) {
-                AddTrainingFAB(onAddTraining = actions::onAddTrainingClick)
-            }
-        }
+        floatingActionButton = { AddTrainingButton(state = state) { actions.onAddTrainingClick() } }
     ) { paddingValues ->
-        Column(
+        TrainingListMainContent(
             modifier = Modifier.padding(paddingValues = paddingValues),
-            verticalArrangement = Arrangement.spacedBy(space = Spacing.S)
-        ) {
-            if (state.showFilters) {
-                TrainingFilters()
-            }
-            val contentState = when {
-                state.isLoading -> TrainingListContentState.LOADING
-                filteredTrainings.isEmpty() -> TrainingListContentState.EMPTY
-                else -> TrainingListContentState.CONTENT
-            }
-            AnimatedContent(
-                targetState = contentState,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(durationMillis = CONTENT_FADE_IN_MILLIS)) togetherWith
-                        fadeOut(animationSpec = tween(durationMillis = CONTENT_FADE_OUT_MILLIS))
-                },
-                label = "trainingListContent"
-            ) { targetState ->
-                when (targetState) {
-                    TrainingListContentState.LOADING -> TrainingListSkeleton()
-                    TrainingListContentState.EMPTY -> EmptyTrainingList(
-                        state = state,
-                        actions = actions
-                    )
-
-                    TrainingListContentState.CONTENT -> TrainingList(
-                        trainings = filteredTrainings,
-                        selectedTrainingIds = state.selectedTrainingIds,
-                        actions = actions
-                    )
-                }
-            }
-        }
+            state = state,
+            actions = actions,
+            filteredTrainings = filteredTrainings
+        )
+    }
+    state.activeFilterSheet?.let { parameter ->
+        TrainingFilterSheet(
+            parameter = parameter,
+            filter = state.filter,
+            athleteCatalog = state.athleteCatalog,
+            actions = actions,
+        )
     }
     state.transferNotice?.let { notice ->
         TransferDataAlert(
@@ -232,7 +212,7 @@ private fun ListTrainingTopBar(
             actions = actions
         )
     } else {
-        ListTrainingTopBarWithSearch(
+        ListTrainingTopBarContent(
             state = state,
             openBackupLauncher = openBackupLauncher,
             actions = actions
@@ -259,6 +239,10 @@ private fun SelectionTopBar(
             }
         },
         actions = {
+            FilterActionButton(
+                state = state,
+                actions = actions,
+            )
             IconButton(
                 onClick = { actions.onToggleSelectAllClick(visibleTrainingIds) },
                 enabled = visibleTrainingIds.isNotEmpty()
@@ -294,81 +278,120 @@ private fun SelectionTopBar(
 }
 
 @Composable
-private fun ListTrainingTopBarWithSearch(
+private fun ListTrainingTopBarContent(
     state: ListTrainingState,
     openBackupLauncher: () -> Unit,
     actions: ListTrainingScreenActions
 ) {
-    Column {
-        TopAppBar(
-            title = stringResource(Res.string.training_list_title),
-            actions = {
-                IconButton(
-                    onClick = openBackupLauncher,
-                    enabled = !state.isTransferring
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FileOpen,
-                        contentDescription = stringResource(Res.string.training_transfer_import_action)
-                    )
-                }
-                IconButton(onClick = { actions.onShowFiltersChange(!state.showFilters) }) {
-                    Icon(
-                        imageVector = Icons.Default.FilterList,
-                        contentDescription = stringResource(Res.string.training_filter_content_description),
-                        tint = MaterialTheme.colorScheme.run { if (state.showFilters) primary else onSurfaceVariant }
-                    )
-                }
-            },
-            onNavIconClick = actions::navigateBack
-        )
-        TextField(
-            value = state.searchQuery,
-            onValueChange = actions::onSearchQueryChange,
-            placeholder = { Text(stringResource(Res.string.training_search_placeholder)) },
-            leadingIcon = {
+    TopAppBar(
+        title = stringResource(Res.string.training_list_title),
+        actions = {
+            IconButton(
+                onClick = openBackupLauncher,
+                enabled = !state.isTransferring
+            ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(Res.string.training_search_content_description)
+                    imageVector = Icons.Default.FileOpen,
+                    contentDescription = stringResource(Res.string.training_transfer_import_action)
                 )
-            },
-            trailingIcon = {
-                if (state.searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { actions.onSearchQueryChange("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(Res.string.training_search_clear)
-                        )
+            }
+            FilterActionButton(
+                state = state,
+                actions = actions,
+            )
+        },
+        onNavIconClick = actions::navigateBack
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FilterActionButton(
+    state: ListTrainingState,
+    actions: ListTrainingScreenActions,
+) {
+    val activeCount = state.filter.activeParametersCount
+    val isHighlighted = state.showFilters || activeCount > 0
+    IconButton(onClick = { actions.onShowFiltersChange(!state.showFilters) }) {
+        BadgedBox(
+            badge = {
+                if (activeCount > 0) {
+                    MaterialBadge {
+                        Text(text = activeCount.toString())
                     }
                 }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = Spacing.M,
-                    vertical = Spacing.S
-                )
-        )
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.FilterList,
+                contentDescription = if (activeCount > 0) {
+                    stringResource(Res.string.training_filter_active_badge, activeCount)
+                } else {
+                    stringResource(Res.string.training_filter_content_description)
+                },
+                tint = MaterialTheme.colorScheme.run { if (isHighlighted) primary else onSurfaceVariant }
+            )
+        }
     }
 }
 
 @Composable
-private fun TrainingFilters() {
-    DataCard(
-        modifier = Modifier.padding(all = Spacing.M),
-        verticalSpacing = Spacing.SM
+private fun TrainingListMainContent(
+    modifier: Modifier,
+    state: ListTrainingState,
+    actions: ListTrainingScreenActions,
+    filteredTrainings: List<ListTrainingStateItem>
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(space = Spacing.S)
     ) {
-        Text(
-            text = stringResource(Res.string.training_filters_title),
-            style = TypographyPalette.H4,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = stringResource(Res.string.training_filters_coming_soon),
-            style = TypographyPalette.Body2Regular,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (state.showFilters) {
+            TrainingFiltersPanel(
+                state = state,
+                actions = actions,
+            )
+        }
+        val contentState = when {
+            state.isLoading -> TrainingListContentState.LOADING
+            filteredTrainings.isEmpty() -> TrainingListContentState.EMPTY
+            else -> TrainingListContentState.CONTENT
+        }
+        AnimatedContent(
+            targetState = contentState,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(durationMillis = CONTENT_FADE_IN_MILLIS)) togetherWith
+                        fadeOut(animationSpec = tween(durationMillis = CONTENT_FADE_OUT_MILLIS))
+            },
+            label = "trainingListContent"
+        ) { targetState ->
+            when (targetState) {
+                TrainingListContentState.LOADING -> TrainingListSkeleton()
+                TrainingListContentState.EMPTY -> EmptyTrainingList(
+                    filteredByFilter = state.items.isNotEmpty(),
+                    actions = actions
+                )
+
+                TrainingListContentState.CONTENT -> TrainingList(
+                    trainings = filteredTrainings,
+                    selectedTrainingIds = state.selectedTrainingIds,
+                    actions = actions
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun AddTrainingButton(
+    state: ListTrainingState,
+    onAddTrainingClick: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = !state.isSelectionMode,
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut(),
+    ) { AddTrainingFAB(onAddTraining = onAddTrainingClick) }
 }
 
 @Composable
@@ -548,15 +571,17 @@ private fun TrainingSkeletonItem() {
 
 @Composable
 private fun EmptyTrainingList(
-    state: ListTrainingState,
+    filteredByFilter: Boolean,
     actions: ListTrainingScreenActions
 ) {
-    if (state.searchQuery.isNotEmpty()) {
+    if (filteredByFilter) {
         EmptyState(
             modifier = Modifier.fillMaxSize(),
-            title = stringResource(Res.string.training_search_empty_title),
-            description = stringResource(Res.string.training_search_no_results, state.searchQuery),
-            icon = Icons.Default.SearchOff,
+            title = stringResource(Res.string.training_filters_empty_title),
+            description = stringResource(Res.string.training_filters_empty_description),
+            icon = Icons.Default.FilterList,
+            actionText = stringResource(Res.string.training_filters_empty_action),
+            onActionClick = actions::onResetFilters,
         )
     } else {
         EmptyState(
@@ -642,20 +667,6 @@ private enum class TrainingListContentState {
     EMPTY,
     CONTENT,
 }
-
-private const val CONTENT_FADE_IN_MILLIS = 220
-private const val CONTENT_FADE_OUT_MILLIS = 140
-private const val CHECKBOX_ENTER_SCALE = 0.7f
-
-private val SKELETON_BADGE_WIDTH = 88.dp
-private val SKELETON_BADGE_HEIGHT = 20.dp
-private val SKELETON_DATE_WIDTH = 72.dp
-private val SKELETON_DATE_HEIGHT = 14.dp
-private val SKELETON_TITLE_HEIGHT = 28.dp
-private val SKELETON_SUBTITLE_HEIGHT = 16.dp
-private const val SKELETON_TITLE_FRACTION = 0.55f
-private const val SKELETON_SUBTITLE_FRACTION = 0.35f
-private const val SKELETON_ITEM_COUNT = 5
 
 private fun suggestedBackupFileName(): String {
     val date = Instant.fromEpochMilliseconds(nowInMillis()).toLocalDateTime(TimeZone.currentSystemDefault()).date

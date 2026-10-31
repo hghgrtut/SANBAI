@@ -1,6 +1,5 @@
 package by.rowing.sanbaiteam.training.presentation.list
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
@@ -11,6 +10,8 @@ import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.data.trainingtransfer.BackupFileAccess
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingBackupSerializer
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
+import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
+import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
 import by.rowing.sanbaiteam.training.presentation.list.compose.ListTrainingScreenActions
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavigation
@@ -31,7 +32,6 @@ internal class ListTrainingViewModel(
 ) : ComposeBaseViewModel<ListTrainingState>(
     initialState = ListTrainingState(
         items = emptyList(),
-        searchQuery = "",
         showFilters = false,
         transferNotice = null,
         isTransferring = false,
@@ -41,8 +41,7 @@ internal class ListTrainingViewModel(
 
     private var pendingExportJson: String? = null
 
-    override fun onCreated(source: LifecycleOwner) {
-        super.onCreated(source)
+    init {
         reloadTrainings()
         loadAthleteCatalog()
     }
@@ -55,8 +54,28 @@ internal class ListTrainingViewModel(
         }
     }
 
-    override fun onSearchQueryChange(newQuery: String) {
-        changeState { copy(searchQuery = newQuery) }
+    override fun onFilterChange(filter: TrainingFilter) {
+        applyFilter(filter = filter)
+    }
+
+    override fun onFilterReset(parameter: TrainingFilterParameter) {
+        applyFilter(filter = state.filter.without(parameter))
+    }
+
+    override fun onResetFilters() {
+        applyFilter(filter = TrainingFilter())
+    }
+
+    override fun onFilterSheetOpen(parameter: TrainingFilterParameter) {
+        changeState { copy(activeFilterSheet = parameter) }
+    }
+
+    override fun onFilterSheetDismiss() {
+        changeState { copy(activeFilterSheet = null) }
+    }
+
+    override fun onLactateFilterToggle() {
+        applyFilter(filter = state.filter.copy(lactateOnly = !state.filter.lactateOnly))
     }
 
     override fun onShowFiltersChange(showFilters: Boolean) {
@@ -229,6 +248,15 @@ internal class ListTrainingViewModel(
                 } else {
                     selectedTrainingIds + trainingId
                 }
+            )
+        }
+    }
+
+    private fun applyFilter(filter: TrainingFilter) {
+        changeState {
+            copy(
+                filter = filter,
+                activeFilterSheet = null,
             )
         }
     }

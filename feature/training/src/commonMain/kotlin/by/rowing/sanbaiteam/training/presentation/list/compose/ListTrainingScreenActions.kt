@@ -1,10 +1,22 @@
 package by.rowing.sanbaiteam.training.presentation.list.compose
 
 import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
+import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
+import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
 
 internal interface ListTrainingScreenActions : NavigateBackAware {
 
-    fun onSearchQueryChange(newQuery: String)
+    fun onFilterChange(filter: TrainingFilter)
+
+    fun onFilterReset(parameter: TrainingFilterParameter)
+
+    fun onResetFilters()
+
+    fun onFilterSheetOpen(parameter: TrainingFilterParameter)
+
+    fun onFilterSheetDismiss()
+
+    fun onLactateFilterToggle()
 
     fun onShowFiltersChange(showFilters: Boolean)
 

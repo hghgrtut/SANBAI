@@ -3,7 +3,6 @@ package com.checker.detekt
 import com.checker.detekt.rule.MultipleArgumentListWrapping
 import com.checker.detekt.rule.MultipleParameterListWrapping
 import com.checker.detekt.rule.TopLevelDeclarationsShouldNotBePublic
-import com.checker.detekt.rule.ViewModelUseInitBlock
 import com.checker.detekt.rule.WrongClassDeclarationsOrder
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.RuleSet
@@ -17,7 +16,6 @@ internal class HonestsignDetektRulesProvider : RuleSetProvider {
         ruleSetId,
         listOf(
             TopLevelDeclarationsShouldNotBePublic(config),
-            ViewModelUseInitBlock(config),
             WrongClassDeclarationsOrder(config),
             MultipleArgumentListWrapping(config),
             MultipleParameterListWrapping(config),
