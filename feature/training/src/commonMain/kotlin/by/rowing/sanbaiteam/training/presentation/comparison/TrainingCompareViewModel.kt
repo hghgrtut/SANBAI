@@ -1,6 +1,5 @@
 package by.rowing.sanbaiteam.training.presentation.comparison
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
@@ -19,8 +18,7 @@ internal class TrainingCompareViewModel(
 ) : ComposeBaseViewModel<TrainingCompareState>(initialState = TrainingCompareState()), TrainingCompareActions,
     NavigateBackAware {
 
-    override fun onCreated(source: LifecycleOwner) {
-        super.onCreated(source)
+    init {
         loadCandidates()
         loadAthleteCatalog()
     }

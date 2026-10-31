@@ -18,10 +18,26 @@ internal data class TrainingFilter(
 ) {
 
     val isEmpty: Boolean
-        get() = athleteIds.isEmpty() &&
-                trainingTypes.isEmpty() &&
-                pieceTimeRange == null &&
-                pieceDistanceRange == null &&
-                !lactateOnly &&
-                dateRange == null
+        get() = TrainingFilterParameter.entries.any { parameter -> isActive(parameter) }
+
+    val activeParametersCount: Int
+        get() = TrainingFilterParameter.entries.count { parameter -> isActive(parameter) }
+
+    fun isActive(parameter: TrainingFilterParameter): Boolean = when (parameter) {
+        TrainingFilterParameter.ATHLETES -> athleteIds.isNotEmpty()
+        TrainingFilterParameter.TRAINING_TYPE -> trainingTypes.isNotEmpty()
+        TrainingFilterParameter.PIECE_TIME -> pieceTimeRange != null
+        TrainingFilterParameter.PIECE_DISTANCE -> pieceDistanceRange != null
+        TrainingFilterParameter.LACTATE -> lactateOnly
+        TrainingFilterParameter.DATE -> dateRange != null
+    }
+
+    fun without(parameter: TrainingFilterParameter): TrainingFilter = when (parameter) {
+        TrainingFilterParameter.ATHLETES -> copy(athleteIds = emptySet())
+        TrainingFilterParameter.TRAINING_TYPE -> copy(trainingTypes = emptySet())
+        TrainingFilterParameter.PIECE_TIME -> copy(pieceTimeRange = null)
+        TrainingFilterParameter.PIECE_DISTANCE -> copy(pieceDistanceRange = null)
+        TrainingFilterParameter.LACTATE -> copy(lactateOnly = false)
+        TrainingFilterParameter.DATE -> copy(dateRange = null)
+    }
 }

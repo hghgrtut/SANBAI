@@ -49,13 +49,36 @@ object TimeUtils {
         val day = digits.substring(0, 2).toInt()
         val month = digits.substring(2, 4).toInt()
         val year = digits.substring(4, 8).toInt()
-        return try {
-            LocalDate(year, month, day)
-                .atStartOfDayIn(TimeZone.currentSystemDefault())
-                .toEpochMilliseconds()
-        } catch (_: IllegalArgumentException) {
-            null
-        }
+        return startOfDayMillis(
+            year = year,
+            month = month,
+            day = day
+        )
+    }
+
+    fun startOfDayMillis(
+        year: Int,
+        month: Int,
+        day: Int
+    ): Long? = try {
+        LocalDate(year, month, day)
+            .atStartOfDayIn(TimeZone.currentSystemDefault())
+            .toEpochMilliseconds()
+    } catch (_: IllegalArgumentException) {
+        null
+    }
+
+    fun endOfDayMillis(
+        year: Int,
+        month: Int,
+        day: Int
+    ): Long? = try {
+        LocalDate(year, month, day)
+            .plus(1, DateTimeUnit.DAY)
+            .atStartOfDayIn(TimeZone.currentSystemDefault())
+            .toEpochMilliseconds() - 1
+    } catch (_: IllegalArgumentException) {
+        null
     }
 
     fun isSameCalendarDay(
@@ -63,8 +86,7 @@ object TimeUtils {
         secondMillis: Long,
     ): Boolean = firstMillis.toLocalDate() == secondMillis.toLocalDate()
 
-    /** Полных лет на текущий момент.
-     */
+    /** Полных лет на текущий момент. */
     fun ageInYearsNow(birthTimeInMillis: Long): Int {
         val birth = birthTimeInMillis.toLocalDate()
         val now = nowInMillis().toLocalDate()

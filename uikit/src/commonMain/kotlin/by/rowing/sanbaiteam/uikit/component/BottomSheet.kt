@@ -14,6 +14,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,8 @@ import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+private val SHEET_CLOSE_ICON_SIZE = 16.dp
 
 /**
  * Нижняя панель с общим заголовком, содержимым и необязательным футером.
@@ -46,9 +49,11 @@ fun BottomSheet(
     footer: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
+        sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
@@ -96,8 +101,6 @@ fun BottomSheet(
         }
     }
 }
-
-private val SHEET_CLOSE_ICON_SIZE = 16.dp
 
 @Preview
 @Composable

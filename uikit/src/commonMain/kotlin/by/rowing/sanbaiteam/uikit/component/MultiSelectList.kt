@@ -26,6 +26,8 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+private val DEFAULT_MAX_HEIGHT = 360.dp
+
 /**
  * Список с множественным выбором для нижних панелей.
  *
@@ -123,8 +125,6 @@ private fun MultiSelectRow(
         )
     }
 }
-
-private val DEFAULT_MAX_HEIGHT = 360.dp
 
 @Preview
 @Composable
