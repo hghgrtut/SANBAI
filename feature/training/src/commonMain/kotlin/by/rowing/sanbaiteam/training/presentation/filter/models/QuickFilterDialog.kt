@@ -1,4 +1,6 @@
-package by.rowing.sanbaiteam.training.presentation.list.models
+package by.rowing.sanbaiteam.training.presentation.filter.models
+
+import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
 
 /** Открытое окно быстрых фильтров. */
 internal sealed interface QuickFilterDialog {
@@ -10,3 +12,8 @@ internal sealed interface QuickFilterDialog {
     data class Manage(val filterId: Long) : QuickFilterDialog
 }
 
+/** Запрос на перезапись существующего быстрого фильтра. */
+internal data class QuickFilterOverwrite(
+    val name: String,
+    val filter: TrainingFilter,
+)

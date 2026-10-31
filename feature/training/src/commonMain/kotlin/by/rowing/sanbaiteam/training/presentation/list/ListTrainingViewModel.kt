@@ -13,10 +13,9 @@ import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingBackupSeriali
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
+import by.rowing.sanbaiteam.training.presentation.filter.TrainingFiltersController
 import by.rowing.sanbaiteam.training.presentation.list.compose.ListTrainingScreenActions
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
-import by.rowing.sanbaiteam.training.presentation.list.models.QuickFilterDialog
-import by.rowing.sanbaiteam.training.presentation.list.models.QuickFilterOverwrite
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavigation
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_transfer_export_error
@@ -31,12 +30,11 @@ internal class ListTrainingViewModel(
     private val trainingTransferRepository: TrainingTransferRepository,
     private val backupFileAccess: BackupFileAccess,
     private val athletesRepository: AthletesRepository,
-    private val savedFiltersRepository: SavedTrainingFiltersRepository,
-    private val composeNavigator: ComposeNavigator
+    private val composeNavigator: ComposeNavigator,
+    savedFiltersRepository: SavedTrainingFiltersRepository
 ) : ComposeBaseViewModel<ListTrainingState>(
     initialState = ListTrainingState(
         items = emptyList(),
-        showFilters = false,
         transferNotice = null,
         isTransferring = false,
         exportPromptRequested = false,
@@ -45,10 +43,17 @@ internal class ListTrainingViewModel(
 
     private var pendingExportJson: String? = null
 
+    private val filtersController = TrainingFiltersController(
+        repository = savedFiltersRepository,
+        scope = viewModelScope,
+        readFilters = { state.filters },
+        writeFilters = { filters -> changeState { copy(filters = filters) } },
+    )
+
     init {
         reloadTrainings()
         loadAthleteCatalog()
-        loadSavedFilters()
+        filtersController.subscribe()
     }
 
     override fun navigateBack() {
@@ -60,150 +65,81 @@ internal class ListTrainingViewModel(
     }
 
     override fun onFilterChange(filter: TrainingFilter) {
-        applyFilter(filter = filter)
+        filtersController.updateFilter(filter = filter)
     }
 
     override fun onFilterReset(parameter: TrainingFilterParameter) {
-        applyFilter(filter = state.filter.without(parameter))
+        filtersController.resetParameter(parameter = parameter)
     }
 
     override fun onResetFilters() {
-        applyFilter(filter = TrainingFilter())
+        filtersController.resetAll()
     }
 
     override fun onFilterSheetOpen(parameter: TrainingFilterParameter) {
-        changeState { copy(activeFilterSheet = parameter) }
+        filtersController.openSheet(parameter = parameter)
     }
 
     override fun onFilterSheetDismiss() {
-        changeState { copy(activeFilterSheet = null) }
+        filtersController.dismissSheet()
     }
 
     override fun onLactateFilterToggle() {
-        applyFilter(filter = state.filter.copy(lactateOnly = !state.filter.lactateOnly))
+        filtersController.toggleLactate()
     }
 
     override fun onQuickFilterApply(filterId: Long) {
-        val savedFilter = state.savedFilters.firstOrNull { saved -> saved.id == filterId } ?: return
-        applyFilter(
-            filter = state.filter.applyPreset(savedFilter.filter),
-            activeQuickFilterId = filterId,
-        )
+        filtersController.applyQuickFilter(filterId = filterId)
     }
 
     override fun onQuickFilterSaveClick() {
-        if (!state.filter.isEmpty) {
-            changeState { copy(quickFilterDialog = QuickFilterDialog.Save) }
-        }
+        filtersController.requestSaveQuickFilter()
     }
 
     override fun onQuickFilterSave(name: String) {
-        val normalizedName = name.trim()
-        if (normalizedName.isEmpty()) return
-        val filter = state.filter
-        state.savedFilters.firstOrNull { saved ->
-            saved.name.equals(
-                other = normalizedName,
-                ignoreCase = true
-            )
-        }?.let {
-            changeState {
-                copy(
-                    quickFilterOverwrite = QuickFilterOverwrite(
-                        name = normalizedName,
-                        filter = filter
-                    )
-                )
-            }
-            return
-        }
-        viewModelScope.launch {
-            val filterId = savedFiltersRepository.create(
-                name = normalizedName,
-                filter = filter,
-            )
-            changeState {
-                copy(
-                    quickFilterDialog = null,
-                    activeQuickFilterId = filterId,
-                )
-            }
-        }
+        filtersController.saveQuickFilter(name = name)
     }
 
     override fun onQuickFilterOverwriteConfirm() {
-        val overwrite = state.quickFilterOverwrite ?: return
-        val existing = state.savedFilters.firstOrNull { saved ->
-            saved.name.equals(overwrite.name, ignoreCase = true)
-        } ?: return
-        viewModelScope.launch {
-            savedFiltersRepository.overwrite(
-                id = existing.id,
-                filter = overwrite.filter
-            )
-            changeState {
-                copy(
-                    quickFilterDialog = null,
-                    quickFilterOverwrite = null,
-                    activeQuickFilterId = existing.id,
-                )
-            }
-        }
+        filtersController.confirmOverwrite()
     }
 
     override fun onQuickFilterOverwriteDismiss() {
-        changeState { copy(quickFilterOverwrite = null) }
+        filtersController.dismissOverwrite()
     }
 
     override fun onQuickFilterManageClick(filterId: Long) {
-        if (state.savedFilters.none { saved -> saved.id == filterId }) return
-        changeState { copy(quickFilterDialog = QuickFilterDialog.Manage(filterId = filterId)) }
+        filtersController.openQuickFilterManage(filterId = filterId)
     }
 
-    override fun onQuickFilterRename(filterId: Long, name: String) {
-        val normalizedName = name.trim()
-        if (normalizedName.isEmpty()) return
-        val nameTaken = state.savedFilters.any { saved ->
-            saved.id != filterId && saved.name.equals(normalizedName, ignoreCase = true)
-        }
-        if (nameTaken) return
-        viewModelScope.launch {
-            savedFiltersRepository.rename(
-                id = filterId,
-                name = normalizedName
-            )
-            changeState { copy(quickFilterDialog = null) }
-        }
+    override fun onQuickFilterRename(
+        filterId: Long,
+        name: String
+    ) {
+        filtersController.renameQuickFilter(
+            filterId = filterId,
+            name = name
+        )
     }
 
     override fun onQuickFilterDeleteClick(filterId: Long) {
-        changeState { copy(quickFilterDeleteId = filterId) }
+        filtersController.requestDeleteQuickFilter(filterId = filterId)
     }
 
     override fun onQuickFilterDeleteConfirm() {
-        val filterId = state.quickFilterDeleteId ?: return
-        viewModelScope.launch {
-            savedFiltersRepository.delete(id = filterId)
-            changeState {
-                copy(
-                    quickFilterDeleteId = null,
-                    quickFilterDialog = null,
-                    activeQuickFilterId = activeQuickFilterId.takeIf { activeId -> activeId != filterId },
-                )
-            }
-        }
+        filtersController.confirmDeleteQuickFilter()
     }
 
     override fun onQuickFilterDeleteDismiss() {
-        changeState { copy(quickFilterDeleteId = null) }
+        filtersController.dismissDeleteQuickFilter()
     }
 
     override fun onQuickFilterDialogDismiss() {
-        changeState { copy(quickFilterDialog = null) }
+        filtersController.dismissQuickFilterDialog()
     }
 
     override fun onShowFiltersChange(showFilters: Boolean) {
-        changeState { copy(showFilters = showFilters) }
+        filtersController.setShowFilters(showFilters = showFilters)
     }
 
     override fun onAddTrainingClick() {
@@ -359,22 +295,7 @@ internal class ListTrainingViewModel(
     private fun loadAthleteCatalog() {
         viewModelScope.launch {
             athletesRepository.allAthletes.collect { athletes ->
-                changeState { copy(athleteCatalog = athletes) }
-            }
-        }
-    }
-
-    private fun loadSavedFilters() {
-        viewModelScope.launch {
-            savedFiltersRepository.savedFilters.collect { savedFilters ->
-                changeState {
-                    copy(
-                        savedFilters = savedFilters,
-                        activeQuickFilterId = activeQuickFilterId?.takeIf { activeId ->
-                            savedFilters.any { saved -> saved.id == activeId }
-                        },
-                    )
-                }
+                filtersController.updateAthleteCatalog(athletes)
             }
         }
     }
@@ -387,19 +308,6 @@ internal class ListTrainingViewModel(
                 } else {
                     selectedTrainingIds + trainingId
                 }
-            )
-        }
-    }
-
-    private fun applyFilter(
-        filter: TrainingFilter,
-        activeQuickFilterId: Long? = null,
-    ) {
-        changeState {
-            copy(
-                filter = filter,
-                activeFilterSheet = null,
-                activeQuickFilterId = activeQuickFilterId,
             )
         }
     }

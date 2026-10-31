@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.training.presentation.list.compose
+package by.rowing.sanbaiteam.training.presentation.filter.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,8 +25,8 @@ import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.training.data.filter.SavedTrainingFilter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
-import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
-import by.rowing.sanbaiteam.training.presentation.list.models.QuickFilterDialog
+import by.rowing.sanbaiteam.training.presentation.filter.models.QuickFilterDialog
+import by.rowing.sanbaiteam.training.presentation.filter.models.TrainingFiltersState
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.cancel
 import by.rowing.sanbaiteam.training.resources.save
@@ -61,7 +61,7 @@ private const val QUICK_FILTER_NAME_MAX_LENGTH = 40
 internal fun TrainingQuickFiltersRow(
     savedFilters: List<SavedTrainingFilter>,
     activeQuickFilterId: Long?,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     if (savedFilters.isEmpty()) return
     ChipRow(contentPadding = PaddingValues(0.dp)) {
@@ -79,25 +79,25 @@ internal fun TrainingQuickFiltersRow(
 
 @Composable
 internal fun TrainingQuickFilterDialogs(
-    state: ListTrainingState,
-    actions: ListTrainingScreenActions,
+    filters: TrainingFiltersState,
+    actions: TrainingFiltersActions,
 ) {
-    when (val dialog = state.quickFilterDialog) {
+    when (val dialog = filters.quickFilterDialog) {
         QuickFilterDialog.Save -> QuickFilterSaveSheet(
-            filter = state.filter,
-            athleteCatalog = state.athleteCatalog,
+            filter = filters.filter,
+            athleteCatalog = filters.athleteCatalog,
             actions = actions,
         )
 
         is QuickFilterDialog.Manage -> {
-            val savedFilter = state.savedFilters.firstOrNull { saved -> saved.id == dialog.filterId }
+            val savedFilter = filters.savedFilters.firstOrNull { saved -> saved.id == dialog.filterId }
             if (savedFilter != null) {
                 QuickFilterManageSheet(
                     savedFilter = savedFilter,
-                    otherNames = state.savedFilters
+                    otherNames = filters.savedFilters
                         .filter { saved -> saved.id != savedFilter.id }
                         .map { saved -> saved.name },
-                    athleteCatalog = state.athleteCatalog,
+                    athleteCatalog = filters.athleteCatalog,
                     actions = actions,
                 )
             }
@@ -106,7 +106,7 @@ internal fun TrainingQuickFilterDialogs(
         null -> Unit
     }
 
-    state.quickFilterOverwrite?.let { overwrite ->
+    filters.quickFilterOverwrite?.let { overwrite ->
         QuickFilterOverwriteDialog(
             name = overwrite.name,
             onConfirm = actions::onQuickFilterOverwriteConfirm,
@@ -114,8 +114,8 @@ internal fun TrainingQuickFilterDialogs(
         )
     }
 
-    state.quickFilterDeleteId?.let { filterId ->
-        val name = state.savedFilters.firstOrNull { saved -> saved.id == filterId }?.name.orEmpty()
+    filters.quickFilterDeleteId?.let { filterId ->
+        val name = filters.savedFilters.firstOrNull { saved -> saved.id == filterId }?.name.orEmpty()
         QuickFilterDeleteDialog(
             name = name,
             onConfirm = actions::onQuickFilterDeleteConfirm,
@@ -128,7 +128,7 @@ internal fun TrainingQuickFilterDialogs(
 private fun QuickFilterSaveSheet(
     filter: TrainingFilter,
     athleteCatalog: List<AthleteItemModel>,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     var name by remember { mutableStateOf("") }
     val athleteNames = remember(athleteCatalog) {
@@ -177,7 +177,7 @@ private fun QuickFilterManageSheet(
     savedFilter: SavedTrainingFilter,
     otherNames: List<String>,
     athleteCatalog: List<AthleteItemModel>,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     var name by remember(savedFilter.id) { mutableStateOf(savedFilter.name) }
     val normalizedName = name.trim()
@@ -219,11 +219,7 @@ private fun QuickFilterManageSheet(
             value = name,
             onValueChange = { value -> name = value.take(QUICK_FILTER_NAME_MAX_LENGTH) },
             isError = nameTaken,
-            supportingText = if (nameTaken) {
-                stringResource(Res.string.training_quick_filter_name_taken)
-            } else {
-                null
-            },
+            supportingText = stringResource(Res.string.training_quick_filter_name_taken).takeIf { nameTaken },
         )
         QuickFilterSummary(
             filter = savedFilter.filter,
@@ -272,7 +268,10 @@ private fun QuickFilterSummary(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = filterSummary(filter = filter, athleteNames = athleteNames),
+            text = filterSummary(
+                filter = filter,
+                athleteNames = athleteNames
+            ),
             style = TypographyPalette.Body2Regular,
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -287,7 +286,10 @@ private fun filterSummary(
     val labels = mutableListOf<String>()
     for (parameter in TrainingFilterParameter.entries) {
         if (filter.isActive(parameter)) {
-            labels += parameter.chipLabel(filter = filter, athleteNames = athleteNames)
+            labels += parameter.chipLabel(
+                filter = filter,
+                athleteNames = athleteNames
+            )
         }
     }
     return labels.joinToString(separator = " · ")

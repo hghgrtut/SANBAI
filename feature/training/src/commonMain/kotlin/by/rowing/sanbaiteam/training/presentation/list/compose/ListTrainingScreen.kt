@@ -31,10 +31,8 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableRows
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,6 +54,10 @@ import by.rowing.sanbaiteam.athlete.presentation.common.ItemCard
 import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.presentation.filter.applyTrainingFilter
+import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingFilterActionButton
+import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingFilterSheet
+import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingFiltersPanel
+import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingQuickFilterDialogs
 import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
@@ -69,8 +71,6 @@ import by.rowing.sanbaiteam.training.resources.training_add_training
 import by.rowing.sanbaiteam.training.resources.training_delete_action
 import by.rowing.sanbaiteam.training.resources.training_delete_confirm_message
 import by.rowing.sanbaiteam.training.resources.training_delete_confirm_title
-import by.rowing.sanbaiteam.training.resources.training_filter_active_badge
-import by.rowing.sanbaiteam.training.resources.training_filter_content_description
 import by.rowing.sanbaiteam.training.resources.training_filters_empty_action
 import by.rowing.sanbaiteam.training.resources.training_filters_empty_description
 import by.rowing.sanbaiteam.training.resources.training_filters_empty_title
@@ -100,7 +100,6 @@ import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Instant
-import androidx.compose.material3.Badge as MaterialBadge
 
 private const val CONTENT_FADE_IN_MILLIS = 220
 private const val CONTENT_FADE_OUT_MILLIS = 140
@@ -142,8 +141,8 @@ private fun ListTrainingScreenContent(
     state: ListTrainingState,
     actions: ListTrainingScreenActions
 ) {
-    val filteredTrainings = remember(state.filter, state.items) {
-        state.items.applyTrainingFilter(trainingFilter = state.filter)
+    val filteredTrainings = remember(state.filters.filter, state.items) {
+        state.items.applyTrainingFilter(trainingFilter = state.filters.filter)
     }
 
     val createBackupLauncher = rememberCreateBackupLauncher(onCreated = actions::onExportToHandle)
@@ -175,16 +174,16 @@ private fun ListTrainingScreenContent(
             filteredTrainings = filteredTrainings
         )
     }
-    state.activeFilterSheet?.let { parameter ->
+    state.filters.activeFilterSheet?.let { parameter ->
         TrainingFilterSheet(
             parameter = parameter,
-            filter = state.filter,
-            athleteCatalog = state.athleteCatalog,
+            filter = state.filters.filter,
+            athleteCatalog = state.filters.athleteCatalog,
             actions = actions,
         )
     }
     TrainingQuickFilterDialogs(
-        state = state,
+        filters = state.filters,
         actions = actions,
     )
     state.transferNotice?.let { notice ->
@@ -243,9 +242,10 @@ private fun SelectionTopBar(
             }
         },
         actions = {
-            FilterActionButton(
-                state = state,
-                actions = actions,
+            TrainingFilterActionButton(
+                activeCount = state.filters.filter.activeParametersCount,
+                showFilters = state.filters.showFilters,
+                onToggle = { actions.onShowFiltersChange(!state.filters.showFilters) },
             )
             IconButton(
                 onClick = { actions.onToggleSelectAllClick(visibleTrainingIds) },
@@ -299,44 +299,14 @@ private fun ListTrainingTopBarContent(
                     contentDescription = stringResource(Res.string.training_transfer_import_action)
                 )
             }
-            FilterActionButton(
-                state = state,
-                actions = actions,
+            TrainingFilterActionButton(
+                activeCount = state.filters.filter.activeParametersCount,
+                showFilters = state.filters.showFilters,
+                onToggle = { actions.onShowFiltersChange(!state.filters.showFilters) },
             )
         },
         onNavIconClick = actions::navigateBack
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FilterActionButton(
-    state: ListTrainingState,
-    actions: ListTrainingScreenActions,
-) {
-    val activeCount = state.filter.activeParametersCount
-    val isHighlighted = state.showFilters || activeCount > 0
-    IconButton(onClick = { actions.onShowFiltersChange(!state.showFilters) }) {
-        BadgedBox(
-            badge = {
-                if (activeCount > 0) {
-                    MaterialBadge {
-                        Text(text = activeCount.toString())
-                    }
-                }
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Default.FilterList,
-                contentDescription = if (activeCount > 0) {
-                    stringResource(Res.string.training_filter_active_badge, activeCount)
-                } else {
-                    stringResource(Res.string.training_filter_content_description)
-                },
-                tint = MaterialTheme.colorScheme.run { if (isHighlighted) primary else onSurfaceVariant }
-            )
-        }
-    }
 }
 
 @Composable
@@ -350,9 +320,9 @@ private fun TrainingListMainContent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(space = Spacing.S)
     ) {
-        if (state.showFilters) {
+        if (state.filters.showFilters) {
             TrainingFiltersPanel(
-                state = state,
+                filters = state.filters,
                 actions = actions,
             )
         }
