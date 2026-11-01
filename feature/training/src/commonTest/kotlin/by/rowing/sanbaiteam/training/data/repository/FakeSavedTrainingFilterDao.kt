@@ -32,9 +32,7 @@ internal class FakeSavedTrainingFilterDao : SavedTrainingFilterDao {
         id: Long,
         name: String
     ) {
-        entities.value = entities.value.map { entity ->
-            if (entity.id == id) entity.copy(name = name) else entity
-        }
+        entities.value = entities.value.map { entity -> if (entity.id == id) entity.copy(name = name) else entity }
     }
 
     override suspend fun delete(id: Long) {

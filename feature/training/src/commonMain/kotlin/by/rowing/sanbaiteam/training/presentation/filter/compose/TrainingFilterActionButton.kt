@@ -39,9 +39,7 @@ internal fun TrainingFilterActionButton(
                 } else {
                     stringResource(Res.string.training_filter_content_description)
                 },
-                tint = MaterialTheme.colorScheme.run {
-                    if (isHighlighted) primary else onSurfaceVariant
-                }
+                tint = MaterialTheme.colorScheme.run { if (isHighlighted) primary else onSurfaceVariant }
             )
         }
     }

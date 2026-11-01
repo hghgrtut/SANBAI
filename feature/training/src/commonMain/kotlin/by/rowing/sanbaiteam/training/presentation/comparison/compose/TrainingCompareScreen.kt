@@ -135,8 +135,7 @@ private fun CompareContent(
             title = stringResource(Res.string.training_compare_empty_title),
             description = stringResource(Res.string.training_compare_empty_description),
             icon = Icons.AutoMirrored.Filled.CompareArrows,
-            actionText = stringResource(Res.string.training_compare_reset)
-                .takeIf { state.hasAppliedComparison },
+            actionText = stringResource(Res.string.training_compare_reset).takeIf { state.hasAppliedComparison },
             onActionClick = actions::onReset.takeIf { state.hasAppliedComparison }
         )
 

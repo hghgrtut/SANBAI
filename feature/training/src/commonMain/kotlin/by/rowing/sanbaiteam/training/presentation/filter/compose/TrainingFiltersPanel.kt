@@ -168,14 +168,13 @@ internal fun TrainingFiltersPanel(
     }
 }
 
-internal fun visibleFilterParameters(showTypeFilter: Boolean): List<TrainingFilterParameter> =
-    if (showTypeFilter) {
-        TrainingFilterParameter.entries
-    } else {
-        TrainingFilterParameter.entries.filter { parameter ->
-            parameter != TrainingFilterParameter.TRAINING_TYPE
-        }
+internal fun visibleFilterParameters(showTypeFilter: Boolean): List<TrainingFilterParameter> = if (showTypeFilter) {
+    TrainingFilterParameter.entries
+} else {
+    TrainingFilterParameter.entries.filter { parameter ->
+        parameter != TrainingFilterParameter.TRAINING_TYPE
     }
+}
 
 @Composable
 internal fun TrainingFilterSheet(
