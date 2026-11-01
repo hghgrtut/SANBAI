@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.training.presentation.list.compose
+package by.rowing.sanbaiteam.training.presentation.filter.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,7 +29,7 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterTimeParser
-import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
+import by.rowing.sanbaiteam.training.presentation.filter.models.TrainingFiltersState
 import by.rowing.sanbaiteam.training.presentation.platform.rememberTrainingDatePicker
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_filter_athletes
@@ -87,14 +87,21 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * Панель фильтров тренировок.
+ *
+ * @param showTypeFilter показывать ли параметр «Тип тренировки»; на экране
+ * выбора для сравнения кандидаты уже ограничены типом исходной тренировки.
+ */
 @Composable
 internal fun TrainingFiltersPanel(
-    state: ListTrainingState,
-    actions: ListTrainingScreenActions,
+    filters: TrainingFiltersState,
+    actions: TrainingFiltersActions,
+    showTypeFilter: Boolean,
 ) {
-    val filter = state.filter
-    val athleteNames = remember(state.athleteCatalog) {
-        state.athleteCatalog.associate { athlete -> athlete.id to athlete.name }
+    val filter = filters.filter
+    val athleteNames = remember(filters.athleteCatalog) {
+        filters.athleteCatalog.associate { athlete -> athlete.id to athlete.name }
     }
 
     DataCard(
@@ -144,12 +151,12 @@ internal fun TrainingFiltersPanel(
             }
         }
         TrainingQuickFiltersRow(
-            savedFilters = state.savedFilters,
-            activeQuickFilterId = state.activeQuickFilterId,
+            savedFilters = filters.savedFilters,
+            activeQuickFilterId = filters.activeQuickFilterId,
             actions = actions,
         )
         ChipRow(contentPadding = PaddingValues(0.dp)) {
-            for (parameter in TrainingFilterParameter.entries) {
+            for (parameter in visibleFilterParameters(showTypeFilter)) {
                 FilterParameterChip(
                     parameter = parameter,
                     filter = filter,
@@ -161,12 +168,20 @@ internal fun TrainingFiltersPanel(
     }
 }
 
+internal fun visibleFilterParameters(showTypeFilter: Boolean): List<TrainingFilterParameter> = if (showTypeFilter) {
+    TrainingFilterParameter.entries
+} else {
+    TrainingFilterParameter.entries.filter { parameter ->
+        parameter != TrainingFilterParameter.TRAINING_TYPE
+    }
+}
+
 @Composable
 internal fun TrainingFilterSheet(
     parameter: TrainingFilterParameter,
     filter: TrainingFilter,
     athleteCatalog: List<AthleteItemModel>,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     when (parameter) {
         TrainingFilterParameter.ATHLETES -> AthletesFilterSheet(
@@ -204,7 +219,7 @@ private fun FilterParameterChip(
     parameter: TrainingFilterParameter,
     filter: TrainingFilter,
     athleteNames: Map<Long, String>,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     val active = filter.isActive(parameter)
     val label = parameter.chipLabel(
@@ -237,7 +252,7 @@ private fun FilterParameterChip(
 private fun AthletesFilterSheet(
     filter: TrainingFilter,
     athleteCatalog: List<AthleteItemModel>,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     var selected by remember(filter.athleteIds) { mutableStateOf(filter.athleteIds) }
 
@@ -266,7 +281,7 @@ private fun AthletesFilterSheet(
 @Composable
 private fun TrainingTypesFilterSheet(
     filter: TrainingFilter,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     var selected by remember(filter.trainingTypes) { mutableStateOf(filter.trainingTypes) }
     val labels = trainingTypeLabels()
@@ -295,7 +310,7 @@ private fun TrainingTypesFilterSheet(
 @Composable
 private fun PieceTimeFilterSheet(
     filter: TrainingFilter,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     var from by remember(filter.pieceTimeRange) {
         mutableStateOf(
@@ -360,7 +375,7 @@ private fun PieceTimeFilterSheet(
 @Composable
 private fun PieceDistanceFilterSheet(
     filter: TrainingFilter,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     var from by remember(filter.pieceDistanceRange) {
         mutableStateOf(filter.pieceDistanceRange?.first?.toString().orEmpty())
@@ -413,7 +428,7 @@ private fun PieceDistanceFilterSheet(
 @Composable
 private fun DateFilterSheet(
     filter: TrainingFilter,
-    actions: ListTrainingScreenActions,
+    actions: TrainingFiltersActions,
 ) {
     var fromMillis by remember(filter.dateRange) { mutableStateOf(filter.dateRange?.first) }
     var toMillis by remember(filter.dateRange) { mutableStateOf(filter.dateRange?.last) }

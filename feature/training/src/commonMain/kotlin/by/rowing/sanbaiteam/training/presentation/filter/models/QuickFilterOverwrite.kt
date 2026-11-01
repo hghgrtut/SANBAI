@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.training.presentation.list.models
+package by.rowing.sanbaiteam.training.presentation.filter.models
 
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
 

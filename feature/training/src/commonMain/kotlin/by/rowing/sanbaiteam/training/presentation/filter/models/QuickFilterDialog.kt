@@ -1,4 +1,4 @@
-package by.rowing.sanbaiteam.training.presentation.list.models
+package by.rowing.sanbaiteam.training.presentation.filter.models
 
 /** Открытое окно быстрых фильтров. */
 internal sealed interface QuickFilterDialog {
@@ -9,4 +9,3 @@ internal sealed interface QuickFilterDialog {
     /** Управление сохранённым фильтром: переименование и удаление. */
     data class Manage(val filterId: Long) : QuickFilterDialog
 }
-
