@@ -86,4 +86,57 @@ internal class TrainingFilterTest {
             filter.without(TrainingFilterParameter.LACTATE)
         )
     }
+
+    @Test
+    fun `apply preset overwrites only preset parameters`() {
+        val current = TrainingFilter(
+            athleteIds = setOf(1L),
+            trainingTypes = setOf(TrainingPieceType.SINGLE),
+            lactateOnly = true,
+        )
+        val preset = TrainingFilter(
+            trainingTypes = setOf(TrainingPieceType.DOUBLE),
+            pieceDistanceRange = 500..2_000,
+        )
+
+        assertEquals(
+            TrainingFilter(
+                athleteIds = setOf(1L),
+                trainingTypes = setOf(TrainingPieceType.DOUBLE),
+                pieceDistanceRange = 500..2_000,
+                lactateOnly = true,
+            ),
+            current.applyPreset(preset),
+        )
+    }
+
+    @Test
+    fun `apply empty preset keeps current filter`() {
+        val current = TrainingFilter(
+            athleteIds = setOf(1L),
+            dateRange = 0L..1_000L,
+        )
+
+        assertEquals(current, current.applyPreset(TrainingFilter()))
+    }
+
+    @Test
+    fun `apply full preset replaces all parameters`() {
+        val current = TrainingFilter(
+            athleteIds = setOf(1L),
+        )
+        val preset = TrainingFilter(
+            athleteIds = setOf(2L),
+            trainingTypes = setOf(TrainingPieceType.PAIR),
+            pieceTimeRange = 60_000L..120_000L,
+            pieceDistanceRange = 500..2_000,
+            lactateOnly = true,
+            dateRange = 0L..1_000L,
+        )
+
+        assertEquals(
+            preset,
+            current.applyPreset(preset),
+        )
+    }
 }

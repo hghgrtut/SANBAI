@@ -18,7 +18,7 @@ internal data class TrainingFilter(
 ) {
 
     val isEmpty: Boolean
-        get() = TrainingFilterParameter.entries.any { parameter -> isActive(parameter) }
+        get() = TrainingFilterParameter.entries.none { parameter -> isActive(parameter) }
 
     val activeParametersCount: Int
         get() = TrainingFilterParameter.entries.count { parameter -> isActive(parameter) }
@@ -40,4 +40,17 @@ internal data class TrainingFilter(
         TrainingFilterParameter.LACTATE -> copy(lactateOnly = false)
         TrainingFilterParameter.DATE -> copy(dateRange = null)
     }
+
+    /**
+     * Накладывает сохранённый фильтр поверх текущего.
+     * Перезаписываются только параметры, заданные в [preset]; остальные текущие ограничения не трогаются.
+     */
+    fun applyPreset(preset: TrainingFilter): TrainingFilter = TrainingFilter(
+        athleteIds = preset.athleteIds.ifEmpty { athleteIds },
+        trainingTypes = preset.trainingTypes.ifEmpty { trainingTypes },
+        pieceTimeRange = preset.pieceTimeRange ?: pieceTimeRange,
+        pieceDistanceRange = preset.pieceDistanceRange ?: pieceDistanceRange,
+        lactateOnly = lactateOnly || preset.lactateOnly,
+        dateRange = preset.dateRange ?: dateRange,
+    )
 }

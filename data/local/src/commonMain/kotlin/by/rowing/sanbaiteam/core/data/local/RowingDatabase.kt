@@ -12,8 +12,10 @@ import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.local.AthleteDao
 import by.rowing.sanbaiteam.athlete.data.local.AthletePersonalBestDao
 import by.rowing.sanbaiteam.core.data.local.RowingDatabase.Companion.DATABASE_VERSION
+import by.rowing.sanbaiteam.training.data.entity.SavedTrainingFilterEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
+import by.rowing.sanbaiteam.training.data.local.SavedTrainingFilterDao
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
 
 @Database(
@@ -22,6 +24,7 @@ import by.rowing.sanbaiteam.training.data.local.TrainingDao
         AthletePersonalBestEntity::class,
         TrainingEntity::class,
         TrainingAthletePieceEntity::class,
+        SavedTrainingFilterEntity::class,
     ],
     version = DATABASE_VERSION,
     exportSchema = false
@@ -32,10 +35,11 @@ internal abstract class RowingDatabase : RoomDatabase() {
     abstract fun athleteDao(): AthleteDao
     abstract fun athletePersonalBestDao(): AthletePersonalBestDao
     abstract fun trainingDao(): TrainingDao
+    abstract fun savedTrainingFilterDao(): SavedTrainingFilterDao
 
     companion object {
 
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 3
         const val DATABASE_NAME = "rowing_database"
 
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -49,7 +53,22 @@ internal abstract class RowingDatabase : RoomDatabase() {
             }
         }
 
-        val MIGRATIONS = arrayOf(MIGRATION_1_2)
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `${SavedTrainingFilterDao.TABLE_SAVED_TRAINING_FILTER}` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `payload` TEXT NOT NULL,
+                        `createdAtMillis` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
     }
 }
 

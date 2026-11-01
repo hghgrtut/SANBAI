@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -26,6 +27,10 @@ import by.rowing.sanbaiteam.athlete.presentation.common.ItemCard
 import by.rowing.sanbaiteam.training.presentation.comparison.TrainingCompareActions
 import by.rowing.sanbaiteam.training.presentation.comparison.TrainingCompareViewModel
 import by.rowing.sanbaiteam.training.presentation.comparison.models.TrainingCompareState
+import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingFilterActionButton
+import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingFilterSheet
+import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingFiltersPanel
+import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingQuickFilterDialogs
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_compare_confirm
@@ -34,6 +39,9 @@ import by.rowing.sanbaiteam.training.resources.training_compare_empty_title
 import by.rowing.sanbaiteam.training.resources.training_compare_reset
 import by.rowing.sanbaiteam.training.resources.training_compare_subtitle
 import by.rowing.sanbaiteam.training.resources.training_compare_title
+import by.rowing.sanbaiteam.training.resources.training_filters_empty_action
+import by.rowing.sanbaiteam.training.resources.training_filters_empty_description
+import by.rowing.sanbaiteam.training.resources.training_filters_empty_title
 import by.rowing.sanbaiteam.uikit.component.Checkbox
 import by.rowing.sanbaiteam.uikit.component.CheckedState
 import by.rowing.sanbaiteam.uikit.component.EmptyState
@@ -64,53 +72,101 @@ private fun TrainingCompareContent(
         topBar = {
             TopAppBar(
                 title = stringResource(Res.string.training_compare_title),
+                actions = {
+                    TrainingFilterActionButton(
+                        activeCount = state.filters.filter.activeParametersCount,
+                        showFilters = state.filters.showFilters,
+                        onToggle = { actions.onShowFiltersChange(!state.filters.showFilters) },
+                    )
+                },
                 onNavIconClick = actions::navigateBack,
             )
         },
         bottomBar = {
-            if (!state.isLoading && state.items.isNotEmpty() && state.selectedIds.isNotEmpty()) {
+            if (!state.isLoading && state.filteredItems.isNotEmpty() && state.visibleSelectedIds.isNotEmpty()) {
                 CompareBottomBar(
-                    selectedCount = state.selectedIds.size,
+                    selectedCount = state.visibleSelectedIds.size,
                     onConfirm = actions::onConfirm,
                 )
             }
         }
     ) { paddingValues ->
-        when {
-            state.isLoading -> CompareLoader(paddingValues = paddingValues)
-            state.items.isEmpty() -> EmptyState(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                title = stringResource(Res.string.training_compare_empty_title),
-                description = stringResource(Res.string.training_compare_empty_description),
-                icon = Icons.AutoMirrored.Filled.CompareArrows,
-                actionText = stringResource(Res.string.training_compare_reset).takeIf { state.hasAppliedComparison },
-                onActionClick = actions::onReset.takeIf { state.hasAppliedComparison }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = paddingValues),
+        ) {
+            if (state.filters.showFilters) {
+                TrainingFiltersPanel(
+                    filters = state.filters,
+                    actions = actions,
+                    showTypeFilter = false,
+                )
+            }
+            CompareContent(
+                state = state,
+                actions = actions,
             )
+        }
+    }
+    state.filters.activeFilterSheet?.let { parameter ->
+        TrainingFilterSheet(
+            parameter = parameter,
+            filter = state.filters.filter,
+            athleteCatalog = state.filters.athleteCatalog,
+            actions = actions,
+        )
+    }
+    TrainingQuickFilterDialogs(
+        filters = state.filters,
+        actions = actions,
+    )
+}
 
-            else -> LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(vertical = Spacing.S),
-            ) {
-                item {
-                    CompareHeader(
-                        state = state,
-                        onReset = actions::onReset,
-                    )
-                }
-                items(
-                    items = state.items,
-                    key = { it.trainingId }
-                ) { item ->
-                    CompareTrainingItem(
-                        item = item,
-                        selected = item.trainingId in state.selectedIds,
-                        onToggle = actions::onToggleSelection,
-                    )
-                }
+@Composable
+private fun CompareContent(
+    state: TrainingCompareState,
+    actions: TrainingCompareActions,
+) {
+    when {
+        state.isLoading -> CompareLoader()
+        state.items.isEmpty() -> EmptyState(
+            modifier = Modifier.fillMaxSize(),
+            title = stringResource(Res.string.training_compare_empty_title),
+            description = stringResource(Res.string.training_compare_empty_description),
+            icon = Icons.AutoMirrored.Filled.CompareArrows,
+            actionText = stringResource(Res.string.training_compare_reset).takeIf { state.hasAppliedComparison },
+            onActionClick = actions::onReset.takeIf { state.hasAppliedComparison }
+        )
+
+        state.filteredItems.isEmpty() -> EmptyState(
+            modifier = Modifier.fillMaxSize(),
+            title = stringResource(Res.string.training_filters_empty_title),
+            description = stringResource(Res.string.training_filters_empty_description),
+            icon = Icons.Default.FilterList,
+            actionText = stringResource(Res.string.training_filters_empty_action),
+            onActionClick = actions::onResetFilters,
+        )
+
+        else -> LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = Spacing.S),
+        ) {
+            item {
+                CompareHeader(
+                    state = state,
+                    onReset = actions::onReset,
+                )
+            }
+            items(
+                items = state.filteredItems,
+                key = { it.trainingId }
+            ) { item ->
+                CompareTrainingItem(
+                    item = item,
+                    selected = item.trainingId in state.selectedIds,
+                    onToggle = actions::onToggleSelection,
+                )
             }
         }
     }
@@ -215,11 +271,10 @@ private fun CompareBottomBar(
 }
 
 @Composable
-private fun CompareLoader(paddingValues: PaddingValues) {
+private fun CompareLoader() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
             .padding(horizontal = Spacing.M),
         verticalArrangement = Arrangement.spacedBy(Spacing.M),
     ) {
