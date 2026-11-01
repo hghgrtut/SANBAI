@@ -133,19 +133,19 @@ internal class ListTrainingViewModel(
 
     override fun onQuickFilterOverwriteConfirm() {
         val overwrite = state.quickFilterOverwrite ?: return
-        val existing = state.savedFilters.firstOrNull { saved ->
+        val existingFilterId = state.savedFilters.firstOrNull { saved ->
             saved.name.equals(overwrite.name, ignoreCase = true)
-        } ?: return
+        }?.id ?: return
         viewModelScope.launch {
             savedFiltersRepository.overwrite(
-                id = existing.id,
+                id = existingFilterId,
                 filter = overwrite.filter
             )
             changeState {
                 copy(
                     quickFilterDialog = null,
                     quickFilterOverwrite = null,
-                    activeQuickFilterId = existing.id,
+                    activeQuickFilterId = existingFilterId,
                 )
             }
         }
@@ -161,8 +161,7 @@ internal class ListTrainingViewModel(
     }
 
     override fun onQuickFilterRename(filterId: Long, name: String) {
-        val normalizedName = name.trim()
-        if (normalizedName.isEmpty()) return
+        val normalizedName = name.trim().ifEmpty { return }
         val nameTaken = state.savedFilters.any { saved ->
             saved.id != filterId && saved.name.equals(normalizedName, ignoreCase = true)
         }

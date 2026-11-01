@@ -63,7 +63,6 @@ internal fun TrainingQuickFiltersRow(
     activeQuickFilterId: Long?,
     actions: ListTrainingScreenActions,
 ) {
-    if (savedFilters.isEmpty()) return
     ChipRow(contentPadding = PaddingValues(0.dp)) {
         savedFilters.forEach { savedFilter ->
             Chip(
@@ -89,9 +88,8 @@ internal fun TrainingQuickFilterDialogs(
             actions = actions,
         )
 
-        is QuickFilterDialog.Manage -> {
-            val savedFilter = state.savedFilters.firstOrNull { saved -> saved.id == dialog.filterId }
-            if (savedFilter != null) {
+        is QuickFilterDialog.Manage -> state.savedFilters.firstOrNull { saved -> saved.id == dialog.filterId }
+            ?.let { savedFilter ->
                 QuickFilterManageSheet(
                     savedFilter = savedFilter,
                     otherNames = state.savedFilters
@@ -101,7 +99,6 @@ internal fun TrainingQuickFilterDialogs(
                     actions = actions,
                 )
             }
-        }
 
         null -> Unit
     }
@@ -219,11 +216,7 @@ private fun QuickFilterManageSheet(
             value = name,
             onValueChange = { value -> name = value.take(QUICK_FILTER_NAME_MAX_LENGTH) },
             isError = nameTaken,
-            supportingText = if (nameTaken) {
-                stringResource(Res.string.training_quick_filter_name_taken)
-            } else {
-                null
-            },
+            supportingText = stringResource(Res.string.training_quick_filter_name_taken).takeIf { nameTaken },
         )
         QuickFilterSummary(
             filter = savedFilter.filter,

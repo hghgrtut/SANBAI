@@ -33,6 +33,7 @@ interface SavedTrainingFilterDao {
     suspend fun delete(id: Long)
 
     companion object {
-        const val TABLE_SAVED_TRAINING_FILTER = "saved_training_filter"
+
+        private const val TABLE_SAVED_TRAINING_FILTER = "saved_training_filter"
     }
 }
