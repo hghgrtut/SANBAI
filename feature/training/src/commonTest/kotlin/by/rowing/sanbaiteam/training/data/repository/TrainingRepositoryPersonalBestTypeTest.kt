@@ -5,11 +5,11 @@ import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
+import by.rowing.sanbaiteam.training.data.FakeTrainingDao
 import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
-import by.rowing.sanbaiteam.training.data.local.TrainingDao
 import by.rowing.sanbaiteam.training.data.trainingimport.FakeTrainingImportStorage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -113,10 +113,12 @@ internal class TrainingRepositoryPersonalBestTypeTest {
         athletesRepository: FakeAthletesRepository,
     ) = TrainingRepository(
         dao = FakeTrainingDao(
-            training = TrainingEntity(
-                id = TRAINING_ID,
-                dateMillis = DATE_MILLIS,
-                type = type
+            trainings = listOf(
+                TrainingEntity(
+                    id = TRAINING_ID,
+                    dateMillis = DATE_MILLIS,
+                    type = type
+                )
             ),
             pieces = listOf(
                 TrainingAthletePieceEntity(
@@ -149,47 +151,6 @@ internal class TrainingRepositoryPersonalBestTypeTest {
         const val TRAINING_ID = 7L
         const val ATHLETE_ID = 3L
         const val DATE_MILLIS = 1_700_000_000_000L
-    }
-
-    private class FakeTrainingDao(
-        private val training: TrainingEntity?,
-        private val pieces: List<TrainingAthletePieceEntity>,
-    ) : TrainingDao {
-
-        override suspend fun insertTraining(training: TrainingEntity): Long = 1L
-
-        override suspend fun insertPieces(pieces: List<TrainingAthletePieceEntity>) = Unit
-
-        override suspend fun getAllTrainingEntities(): List<TrainingEntity> = listOfNotNull(training)
-
-        override suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity> =
-            listOfNotNull(training).filter { it.id in trainingIds }
-
-        override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
-            training?.takeIf { it.id == trainingId }
-
-        override suspend fun getImportPathsByIds(trainingIds: List<Long>): List<String> =
-            listOfNotNull(training)
-                .filter { it.id in trainingIds }
-                .mapNotNull { it.sourceFileRelativePath }
-
-        override suspend fun deletePiecesForTrainings(trainingIds: List<Long>) {}
-
-        override suspend fun deleteTrainings(trainingIds: List<Long>) {}
-
-        override suspend fun updateImportMetadata(
-            trainingId: Long,
-            relativePath: String?,
-        ) = Unit
-
-        override suspend fun getPiecesForTraining(trainingId: Long): List<TrainingAthletePieceEntity> =
-            pieces.filter { it.trainingId == trainingId }
-
-        override suspend fun getPiecesForTrainings(trainingIds: List<Long>): List<TrainingAthletePieceEntity> =
-            pieces.filter { it.trainingId in trainingIds }
-
-        override suspend fun getAthleteIdsInTraining(trainingId: Long): List<Long> =
-            pieces.filter { it.trainingId == trainingId }.map { it.athleteId }.distinct()
     }
 
     private class FakeAthletesRepository(

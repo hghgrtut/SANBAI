@@ -34,6 +34,6 @@ interface SavedTrainingFilterDao {
 
     companion object {
 
-        private const val TABLE_SAVED_TRAINING_FILTER = "saved_training_filter"
+        const val TABLE_SAVED_TRAINING_FILTER = "saved_training_filter"
     }
 }

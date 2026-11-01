@@ -22,6 +22,10 @@ import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailSt
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingPieceItem
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 internal class TrainingRepository(
@@ -60,9 +64,10 @@ internal class TrainingRepository(
         dao.deleteTrainingsWithPieces(trainingIds)
     }
 
-    suspend fun getTrainingsList(): List<ListTrainingStateItem> = withContext(Dispatchers.Default) {
-        toListItems(trainings = dao.getAllTrainingEntities())
-    }
+    fun observeTrainingsList(): Flow<List<ListTrainingStateItem>> = dao.observeAllTrainingEntities()
+        .map { trainings -> toListItems(trainings = trainings) }
+        .distinctUntilChanged()
+        .flowOn(Dispatchers.Default)
 
     suspend fun getComparisonCandidates(trainingId: Long): List<ListTrainingStateItem> =
         withContext(Dispatchers.Default) {
