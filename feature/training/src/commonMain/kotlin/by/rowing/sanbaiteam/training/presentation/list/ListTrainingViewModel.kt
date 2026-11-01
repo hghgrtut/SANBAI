@@ -156,8 +156,9 @@ internal class ListTrainingViewModel(
     }
 
     override fun onQuickFilterManageClick(filterId: Long) {
-        if (state.savedFilters.none { saved -> saved.id == filterId }) return
-        changeState { copy(quickFilterDialog = QuickFilterDialog.Manage(filterId = filterId)) }
+        if (state.savedFilters.all { saved -> saved.id != filterId }) {
+            changeState { copy(quickFilterDialog = QuickFilterDialog.Manage(filterId = filterId)) }
+        }
     }
 
     override fun onQuickFilterRename(filterId: Long, name: String) {

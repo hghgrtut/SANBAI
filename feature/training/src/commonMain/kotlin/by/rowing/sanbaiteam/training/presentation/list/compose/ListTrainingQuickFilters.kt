@@ -233,9 +233,7 @@ private fun QuickFilterNameField(
     supportingText: String? = null,
 ) {
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     OutlinedTextField(
         value = value,
@@ -265,7 +263,10 @@ private fun QuickFilterSummary(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = filterSummary(filter = filter, athleteNames = athleteNames),
+            text = filterSummary(
+                filter = filter,
+                athleteNames = athleteNames
+            ),
             style = TypographyPalette.Body2Regular,
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -276,15 +277,12 @@ private fun QuickFilterSummary(
 private fun filterSummary(
     filter: TrainingFilter,
     athleteNames: Map<Long, String>,
-): String {
-    val labels = mutableListOf<String>()
-    for (parameter in TrainingFilterParameter.entries) {
-        if (filter.isActive(parameter)) {
-            labels += parameter.chipLabel(filter = filter, athleteNames = athleteNames)
-        }
-    }
-    return labels.joinToString(separator = " · ")
-}
+): String = TrainingFilterParameter.entries.filter { filter.isActive(it) }.map {
+    it.chipLabel(
+        filter = filter,
+        athleteNames = athleteNames
+    )
+}.joinToString(separator = " · ")
 
 @Composable
 private fun QuickFilterOverwriteDialog(
@@ -294,26 +292,15 @@ private fun QuickFilterOverwriteDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(Res.string.training_quick_filter_overwrite_title))
-        },
-        text = {
-            Text(
-                text = stringResource(
-                    Res.string.training_quick_filter_overwrite_message,
-                    name,
-                )
-            )
-        },
+        title = { Text(text = stringResource(Res.string.training_quick_filter_overwrite_title)) },
+        text = { Text(text = stringResource(Res.string.training_quick_filter_overwrite_message, name)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(text = stringResource(Res.string.training_quick_filter_overwrite_confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(Res.string.cancel))
-            }
+            TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.cancel)) }
         },
     )
 }
