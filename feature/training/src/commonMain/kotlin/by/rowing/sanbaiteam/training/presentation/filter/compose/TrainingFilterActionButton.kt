@@ -26,9 +26,7 @@ internal fun TrainingFilterActionButton(
         BadgedBox(
             badge = {
                 if (activeCount > 0) {
-                    MaterialBadge {
-                        Text(text = activeCount.toString())
-                    }
+                    MaterialBadge { Text(text = activeCount.toString()) }
                 }
             }
         ) {

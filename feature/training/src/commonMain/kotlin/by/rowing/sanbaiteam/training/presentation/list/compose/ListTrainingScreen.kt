@@ -324,6 +324,7 @@ private fun TrainingListMainContent(
             TrainingFiltersPanel(
                 filters = state.filters,
                 actions = actions,
+                showTypeFilter = true
             )
         }
         val contentState = when {

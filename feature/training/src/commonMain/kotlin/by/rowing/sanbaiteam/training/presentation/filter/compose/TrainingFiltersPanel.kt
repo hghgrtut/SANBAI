@@ -97,7 +97,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun TrainingFiltersPanel(
     filters: TrainingFiltersState,
     actions: TrainingFiltersActions,
-    showTypeFilter: Boolean = true,
+    showTypeFilter: Boolean,
 ) {
     val filter = filters.filter
     val athleteNames = remember(filters.athleteCatalog) {
