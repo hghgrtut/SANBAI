@@ -71,9 +71,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
         matching { it.name == "androidHostTest" }.configureEach {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+            dependencies { implementation(kotlin("test")) }
         }
     }
 }
