@@ -36,4 +36,4 @@ include(":detekt")
 include(":feature:calculator")
 include(":feature:athlete")
 include(":feature:training")
- 
+include(":feature:settings")

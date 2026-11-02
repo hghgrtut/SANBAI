@@ -10,6 +10,8 @@ internal interface MainScreenActions {
 
     fun navigateToAddTrainingScreen()
 
+    fun navigateToSettings()
+
     fun onTrainingClick(trainingId: Long)
 
     companion object {
@@ -20,6 +22,7 @@ internal interface MainScreenActions {
             override fun navigateToTrainingsScreen() {}
             override fun navigateToCalculatorScreen() {}
             override fun navigateToAddTrainingScreen() {}
+            override fun navigateToSettings() {}
             override fun onTrainingClick(trainingId: Long) {}
         }
     }

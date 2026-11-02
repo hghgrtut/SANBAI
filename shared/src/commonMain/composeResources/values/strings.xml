@@ -11,4 +11,5 @@
     <string name="main_show_all">Все</string>
     <string name="main_empty_trainings_title">Пока нет тренировок</string>
     <string name="main_empty_trainings_hint">Добавьте тренировку — она появится здесь</string>
+    <string name="main_settings">Настройки</string>
 </resources>

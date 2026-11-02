@@ -20,9 +20,11 @@ import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,6 +42,7 @@ import by.rowing.sanbaiteam.shared.resources.main_add_training
 import by.rowing.sanbaiteam.shared.resources.main_empty_trainings_hint
 import by.rowing.sanbaiteam.shared.resources.main_empty_trainings_title
 import by.rowing.sanbaiteam.shared.resources.main_recent_trainings
+import by.rowing.sanbaiteam.shared.resources.main_settings
 import by.rowing.sanbaiteam.shared.resources.main_show_all
 import by.rowing.sanbaiteam.shared.resources.main_stats_athletes
 import by.rowing.sanbaiteam.shared.resources.main_stats_trainings
@@ -83,7 +86,7 @@ private fun MainScreenContent(
                 .padding(all = Spacing.M),
             verticalArrangement = Arrangement.spacedBy(space = Spacing.L),
         ) {
-            DashboardHeader()
+            DashboardHeader(onSettingsClick = actions::navigateToSettings)
             StatsSection(
                 state = state,
                 actions = actions,
@@ -98,7 +101,7 @@ private fun MainScreenContent(
 }
 
 @Composable
-private fun DashboardHeader() {
+private fun DashboardHeader(onSettingsClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,17 +116,33 @@ private fun DashboardHeader() {
             )
             .padding(Spacing.L),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.XS)) {
-            Text(
-                text = stringResource(Res.string.main_title),
-                style = TypographyPalette.H1,
-                color = MaterialTheme.colorScheme.onPrimary,
-            )
-            Text(
-                text = stringResource(Res.string.main_subtitle),
-                style = TypographyPalette.Body2Medium,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = HEADER_SUBTITLE_ALPHA),
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.S),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(Spacing.XS),
+            ) {
+                Text(
+                    text = stringResource(Res.string.main_title),
+                    style = TypographyPalette.H1,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+                Text(
+                    text = stringResource(Res.string.main_subtitle),
+                    style = TypographyPalette.Body2Medium,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = HEADER_SUBTITLE_ALPHA),
+                )
+            }
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = stringResource(Res.string.main_settings),
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
         }
     }
 }

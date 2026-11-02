@@ -43,6 +43,7 @@ kotlin {
             implementation(project(":core:base"))
             implementation(project(":uikit"))
             implementation(project(":feature:athlete"))
+            implementation(project(":feature:settings"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -70,9 +71,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
         matching { it.name == "androidHostTest" }.configureEach {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+            dependencies { implementation(kotlin("test")) }
         }
     }
 }

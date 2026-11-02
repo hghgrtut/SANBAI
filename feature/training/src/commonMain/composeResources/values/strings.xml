@@ -174,7 +174,7 @@
     <string name="training_chart_metric_stroke_rate">SPM</string>
     <string name="training_chart_metric_heart_rate">ЧСС</string>
     <string name="training_chart_average">Сред.</string>
-    <string name="training_chart_best">Лучший</string>
+    <string name="training_chart_best">Лучшая</string>
     <string name="training_chart_max">Макс.</string>
     <string name="training_chart_faster">быстрее →</string>
     <string name="training_chart_pace_value">%1$s /500 м</string>

@@ -6,11 +6,9 @@ import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.training.data.FakeTrainingDao
-import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
-import by.rowing.sanbaiteam.training.data.trainingimport.FakeTrainingImportStorage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
@@ -111,7 +109,7 @@ internal class TrainingRepositoryPersonalBestTypeTest {
     private fun repository(
         type: TrainingPieceType,
         athletesRepository: FakeAthletesRepository,
-    ) = TrainingRepository(
+    ) = testTrainingRepository(
         dao = FakeTrainingDao(
             trainings = listOf(
                 TrainingEntity(
@@ -132,8 +130,6 @@ internal class TrainingRepositoryPersonalBestTypeTest {
             ),
         ),
         athletesRepository = athletesRepository,
-        importStorage = FakeTrainingImportStorage(),
-        chartReader = TrainingChartReader(),
     )
 
     private fun best(

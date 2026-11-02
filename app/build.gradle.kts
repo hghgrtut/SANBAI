@@ -61,6 +61,7 @@ dependencies {
     implementation(project(":feature:calculator"))
     implementation(project(":feature:athlete"))
     implementation(project(":feature:training"))
+    implementation(project(":feature:settings"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

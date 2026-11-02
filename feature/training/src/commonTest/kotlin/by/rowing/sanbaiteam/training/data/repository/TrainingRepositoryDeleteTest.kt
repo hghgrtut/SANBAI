@@ -1,7 +1,6 @@
 package by.rowing.sanbaiteam.training.data.repository
 
 import by.rowing.sanbaiteam.training.data.FakeTrainingDao
-import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.trainingimport.FakeTrainingImportStorage
 import kotlinx.coroutines.test.runTest
@@ -30,11 +29,9 @@ internal class TrainingRepositoryDeleteTest {
             )
         )
         val storage = FakeTrainingImportStorage()
-        val repository = TrainingRepository(
+        val repository = testTrainingRepository(
             dao = dao,
-            athletesRepository = StubAthletesRepository(),
             importStorage = storage,
-            chartReader = TrainingChartReader(),
         )
 
         repository.deleteTrainings(listOf(1L, 3L))
@@ -49,12 +46,7 @@ internal class TrainingRepositoryDeleteTest {
     @Test
     fun `delete with empty ids does not touch database`() = runTest {
         val dao = FakeTrainingDao()
-        val repository = TrainingRepository(
-            dao = dao,
-            athletesRepository = StubAthletesRepository(),
-            importStorage = FakeTrainingImportStorage(),
-            chartReader = TrainingChartReader(),
-        )
+        val repository = testTrainingRepository(dao = dao)
 
         repository.deleteTrainings(emptyList())
 

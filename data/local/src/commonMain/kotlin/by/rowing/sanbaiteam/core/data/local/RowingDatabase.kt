@@ -15,8 +15,10 @@ import by.rowing.sanbaiteam.core.data.local.RowingDatabase.Companion.DATABASE_VE
 import by.rowing.sanbaiteam.training.data.entity.SavedTrainingFilterEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
+import by.rowing.sanbaiteam.training.data.entity.TrainingWorkDisplaySettingEntity
 import by.rowing.sanbaiteam.training.data.local.SavedTrainingFilterDao
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
+import by.rowing.sanbaiteam.training.data.local.TrainingWorkDisplaySettingDao
 
 @Database(
     entities = [
@@ -25,6 +27,7 @@ import by.rowing.sanbaiteam.training.data.local.TrainingDao
         TrainingEntity::class,
         TrainingAthletePieceEntity::class,
         SavedTrainingFilterEntity::class,
+        TrainingWorkDisplaySettingEntity::class,
     ],
     version = DATABASE_VERSION,
     exportSchema = false
@@ -36,10 +39,11 @@ internal abstract class RowingDatabase : RoomDatabase() {
     abstract fun athletePersonalBestDao(): AthletePersonalBestDao
     abstract fun trainingDao(): TrainingDao
     abstract fun savedTrainingFilterDao(): SavedTrainingFilterDao
+    abstract fun trainingWorkDisplaySettingDao(): TrainingWorkDisplaySettingDao
 
     companion object {
 
-        const val DATABASE_VERSION = 3
+        const val DATABASE_VERSION = 4
         const val DATABASE_NAME = "rowing_database"
 
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -68,7 +72,21 @@ internal abstract class RowingDatabase : RoomDatabase() {
             }
         }
 
-        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `${TrainingWorkDisplaySettingDao.TABLE_TRAINING_WORK_DISPLAY_SETTING}` (
+                        `pieceType` TEXT NOT NULL,
+                        `mode` TEXT NOT NULL,
+                        PRIMARY KEY(`pieceType`)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
     }
 }
 

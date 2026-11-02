@@ -1,13 +1,10 @@
 package by.rowing.sanbaiteam.training.data.repository
 
-import by.rowing.sanbaiteam.training.data.FakeTrainingDao
-import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
-import by.rowing.sanbaiteam.training.data.trainingimport.FakeTrainingImportStorage
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,7 +14,7 @@ internal class TrainingRepositoryComparisonTest {
 
     @Test
     fun `candidates contain only same type without current training`() = runTest {
-        val repository = repository(
+        val repository = testTrainingRepository(
             trainings = listOf(
                 training(
                     id = 1,
@@ -63,7 +60,7 @@ internal class TrainingRepositoryComparisonTest {
 
     @Test
     fun `detail compares pieces with the same order and skips other types`() = runTest {
-        val repository = repository(
+        val repository = testTrainingRepository(
             trainings = listOf(
                 training(
                     id = 1,
@@ -122,19 +119,6 @@ internal class TrainingRepositoryComparisonTest {
         assertEquals(ComparisonTrend.BETTER, time.trend)
         assertNull(first.metrics[ComparisonMetric.PERCENT_OF_PB])
     }
-
-    private fun repository(
-        trainings: List<TrainingEntity>,
-        pieces: List<TrainingAthletePieceEntity>,
-    ) = TrainingRepository(
-        dao = FakeTrainingDao(
-            trainings = trainings,
-            pieces = pieces
-        ),
-        athletesRepository = StubAthletesRepository(),
-        importStorage = FakeTrainingImportStorage(),
-        chartReader = TrainingChartReader(),
-    )
 
     private fun training(
         id: Long,
