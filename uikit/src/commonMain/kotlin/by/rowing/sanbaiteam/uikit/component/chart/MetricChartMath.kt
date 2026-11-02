@@ -41,6 +41,48 @@ internal fun niceRange(
     }
 }
 
+/**
+ * Строит диапазон по данным, но не позволяет ему выйти за [bounds].
+ *
+ * В отличие от [niceRange] не расширяет границы до «красивых» делений: это важно,
+ * когда границы нужны для отсечения аномальных значений.
+ */
+internal fun boundedRange(
+    min: Double,
+    max: Double,
+    bounds: ClosedFloatingPointRange<Double>,
+    targetTicks: Int = 4,
+): ChartRange {
+    if (
+        !min.isFinite() ||
+        !max.isFinite() ||
+        !bounds.start.isFinite() ||
+        !bounds.endInclusive.isFinite()
+    ) {
+        return niceRange(
+            min = min,
+            max = max,
+            targetTicks = targetTicks
+        )
+    }
+
+    val lower = maxOf(min, bounds.start)
+    val upper = minOf(max, bounds.endInclusive)
+    return if (lower >= upper) {
+        niceRange(
+            min = min,
+            max = max,
+            targetTicks = targetTicks
+        )
+    } else {
+        ChartRange(
+            min = lower,
+            max = upper,
+            step = niceStep(rawStep = (upper - lower) / targetTicks.coerceAtLeast(1).toDouble()),
+        )
+    }
+}
+
 internal fun timeTickStep(durationMillis: Long): Long {
     if (durationMillis <= 0L) return 1_000L
     val rawStep = durationMillis.toDouble() / 4 // 4 - количество отметок времени на графике

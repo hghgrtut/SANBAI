@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -31,6 +32,7 @@ import by.rowing.sanbaiteam.training.data.models.chart.TrainingPieceChartData
 import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartActions
 import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartViewModel
 import by.rowing.sanbaiteam.training.presentation.chart.models.TrainingChartState
+import by.rowing.sanbaiteam.training.presentation.chart.models.trainingChartValueBounds
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_chart_average
 import by.rowing.sanbaiteam.training.resources.training_chart_best
@@ -132,6 +134,15 @@ private fun ChartBody(
         )
         return
     }
+    val valueBounds = remember(points, selectedMetric, state.pieceType) {
+        state.pieceType?.let { pieceType ->
+            trainingChartValueBounds(
+                metric = selectedMetric,
+                pieceType = pieceType,
+                points = points,
+            )
+        }
+    }
     val contentDescription = stringResource(selectedMetric.description) + ". " +
             stringResource(Res.string.training_chart_average) + " " + summaryValues(selectedMetric, points).first
 
@@ -169,6 +180,7 @@ private fun ChartBody(
                     durationMillis = data.durationMillis,
                     averageValue = points.map { it.value }.average(),
                     reverseValueAxis = selectedMetric == TrainingChartMetric.SPEED,
+                    valueBounds = valueBounds,
                     valueFormatter = { value ->
                         formatAxisValue(
                             metric = selectedMetric,

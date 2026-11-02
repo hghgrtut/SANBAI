@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -37,6 +38,7 @@ fun MetricLineChart(
     modifier: Modifier = Modifier,
     averageValue: Double? = null,
     reverseValueAxis: Boolean = false,
+    valueBounds: ClosedFloatingPointRange<Double>? = null,
 ) {
     val textMeasurer = rememberTextMeasurer()
     val gridColor = MaterialTheme.colorScheme.outlineVariant
@@ -55,9 +57,17 @@ fun MetricLineChart(
         val plotBottom = size.height - bottomInset
         if (plotRight <= leftInset || plotBottom <= topInset) return@Canvas
 
-        val valueRange = niceRange(
-            min = points.minOf { it.value },
-            max = points.maxOf { it.value },
+        val minValue = points.minOf { it.value }
+        val maxValue = points.maxOf { it.value }
+        val valueRange = valueBounds?.let { bounds ->
+            boundedRange(
+                min = minValue,
+                max = maxValue,
+                bounds = bounds,
+            )
+        } ?: niceRange(
+            min = minValue,
+            max = maxValue,
         )
         val layout = ChartLayout(
             plotLeft = leftInset,
@@ -81,19 +91,26 @@ fun MetricLineChart(
             timeFormatter = timeFormatter,
         )
 
-        drawAverageLine(
-            averageValue = averageValue,
-            valueRange = valueRange,
-            averageColor = averageColor,
-            layout = layout
-        )
-        drawValuesLine(
-            points = points,
-            durationMillis = durationMillis,
-            lineColor = lineColor,
-            xForValue = layout::xForValue,
-            yForTime = layout::yForTime
-        )
+        clipRect(
+            left = layout.plotLeft,
+            top = layout.plotTop,
+            right = layout.plotRight,
+            bottom = layout.plotBottom,
+        ) {
+            drawAverageLine(
+                averageValue = averageValue,
+                valueRange = valueRange,
+                averageColor = averageColor,
+                layout = layout
+            )
+            drawValuesLine(
+                points = points,
+                durationMillis = durationMillis,
+                lineColor = lineColor,
+                xForValue = layout::xForValue,
+                yForTime = layout::yForTime
+            )
+        }
     }
 }
 
@@ -203,7 +220,7 @@ private class ChartLayout(
 ) {
 
     fun xForValue(value: Double): Float {
-        val ratio = ((value - valueRange.min) / (valueRange.max - valueRange.min)).coerceIn(0.0, 1.0)
+        val ratio = (value - valueRange.min) / (valueRange.max - valueRange.min)
         val normalized = if (reverseValueAxis) 1.0 - ratio else ratio
         return plotLeft + normalized.toFloat() * (plotRight - plotLeft)
     }

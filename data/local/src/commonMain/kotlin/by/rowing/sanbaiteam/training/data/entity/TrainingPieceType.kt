@@ -17,31 +17,46 @@ import org.jetbrains.compose.resources.StringResource
 @AllowDetektPublic
 enum class TrainingPieceType(
     val uiResId: StringResource,
-    val seatsCount: Int = 1
+    val isWater: Boolean,
 ) {
-    CONCEPT_ROW_ERG(uiResId = Res.string.training_piece_type_concept_row_erg),
-    RP_3(uiResId = Res.string.training_piece_type_rp3),
-    CONCEPT_BIKE_ERG(uiResId = Res.string.training_piece_type_concept_bike_erg),
-    WATT_BIKE(uiResId = Res.string.training_piece_type_watt_bike),
-    SINGLE(uiResId = Res.string.training_piece_type_single),
+    CONCEPT_ROW_ERG(
+        uiResId = Res.string.training_piece_type_concept_row_erg,
+        isWater = false
+    ),
+    RP_3(
+        uiResId = Res.string.training_piece_type_rp3,
+        isWater = false
+    ),
+    CONCEPT_BIKE_ERG(
+        uiResId = Res.string.training_piece_type_concept_bike_erg,
+        isWater = false
+    ),
+    WATT_BIKE(
+        uiResId = Res.string.training_piece_type_watt_bike,
+        isWater = false
+    ),
+    SINGLE(
+        uiResId = Res.string.training_piece_type_single,
+        isWater = true,
+    ),
     DOUBLE(
         uiResId = Res.string.training_piece_type_double,
-        seatsCount = 2,
+        isWater = true,
     ),
     QUADRUPLE(
         uiResId = Res.string.training_piece_type_quadruple,
-        seatsCount = 4
+        isWater = true,
     ),
     PAIR(
         uiResId = Res.string.training_piece_type_pair,
-        seatsCount = 2
+        isWater = true,
     ),
     FOUR(
         uiResId = Res.string.training_piece_type_four,
-        seatsCount = 4
+        isWater = true,
     ),
     EIGHT(
         uiResId = Res.string.training_piece_type_eight,
-        seatsCount = 8
+        isWater = true,
     )
 }
