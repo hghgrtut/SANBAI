@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_work_display_section">Отображение объёма работы</string>
+    <string name="settings_work_display_hint">Выбери единицы объёма работы для каждого типа тренировки.</string>
+    <string name="settings_work_display_meters">Метры</string>
+    <string name="settings_work_display_minutes">Минуты</string>
+</resources>

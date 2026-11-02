@@ -7,11 +7,13 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.core.util.roundToTenths
+import by.rowing.sanbaiteam.settings.data.repository.WorkDisplaySettingsRepository
 import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.comparison.TrainingComparisonCalculator
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
+import by.rowing.sanbaiteam.training.data.entity.TrainingWorkDisplayMode
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartResult
@@ -23,7 +25,9 @@ import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingPieceI
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -33,6 +37,7 @@ internal class TrainingRepository(
     private val athletesRepository: AthletesRepository,
     private val importStorage: TrainingImportStorage,
     private val chartReader: TrainingChartReader,
+    private val workDisplaySettingsRepository: WorkDisplaySettingsRepository,
 ) {
 
     suspend fun saveTraining(
@@ -64,8 +69,16 @@ internal class TrainingRepository(
         dao.deleteTrainingsWithPieces(trainingIds)
     }
 
-    fun observeTrainingsList(): Flow<List<ListTrainingStateItem>> = dao.observeAllTrainingEntities()
-        .map { trainings -> toListItems(trainings = trainings) }
+    fun observeTrainingsList(): Flow<List<ListTrainingStateItem>> = combine(
+        dao.observeAllTrainingEntities(),
+        workDisplaySettingsRepository.modes,
+    ) { trainings, modes -> trainings to modes }
+        .map { (trainings, modes) ->
+            toListItems(
+                trainings = trainings,
+                modes = modes
+            )
+        }
         .distinctUntilChanged()
         .flowOn(Dispatchers.Default)
 
@@ -75,7 +88,8 @@ internal class TrainingRepository(
             toListItems(
                 trainings = dao.getAllTrainingEntities().filter { training ->
                     training.type == baseType && training.id != trainingId
-                }
+                },
+                modes = workDisplaySettingsRepository.modes.first(),
             )
         }
 
@@ -250,7 +264,10 @@ internal class TrainingRepository(
         )
     }
 
-    private suspend fun toListItems(trainings: List<TrainingEntity>): List<ListTrainingStateItem> {
+    private suspend fun toListItems(
+        trainings: List<TrainingEntity>,
+        modes: Map<TrainingPieceType, TrainingWorkDisplayMode>,
+    ): List<ListTrainingStateItem> {
         if (trainings.isEmpty()) return emptyList()
         val piecesByTrainingId = dao.getPiecesForTrainings(trainings.map { it.id })
             .groupBy { it.trainingId }
@@ -264,6 +281,7 @@ internal class TrainingRepository(
                 training = training,
                 pieces = piecesByTrainingId[training.id].orEmpty(),
                 nameMap = nameMap,
+                modes = modes,
             )
         }
     }
@@ -272,6 +290,7 @@ internal class TrainingRepository(
         training: TrainingEntity,
         pieces: List<TrainingAthletePieceEntity>,
         nameMap: Map<Long, String>,
+        modes: Map<TrainingPieceType, TrainingWorkDisplayMode>,
     ): ListTrainingStateItem? {
         if (pieces.isEmpty()) return null
 
@@ -284,7 +303,7 @@ internal class TrainingRepository(
             trainingTypeResId = training.type.uiResId,
             trainingDate = TimeUtils.formatDate(training.dateMillis),
             trainingWork = formatWorkSummary(
-                type = training.type,
+                mode = modes.getValue(training.type),
                 pieces = pieces
             ),
             athletes = athleteNames,
@@ -315,10 +334,10 @@ internal class TrainingRepository(
     }.average().takeIf { !it.isNaN() }?.roundToTenths()
 
     private fun formatWorkSummary(
-        type: TrainingPieceType,
+        mode: TrainingWorkDisplayMode,
         pieces: List<TrainingAthletePieceEntity>,
     ): String {
-        val useTime = type in TYPES_WITH_TIME_DISPLAYED
+        val useTime = mode == TrainingWorkDisplayMode.MINUTES
         val groups = LinkedHashMap<Long, Int>()
         for (piece in pieces) {
             val value = if (useTime) {
@@ -341,16 +360,6 @@ internal class TrainingRepository(
         } else {
             RowingTimeFormat.formatDurationMmSs(timeMillis = seconds * TimeUtils.MILLIS_PER_SECOND)
         }
-    }
-
-    companion object {
-
-        private val TYPES_WITH_TIME_DISPLAYED = listOf(
-            TrainingPieceType.CONCEPT_ROW_ERG,
-            TrainingPieceType.RP_3,
-            TrainingPieceType.CONCEPT_BIKE_ERG,
-            TrainingPieceType.WATT_BIKE
-        )
     }
 
     private data class ComparedTrainingSource(

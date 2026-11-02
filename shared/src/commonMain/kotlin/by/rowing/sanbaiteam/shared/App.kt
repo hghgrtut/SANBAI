@@ -15,6 +15,7 @@ import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigationEvent
 import by.rowing.sanbaiteam.core.presentation.compose.composable
+import by.rowing.sanbaiteam.settings.presentation.navigation.SettingsNavGraphProvider
 import by.rowing.sanbaiteam.shared.fileimport.ExternalFileImport
 import by.rowing.sanbaiteam.shared.main.presentation.MainScreen
 import by.rowing.sanbaiteam.shared.main.presentation.MainViewModel
@@ -73,6 +74,10 @@ private val navigationBuilder: (ComposeNavigator) -> NavGraphBuilder.() -> Unit 
             navigator = composeNavigator
         )
         TrainingNavGraphProvider.trainingNavGraph(
+            builder = this,
+            navigator = composeNavigator
+        )
+        SettingsNavGraphProvider.settingsNavGraph(
             builder = this,
             navigator = composeNavigator
         )

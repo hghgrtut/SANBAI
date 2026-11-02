@@ -42,6 +42,7 @@ kotlin {
             implementation(project(":feature:calculator"))
             implementation(project(":feature:athlete"))
             implementation(project(":feature:training"))
+            implementation(project(":feature:settings"))
 
             implementation(compose.runtime)
             implementation(compose.foundation)

@@ -7,6 +7,7 @@ import by.rowing.sanbaiteam.calculator.presentation.navigation.CalculatorNavGrap
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
+import by.rowing.sanbaiteam.settings.presentation.navigation.SettingsNavGraphProvider
 import by.rowing.sanbaiteam.shared.main.presentation.navigation.MainNavigation
 import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboard
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavGraphProvider
@@ -61,6 +62,13 @@ internal class MainViewModel(
 
     override fun navigateToAddTrainingScreen() {
         TrainingNavGraphProvider.navigateToAdd(
+            composeNavigator = composeNavigator,
+            navOptions = getReturnToScreenNavOptions<MainNavigation.Root>()
+        )
+    }
+
+    override fun navigateToSettings() {
+        SettingsNavGraphProvider.navigateToRoot(
             composeNavigator = composeNavigator,
             navOptions = getReturnToScreenNavOptions<MainNavigation.Root>()
         )
