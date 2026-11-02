@@ -10,6 +10,7 @@ import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.shared.main.presentation.navigation.MainNavigation
 import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboard
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavGraphProvider
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 internal class MainViewModel(
@@ -19,25 +20,21 @@ internal class MainViewModel(
 ) : ComposeBaseViewModel<MainUiState>(initialState = MainUiState()), MainScreenActions {
 
     init {
-        refreshDashboard()
-    }
-
-    fun refreshDashboard() {
         viewModelScope.launch {
-            runCatching {
-                val athletes = athletesRepository.getAllAthletesOnce()
-                val trainings = trainingDashboard.load()
-                changeState {
-                    copy(
-                        isLoading = false,
-                        athletesCount = athletes.size,
-                        trainingsCount = trainings.trainingCount,
-                        recentTrainings = trainings.recent,
-                    )
+            combine(
+                trainingDashboard.observeDashboard(),
+                athletesRepository.allAthletes,
+            ) { trainings, athletes -> trainings to athletes }
+                .collect { (trainings, athletes) ->
+                    changeState {
+                        copy(
+                            isLoading = false,
+                            athletesCount = athletes.size,
+                            trainingsCount = trainings.trainingCount,
+                            recentTrainings = trainings.recent,
+                        )
+                    }
                 }
-            }.onFailure {
-                changeState { copy(isLoading = false) }
-            }
         }
     }
 

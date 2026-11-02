@@ -51,7 +51,7 @@ internal class ListTrainingViewModel(
     )
 
     init {
-        reloadTrainings()
+        observeTrainings()
         loadAthleteCatalog()
         filtersController.subscribe()
     }
@@ -199,7 +199,6 @@ internal class ListTrainingViewModel(
         changeState { copy(deleteConfirmationRequested = false) }
         viewModelScope.launch {
             repository.deleteTrainings(state.selectedTrainingIds.toList())
-            reloadTrainings()
             changeState { copy(selectedTrainingIds = emptySet()) }
         }
     }
@@ -280,14 +279,15 @@ internal class ListTrainingViewModel(
         changeState { copy(transferNotice = null) }
     }
 
-    fun reloadTrainings() {
+    private fun observeTrainings() {
         viewModelScope.launch {
-            val trainings = repository.getTrainingsList()
-            changeState {
-                copy(
-                    items = trainings,
-                    isLoading = false,
-                )
+            repository.observeTrainingsList().collect { trainings ->
+                changeState {
+                    copy(
+                        items = trainings,
+                        isLoading = false,
+                    )
+                }
             }
         }
     }

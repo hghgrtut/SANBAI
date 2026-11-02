@@ -7,6 +7,7 @@ import androidx.room.Transaction
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
+import kotlinx.coroutines.flow.Flow
 
 @AllowDetektPublic
 @Dao
@@ -30,6 +31,9 @@ interface TrainingDao {
 
     @Query("SELECT * FROM $TABLE_TRAINING ORDER BY dateMillis DESC")
     suspend fun getAllTrainingEntities(): List<TrainingEntity>
+
+    @Query("SELECT * FROM $TABLE_TRAINING ORDER BY dateMillis DESC")
+    fun observeAllTrainingEntities(): Flow<List<TrainingEntity>>
 
     @Query("SELECT * FROM $TABLE_TRAINING WHERE id IN (:trainingIds) ORDER BY dateMillis DESC")
     suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity>

@@ -2,6 +2,8 @@ package by.rowing.sanbaiteam.training.data.dashboard
 
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.StringResource
 
 private const val RECENT_TRAININGS_LIMIT = 4
@@ -28,16 +30,15 @@ data class TrainingDashboardData(
 @AllowDetektPublic
 interface TrainingDashboard {
 
-    suspend fun load(): TrainingDashboardData
+    fun observeDashboard(): Flow<TrainingDashboardData>
 }
 
 internal class TrainingDashboardImpl(
     private val repository: TrainingRepository,
 ) : TrainingDashboard {
 
-    override suspend fun load(): TrainingDashboardData {
-        val trainings = repository.getTrainingsList()
-        return TrainingDashboardData(
+    override fun observeDashboard(): Flow<TrainingDashboardData> = repository.observeTrainingsList().map { trainings ->
+        TrainingDashboardData(
             trainingCount = trainings.size,
             recent = trainings
                 .take(n = RECENT_TRAININGS_LIMIT)
