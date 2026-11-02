@@ -161,7 +161,8 @@ internal class TrainingRepository(
                     ?: return@withContext TrainingChartResult.SourceUnavailable,
                 sourceIntervalIndex = piece.sourceIntervalIndex
                     ?: return@withContext TrainingChartResult.SourceUnavailable,
-            ) ?: return@withContext TrainingChartResult.SourceUnavailable
+            ) ?: return@withContext TrainingChartResult.SourceUnavailable,
+            pieceType = training.type,
         )
     }
 

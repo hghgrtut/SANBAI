@@ -27,6 +27,7 @@ internal class TrainingChartViewModel(
                     changeState {
                         copy(
                             chartData = result.data,
+                            pieceType = result.pieceType,
                             availableMetrics = availableMetrics,
                             selectedMetric = requested
                                 ?.takeIf { it in availableMetrics }
@@ -62,8 +63,9 @@ internal class TrainingChartViewModel(
         changeState { copy(selectedMetric = metric) }
     }
 
-    private companion object {
-        val METRIC_ORDER = listOf(
+    companion object {
+
+        private val METRIC_ORDER = listOf(
             TrainingChartMetric.SPEED,
             TrainingChartMetric.STROKE_RATE,
             TrainingChartMetric.HEART_RATE,
