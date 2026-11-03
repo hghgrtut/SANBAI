@@ -15,6 +15,7 @@ internal data class AddTrainingState(
     val pendingRawFiles: List<ByteArray> = emptyList(),
     val pendingFileExtension: String? = null,
     val pendingImportSource: TrainingImportSource? = null,
+    val pendingImportTrainingType: TrainingPieceType? = null,
     val trainingType: TrainingPieceType = TrainingPieceType.SINGLE,
     val pendingSourceSerial: String? = null,
     val importNotice: UiText? = null,

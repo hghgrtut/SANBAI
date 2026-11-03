@@ -169,7 +169,7 @@ internal class TrainingTransferRepository(
     private fun sourceOf(training: BackupTraining): TrainingImportSource = training.source?.let { name ->
         runCatching { TrainingImportSource.valueOf(name) }.getOrNull()
     } ?: when (runCatching { TrainingPieceType.valueOf(training.type) }.getOrNull()) {
-        TrainingPieceType.CONCEPT_ROW_ERG -> TrainingImportSource.CONCEPT2_FIT
+        TrainingPieceType.CONCEPT_ROW_ERG, TrainingPieceType.CONCEPT_BIKE_ERG -> TrainingImportSource.CONCEPT2_FIT
         TrainingPieceType.RP_3 -> TrainingImportSource.RP3_CSV
         else -> TrainingImportSource.SPEED_COACH
     }

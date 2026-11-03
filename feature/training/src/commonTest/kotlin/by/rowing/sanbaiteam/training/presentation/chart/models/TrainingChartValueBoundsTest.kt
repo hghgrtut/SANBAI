@@ -45,6 +45,23 @@ internal class TrainingChartValueBoundsTest {
     }
 
     @Test
+    fun `bike erg pace bounds are cut by thirty seconds`() {
+        val values = List(100) { 120.0 } + listOf(60.0, 400.0)
+        val average = values.average()
+
+        val bounds = assertNotNull(
+            trainingChartValueBounds(
+                metric = TrainingChartMetric.SPEED,
+                pieceType = TrainingPieceType.CONCEPT_BIKE_ERG,
+                points = points(values),
+            )
+        )
+
+        assertEquals(average - 30.0, bounds.start, 0.001)
+        assertEquals(average + 30.0, bounds.endInclusive, 0.001)
+    }
+
+    @Test
     fun `water stroke rate bounds are absolute`() {
         val bounds = assertNotNull(
             trainingChartValueBounds(

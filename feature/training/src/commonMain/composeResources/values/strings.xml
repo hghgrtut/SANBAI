@@ -105,6 +105,7 @@
     <string name="add_training_import_read_error">Не удалось прочитать выбранный файл.</string>
     <string name="add_training_import_unsupported_format">Формат файла не поддерживается. Выберите CSV RP3 или FIT SpeedCoach / Concept2.</string>
     <string name="add_training_import_mixed_sources">Нельзя импортировать вместе файлы разных источников. Импортируйте их отдельно.</string>
+    <string name="add_training_import_mixed_types">Нельзя импортировать вместе файлы RowErg и BikeErg. Импортируйте их отдельно.</string>
     <string name="add_training_import_parse_error">Не удалось разобрать файл тренировки.</string>
     <string name="add_training_import_not_found_by_serial">Спортсмен со спидкоучем %1$s не найден. Выберите вручную.</string>
     <string name="add_training_import_success">Тренировка импортирована.</string>
@@ -177,7 +178,7 @@
     <string name="training_chart_best">Лучшая</string>
     <string name="training_chart_max">Макс.</string>
     <string name="training_chart_faster">быстрее →</string>
-    <string name="training_chart_pace_value">%1$s /500 м</string>
+    <string name="training_chart_pace_value">%1$s /%2$d м</string>
     <string name="training_chart_stroke_rate_value">%1$s греб./мин</string>
     <string name="training_chart_heart_rate_value">%1$d уд./мин</string>
     <string name="training_chart_empty_metric">Нет данных для этого показателя</string>

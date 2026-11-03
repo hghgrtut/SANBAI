@@ -26,9 +26,11 @@ import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.formatTenths
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartPoint
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingPieceChartData
+import by.rowing.sanbaiteam.training.data.models.chart.chartPaceDistanceMeters
 import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartActions
 import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartViewModel
 import by.rowing.sanbaiteam.training.presentation.chart.models.TrainingChartState
@@ -144,7 +146,11 @@ private fun ChartBody(
         }
     }
     val contentDescription = stringResource(selectedMetric.description) + ". " +
-            stringResource(Res.string.training_chart_average) + " " + summaryValues(selectedMetric, points).first
+            stringResource(Res.string.training_chart_average) + " " + summaryValues(
+        metric = selectedMetric,
+        points = points,
+        pieceType = state.pieceType,
+    ).first
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -158,6 +164,7 @@ private fun ChartBody(
         SummaryRow(
             metric = selectedMetric,
             points = points,
+            pieceType = state.pieceType,
         )
         DataCard(
             modifier = Modifier
@@ -244,10 +251,12 @@ private fun MetricSelector(
 private fun SummaryRow(
     metric: TrainingChartMetric,
     points: List<TrainingChartPoint>,
+    pieceType: TrainingPieceType?,
 ) {
     val (average, extreme) = summaryValues(
         metric = metric,
-        points = points
+        points = points,
+        pieceType = pieceType,
     )
     val maximumLabelResId =
         if (metric == TrainingChartMetric.SPEED) Res.string.training_chart_best else Res.string.training_chart_max
@@ -293,22 +302,27 @@ private fun SummaryItem(
 private fun summaryValues(
     metric: TrainingChartMetric,
     points: List<TrainingChartPoint>,
+    pieceType: TrainingPieceType?,
 ): Pair<String, String> = formatSummaryValue(
     metric = metric,
-    value = points.map { it.value }.average()
+    value = points.map { it.value }.average(),
+    pieceType = pieceType,
 ) to formatSummaryValue(
     metric = metric,
-    value = if (metric == TrainingChartMetric.SPEED) points.minOf { it.value } else points.maxOf { it.value }
+    value = if (metric == TrainingChartMetric.SPEED) points.minOf { it.value } else points.maxOf { it.value },
+    pieceType = pieceType,
 )
 
 @Composable
 private fun formatSummaryValue(
     metric: TrainingChartMetric,
     value: Double,
+    pieceType: TrainingPieceType?,
 ): String = when (metric) {
     TrainingChartMetric.SPEED -> stringResource(
         Res.string.training_chart_pace_value,
         RowingTimeFormat.formatDuration((value * TimeUtils.MILLIS_PER_SECOND).roundToLong()),
+        chartPaceDistanceMeters(pieceType),
     )
 
     TrainingChartMetric.STROKE_RATE -> stringResource(
