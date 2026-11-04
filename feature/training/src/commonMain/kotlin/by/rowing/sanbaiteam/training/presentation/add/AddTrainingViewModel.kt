@@ -19,10 +19,10 @@ import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportContainer
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportParsers
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
-import by.rowing.sanbaiteam.training.data.trainingimport.impliedTrainingType
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.add_training_crew_max_size
 import by.rowing.sanbaiteam.training.resources.add_training_import_mixed_sources
+import by.rowing.sanbaiteam.training.resources.add_training_import_mixed_types
 import by.rowing.sanbaiteam.training.resources.add_training_import_multi_success
 import by.rowing.sanbaiteam.training.resources.add_training_import_not_found_by_serial
 import by.rowing.sanbaiteam.training.resources.add_training_import_parse_error
@@ -335,27 +335,34 @@ internal class AddTrainingViewModel(
                 return@launch
             }
             val parser = TrainingImportParsers.bySource(checkNotNull(importSource))
-            var fileIndex = state.pendingRawFiles.size
+            val parsedImports = mutableListOf<ParsedTrainingImport>()
             fileContents.forEach { file ->
                 TrainingImportContainer.unpackOrSingle(file.bytes).forEach { part ->
-                    runCatching {
+                    val parsed = runCatching {
                         parser.parse(
                             bytes = part,
                             fileName = file.fileName
                         )
-                    }.getOrNull()?.let { parsed ->
-                        applyParsedImport(
-                            parsed = parsed,
-                            fileIndex = fileIndex
-                        )
-                        fileIndex++
-                    } ?: run {
+                    }.getOrNull() ?: run {
                         changeState {
                             copy(importNotice = UiText.of(Res.string.add_training_import_parse_error))
                         }
                         return@launch
                     }
+                    parsedImports += parsed
                 }
+            }
+            if (parsedImports.map { it.trainingType }.toSet().size > 1) {
+                changeState { copy(importNotice = UiText.of(Res.string.add_training_import_mixed_types)) }
+                return@launch
+            }
+            var fileIndex = state.pendingRawFiles.size
+            parsedImports.forEach { parsed ->
+                applyParsedImport(
+                    parsed = parsed,
+                    fileIndex = fileIndex
+                )
+                fileIndex++
             }
         }
     }
@@ -374,6 +381,11 @@ internal class AddTrainingViewModel(
         parsed: ParsedTrainingImport,
         fileIndex: Int,
     ) {
+        val pendingTrainingType = state.pendingImportTrainingType
+        if (pendingTrainingType != null && pendingTrainingType != parsed.trainingType) {
+            changeState { copy(importNotice = UiText.of(Res.string.add_training_import_mixed_types)) }
+            return
+        }
         val newPieces = parsed.intervals.mapIndexed { intervalIndex, interval ->
             AddPieceDraft(
                 distanceMeters = interval.distanceMeters,
@@ -392,9 +404,7 @@ internal class AddTrainingViewModel(
         val isFirstImport = state.pendingRawFiles.isEmpty()
 
         if (isFirstImport) {
-            val parsedAthleteId = parsed.deviceSerial
-                ?.let { athleteRepository.findAthleteIdBySpeedCoachSerial(it) }
-                ?: 0L
+            val parsedAthleteId = resolveImportedAthleteId(parsed = parsed)
             val trainingDateMillis = parsed.startTimeMillis?.let(::toTrainingDateMillis) ?: state.dateMillis
             changeState {
                 copy(
@@ -402,7 +412,8 @@ internal class AddTrainingViewModel(
                     dateFormatted = TimeUtils.formatDate(trainingDateMillis),
                     crewAthletes = listOf(AddCrewAthlete(rowerId = parsedAthleteId)),
                     pieces = newPieces.ifEmpty { listOf(AddPieceDraft()) },
-                    trainingType = parsed.source.impliedTrainingType(),
+                    trainingType = parsed.trainingType,
+                    pendingImportTrainingType = parsed.trainingType,
                     pendingRawFiles = listOf(parsed.rawFile),
                     pendingFileExtension = parsed.fileExtension,
                     pendingImportSource = parsed.source,
@@ -434,6 +445,16 @@ internal class AddTrainingViewModel(
             }
         }
     }
+
+    private suspend fun resolveImportedAthleteId(parsed: ParsedTrainingImport): Long =
+        parsed.deviceSerial?.let { athleteRepository.findAthleteIdBySpeedCoachSerial(it) } ?: run {
+            val catalog = state.rowersCatalog
+            if (catalog.isNotEmpty()) {
+                catalog.singleOrNull()?.id
+            } else {
+                athleteRepository.getAllAthletesOnce().singleOrNull()?.id
+            }
+        } ?: 0L
 
     private fun buildImportNotice(
         fileCount: Int,

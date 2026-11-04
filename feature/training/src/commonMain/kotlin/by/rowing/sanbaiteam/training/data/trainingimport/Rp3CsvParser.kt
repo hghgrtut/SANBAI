@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -45,6 +46,7 @@ internal object Rp3CsvParser : TrainingImportParser {
 
         return ParsedTrainingImport(
             source = source,
+            trainingType = TrainingPieceType.RP_3,
             rawFile = bytes,
             fileExtension = CSV_FILE_EXTENSION,
             deviceSerial = null,

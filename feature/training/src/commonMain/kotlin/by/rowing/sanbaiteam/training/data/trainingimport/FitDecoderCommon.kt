@@ -47,13 +47,15 @@ internal val MESG_LAP = 19.toUShort()
 internal val MESG_RECORD = 20.toUShort()
 
 internal val SPORT_FITNESS_EQUIPMENT = 4.toUShort()
+internal val SPORT_CYCLING = 2.toUShort()
 internal val SPORT_ROWING = 15.toUShort()
 internal val SPORT_OTHER = 0.toUShort()
 
-internal val MANUFACTURER_CONCEPT2 = 1.toUShort()
+internal val MANUFACTURER_CONCEPT2 = 40.toUShort()
 internal val MANUFACTURER_SPEEDCOACH = 87.toUShort()
 
 internal val SUB_SPORT_INDOOR_ROWING = 14.toUShort()
+internal val SUB_SPORT_INDOOR_CYCLING = 6.toUShort()
 internal val SUB_SPORT_GENERIC = 0.toUShort()
 
 internal val INTENSITY_ACTIVE = 0.toUByte()

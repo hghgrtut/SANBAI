@@ -1,5 +1,7 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
+
 internal interface TrainingImportParser {
 
     val source: TrainingImportSource
@@ -14,6 +16,7 @@ internal interface TrainingImportParser {
 
 internal class ParsedTrainingImport(
     val source: TrainingImportSource,
+    val trainingType: TrainingPieceType,
     val rawFile: ByteArray,
     val fileExtension: String,
     val deviceSerial: String?,

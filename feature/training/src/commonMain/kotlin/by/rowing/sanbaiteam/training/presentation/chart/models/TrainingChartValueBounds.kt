@@ -6,6 +6,7 @@ import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartPoint
 
 private const val WATER_PACE_MARGIN_SECONDS = 50.0
 private const val ERG_PACE_MARGIN_SECONDS = 15.0
+private const val BIKE_PACE_MARGIN_SECONDS = 30.0
 private const val WATER_STROKE_RATE_MIN = 9.0
 private const val WATER_STROKE_RATE_MAX = 50.0
 private const val ERG_STROKE_RATE_MARGIN = 10.0
@@ -14,7 +15,8 @@ private const val ERG_STROKE_RATE_MARGIN = 10.0
  * Возвращает окно значений для оси графика или null, если ограничивать диапазон не нужно.
  *
  * Окно всегда пересекается с текущим диапазоном точек, поэтому существующие ограничения
- * (например, отбрасывание темпа вне 60..500 секунд в TrainingChartReader) остаются в силе.
+ * (например, отбрасывание темпа вне 60..500 секунд на 500 м в TrainingChartReader) остаются в силе.
+ * Для BikeErg темп считается на 1000 м, поэтому и запас для него вдвое больше.
  */
 internal fun trainingChartValueBounds(
     metric: TrainingChartMetric,
@@ -30,7 +32,11 @@ internal fun trainingChartValueBounds(
 
     val suggested = when (metric) {
         TrainingChartMetric.SPEED -> {
-            val margin = if (pieceType.isWater) WATER_PACE_MARGIN_SECONDS else ERG_PACE_MARGIN_SECONDS
+            val margin = when {
+                pieceType.isWater -> WATER_PACE_MARGIN_SECONDS
+                pieceType == TrainingPieceType.CONCEPT_BIKE_ERG -> BIKE_PACE_MARGIN_SECONDS
+                else -> ERG_PACE_MARGIN_SECONDS
+            }
             average - margin to average + margin
         }
 

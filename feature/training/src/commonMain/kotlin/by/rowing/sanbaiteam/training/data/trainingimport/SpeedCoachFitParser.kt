@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlin.math.roundToInt
 
 /**
@@ -36,6 +37,7 @@ internal object SpeedCoachFitParser : TrainingImportParser {
         val records = workout.records.sortedBy { it.timestampMillis }
         return ParsedTrainingImport(
             source = source,
+            trainingType = TrainingPieceType.SINGLE,
             rawFile = bytes,
             fileExtension = FIT_FILE_EXTENSION,
             deviceSerial = workout.deviceSerial,

@@ -1,25 +1,26 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Regression test for Concept2 RowErg `.fit` files where message definitions contain fields
- * whose sizes differ from the profile fields with the same number in other messages
- * (`file_id` field 2 is 2 bytes, while `session` field 2 is 4 bytes, etc.).
+ * Regression tests for Concept2 PM5 `.fit` files.
  *
- * A decoder that dispatches on the field number alone used to stop consuming bytes for such
- * fields, which desynchronised the whole message stream and made the workout unreadable.
+ * A workout without rest laps (just ride, single time/distance) is imported as one continuous
+ * piece, while an interval workout keeps one piece per active lap.
  */
 internal class Concept2FitParserTest {
 
     @Test
     fun parse_activeLap_becomesSingleInterval() {
-        val parsed = Concept2FitParser.parse(concept2FitSample(), fileName = null)
+        val parsed = Concept2FitParser.parse(intervalFitSample(), fileName = null)
 
         assertEquals(TrainingImportSource.CONCEPT2_FIT, parsed.source)
+        assertEquals(TrainingPieceType.CONCEPT_ROW_ERG, parsed.trainingType)
         assertEquals(1, parsed.intervals.size)
 
         val interval = parsed.intervals.single()
@@ -28,175 +29,230 @@ internal class Concept2FitParserTest {
         assertEquals(25.0, interval.strokeRate)
         assertEquals(145, interval.avgHeartRate)
         assertEquals(150, interval.maxHeartRate)
+        assertEquals(150, interval.recoveryHeartRate)
     }
 
     @Test
     fun parse_sessionStart_isReportedAsWorkoutStart() {
-        val parsed = Concept2FitParser.parse(
-            concept2FitSample(),
-            fileName = null
-        )
+        val parsed = Concept2FitParser.parse(intervalFitSample(), fileName = null)
 
-        assertEquals((START_TS + FIT_EPOCH_OFFSET_SECONDS) * 1_000L, parsed.startTimeMillis)
+        assertEquals((FIT_TEST_START_TS + FIT_EPOCH_OFFSET_SECONDS) * 1_000L, parsed.startTimeMillis)
     }
 
     @Test
-    fun matches_recognisesFitMagic() {
-        assertTrue(Concept2FitParser.matches(concept2FitSample()))
+    fun parse_rowErgSingleDistance_isMergedIntoOnePiece() {
+        val parsed = Concept2FitParser.parse(rowErgSingleDistanceSample(), fileName = null)
+
+        assertEquals(TrainingPieceType.CONCEPT_ROW_ERG, parsed.trainingType)
+        val interval = parsed.intervals.single()
+        assertEquals(420_000L, interval.timeMillis)
+        assertEquals(2264, interval.distanceMeters)
+        assertEquals(27.5, interval.strokeRate)
+        assertNull(interval.recoveryHeartRate)
+    }
+
+    @Test
+    fun parse_bikeErgJustRide_isMergedIntoOnePiece() {
+        val parsed = Concept2FitParser.parse(bikeErgJustRideSample(), fileName = null)
+
+        assertEquals(TrainingImportSource.CONCEPT2_FIT, parsed.source)
+        assertEquals(TrainingPieceType.CONCEPT_BIKE_ERG, parsed.trainingType)
+        val interval = parsed.intervals.single()
+        assertEquals(900_000L, interval.timeMillis)
+        assertEquals(8060, interval.distanceMeters)
+        assertEquals(65.0, interval.strokeRate)
+        assertEquals(142, interval.avgHeartRate)
+        assertEquals(145, interval.maxHeartRate)
+        assertNull(interval.recoveryHeartRate)
+    }
+
+    @Test
+    fun parse_intervalWorkout_keepsActiveLapsAndRecoveryHeartRate() {
+        val parsed = Concept2FitParser.parse(intervalWithRestSample(), fileName = null)
+
+        assertEquals(2, parsed.intervals.size)
+        val first = parsed.intervals[0]
+        assertEquals(300_000L, first.timeMillis)
+        assertEquals(1000, first.distanceMeters)
+        assertEquals(145, first.avgHeartRate)
+        assertEquals(102, first.recoveryHeartRate)
+
+        val second = parsed.intervals[1]
+        assertEquals(300_000L, second.timeMillis)
+        assertEquals(165, second.avgHeartRate)
+        assertEquals(92, second.recoveryHeartRate)
+    }
+
+    @Test
+    fun matches_recognisesRowingAndBikeErg() {
+        assertTrue(Concept2FitParser.matches(intervalFitSample()))
+        assertTrue(Concept2FitParser.matches(rowErgSingleDistanceSample()))
+        assertTrue(Concept2FitParser.matches(bikeErgJustRideSample()))
         assertFalse(Concept2FitParser.matches(byteArrayOf(1, 2, 3)))
     }
 
-    private fun concept2FitSample(): ByteArray {
-        val data = FitWriter().apply {
-            // file_id: fields 2, 3 and 5 must be skipped even though session/lap use those numbers.
-            definition(
-                local = 0,
-                global = 0,
-                fields = listOf(0 to 1, 1 to 2, 2 to 2, 3 to 4, 4 to 4, 5 to 2)
-            )
-            dataMessage(
-                local = 0,
-                u8(4),
-                u16(0x0028),
-                u16(0),
-                u32(0),
-                u32(START_TS),
-                u16(0),
-            )
+    @Test
+    fun matches_rejectsIndoorCyclingOfOtherManufacturers() {
+        val foreignBike = concept2FitFile(
+            laps = listOf(
+                FitTestLap(
+                    startOffsetSeconds = 0,
+                    elapsedSeconds = 300,
+                    distanceMeters = 2648.0,
+                )
+            ),
+            sport = 2,
+            subSport = 6,
+            manufacturer = 260,
+        )
 
-            // session: sport = fitness_equipment (4), sub_sport = indoor_rowing (14).
-            definition(
-                local = 1,
-                global = 18,
-                fields = listOf(253 to 4, 2 to 4, 5 to 1, 6 to 1, 7 to 4, 9 to 4)
-            )
-            dataMessage(
-                local = 1,
-                u32(START_TS + 1_260),
-                u32(START_TS),
-                u8(4),
-                u8(14),
-                u32(1_260_000),
-                u32(485_438),
-            )
-
-            // laps: one active (intensity 0) and one rest (intensity 1).
-            definition(
-                local = 2,
-                global = 19,
-                fields = listOf(253 to 4, 2 to 4, 7 to 4, 9 to 4, 23 to 1)
-            )
-            dataMessage(
-                local = 2,
-                u32(START_TS + 900),
-                u32(START_TS),
-                u32(900_000),
-                u32(452_299),
-                u8(0),
-            )
-            dataMessage(
-                local = 2,
-                u32(START_TS + 1_260),
-                u32(START_TS + 900),
-                u32(360_000),
-                u32(33_139),
-                u8(1),
-            )
-
-            // records: fields 5 (distance), 6 (speed) and 7 (power) do not exist in other messages.
-            definition(
-                local = 3,
-                global = 20,
-                fields = listOf(253 to 4, 3 to 1, 4 to 1, 5 to 4, 6 to 2, 7 to 2)
-            )
-            dataMessage(
-                local = 3,
-                u32(START_TS + 10),
-                u8(140),
-                u8(24),
-                u32(5_000),
-                u16(3_600),
-                u16(220),
-            )
-            dataMessage(
-                local = 3,
-                u32(START_TS + 20),
-                u8(150),
-                u8(26),
-                u32(10_000),
-                u16(3_700),
-                u16(230),
-            )
-        }.toByteArray()
-
-        return buildFitFile(data)
+        assertFalse(Concept2FitParser.matches(foreignBike))
     }
 
-    private fun buildFitFile(data: ByteArray): ByteArray {
-        val header = ByteArray(FIT_HEADER_MIN_SIZE)
-        header[0] = FIT_HEADER_MIN_SIZE.toByte()
-        header[1] = 0x10
-        header[4] = (data.size and 0xFF).toByte()
-        header[5] = ((data.size shr 8) and 0xFF).toByte()
-        header[6] = ((data.size shr 16) and 0xFF).toByte()
-        header[7] = ((data.size shr 24) and 0xFF).toByte()
-        header[FIT_HEADER_MAGIC_OFFSET] = '.'.code.toByte()
-        header[FIT_HEADER_MAGIC_OFFSET + 1] = 'F'.code.toByte()
-        header[FIT_HEADER_MAGIC_OFFSET + 2] = 'I'.code.toByte()
-        header[FIT_HEADER_MAGIC_OFFSET + 3] = 'T'.code.toByte()
-        return header + data + byteArrayOf(0, 0)
-    }
+    private fun intervalFitSample(): ByteArray = concept2FitFile(
+        laps = listOf(
+            FitTestLap(
+                startOffsetSeconds = 0,
+                elapsedSeconds = 900,
+                distanceMeters = 4522.99,
+                intensity = 0,
+            ),
+            FitTestLap(
+                startOffsetSeconds = 900,
+                elapsedSeconds = 360,
+                distanceMeters = 331.39,
+                intensity = 1,
+            ),
+        ),
+        records = listOf(
+            FitTestRecord(
+                offsetSeconds = 10,
+                heartRate = 140,
+                cadence = 24,
+                distanceMeters = 50.0,
+                speedMetersPerSecond = 3.6,
+            ),
+            FitTestRecord(
+                offsetSeconds = 20,
+                heartRate = 150,
+                cadence = 26,
+                distanceMeters = 100.0,
+                speedMetersPerSecond = 3.7,
+            ),
+        ),
+    )
 
-    private companion object {
-        const val START_TS = 1_180_000_000L
+    private fun rowErgSingleDistanceSample(): ByteArray = concept2FitFile(
+        laps = listOf(
+            FitTestLap(0, 120, 650.0),
+            FitTestLap(120, 120, 600.0),
+            FitTestLap(240, 120, 550.0),
+            FitTestLap(360, 60, 464.0),
+        ),
+        records = listOf(
+            FitTestRecord(
+                offsetSeconds = 10,
+                heartRate = 130,
+                cadence = 28,
+                speedMetersPerSecond = 5.4,
+            ),
+            FitTestRecord(
+                offsetSeconds = 130,
+                heartRate = 140,
+                cadence = 28,
+                speedMetersPerSecond = 5.0,
+            ),
+            FitTestRecord(
+                offsetSeconds = 250,
+                heartRate = 150,
+                cadence = 27,
+                speedMetersPerSecond = 4.6,
+            ),
+            FitTestRecord(
+                offsetSeconds = 370,
+                heartRate = 160,
+                cadence = 27,
+                speedMetersPerSecond = 7.7,
+            ),
+        ),
+    )
 
-        fun u8(value: Int): ByteArray = byteArrayOf(value.toByte())
+    private fun bikeErgJustRideSample(): ByteArray = concept2FitFile(
+        laps = listOf(
+            FitTestLap(0, 300, 2648.0),
+            FitTestLap(300, 300, 2705.0),
+            FitTestLap(600, 300, 2707.0),
+        ),
+        records = listOf(
+            FitTestRecord(
+                offsetSeconds = 10,
+                heartRate = 140,
+                cadence = 64,
+                speedMetersPerSecond = 8.83,
+            ),
+            FitTestRecord(
+                offsetSeconds = 310,
+                heartRate = 142,
+                cadence = 65,
+                speedMetersPerSecond = 9.02,
+            ),
+            FitTestRecord(
+                offsetSeconds = 610,
+                heartRate = 145,
+                cadence = 66,
+                speedMetersPerSecond = 9.02,
+            ),
+        ),
+        sport = 2,
+        subSport = 6,
+    )
 
-        fun u16(value: Int): ByteArray = u8(value and 0xFF) + u8((value shr 8) and 0xFF)
-
-        fun u32(value: Long): ByteArray = u8((value and 0xFF).toInt()) +
-                u8(((value shr 8) and 0xFF).toInt()) +
-                u8(((value shr 16) and 0xFF).toInt()) +
-                u8(((value shr 24) and 0xFF).toInt())
-    }
-
-    private class FitWriter {
-        private val bytes = ArrayList<Byte>()
-
-        fun definition(
-            local: Int,
-            global: Int,
-            fields: List<Pair<Int, Int>>
-        ) {
-            byte(DEFINITION_MASK or local)
-            byte(0)
-            byte(0)
-            ushort(global)
-            byte(fields.size)
-            fields.forEach { (num, size) ->
-                byte(num)
-                byte(size)
-                byte(0)
-            }
-        }
-
-        fun dataMessage(
-            local: Int,
-            vararg fields: ByteArray
-        ) {
-            byte(local)
-            fields.forEach { field -> field.forEach { byte(it.toInt() and 0xFF) } }
-        }
-
-        fun toByteArray(): ByteArray = bytes.toByteArray()
-
-        private fun byte(value: Int) {
-            bytes.add(value.toByte())
-        }
-
-        private fun ushort(value: Int) {
-            byte(value and 0xFF)
-            byte((value shr 8) and 0xFF)
-        }
-    }
+    private fun intervalWithRestSample(): ByteArray = concept2FitFile(
+        laps = listOf(
+            FitTestLap(0, 300, 1000.0, intensity = 0),
+            FitTestLap(300, 120, 0.0, intensity = 1),
+            FitTestLap(420, 300, 1000.0, intensity = 0),
+            FitTestLap(720, 120, 0.0, intensity = 1),
+        ),
+        records = listOf(
+            FitTestRecord(
+                offsetSeconds = 10,
+                heartRate = 140,
+                cadence = 30,
+                speedMetersPerSecond = 4.0,
+            ),
+            FitTestRecord(
+                offsetSeconds = 20,
+                heartRate = 150,
+                cadence = 30,
+                speedMetersPerSecond = 4.0,
+            ),
+            FitTestRecord(
+                offsetSeconds = 310,
+                heartRate = 120,
+            ),
+            FitTestRecord(
+                offsetSeconds = 400,
+                heartRate = 100,
+            ),
+            FitTestRecord(
+                offsetSeconds = 430,
+                heartRate = 160,
+                cadence = 32,
+            ),
+            FitTestRecord(
+                offsetSeconds = 440,
+                heartRate = 170,
+                cadence = 32,
+            ),
+            FitTestRecord(
+                offsetSeconds = 730,
+                heartRate = 110,
+            ),
+            FitTestRecord(
+                offsetSeconds = 820,
+                heartRate = 90,
+            ),
+        ),
+    )
 }
