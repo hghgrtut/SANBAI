@@ -20,7 +20,6 @@ import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportParsers
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.add_training_crew_max_size
 import by.rowing.sanbaiteam.training.resources.add_training_import_mixed_sources
 import by.rowing.sanbaiteam.training.resources.add_training_import_mixed_types
 import by.rowing.sanbaiteam.training.resources.add_training_import_multi_success
@@ -30,13 +29,6 @@ import by.rowing.sanbaiteam.training.resources.add_training_import_read_error
 import by.rowing.sanbaiteam.training.resources.add_training_import_ready
 import by.rowing.sanbaiteam.training.resources.add_training_import_success
 import by.rowing.sanbaiteam.training.resources.add_training_import_unsupported_format
-import by.rowing.sanbaiteam.training.resources.add_training_validation_athlete_duplicate
-import by.rowing.sanbaiteam.training.resources.add_training_validation_need_athlete
-import by.rowing.sanbaiteam.training.resources.add_training_validation_need_piece
-import by.rowing.sanbaiteam.training.resources.add_training_validation_piece_distance
-import by.rowing.sanbaiteam.training.resources.add_training_validation_piece_stroke_rate
-import by.rowing.sanbaiteam.training.resources.add_training_validation_piece_time
-import by.rowing.sanbaiteam.training.resources.add_training_validation_select_athlete
 import by.rowing.sanbaiteam.uikit.component.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -88,7 +80,34 @@ internal class AddTrainingViewModel(
     }
 
     override fun navigateBack() {
+        when {
+            state.showSaveDialog || state.showExitDialog -> changeState {
+                copy(
+                    showSaveDialog = false,
+                    showExitDialog = false
+                )
+            }
+
+            state.isDirty -> changeState { copy(showExitDialog = true) }
+            else -> composeNavigator.navigateBack()
+        }
+    }
+
+    fun confirmExit() {
+        changeState { copy(showExitDialog = false) }
         composeNavigator.navigateBack()
+    }
+
+    fun dismissExitDialog() {
+        changeState { copy(showExitDialog = false) }
+    }
+
+    fun dismissImportNotice() {
+        changeState { copy(importNotice = null) }
+    }
+
+    fun consumeScrollTarget() {
+        changeState { copy(scrollTarget = null) }
     }
 
     fun consumeInitialImportUri(): String? = pendingInitialImportUri.also { pendingInitialImportUri = null }
@@ -102,7 +121,8 @@ internal class AddTrainingViewModel(
         changeState {
             copy(
                 dateMillis = millis,
-                dateFormatted = TimeUtils.formatDate(millis)
+                dateFormatted = TimeUtils.formatDate(millis),
+                isDirty = true,
             )
         }
     }
@@ -111,7 +131,8 @@ internal class AddTrainingViewModel(
         changeState {
             copy(
                 trainingType = trainingType,
-                validationError = null
+                validationError = null,
+                isDirty = true,
             )
         }
     }
@@ -125,7 +146,9 @@ internal class AddTrainingViewModel(
                 crewAthletes = crewAthletes.map { athlete ->
                     if (athlete.crewId == crewLocalId) athlete.copy(rowerId = athleteId) else athlete
                 },
-                validationError = null
+                validationError = null,
+                athleteError = null,
+                isDirty = true,
             )
         }
     }
@@ -231,7 +254,9 @@ internal class AddTrainingViewModel(
             }
             copy(
                 pieces = pieces + newPiece,
-                validationError = null
+                scrollTarget = AddTrainingScrollTarget.Piece(newPiece.localId),
+                validationError = null,
+                isDirty = true,
             )
         }
     }
@@ -241,16 +266,31 @@ internal class AddTrainingViewModel(
             changeState {
                 copy(
                     pieces = pieces.filterNot { it.localId == pieceLocalId },
-                    validationError = null
+                    pieceErrors = pieceErrors - pieceLocalId,
+                    validationError = null,
+                    isDirty = true,
                 )
             }
         }
     }
 
     fun saveTraining() {
-        val error = validate()
-        if (error != null) {
-            changeState { copy(validationError = error) }
+        val validation = validateAddTraining(
+            crewAthletes = state.crewAthletes,
+            pieces = state.pieces,
+        )
+        if (!validation.isValid) {
+            changeState {
+                copy(
+                    validationError = validation.generalError,
+                    athleteError = validation.athleteError,
+                    pieceErrors = validation.pieceErrors,
+                    scrollTarget = validation.athleteError?.let { AddTrainingScrollTarget.Athlete }
+                        ?: validation.firstInvalidPieceId?.let { pieceId ->
+                            AddTrainingScrollTarget.Piece(pieceLocalId = pieceId)
+                        },
+                )
+            }
             return
         }
         viewModelScope.launch(context = Dispatchers.Default) {
@@ -305,7 +345,8 @@ internal class AddTrainingViewModel(
         changeState {
             copy(
                 validationError = null,
-                importNotice = null
+                athleteError = null,
+                pieceErrors = emptyMap(),
             )
         }
     }
@@ -424,7 +465,11 @@ internal class AddTrainingViewModel(
                         serialNotFound = parsedAthleteId == 0L && !parsed.deviceSerial.isNullOrBlank(),
                         deviceSerial = parsed.deviceSerial,
                     ),
-                    validationError = null
+                    validationError = null,
+                    athleteError = null,
+                    pieceErrors = emptyMap(),
+                    scrollTarget = null,
+                    isDirty = true,
                 )
             }
         } else {
@@ -440,7 +485,10 @@ internal class AddTrainingViewModel(
                         serialNotFound = false,
                         deviceSerial = null,
                     ),
-                    validationError = null
+                    validationError = null,
+                    athleteError = null,
+                    pieceErrors = emptyMap(),
+                    isDirty = true,
                 )
             }
         }
@@ -504,50 +552,6 @@ internal class AddTrainingViewModel(
         minute = 0,
     ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 
-    private fun validate(): UiText? = validateCrewSize() ?: validateRowerIds() ?: validatePieces()
-
-    private fun validateCrewSize(): UiText? = when {
-        state.crewAthletes.isEmpty() -> UiText.of(Res.string.add_training_validation_need_athlete)
-        state.crewAthletes.size > AddTrainingState.MAX_CREW_SIZE -> UiText.of(
-            Res.string.add_training_crew_max_size,
-            AddTrainingState.MAX_CREW_SIZE
-        )
-
-        else -> null
-    }
-
-    private fun validateRowerIds(): UiText? {
-        val usedAthletes = mutableSetOf<Long>()
-        for (athlete in state.crewAthletes) {
-            if (athlete.rowerId <= 0) {
-                return UiText.of(Res.string.add_training_validation_select_athlete)
-            }
-            if (!usedAthletes.add(athlete.rowerId)) {
-                return UiText.of(Res.string.add_training_validation_athlete_duplicate)
-            }
-        }
-        return null
-    }
-
-    private fun validatePieces(): UiText? {
-        if (state.pieces.isEmpty()) {
-            return UiText.of(Res.string.add_training_validation_need_piece)
-        }
-        for (piece in state.pieces) {
-            val time = RowingTimeFormat.parseTimeInput(input = piece.timeText) ?: piece.timeMillis
-            val rate = RowingTimeFormat.parseStrokeRate(piece.strokeRateText) ?: piece.strokeRate
-            when {
-                piece.distanceMeters <= 0 ->
-                    return UiText.of(Res.string.add_training_validation_piece_distance)
-
-                time <= 0 -> return UiText.of(Res.string.add_training_validation_piece_time)
-
-                rate <= 0 -> return UiText.of(Res.string.add_training_validation_piece_stroke_rate)
-            }
-        }
-        return null
-    }
-
     private fun updatePiece(
         pieceLocalId: Long,
         transform: (AddPieceDraft) -> AddPieceDraft
@@ -555,7 +559,9 @@ internal class AddTrainingViewModel(
         changeState {
             copy(
                 pieces = pieces.map { piece -> if (piece.localId == pieceLocalId) transform(piece) else piece },
-                validationError = null
+                pieceErrors = pieceErrors - pieceLocalId,
+                validationError = null,
+                isDirty = true,
             )
         }
     }

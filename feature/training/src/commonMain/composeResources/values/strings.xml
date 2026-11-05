@@ -84,8 +84,12 @@
     <string name="add_training_crew_header">Экипаж</string>
     <string name="add_training_pieces_header">Отрезки</string>
     <string name="add_training_select_athlete">Выберите спортсмена</string>
-    <string name="add_training_piece">Добавить отрезок</string>
-    <string name="add_training_delete_piece">Удалить отрезок</string>
+    <string name="add_training_add_piece_action">Добавить</string>
+    <string name="add_training_delete_piece_number">Удалить отрезок %1$d</string>
+    <string name="add_training_exit_title">Выйти без сохранения?</string>
+    <string name="add_training_exit_text">Введённые данные не сохранятся.</string>
+    <string name="add_training_exit_confirm">Выйти</string>
+    <string name="add_training_exit_dismiss">Остаться</string>
     <string name="add_training_save">Сохранить тренировку</string>
     <string name="add_training_save_are_you_sure">Вы уверены, что хотите сохранить эту тренировку?</string>
     <string name="add_training_validation_title">Проверьте данные</string>

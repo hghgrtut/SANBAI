@@ -7,15 +7,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Rowing
 import androidx.compose.material.icons.filled.Save
@@ -29,9 +35,11 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,15 +56,19 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.presentation.platform.rememberTrainingDatePicker
 import by.rowing.sanbaiteam.training.presentation.platform.rememberTrainingImportPicker
 import by.rowing.sanbaiteam.training.resources.Res
+import by.rowing.sanbaiteam.training.resources.add_training_add_piece_action
 import by.rowing.sanbaiteam.training.resources.add_training_athlete_header
 import by.rowing.sanbaiteam.training.resources.add_training_crew_header
 import by.rowing.sanbaiteam.training.resources.add_training_date_label
-import by.rowing.sanbaiteam.training.resources.add_training_delete_piece
+import by.rowing.sanbaiteam.training.resources.add_training_delete_piece_number
+import by.rowing.sanbaiteam.training.resources.add_training_exit_confirm
+import by.rowing.sanbaiteam.training.resources.add_training_exit_dismiss
+import by.rowing.sanbaiteam.training.resources.add_training_exit_text
+import by.rowing.sanbaiteam.training.resources.add_training_exit_title
 import by.rowing.sanbaiteam.training.resources.add_training_general_header
 import by.rowing.sanbaiteam.training.resources.add_training_import_csv
 import by.rowing.sanbaiteam.training.resources.add_training_import_notice_title
 import by.rowing.sanbaiteam.training.resources.add_training_pace_placeholder
-import by.rowing.sanbaiteam.training.resources.add_training_piece
 import by.rowing.sanbaiteam.training.resources.add_training_piece_avg_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.add_training_piece_lactate_label
 import by.rowing.sanbaiteam.training.resources.add_training_piece_length_label
@@ -87,6 +99,14 @@ import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+
+private val FIELD_ICON_SIZE = 20.dp
+private val ADD_PIECE_ICON_SIZE = 18.dp
+
+private val CompactFieldContentPadding = PaddingValues(
+    horizontal = Spacing.S,
+    vertical = Spacing.M
+)
 
 @Composable
 internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
@@ -130,6 +150,16 @@ private fun AddTrainingAlerts(
             onConfirm = viewModel::saveTraining
         )
     }
+    if (state.showExitDialog) {
+        Alert(
+            title = Res.string.add_training_exit_title,
+            text = stringResource(Res.string.add_training_exit_text),
+            confirmText = Res.string.add_training_exit_confirm,
+            dismissText = Res.string.add_training_exit_dismiss,
+            onDismiss = viewModel::dismissExitDialog,
+            onConfirm = viewModel::confirmExit,
+        )
+    }
     state.validationError?.let { error ->
         Alert(
             title = Res.string.add_training_validation_title,
@@ -141,7 +171,7 @@ private fun AddTrainingAlerts(
         Alert(
             title = Res.string.add_training_import_notice_title,
             text = notice.resolve(),
-            onDismiss = viewModel::clearValidationError,
+            onDismiss = viewModel::dismissImportNotice,
         )
     }
 }
@@ -153,6 +183,13 @@ private fun AddTrainingDataInputs(
     viewModel: AddTrainingViewModel,
 ) {
     val launchImport = rememberTrainingImportPicker(onFilesPicked = viewModel::importTrainingBatch)
+    val athleteRequester = remember { BringIntoViewRequester() }
+    LaunchedEffect(state.scrollTarget) {
+        if (state.scrollTarget == AddTrainingScrollTarget.Athlete) {
+            athleteRequester.bringIntoView()
+            viewModel.consumeScrollTarget()
+        }
+    }
     Column(
         modifier = Modifier
             .padding(paddingValues)
@@ -174,22 +211,38 @@ private fun AddTrainingDataInputs(
         AthleteDropdown(
             state = state,
             onAthleteSelected = viewModel::changeAthleteId,
-            leadingIcon = { FieldIcon(icon = Icons.Default.Person) }
+            leadingIcon = { FieldIcon(icon = Icons.Default.Person) },
+            error = state.athleteError?.resolve(),
+            modifier = Modifier.bringIntoViewRequester(athleteRequester),
         )
-        SectionHeader(title = stringResource(Res.string.add_training_pieces_header))
+        SectionHeader(
+            title = stringResource(Res.string.add_training_pieces_header),
+            trailing = { AddPieceButton(onClick = viewModel::addPiece) }
+        )
         TrainingPieces(
             state = state,
             viewModel = viewModel
         )
         Button(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(Res.string.add_training_piece),
-            debounceClick = viewModel::addPiece
-        )
-        Button(
-            modifier = Modifier.fillMaxWidth(),
             text = stringResource(Res.string.add_training_import_csv),
             debounceClick = launchImport
+        )
+    }
+}
+
+@Composable
+private fun AddPieceButton(onClick: () -> Unit) {
+    TextButton(onClick = onClick) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null,
+            modifier = Modifier.size(ADD_PIECE_ICON_SIZE),
+        )
+        Spacer(modifier = Modifier.width(Spacing.XS))
+        Text(
+            text = stringResource(Res.string.add_training_add_piece_action),
+            style = TypographyPalette.Body2Medium,
         )
     }
 }
@@ -223,6 +276,9 @@ private fun TrainingPieces(
                 index = pieceIndex,
                 piece = piece,
                 canRemove = state.pieces.size > 1,
+                errors = state.pieceErrors[piece.localId] ?: AddPieceFieldErrors(),
+                scrollTarget = state.scrollTarget,
+                onScrollHandled = viewModel::consumeScrollTarget,
                 onDistanceChange = { newDistance ->
                     viewModel.changePieceDistance(
                         pieceLocalId = piece.localId,
@@ -305,18 +361,14 @@ private fun SaveIcon() {
     )
 }
 
-private val FIELD_ICON_SIZE = 20.dp
-
-private val CompactFieldContentPadding = PaddingValues(
-    horizontal = Spacing.S,
-    vertical = Spacing.M
-)
-
 @Composable
 private fun PieceForm(
     index: Int,
     piece: AddPieceDraft,
     canRemove: Boolean,
+    errors: AddPieceFieldErrors,
+    scrollTarget: AddTrainingScrollTarget?,
+    onScrollHandled: () -> Unit,
     onDistanceChange: (String) -> Unit,
     onTimeChange: (String) -> Unit,
     onStrokeRateChange: (String) -> Unit,
@@ -330,8 +382,17 @@ private fun PieceForm(
         timeMillis = piece.timeMillis,
         distanceMeters = piece.distanceMeters
     ) ?: stringResource(Res.string.add_training_pace_placeholder)
+    val requester = remember { BringIntoViewRequester() }
+    LaunchedEffect(scrollTarget) {
+        if (scrollTarget == AddTrainingScrollTarget.Piece(piece.localId)) {
+            requester.bringIntoView()
+            onScrollHandled()
+        }
+    }
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .bringIntoViewRequester(requester),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -341,12 +402,14 @@ private fun PieceForm(
             modifier = Modifier.padding(Spacing.S),
             verticalArrangement = Arrangement.spacedBy(space = Spacing.XS)
         ) {
-            Text(
-                text = stringResource(Res.string.training_detail_piece_number, index + 1),
-                style = TypographyPalette.Body2Medium
+            PieceHeader(
+                index = index,
+                canRemove = canRemove,
+                onRemove = onRemove,
             )
             DistanceTimeSPMBlock(
                 piece = piece,
+                errors = errors,
                 onDistanceChange = onDistanceChange,
                 onTimeChange = onTimeChange,
                 onStrokeRateChange = onStrokeRateChange
@@ -363,8 +426,36 @@ private fun PieceForm(
                 style = TypographyPalette.Body2Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            if (canRemove) {
-                RemovePieceButton(onRemove = onRemove)
+        }
+    }
+}
+
+@Composable
+private fun PieceHeader(
+    index: Int,
+    canRemove: Boolean,
+    onRemove: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(Res.string.training_detail_piece_number, index + 1),
+            style = TypographyPalette.Body1Medium,
+            modifier = Modifier.weight(weight = 1f),
+        )
+        if (canRemove) {
+            IconButton(onClick = onRemove) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(
+                        Res.string.add_training_delete_piece_number,
+                        index + 1,
+                    ),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(FIELD_ICON_SIZE),
+                )
             }
         }
     }
@@ -373,39 +464,52 @@ private fun PieceForm(
 @Composable
 private fun DistanceTimeSPMBlock(
     piece: AddPieceDraft,
+    errors: AddPieceFieldErrors,
     onDistanceChange: (String) -> Unit,
     onTimeChange: (String) -> Unit,
     onStrokeRateChange: (String) -> Unit
 ) {
-    DataInputRow {
-        TextField(
-            value = piece.distanceText,
-            onValueChange = onDistanceChange,
-            label = stringResource(Res.string.add_training_piece_length_label),
-            contentPadding = CompactFieldContentPadding,
-            textStyle = TypographyPalette.Body1Regular,
-            keyboardOptions = KeyboardOptions.number(),
-            modifier = Modifier.weight(2f)
-        )
-        TextField(
-            value = piece.timeText,
-            onValueChange = onTimeChange,
-            label = stringResource(Res.string.add_training_piece_time_label),
-            contentPadding = CompactFieldContentPadding,
-            placeholder = stringResource(Res.string.add_training_piece_time_placeholder),
-            textStyle = TypographyPalette.Body1Regular,
-            keyboardOptions = KeyboardOptions.time(),
-            modifier = Modifier.weight(3f)
-        )
-        TextField(
-            value = piece.strokeRateText,
-            onValueChange = onStrokeRateChange,
-            label = stringResource(Res.string.add_training_piece_stroke_rate_label),
-            contentPadding = CompactFieldContentPadding,
-            textStyle = TypographyPalette.Body1Regular,
-            keyboardOptions = KeyboardOptions.decimal(),
-            modifier = Modifier.weight(1f)
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(space = Spacing._2XS)) {
+        DataInputRow {
+            TextField(
+                value = piece.distanceText,
+                onValueChange = onDistanceChange,
+                label = stringResource(Res.string.add_training_piece_length_label),
+                contentPadding = CompactFieldContentPadding,
+                textStyle = TypographyPalette.Body1Regular,
+                keyboardOptions = KeyboardOptions.number(),
+                error = errors.distance != null,
+                modifier = Modifier.weight(2f)
+            )
+            TextField(
+                value = piece.timeText,
+                onValueChange = onTimeChange,
+                label = stringResource(Res.string.add_training_piece_time_label),
+                contentPadding = CompactFieldContentPadding,
+                placeholder = stringResource(Res.string.add_training_piece_time_placeholder),
+                textStyle = TypographyPalette.Body1Regular,
+                keyboardOptions = KeyboardOptions.time(),
+                error = errors.time != null,
+                modifier = Modifier.weight(3f)
+            )
+            TextField(
+                value = piece.strokeRateText,
+                onValueChange = onStrokeRateChange,
+                label = stringResource(Res.string.add_training_piece_stroke_rate_label),
+                contentPadding = CompactFieldContentPadding,
+                textStyle = TypographyPalette.Body1Regular,
+                keyboardOptions = KeyboardOptions.decimal(),
+                error = errors.strokeRate != null,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        errors.firstError?.let { error ->
+            Text(
+                text = error.resolve(),
+                style = TypographyPalette.Body3Regular,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
     }
 }
 
@@ -475,22 +579,14 @@ private fun DataInputRow(content: @Composable (RowScope.() -> Unit)) = Row(
     content = content
 )
 
-@Composable
-private fun RemovePieceButton(onRemove: () -> Unit) {
-    Button(
-        modifier = Modifier.fillMaxWidth(),
-        text = stringResource(Res.string.add_training_delete_piece),
-        buttonColors = ButtonColors.text(),
-        debounceClick = onRemove
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AthleteDropdown(
     state: AddTrainingState,
     onAthleteSelected: (crewId: Long, athleteId: Long) -> Unit,
     leadingIcon: (@Composable () -> Unit)? = null,
+    error: String? = null,
+    modifier: Modifier = Modifier,
 ) {
     val rowers = state.rowersCatalog
     val selectedRower = state.crewAthletes.first()
@@ -502,6 +598,8 @@ private fun AthleteDropdown(
         itemText = { rower -> rower.name },
         onItemSelected = { rower -> onAthleteSelected(selectedRower.crewId, rower.id) },
         leadingIcon = leadingIcon,
+        error = error,
+        modifier = modifier,
     )
 }
 
@@ -530,6 +628,8 @@ private fun <T> ExposedSelectionDropdown(
     onItemSelected: (item: T) -> Unit,
     label: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
+    error: String? = null,
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -545,7 +645,9 @@ private fun <T> ExposedSelectionDropdown(
             textStyle = TypographyPalette.Body1Regular,
             leadingIcon = leadingIcon,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
+            error = error != null,
+            supportingText = error,
+            modifier = modifier
                 .fillMaxWidth()
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
         )
@@ -576,6 +678,8 @@ private fun Alert(
     title: StringResource,
     text: String,
     onDismiss: () -> Unit,
+    confirmText: StringResource = Res.string.save,
+    dismissText: StringResource = Res.string.cancel,
     onConfirm: (() -> Unit)? = null
 ) {
     AlertDialog(
@@ -594,7 +698,7 @@ private fun Alert(
         },
         confirmButton = {
             Button(
-                text = stringResource(if (onConfirm != null) Res.string.save else Res.string.cancel),
+                text = stringResource(if (onConfirm != null) confirmText else dismissText),
                 buttonColors = ButtonColors.text(),
                 debounceClick = {
                     onDismiss()
@@ -605,7 +709,7 @@ private fun Alert(
         dismissButton = onConfirm?.let {
             {
                 Button(
-                    text = stringResource(Res.string.cancel),
+                    text = stringResource(dismissText),
                     buttonColors = ButtonColors.text(),
                     debounceClick = onDismiss
                 )

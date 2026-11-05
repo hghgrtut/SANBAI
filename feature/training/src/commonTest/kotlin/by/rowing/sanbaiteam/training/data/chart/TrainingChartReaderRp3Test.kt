@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.data.chart
 
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -15,6 +16,7 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = RP3_CSV.encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 0,
+                pieceType = TrainingPieceType.RP_3
             )
         )
 
@@ -37,6 +39,7 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = RP3_CSV.encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 1,
+                pieceType = TrainingPieceType.RP_3
             )
         )
 
@@ -55,6 +58,7 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = "time,distance\n0,10\n".encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 0,
+                pieceType = TrainingPieceType.RP_3
             )
         )
     }

@@ -12,6 +12,9 @@ internal data class AddTrainingState(
     val crewAthletes: List<AddCrewAthlete> = listOf(AddCrewAthlete()),
     val pieces: List<AddPieceDraft> = listOf(AddPieceDraft()),
     val validationError: UiText? = null,
+    val athleteError: UiText? = null,
+    val pieceErrors: Map<Long, AddPieceFieldErrors> = emptyMap(),
+    val scrollTarget: AddTrainingScrollTarget? = null,
     val pendingRawFiles: List<ByteArray> = emptyList(),
     val pendingFileExtension: String? = null,
     val pendingImportSource: TrainingImportSource? = null,
@@ -19,7 +22,9 @@ internal data class AddTrainingState(
     val trainingType: TrainingPieceType = TrainingPieceType.SINGLE,
     val pendingSourceSerial: String? = null,
     val importNotice: UiText? = null,
-    val showSaveDialog: Boolean = false
+    val showSaveDialog: Boolean = false,
+    val showExitDialog: Boolean = false,
+    val isDirty: Boolean = false
 ) {
     companion object {
         const val MAX_CREW_SIZE = 9
