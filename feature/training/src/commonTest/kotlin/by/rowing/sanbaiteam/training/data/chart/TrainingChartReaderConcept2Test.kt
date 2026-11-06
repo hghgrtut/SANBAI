@@ -29,6 +29,7 @@ internal class TrainingChartReaderConcept2Test {
         assertEquals(4, chart.heartRate.size)
         assertEquals(4, chart.speed.size)
         assertTrue(chart.strokeRate.last().elapsedMillis > 300_000L)
+        assertEquals(listOf(0.0, 650.0, 1_250.0, 1_800.0), chart.distance.map { it.value })
     }
 
     @Test
@@ -47,6 +48,7 @@ internal class TrainingChartReaderConcept2Test {
         // 10 м/с = 100 секунд на 1000 м; на 500 м было бы 50 секунд и точка отфильтровалась бы.
         chart.speed.forEach { point -> assertEquals(100.0, point.value, 0.001) }
         assertTrue(chart.speed.last().elapsedMillis > 300_000L)
+        assertEquals(listOf(0.0, 3_000.0, 6_000.0), chart.distance.map { it.value })
     }
 
     @Test
@@ -62,6 +64,7 @@ internal class TrainingChartReaderConcept2Test {
 
         assertEquals(300_000L, chart.durationMillis)
         assertEquals(listOf(160.0, 170.0), chart.heartRate.map { it.value })
+        assertEquals(listOf(0.0, 40.0), chart.distance.map { it.value })
     }
 
     private fun rowErgSingleDistance(): ByteArray = concept2FitFile(

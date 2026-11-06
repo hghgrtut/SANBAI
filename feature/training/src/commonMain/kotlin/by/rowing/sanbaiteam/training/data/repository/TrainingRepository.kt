@@ -15,8 +15,8 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.entity.TrainingWorkDisplayMode
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
-import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartResult
+import by.rowing.sanbaiteam.training.data.models.chart.TrainingPieceChartData
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparablePiece
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportStorage
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
@@ -150,7 +150,7 @@ internal class TrainingRepository(
                 baseAthleteIds = baseAthleteIds,
                 personalBests = personalBests,
                 comparedByOrder = comparedByOrder,
-                chartMetricsByOrder = loadChartMetrics(
+                chartDataByOrder = loadChartData(
                     training = training,
                     pieces = pieces,
                 ),
@@ -181,27 +181,28 @@ internal class TrainingRepository(
         )
     }
 
-    private fun loadChartMetrics(
+    private fun loadChartData(
         training: TrainingEntity,
         pieces: List<TrainingAthletePieceEntity>,
-    ): Map<Int, Set<TrainingChartMetric>> {
+    ): Map<Int, TrainingPieceChartData> {
         if (pieces.all { it.sourceFileIndex == null || it.sourceIntervalIndex == null }) {
             return emptyMap()
         }
         val sourceBytes = getTrainingSourceBytes(training = training) ?: return emptyMap()
-        val cache = mutableMapOf<Pair<Int, Int>, Set<TrainingChartMetric>>()
+        val cache = mutableMapOf<Pair<Int, Int>, TrainingPieceChartData?>()
         return pieces
             .mapNotNull { piece ->
                 val fileIndex = piece.sourceFileIndex ?: return@mapNotNull null
                 val intervalIndex = piece.sourceIntervalIndex ?: return@mapNotNull null
-                piece.order to cache.getOrPut(fileIndex to intervalIndex) {
+                val data = cache.getOrPut(fileIndex to intervalIndex) {
                     chartReader.read(
                         sourceFileBytes = sourceBytes,
                         sourceFileIndex = fileIndex,
                         sourceIntervalIndex = intervalIndex,
                         pieceType = training.type,
-                    )?.availableMetrics.orEmpty()
-                }
+                    )
+                } ?: return@mapNotNull null
+                piece.order to data
             }
             .toMap()
     }
@@ -214,16 +215,18 @@ internal class TrainingRepository(
         baseAthleteIds: List<Long>,
         personalBests: Map<Long, AthletePersonalBestEntity>,
         comparedByOrder: Map<Int, List<ComparablePiece>>,
-        chartMetricsByOrder: Map<Int, Set<TrainingChartMetric>>,
+        chartDataByOrder: Map<Int, TrainingPieceChartData>,
     ): List<TrainingDetailPiece> = baseCrewPieces.map { piece ->
         val percentOfPb = personalBestPercent(
             piece = piece,
             athleteIds = baseAthleteIds,
             personalBests = personalBests,
         )
+        val chartData = chartDataByOrder[piece.order]
         TrainingDetailPiece(
             order = piece.order + 1,
             distanceMeters = piece.distanceMeters,
+            timeMillis = piece.timeMillis,
             timeFormatted = RowingTimeFormat.formatDuration(piece.timeMillis),
             paceFormatted = RowingTimeFormat.formatPace(
                 timeMillis = piece.timeMillis,
@@ -235,7 +238,8 @@ internal class TrainingRepository(
             recoveryHeartRate = piece.recoveryHeartRate,
             lactate = piece.lactate,
             percentOfPbFormatted = PersonalBestPercent.format(percentOfPb),
-            chartMetrics = chartMetricsByOrder[piece.order].orEmpty(),
+            chartMetrics = chartData?.availableMetrics.orEmpty(),
+            chartData = chartData,
             comparison = TrainingComparisonCalculator.compare(
                 base = ComparablePiece(
                     distanceMeters = piece.distanceMeters,

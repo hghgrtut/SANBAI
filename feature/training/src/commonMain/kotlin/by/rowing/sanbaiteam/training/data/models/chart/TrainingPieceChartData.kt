@@ -5,6 +5,7 @@ internal data class TrainingPieceChartData(
     val speed: List<TrainingChartPoint> = emptyList(),
     val strokeRate: List<TrainingChartPoint> = emptyList(),
     val heartRate: List<TrainingChartPoint> = emptyList(),
+    val distance: List<TrainingChartPoint> = emptyList(),
 ) {
 
     val availableMetrics: Set<TrainingChartMetric>

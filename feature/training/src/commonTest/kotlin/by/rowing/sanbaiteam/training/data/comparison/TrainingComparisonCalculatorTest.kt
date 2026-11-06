@@ -40,11 +40,10 @@ internal class TrainingComparisonCalculatorTest {
             compared = listOf(compared)
         )
 
-        requireNotNull(result)
         assertEquals(1, result.comparedTrainingsCount)
         assertMetric(result, ComparisonMetric.DISTANCE, 950.0, 50.0, ComparisonTrend.BETTER)
         assertMetric(result, ComparisonMetric.TIME, 210_000.0, -10_000.0, ComparisonTrend.BETTER)
-        assertMetric(result, ComparisonMetric.PACE, 110_500.0, -10_500.0, ComparisonTrend.BETTER)
+        assertMetric(result, ComparisonMetric.PACE, 110_526.0, -10_526.0, ComparisonTrend.BETTER)
         assertMetric(result, ComparisonMetric.STROKE_RATE, 31.0, -1.0, ComparisonTrend.NEUTRAL)
         assertMetric(result, ComparisonMetric.AVG_HEART_RATE, 148.0, 2.0, ComparisonTrend.WORSE)
         assertMetric(result, ComparisonMetric.MAX_HEART_RATE, 172.0, -2.0, ComparisonTrend.BETTER)

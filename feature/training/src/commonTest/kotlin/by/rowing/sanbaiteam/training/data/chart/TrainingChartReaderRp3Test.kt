@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.training.data.chart
 
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -15,6 +16,7 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = RP3_CSV.encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 0,
+                pieceType = TrainingPieceType.RP_3,
             )
         )
 
@@ -26,6 +28,8 @@ internal class TrainingChartReaderRp3Test {
         assertEquals(0L, data.speed.first().elapsedMillis)
         assertEquals(4_000L, data.speed.last().elapsedMillis)
         assertEquals(3, data.availableMetrics.size)
+        assertEquals(listOf(0.0, 15.0, 30.0), data.distance.map { it.value })
+        assertEquals(listOf(0L, 2_000L, 4_000L), data.distance.map { it.elapsedMillis })
     }
 
     @Test
@@ -37,12 +41,14 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = RP3_CSV.encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 1,
+                pieceType = TrainingPieceType.RP_3,
             )
         )
 
         assertEquals(1_000L, data.durationMillis)
         assertEquals(2, data.speed.size)
         assertEquals(0L, data.speed.first().elapsedMillis)
+        assertEquals(listOf(0.0, 12.0), data.distance.map { it.value })
     }
 
     @Test
@@ -55,6 +61,7 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = "time,distance\n0,10\n".encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 0,
+                pieceType = TrainingPieceType.RP_3,
             )
         )
     }

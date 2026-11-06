@@ -90,23 +90,31 @@ internal class TrainingChartReader {
         val speed = mutableListOf<TrainingChartPoint>()
         val strokeRate = mutableListOf<TrainingChartPoint>()
         val heartRate = mutableListOf<TrainingChartPoint>()
+        val distance = mutableListOf<TrainingChartPoint>()
         val paceDistance = chartPaceDistanceMeters(pieceType).toDouble()
         val paceRange = paceRange(pieceType)
         var previous: FitRecord? = null
         var offsetMillis = 0L
+        var offsetDistance = 0.0
 
         lapIndices.forEach { lapIndex ->
             val lap = laps[lapIndex]
-            records.forLap(
+            val lapRecords = records.forLap(
                 lap = lap,
                 isLast = lapIndex == laps.lastIndex,
-            ).forEach { record ->
+            )
+            val lapStartDistance = lapRecords.firstNotNullOfOrNull { it.distanceMeters }
+            var previousInLap: FitRecord? = null
+            var currentLapDistance = 0.0
+            lapRecords.forEach { record ->
                 val elapsed = offsetMillis + (record.timestampMillis - lap.startMillis)
                     .coerceIn(0L, lap.elapsedMillis)
-                (record.speedMetersPerSecond?.takeIf { it > 0.0 } ?: calculatedSpeed(
+                val speedMetersPerSecond = record.speedMetersPerSecond?.takeIf { it > 0.0 } ?: calculatedSpeed(
                     previous = previous,
                     current = record
-                ))?.takeIf { it > 0.0 }
+                )
+
+                speedMetersPerSecond?.takeIf { it > 0.0 }
                     ?.let { paceDistance / it }
                     ?.takeIf { it in paceRange }
                     ?.let {
@@ -115,6 +123,18 @@ internal class TrainingChartReader {
                             value = it
                         )
                     }
+
+                currentLapDistance = calculateLapDistance(
+                    record = record,
+                    lapStartDistance = lapStartDistance,
+                    previousTimestamp = previousInLap?.timestampMillis,
+                    previousDistance = currentLapDistance,
+                    speedMetersPerSecond = speedMetersPerSecond,
+                )
+                distance.appendPoint(
+                    elapsedMillis = elapsed,
+                    value = offsetDistance + currentLapDistance
+                )
 
                 record.cadence?.takeIf { it > 0 }?.let {
                     strokeRate.appendPoint(
@@ -131,7 +151,9 @@ internal class TrainingChartReader {
                 }
 
                 previous = record
+                previousInLap = record
             }
+            offsetDistance += maxOf(currentLapDistance, lap.distanceMeters)
             offsetMillis += lap.elapsedMillis
         }
 
@@ -140,7 +162,24 @@ internal class TrainingChartReader {
             speed = speed,
             strokeRate = strokeRate,
             heartRate = heartRate,
+            distance = distance,
         )
+    }
+
+    private fun calculateLapDistance(
+        record: FitRecord,
+        lapStartDistance: Double?,
+        previousTimestamp: Long?,
+        previousDistance: Double,
+        speedMetersPerSecond: Double?,
+    ): Double {
+        val recordDistance = record.distanceMeters
+        if (recordDistance != null && lapStartDistance != null) {
+            return (recordDistance - lapStartDistance).coerceAtLeast(0.0)
+        }
+        val deltaMillis = record.timestampMillis - (previousTimestamp ?: record.timestampMillis)
+        if (deltaMillis <= 0L) return previousDistance
+        return previousDistance + (speedMetersPerSecond ?: 0.0) * deltaMillis / MILLIS_PER_SECOND
     }
 
     private fun paceRange(pieceType: TrainingPieceType?): ClosedFloatingPointRange<Double> =
@@ -179,12 +218,20 @@ internal class TrainingChartReader {
         val speed = mutableListOf<TrainingChartPoint>()
         val strokeRate = mutableListOf<TrainingChartPoint>()
         val heartRate = mutableListOf<TrainingChartPoint>()
+        val distance = mutableListOf<TrainingChartPoint>()
+        val startDistance = group.first().distanceMeters
+        var maxDistance = 0.0
         var previous: Rp3CsvParser.Rp3StrokeRow? = null
 
         group.forEach { stroke ->
             val elapsed = ((stroke.timeSeconds - firstTime) * MILLIS_PER_SECOND)
                 .toLong()
                 .coerceIn(0L, durationMillis)
+            maxDistance = maxOf(maxDistance, stroke.distanceMeters - startDistance)
+            distance.appendPoint(
+                elapsedMillis = elapsed,
+                value = maxDistance
+            )
             val pace = stroke.estimated500mTimeSeconds
                 ?.takeIf { it in MIN_PACE_SECONDS..MAX_PACE_SECONDS }
                 ?: calculatedPace(
@@ -222,6 +269,7 @@ internal class TrainingChartReader {
             speed = speed,
             strokeRate = strokeRate,
             heartRate = heartRate,
+            distance = distance,
         )
     }
 
