@@ -16,7 +16,7 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = RP3_CSV.encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 0,
-                pieceType = TrainingPieceType.RP_3,
+                pieceType = TrainingPieceType.RP_3
             )
         )
 
@@ -41,7 +41,7 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = RP3_CSV.encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 1,
-                pieceType = TrainingPieceType.RP_3,
+                pieceType = TrainingPieceType.RP_3
             )
         )
 
@@ -61,7 +61,7 @@ internal class TrainingChartReaderRp3Test {
                 sourceFileBytes = "time,distance\n0,10\n".encodeToByteArray(),
                 sourceFileIndex = 0,
                 sourceIntervalIndex = 0,
-                pieceType = TrainingPieceType.RP_3,
+                pieceType = TrainingPieceType.RP_3
             )
         )
     }
