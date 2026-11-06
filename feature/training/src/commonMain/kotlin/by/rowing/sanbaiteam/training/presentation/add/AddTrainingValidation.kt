@@ -18,8 +18,8 @@ internal data class AddPieceFieldErrors(
     val time: UiText? = null,
     val strokeRate: UiText? = null,
 ) {
-    val firstError: UiText? get() = distance ?: time ?: strokeRate
 
+    val firstError: UiText? get() = distance ?: time ?: strokeRate
     val hasErrors: Boolean get() = firstError != null
 }
 
@@ -35,8 +35,8 @@ internal data class AddTrainingValidation(
     val athleteError: UiText? = null,
     val pieceErrors: Map<Long, AddPieceFieldErrors> = emptyMap(),
 ) {
-    val isValid: Boolean get() = generalError == null && athleteError == null && pieceErrors.isEmpty()
 
+    val isValid: Boolean get() = generalError == null && athleteError == null && pieceErrors.isEmpty()
     val firstInvalidPieceId: Long? get() = pieceErrors.keys.firstOrNull()
 }
 
@@ -45,14 +45,16 @@ internal fun validateAddTraining(
     pieces: List<AddPieceDraft>,
 ): AddTrainingValidation {
     val crewError = validateCrew(crewAthletes)
-    if (crewError != null) return AddTrainingValidation(generalError = crewError)
-    if (pieces.isEmpty()) {
-        return AddTrainingValidation(generalError = UiText.of(Res.string.add_training_validation_need_piece))
+    return when {
+        crewError != null -> AddTrainingValidation(generalError = crewError)
+        pieces.isEmpty() ->
+            AddTrainingValidation(generalError = UiText.of(Res.string.add_training_validation_need_piece))
+
+        else -> AddTrainingValidation(
+            athleteError = validateAthleteSelection(crewAthletes),
+            pieceErrors = validatePieces(pieces),
+        )
     }
-    return AddTrainingValidation(
-        athleteError = validateAthleteSelection(crewAthletes),
-        pieceErrors = validatePieces(pieces),
-    )
 }
 
 private fun validateCrew(crewAthletes: List<AddCrewAthlete>): UiText? = when {
@@ -78,30 +80,16 @@ private fun validateAthleteSelection(crewAthletes: List<AddCrewAthlete>): UiText
     return null
 }
 
-private fun validatePieces(pieces: List<AddPieceDraft>): Map<Long, AddPieceFieldErrors> =
-    pieces.mapNotNull { piece ->
-        val errors = piece.validate()
-        if (errors.hasErrors) piece.localId to errors else null
-    }.toMap()
+private fun validatePieces(pieces: List<AddPieceDraft>): Map<Long, AddPieceFieldErrors> = pieces.mapNotNull { piece ->
+    val errors = piece.validate()
+    if (errors.hasErrors) piece.localId to errors else null
+}.toMap()
 
-private fun AddPieceDraft.validate(): AddPieceFieldErrors {
-    val time = RowingTimeFormat.parseTimeInput(input = timeText) ?: timeMillis
-    val rate = RowingTimeFormat.parseStrokeRate(input = strokeRateText) ?: strokeRate
-    return AddPieceFieldErrors(
-        distance = if (distanceMeters > 0) {
-            null
-        } else {
-            UiText.of(Res.string.add_training_validation_piece_distance)
-        },
-        time = if (time > 0) {
-            null
-        } else {
-            UiText.of(Res.string.add_training_validation_piece_time)
-        },
-        strokeRate = if (rate > 0) {
-            null
-        } else {
-            UiText.of(Res.string.add_training_validation_piece_stroke_rate)
-        },
-    )
-}
+private fun AddPieceDraft.validate(): AddPieceFieldErrors = AddPieceFieldErrors(
+    distance = UiText.of(Res.string.add_training_validation_piece_distance)
+        .takeIf { distanceMeters <= 0 },
+    time = UiText.of(Res.string.add_training_validation_piece_time)
+        .takeIf { (RowingTimeFormat.parseTimeInput(input = timeText) ?: timeMillis) <= 0 },
+    strokeRate = UiText.of(Res.string.add_training_validation_piece_stroke_rate)
+        .takeIf { (RowingTimeFormat.parseStrokeRate(input = strokeRateText) ?: strokeRate) <= 0 },
+)
