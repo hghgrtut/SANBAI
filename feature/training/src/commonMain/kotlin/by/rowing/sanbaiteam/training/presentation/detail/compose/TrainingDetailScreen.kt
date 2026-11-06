@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.automirrored.filled.Segment
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.Icon
@@ -27,6 +28,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.core.util.RowingTimeFormat
+import by.rowing.sanbaiteam.training.data.chart.models.TrainingSplitLength
 import by.rowing.sanbaiteam.training.presentation.detail.TrainingDetailViewModel
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailState
 import by.rowing.sanbaiteam.training.resources.Res
@@ -36,6 +39,11 @@ import by.rowing.sanbaiteam.training.resources.training_detail_compare_count
 import by.rowing.sanbaiteam.training.resources.training_detail_crew_header
 import by.rowing.sanbaiteam.training.resources.training_detail_not_found
 import by.rowing.sanbaiteam.training.resources.training_detail_title
+import by.rowing.sanbaiteam.training.resources.training_split_chip_distance
+import by.rowing.sanbaiteam.training.resources.training_split_chip_time
+import by.rowing.sanbaiteam.training.resources.training_split_clear
+import by.rowing.sanbaiteam.training.resources.training_split_title
+import by.rowing.sanbaiteam.uikit.component.Chip
 import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.EmptyState
 import by.rowing.sanbaiteam.uikit.component.Skeleton
@@ -73,16 +81,25 @@ private fun TrainingDetailContent(
                 onNavIconClick = actions::navigateBack,
                 actions = {
                     if (!state.isLoading && !state.notFound) {
-                        IconButton(onClick = actions::onCompareClick) {
+                        IconButton(onClick = actions::onSplitClick) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.CompareArrows,
-                                contentDescription = stringResource(Res.string.training_detail_compare_action),
-                                tint = if (state.comparedTrainingIds.isNotEmpty()) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurface
+                                imageVector = Icons.AutoMirrored.Filled.Segment,
+                                contentDescription = stringResource(Res.string.training_split_title),
+                                tint = MaterialTheme.colorScheme.run {
+                                    if (state.splitLength != null) primary else onSurface
                                 }
                             )
+                        }
+                        if (state.splitLength == null) {
+                            IconButton(onClick = actions::onCompareClick) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.CompareArrows,
+                                    contentDescription = stringResource(Res.string.training_detail_compare_action),
+                                    tint = MaterialTheme.colorScheme.run {
+                                        if (state.comparedTrainingIds.isNotEmpty()) primary else onSurface
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -98,6 +115,15 @@ private fun TrainingDetailContent(
                 actions = actions,
             )
         }
+    }
+
+    if (state.showSplitDialog) {
+        TrainingSplitDialog(
+            current = state.splitLength,
+            onDismiss = actions::onSplitDismiss,
+            onApply = actions::onSplitApply,
+            onClear = actions::onSplitClear,
+        )
     }
 }
 
@@ -169,8 +195,14 @@ private fun Training(
                     text = state.dateFormatted,
                     style = TypographyPaletteSp.H2
                 )
-                if (state.comparedTrainingIds.isNotEmpty()) {
-                    ComparisonChip(
+                when {
+                    state.splitLength != null -> SplitModeChip(
+                        length = state.splitLength,
+                        onClick = actions::onSplitClick,
+                        onClear = actions::onSplitClear,
+                    )
+
+                    state.comparedTrainingIds.isNotEmpty() -> ComparisonChip(
                         count = state.comparedTrainingIds.size,
                         onClick = actions::onCompareClick,
                         onClear = actions::onClearComparison,
@@ -211,11 +243,39 @@ private fun Training(
                     piece = piece,
                     expanded = piece.order in state.expandedComparisonOrders,
                     actions = actions,
+                    splits = state.splitsByOrder[piece.order].orEmpty(),
+                    comparisonVisible = state.splitLength == null && piece.comparison != null,
                 )
             }
         }
         item { Spacer(modifier = Modifier.height(height = Spacing._2XS)) }
     }
+}
+
+@Composable
+private fun SplitModeChip(
+    length: TrainingSplitLength,
+    onClick: () -> Unit,
+    onClear: () -> Unit,
+) {
+    Chip(
+        modifier = Modifier.padding(top = Spacing.S),
+        text = when (length) {
+            is TrainingSplitLength.Distance -> stringResource(
+                Res.string.training_split_chip_distance,
+                length.meters
+            )
+
+            is TrainingSplitLength.Time -> stringResource(
+                Res.string.training_split_chip_time,
+                RowingTimeFormat.formatDurationMmSs(length.millis)
+            )
+        },
+        selected = true,
+        onClick = onClick,
+        onClearClick = onClear,
+        clearContentDescription = stringResource(Res.string.training_split_clear),
+    )
 }
 
 @Composable

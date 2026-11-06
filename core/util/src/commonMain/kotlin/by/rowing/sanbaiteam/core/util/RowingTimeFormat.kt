@@ -7,7 +7,6 @@ import kotlin.math.roundToLong
 @AllowDetektPublic
 object RowingTimeFormat {
 
-    private const val MILLIS_PER_TENTH = 100L
     private const val MILLIS_PER_MINUTE = 60_000L
     private const val TENTH_PER_SECOND = 10L
     private const val PACE_DISTANCE_METERS = 500
@@ -20,7 +19,7 @@ object RowingTimeFormat {
      */
     fun formatDuration(timeMillis: Long): String {
         if (timeMillis < 0) return "0:00.0"
-        val tenths = (timeMillis + MILLIS_PER_TENTH / 2) / MILLIS_PER_TENTH % TENTH_PER_SECOND
+        val tenths = (timeMillis + TimeUtils.MILLIS_PER_TENTH / 2) / TimeUtils.MILLIS_PER_TENTH % TENTH_PER_SECOND
         return "${formatDurationMmSs(timeMillis = timeMillis)}.$tenths"
     }
 
@@ -85,9 +84,10 @@ object RowingTimeFormat {
     fun paceMillis(
         timeMillis: Long,
         distanceMeters: Int
-    ): Long? {
-        if (distanceMeters <= 0 || timeMillis <= 0) return null
-        return (timeMillis.toDouble() * PACE_DISTANCE_METERS / distanceMeters).roundToLong().roundToTenths()
+    ): Long? = if (distanceMeters <= 0 || timeMillis <= 0) {
+        null
+    } else {
+        (timeMillis.toDouble() * PACE_DISTANCE_METERS / distanceMeters).roundToTenths().roundToLong()
     }
 
     fun formatPace(
@@ -117,10 +117,7 @@ object RowingTimeFormat {
         return if (seconds >= TimeUtils.SECONDS_PER_MINUTE) {
             null
         } else {
-            minutes * MILLIS_PER_MINUTE + seconds * TimeUtils.MILLIS_PER_SECOND + tenths * MILLIS_PER_TENTH
+            minutes * MILLIS_PER_MINUTE + seconds * TimeUtils.MILLIS_PER_SECOND + tenths * TimeUtils.MILLIS_PER_TENTH
         }
     }
-
-    private fun Long.roundToTenths(): Long =
-        ((this + MILLIS_PER_TENTH / 2) / MILLIS_PER_TENTH) * MILLIS_PER_TENTH
 }

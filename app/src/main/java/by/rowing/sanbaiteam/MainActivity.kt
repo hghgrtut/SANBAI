@@ -27,6 +27,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContentView(
             ComposeView(this).apply {
+                // ID нужен, чтобы Android сохранил и восстановил состояние Compose
+                // (навигационный стек и rememberSaveable) при пересоздании Activity.
+                id = android.R.id.content
                 setViewCompositionStrategy(strategy = ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent(mainActivityContent)
             }

@@ -190,5 +190,26 @@
     <string name="training_chart_piece_not_found">Отрезок не найден</string>
     <string name="training_chart_time_axis_description">Время сверху вниз</string>
     <string name="training_chart_value_axis_description">Значения слева направо</string>
+    <string name="training_split_title">Сплиты</string>
+    <string name="training_split_mode_distance">По дистанции</string>
+    <string name="training_split_mode_time">По времени</string>
+    <string name="training_split_length_label">Длина сплита</string>
+    <string name="training_split_length_placeholder_distance">500</string>
+    <string name="training_split_length_placeholder_time">2:00</string>
+    <string name="training_split_error">Укажите длину сплита больше нуля</string>
+    <string name="training_split_apply">Применить</string>
+    <string name="training_split_clear">Убрать сплиты</string>
+    <string name="training_split_chip_distance">Сплиты: %1$d м</string>
+    <string name="training_split_chip_time">Сплиты: %1$s</string>
+    <string name="training_split_preset_distance">%1$d м</string>
+    <string name="training_split_preset_time">%1$s</string>
+    <string name="training_split_column_number">№</string>
+    <string name="training_split_column_distance">Дист., м</string>
+    <string name="training_split_column_time">Время</string>
+    <string name="training_split_column_pace">Темп /500м</string>
+    <string name="training_split_column_spm">SPM</string>
+    <string name="training_split_column_avg_heart_rate">Ср. ЧСС</string>
+    <string name="training_split_column_max_heart_rate">Макс. ЧСС</string>
+    <string name="training_split_total">Итого</string>
     <string name="ok">ОК</string>
 </resources>

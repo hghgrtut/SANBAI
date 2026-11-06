@@ -12,6 +12,7 @@ import kotlinx.datetime.plus
 @AllowDetektPublic
 object TimeUtils {
 
+    const val MILLIS_PER_TENTH = 100L
     const val MILLIS_PER_SECOND = 1_000L
     const val SECONDS_PER_MINUTE = 60L
 

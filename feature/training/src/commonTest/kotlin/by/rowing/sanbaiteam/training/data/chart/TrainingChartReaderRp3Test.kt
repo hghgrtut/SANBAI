@@ -28,6 +28,8 @@ internal class TrainingChartReaderRp3Test {
         assertEquals(0L, data.speed.first().elapsedMillis)
         assertEquals(4_000L, data.speed.last().elapsedMillis)
         assertEquals(3, data.availableMetrics.size)
+        assertEquals(listOf(0.0, 15.0, 30.0), data.distance.map { it.value })
+        assertEquals(listOf(0L, 2_000L, 4_000L), data.distance.map { it.elapsedMillis })
     }
 
     @Test
@@ -46,6 +48,7 @@ internal class TrainingChartReaderRp3Test {
         assertEquals(1_000L, data.durationMillis)
         assertEquals(2, data.speed.size)
         assertEquals(0L, data.speed.first().elapsedMillis)
+        assertEquals(listOf(0.0, 12.0), data.distance.map { it.value })
     }
 
     @Test

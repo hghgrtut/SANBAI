@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.PersonalBestPercent
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.formatTenths
+import by.rowing.sanbaiteam.training.data.chart.models.TrainingPieceSplit
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
 import by.rowing.sanbaiteam.training.data.models.comparison.MetricComparison
@@ -72,8 +73,12 @@ internal fun TrainingPieceCard(
     piece: TrainingDetailPiece,
     expanded: Boolean,
     actions: TrainingDetailActions,
+    splits: List<TrainingPieceSplit>,
+    comparisonVisible: Boolean,
 ) {
     val comparison = piece.comparison
+    val hasSplits = splits.isNotEmpty()
+    val trainingsInComparison = comparison?.comparedTrainingsCount ?: 0
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -84,10 +89,10 @@ internal fun TrainingPieceCard(
             text = stringResource(Res.string.training_detail_piece_number, piece.order),
             style = TypographyPalette.Body2Medium
         )
-        if (expanded && comparison != null) {
+        if (comparisonVisible && expanded) {
             Text(
                 modifier = Modifier.padding(top = Spacing._2XS),
-                text = comparisonCaption(comparison.comparedTrainingsCount),
+                text = comparisonCaption(trainingsInComparison),
                 style = TypographyPalette.Caption1Regular,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -96,12 +101,19 @@ internal fun TrainingPieceCard(
             modifier = Modifier.padding(top = Spacing.XS),
             verticalArrangement = Arrangement.spacedBy(Spacing._2XS)
         ) {
-            PieceMetricRows(
-                piece = piece,
-                expanded = expanded
-            )
+            if (hasSplits) {
+                TrainingSplitTable(
+                    piece = piece,
+                    splits = splits,
+                )
+            } else {
+                PieceMetricRows(
+                    piece = piece,
+                    expanded = expanded
+                )
+            }
         }
-        val hasTrainingsInComparison = (comparison?.comparedTrainingsCount ?: 0) > 0
+        val hasTrainingsInComparison = comparisonVisible && trainingsInComparison > 0
         if (hasTrainingsInComparison || piece.chartMetrics.isNotEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
