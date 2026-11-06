@@ -1,6 +1,7 @@
 package by.rowing.sanbaiteam.training.data.comparison
 
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
+import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.roundToTenths
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparablePiece
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
@@ -15,8 +16,6 @@ import kotlin.math.roundToLong
  * В среднее попадают только непустые значения метрик.
  */
 internal object TrainingComparisonCalculator {
-
-    private const val MILLIS_PER_TENTH = 100.0
 
     fun compare(
         base: ComparablePiece,
@@ -36,7 +35,7 @@ internal object TrainingComparisonCalculator {
             values = compared.map { it.timeMillis.toDouble() },
             base = base.timeMillis.toDouble(),
             higherIsBetter = false,
-            round = { ((it / MILLIS_PER_TENTH).roundToLong() * MILLIS_PER_TENTH.toLong()).toDouble() }
+            round = { ((it / TimeUtils.MILLIS_PER_TENTH).roundToLong() * TimeUtils.MILLIS_PER_TENTH).toDouble() }
         )
         putMetricIfPresent(
             metrics = metrics,

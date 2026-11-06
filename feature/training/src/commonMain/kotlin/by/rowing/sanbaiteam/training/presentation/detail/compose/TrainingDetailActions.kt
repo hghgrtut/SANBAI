@@ -1,6 +1,7 @@
 package by.rowing.sanbaiteam.training.presentation.detail.compose
 
 import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
+import by.rowing.sanbaiteam.training.data.chart.models.TrainingSplitLength
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
 
 internal interface TrainingDetailActions : NavigateBackAware {
@@ -15,4 +16,12 @@ internal interface TrainingDetailActions : NavigateBackAware {
         order: Int,
         metric: TrainingChartMetric
     )
+
+    fun onSplitClick()
+
+    fun onSplitDismiss()
+
+    fun onSplitApply(length: TrainingSplitLength)
+
+    fun onSplitClear()
 }

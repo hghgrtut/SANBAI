@@ -42,6 +42,9 @@ fun App(importUri: String? = null) {
                     navigation = navigation,
                     navController = navController
                 )
+                // Событие уже обработано: без сброса replay-кэша после пересоздания
+                // Activity оно повторится и откроет экран заново с новой ViewModel.
+                composeNavigator.resetCachedNavigation()
             }
         }
         val externalImportUri by ExternalFileImport.pendingUri.collectAsState()
