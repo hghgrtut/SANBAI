@@ -11,4 +11,5 @@ internal fun Module.databaseDaos() {
     single { get<RowingDatabase>().trainingDao() }
     single { get<RowingDatabase>().savedTrainingFilterDao() }
     single { get<RowingDatabase>().trainingWorkDisplaySettingDao() }
+    single { get<RowingDatabase>().trainingDetailHiddenFieldDao() }
 }

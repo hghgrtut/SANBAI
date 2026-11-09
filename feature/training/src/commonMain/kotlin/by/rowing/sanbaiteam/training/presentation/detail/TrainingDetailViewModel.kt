@@ -8,6 +8,9 @@ import by.rowing.sanbaiteam.training.data.chart.TrainingSplitCalculator
 import by.rowing.sanbaiteam.training.data.chart.models.TrainingPieceSplit
 import by.rowing.sanbaiteam.training.data.chart.models.TrainingSplitLength
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
+import by.rowing.sanbaiteam.training.data.models.detail.TrainingDetailField
+import by.rowing.sanbaiteam.training.data.models.detail.canToggle
+import by.rowing.sanbaiteam.training.data.repository.TrainingDetailSettingsRepository
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.presentation.comparison.TrainingComparisonSelectionStore
 import by.rowing.sanbaiteam.training.presentation.detail.compose.TrainingDetailActions
@@ -21,6 +24,7 @@ import kotlinx.coroutines.launch
 
 internal class TrainingDetailViewModel(
     private val repository: TrainingRepository,
+    private val settingsRepository: TrainingDetailSettingsRepository,
     private val composeNavigator: ComposeNavigator,
     private val comparisonSelectionStore: TrainingComparisonSelectionStore,
     private val trainingId: Long,
@@ -31,6 +35,11 @@ internal class TrainingDetailViewModel(
     private var isClosing = false
 
     init {
+        viewModelScope.launch {
+            settingsRepository.hiddenFields.collect { hiddenFields ->
+                changeState { copy(hiddenFields = hiddenFields) }
+            }
+        }
         viewModelScope.launch {
             comparisonSelectionStore.selection
                 .map { selection -> selection.orEmpty() }
@@ -82,12 +91,27 @@ internal class TrainingDetailViewModel(
         )
     }
 
-    override fun onSplitClick() {
-        changeState { copy(showSplitDialog = true) }
+    override fun onSettingsClick() {
+        changeState { copy(showSettingsDialog = true) }
     }
 
-    override fun onSplitDismiss() {
-        changeState { copy(showSplitDialog = false) }
+    override fun onSettingsDismiss() {
+        changeState { copy(showSettingsDialog = false) }
+    }
+
+    override fun onFieldToggle(field: TrainingDetailField) {
+        if (state.hiddenFields.canToggle(field = field)) {
+            viewModelScope.launch {
+                settingsRepository.setVisible(
+                    field = field,
+                    visible = field in state.hiddenFields,
+                )
+            }
+        }
+    }
+
+    override fun onShowAllFields() {
+        viewModelScope.launch { settingsRepository.showAll() }
     }
 
     override fun onSplitApply(length: TrainingSplitLength) {
@@ -98,7 +122,6 @@ internal class TrainingDetailViewModel(
                     pieces = pieces,
                     length = length,
                 ),
-                showSplitDialog = false,
             )
         }
     }
@@ -108,7 +131,6 @@ internal class TrainingDetailViewModel(
             copy(
                 splitLength = null,
                 splitsByOrder = emptyMap(),
-                showSplitDialog = false,
             )
         }
     }
@@ -150,7 +172,8 @@ internal class TrainingDetailViewModel(
                 expandedComparisonOrders = expandedOrders,
                 splitLength = splitLength,
                 splitsByOrder = splitsByOrder,
-                showSplitDialog = showSplitDialog,
+                hiddenFields = hiddenFields,
+                showSettingsDialog = showSettingsDialog,
             )
         }
     }
