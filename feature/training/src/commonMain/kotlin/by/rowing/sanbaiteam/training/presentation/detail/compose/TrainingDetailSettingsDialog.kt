@@ -27,20 +27,11 @@ import by.rowing.sanbaiteam.training.data.chart.models.TrainingSplitLength
 import by.rowing.sanbaiteam.training.data.models.detail.TrainingDetailField
 import by.rowing.sanbaiteam.training.data.models.detail.canToggle
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.training_detail_avg_heart_rate_label
-import by.rowing.sanbaiteam.training.resources.training_detail_distance_label
-import by.rowing.sanbaiteam.training.resources.training_detail_lactate_label
-import by.rowing.sanbaiteam.training.resources.training_detail_max_heart_rate_label
-import by.rowing.sanbaiteam.training.resources.training_detail_pace_label
-import by.rowing.sanbaiteam.training.resources.training_detail_percent_of_pb_label
-import by.rowing.sanbaiteam.training.resources.training_detail_recovery_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_settings_done
 import by.rowing.sanbaiteam.training.resources.training_detail_settings_fields
 import by.rowing.sanbaiteam.training.resources.training_detail_settings_last_field
 import by.rowing.sanbaiteam.training.resources.training_detail_settings_show_all
 import by.rowing.sanbaiteam.training.resources.training_detail_settings_title
-import by.rowing.sanbaiteam.training.resources.training_detail_stroke_rate_label
-import by.rowing.sanbaiteam.training.resources.training_detail_time_label
 import by.rowing.sanbaiteam.training.resources.training_split_apply
 import by.rowing.sanbaiteam.training.resources.training_split_clear
 import by.rowing.sanbaiteam.training.resources.training_split_error
@@ -59,7 +50,6 @@ import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private val DISTANCE_PRESETS = listOf(250, 500, 1000)
@@ -236,7 +226,7 @@ private fun FieldsSection(
                     rowFields.forEach { field ->
                         Checkbox(
                             modifier = Modifier.weight(1f),
-                            label = stringResource(field.labelRes()),
+                            label = stringResource(field.labelRes),
                             checked = if (field in hiddenFields) {
                                 CheckedState.UNCHECKED
                             } else {
@@ -317,18 +307,6 @@ private fun SplitPresets(
             }
         }
     }
-}
-
-private fun TrainingDetailField.labelRes(): StringResource = when (this) {
-    TrainingDetailField.DISTANCE -> Res.string.training_detail_distance_label
-    TrainingDetailField.TIME -> Res.string.training_detail_time_label
-    TrainingDetailField.PACE -> Res.string.training_detail_pace_label
-    TrainingDetailField.STROKE_RATE -> Res.string.training_detail_stroke_rate_label
-    TrainingDetailField.AVG_HEART_RATE -> Res.string.training_detail_avg_heart_rate_label
-    TrainingDetailField.MAX_HEART_RATE -> Res.string.training_detail_max_heart_rate_label
-    TrainingDetailField.RECOVERY_HEART_RATE -> Res.string.training_detail_recovery_heart_rate_label
-    TrainingDetailField.LACTATE -> Res.string.training_detail_lactate_label
-    TrainingDetailField.PERCENT_OF_PB -> Res.string.training_detail_percent_of_pb_label
 }
 
 private fun sanitizeSplitInput(

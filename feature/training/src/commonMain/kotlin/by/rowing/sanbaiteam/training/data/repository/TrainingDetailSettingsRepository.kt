@@ -9,13 +9,10 @@ import kotlinx.coroutines.flow.map
 /**
  * Хранит набор показателей, скрытых пользователем на экране детали тренировки.
  *
- * В базе лежат только скрытые показатели, поэтому отсутствие записи означает,
- * что показатель отображается. Неизвестные значения (например, из старой версии
- * приложения) игнорируются.
+ * В базе лежат только скрытые показатели => отсутствие записи означает,что показатель отображается.
+ * Неизвестные значения игнорируются.
  */
-internal class TrainingDetailSettingsRepository(
-    private val dao: TrainingDetailHiddenFieldDao,
-) {
+internal class TrainingDetailSettingsRepository(private val dao: TrainingDetailHiddenFieldDao) {
 
     val hiddenFields: Flow<Set<TrainingDetailField>> = dao.observeHidden().map { names ->
         val knownFields = TrainingDetailField.entries.associateBy { field -> field.name }
