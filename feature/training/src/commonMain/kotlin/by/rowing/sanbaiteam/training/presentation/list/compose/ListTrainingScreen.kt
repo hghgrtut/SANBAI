@@ -88,6 +88,7 @@ import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.UiText
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
+import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -139,7 +140,6 @@ private fun ListTrainingScreenContent(
     }
 
     Scaffold(
-        modifier = Modifier.imePadding(),
         topBar = {
             ListTrainingTopBar(
                 actions = actions,
@@ -151,7 +151,7 @@ private fun ListTrainingScreenContent(
         floatingActionButton = { AddTrainingButton(state = state) { actions.onAddTrainingClick() } }
     ) { paddingValues ->
         TrainingListMainContent(
-            modifier = Modifier.padding(paddingValues = paddingValues),
+            modifier = Modifier.scaffoldContentInsets(paddingValues),
             state = state,
             actions = actions,
             filteredTrainings = filteredTrainings
@@ -559,7 +559,9 @@ private fun AddTrainingFAB(onAddTraining: () -> Unit) {
         onClick = onAddTraining,
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
-        modifier = Modifier.padding(Spacing.M)
+        modifier = Modifier
+            .padding(Spacing.M)
+            .imePadding()
     ) {
         Icon(
             imageVector = Icons.Default.Route,

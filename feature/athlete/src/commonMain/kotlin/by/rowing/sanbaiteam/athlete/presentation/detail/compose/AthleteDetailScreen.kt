@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -77,6 +76,7 @@ import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.component.number
 import by.rowing.sanbaiteam.uikit.component.time
+import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -98,7 +98,6 @@ private fun AthleteDetailScreenContent(
     state: AthleteDetailState,
 ) {
     Scaffold(
-        modifier = Modifier.imePadding(),
         topBar = {
             RowDetailsTopBar(
                 state = state,
@@ -157,8 +156,7 @@ private fun RowerData(
     actions: AthleteDetailScreenActions
 ) {
     Column(
-        modifier = Modifier
-            .padding(paddingValues)
+        modifier = Modifier.scaffoldContentInsets(paddingValues)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(Spacing.M),
