@@ -93,6 +93,7 @@ import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.number
 import by.rowing.sanbaiteam.uikit.component.time
+import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -114,12 +115,12 @@ internal fun AddTrainingScreen(viewModel: AddTrainingViewModel) {
     ParseInitialTrainingFile(viewModel = viewModel)
 
     Scaffold(
-        modifier = Modifier.imePadding(),
         topBar = addTrainingToolbar(onBackClick = viewModel::navigateBack),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = viewModel::showSaveTrainingDialog,
                 containerColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.imePadding(),
             ) { SaveIcon() }
         }
     ) { paddingValues ->
@@ -190,8 +191,7 @@ private fun AddTrainingDataInputs(
         }
     }
     Column(
-        modifier = Modifier
-            .padding(paddingValues)
+        modifier = Modifier.scaffoldContentInsets(paddingValues)
             .verticalScroll(rememberScrollState())
             .padding(all = Spacing.M),
         verticalArrangement = Arrangement.spacedBy(space = Spacing.M)

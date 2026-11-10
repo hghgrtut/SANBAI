@@ -60,6 +60,7 @@ import by.rowing.sanbaiteam.uikit.component.EmptyState
 import by.rowing.sanbaiteam.uikit.component.Skeleton
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
+import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.stringResource
@@ -83,7 +84,6 @@ private fun AthleteListScreenContent(
     }
 
     Scaffold(
-        modifier = Modifier.imePadding(),
         topBar = {
             AthleteListTopBarWithSearch(
                 actions = actions,
@@ -95,7 +95,9 @@ private fun AthleteListScreenContent(
                 onClick = actions::onAddAthleteClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.padding(Spacing.M)
+                modifier = Modifier
+                    .padding(Spacing.M)
+                    .imePadding()
             ) {
                 Icon(
                     imageVector = Icons.Default.PersonAdd,
@@ -104,11 +106,9 @@ private fun AthleteListScreenContent(
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues = paddingValues)) {
+        Column(modifier = Modifier.scaffoldContentInsets(paddingValues)) {
             if (state.showFilters) {
-                AthleteFilters(
-                    modifier = Modifier.padding(Spacing.M)
-                )
+                AthleteFilters(modifier = Modifier.padding(Spacing.M))
             }
 
             val contentState = when {

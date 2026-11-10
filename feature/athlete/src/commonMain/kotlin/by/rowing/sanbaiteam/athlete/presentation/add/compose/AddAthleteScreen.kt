@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -62,6 +61,7 @@ import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
+import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import org.jetbrains.compose.resources.StringResource
@@ -80,10 +80,7 @@ private fun AddAthleteScreenContent(
     actions: AddAthleteScreenActions,
     state: AddAthleteState
 ) {
-    Scaffold(
-        modifier = Modifier.imePadding(),
-        topBar = { AddAthleteTopBar(actions = actions) }
-    ) { paddingValues ->
+    Scaffold(topBar = { AddAthleteTopBar(actions = actions) }) { paddingValues ->
         AddAthleteForm(
             actions = actions,
             state = state,
@@ -116,8 +113,7 @@ private fun AddAthleteForm(
     paddingValues: PaddingValues
 ) {
     Column(
-        modifier = Modifier
-            .padding(paddingValues)
+        modifier = Modifier.scaffoldContentInsets(paddingValues)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(Spacing.M),

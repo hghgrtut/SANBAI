@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -57,10 +56,15 @@ import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.time
+import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import org.jetbrains.compose.resources.stringResource
+
+private val FIELD_ICON_SIZE = 20.dp
+private val RESULT_ANIMATION_OFFSET = 12.dp
+private const val RESULT_ANIMATION_DURATION = 260
 
 @Composable
 internal fun CalculatorScreen(viewModel: CalculatorViewModel) {
@@ -88,10 +92,7 @@ private fun CalculatorScreenContent(
     onCalculate: () -> Unit,
     onClearError: () -> Unit,
 ) {
-    Scaffold(
-        modifier = Modifier.imePadding(),
-        topBar = calculatorScreenTopBar(onBackClick = onBackClick)
-    ) { paddingValues ->
+    Scaffold(topBar = calculatorScreenTopBar(onBackClick = onBackClick)) { paddingValues ->
         CalculatorScreenContent(
             paddingValues = paddingValues,
             state = state,
@@ -131,7 +132,7 @@ private fun CalculatorScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
+            .scaffoldContentInsets(paddingValues)
             .verticalScroll(rememberScrollState())
             .padding(Spacing.M),
         verticalArrangement = Arrangement.spacedBy(Spacing.M)
@@ -326,7 +327,3 @@ private fun InputErrorAlert(
         }
     )
 }
-
-private val FIELD_ICON_SIZE = 20.dp
-private val RESULT_ANIMATION_OFFSET = 12.dp
-private const val RESULT_ANIMATION_DURATION = 260
