@@ -42,7 +42,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-internal fun Checkbox(
+@AllowDetektPublic
+fun Checkbox(
     modifier: Modifier = Modifier,
     label: String,
     subtitle: String = "",

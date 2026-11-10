@@ -14,10 +14,12 @@ import by.rowing.sanbaiteam.athlete.data.local.AthletePersonalBestDao
 import by.rowing.sanbaiteam.core.data.local.RowingDatabase.Companion.DATABASE_VERSION
 import by.rowing.sanbaiteam.training.data.entity.SavedTrainingFilterEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
+import by.rowing.sanbaiteam.training.data.entity.TrainingDetailHiddenFieldEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingWorkDisplaySettingEntity
 import by.rowing.sanbaiteam.training.data.local.SavedTrainingFilterDao
 import by.rowing.sanbaiteam.training.data.local.TrainingDao
+import by.rowing.sanbaiteam.training.data.local.TrainingDetailHiddenFieldDao
 import by.rowing.sanbaiteam.training.data.local.TrainingWorkDisplaySettingDao
 
 @Database(
@@ -28,6 +30,7 @@ import by.rowing.sanbaiteam.training.data.local.TrainingWorkDisplaySettingDao
         TrainingAthletePieceEntity::class,
         SavedTrainingFilterEntity::class,
         TrainingWorkDisplaySettingEntity::class,
+        TrainingDetailHiddenFieldEntity::class,
     ],
     version = DATABASE_VERSION,
     exportSchema = false
@@ -40,10 +43,11 @@ internal abstract class RowingDatabase : RoomDatabase() {
     abstract fun trainingDao(): TrainingDao
     abstract fun savedTrainingFilterDao(): SavedTrainingFilterDao
     abstract fun trainingWorkDisplaySettingDao(): TrainingWorkDisplaySettingDao
+    abstract fun trainingDetailHiddenFieldDao(): TrainingDetailHiddenFieldDao
 
     companion object {
 
-        const val DATABASE_VERSION = 4
+        const val DATABASE_VERSION = 5
         const val DATABASE_NAME = "rowing_database"
 
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -86,7 +90,20 @@ internal abstract class RowingDatabase : RoomDatabase() {
             }
         }
 
-        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `${TrainingDetailHiddenFieldDao.TABLE_TRAINING_DETAIL_HIDDEN_FIELD}` (
+                        `field` TEXT NOT NULL,
+                        PRIMARY KEY(`field`)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
     }
 }
 

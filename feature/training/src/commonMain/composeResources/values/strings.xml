@@ -117,6 +117,11 @@
     <string name="training_detail_title">Тренировка</string>
     <string name="training_detail_crew_header">Экипаж</string>
     <string name="training_detail_not_found">Тренировка не найдена</string>
+    <string name="training_detail_settings_title">Настройка экрана</string>
+    <string name="training_detail_settings_fields">Отображаемые данные</string>
+    <string name="training_detail_settings_show_all">Показать все</string>
+    <string name="training_detail_settings_done">Готово</string>
+    <string name="training_detail_settings_last_field">Хотя бы один показатель должен остаться</string>
     <string name="training_detail_piece_number">Отрезок %1$d</string>
     <string name="training_detail_distance">%1$d м</string>
     <string name="training_detail_distance_label">Дистанция</string>

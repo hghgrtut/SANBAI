@@ -32,6 +32,7 @@ import by.rowing.sanbaiteam.training.data.chart.models.TrainingPieceSplit
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
 import by.rowing.sanbaiteam.training.data.models.comparison.MetricComparison
+import by.rowing.sanbaiteam.training.data.models.detail.TrainingDetailField
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_detail_avg_heart_rate_label
@@ -75,6 +76,7 @@ internal fun TrainingPieceCard(
     actions: TrainingDetailActions,
     splits: List<TrainingPieceSplit>,
     comparisonVisible: Boolean,
+    hiddenFields: Set<TrainingDetailField>,
 ) {
     val comparison = piece.comparison
     val hasSplits = splits.isNotEmpty()
@@ -105,11 +107,13 @@ internal fun TrainingPieceCard(
                 TrainingSplitTable(
                     piece = piece,
                     splits = splits,
+                    hiddenFields = hiddenFields,
                 )
             } else {
                 PieceMetricRows(
                     piece = piece,
-                    expanded = expanded
+                    expanded = expanded,
+                    hiddenFields = hiddenFields,
                 )
             }
         }
@@ -167,56 +171,75 @@ internal fun TrainingPieceCard(
 private fun PieceMetricRows(
     piece: TrainingDetailPiece,
     expanded: Boolean,
+    hiddenFields: Set<TrainingDetailField>,
 ) {
     val metrics = piece.comparison?.metrics.orEmpty()
-    DistanceMetricRow(
-        piece = piece,
-        metrics = metrics,
-        expanded = expanded
-    )
-    TimeMetricRow(
-        piece = piece,
-        metrics = metrics,
-        expanded = expanded
-    )
-    PaceMetricRow(
-        piece = piece,
-        metrics = metrics,
-        expanded = expanded
-    )
-    StrokeRateMetricRow(
-        piece = piece,
-        metrics = metrics,
-        expanded = expanded
-    )
-    HeartRateMetricRow(
-        label = stringResource(Res.string.training_detail_avg_heart_rate_label),
-        baseValue = piece.avgHeartRate,
-        comparison = metrics[ComparisonMetric.AVG_HEART_RATE],
-        expanded = expanded
-    )
-    HeartRateMetricRow(
-        label = stringResource(Res.string.training_detail_max_heart_rate_label),
-        baseValue = piece.maxHeartRate,
-        comparison = metrics[ComparisonMetric.MAX_HEART_RATE],
-        expanded = expanded
-    )
-    HeartRateMetricRow(
-        label = stringResource(Res.string.training_detail_recovery_heart_rate_label),
-        baseValue = piece.recoveryHeartRate,
-        comparison = metrics[ComparisonMetric.RECOVERY_HEART_RATE],
-        expanded = expanded
-    )
-    LactateMetricRow(
-        piece = piece,
-        metrics = metrics,
-        expanded = expanded
-    )
-    PercentOfPbMetricRow(
-        piece = piece,
-        metrics = metrics,
-        expanded = expanded
-    )
+    if (TrainingDetailField.DISTANCE !in hiddenFields) {
+        DistanceMetricRow(
+            piece = piece,
+            metrics = metrics,
+            expanded = expanded
+        )
+    }
+    if (TrainingDetailField.TIME !in hiddenFields) {
+        TimeMetricRow(
+            piece = piece,
+            metrics = metrics,
+            expanded = expanded
+        )
+    }
+    if (TrainingDetailField.PACE !in hiddenFields) {
+        PaceMetricRow(
+            piece = piece,
+            metrics = metrics,
+            expanded = expanded
+        )
+    }
+    if (TrainingDetailField.STROKE_RATE !in hiddenFields) {
+        StrokeRateMetricRow(
+            piece = piece,
+            metrics = metrics,
+            expanded = expanded
+        )
+    }
+    if (TrainingDetailField.AVG_HEART_RATE !in hiddenFields) {
+        HeartRateMetricRow(
+            label = stringResource(Res.string.training_detail_avg_heart_rate_label),
+            baseValue = piece.avgHeartRate,
+            comparison = metrics[ComparisonMetric.AVG_HEART_RATE],
+            expanded = expanded
+        )
+    }
+    if (TrainingDetailField.MAX_HEART_RATE !in hiddenFields) {
+        HeartRateMetricRow(
+            label = stringResource(Res.string.training_detail_max_heart_rate_label),
+            baseValue = piece.maxHeartRate,
+            comparison = metrics[ComparisonMetric.MAX_HEART_RATE],
+            expanded = expanded
+        )
+    }
+    if (TrainingDetailField.RECOVERY_HEART_RATE !in hiddenFields) {
+        HeartRateMetricRow(
+            label = stringResource(Res.string.training_detail_recovery_heart_rate_label),
+            baseValue = piece.recoveryHeartRate,
+            comparison = metrics[ComparisonMetric.RECOVERY_HEART_RATE],
+            expanded = expanded
+        )
+    }
+    if (TrainingDetailField.LACTATE !in hiddenFields) {
+        LactateMetricRow(
+            piece = piece,
+            metrics = metrics,
+            expanded = expanded
+        )
+    }
+    if (TrainingDetailField.PERCENT_OF_PB !in hiddenFields) {
+        PercentOfPbMetricRow(
+            piece = piece,
+            metrics = metrics,
+            expanded = expanded
+        )
+    }
 }
 
 @Composable

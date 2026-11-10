@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.training.data.chart.models.TrainingPieceSplit
+import by.rowing.sanbaiteam.training.data.models.detail.TrainingDetailField
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_split_column_avg_heart_rate
@@ -48,13 +49,21 @@ private val PACE_WIDTH = 76.dp
 private val SPM_WIDTH = 56.dp
 private val AVG_HEART_RATE_WIDTH = 56.dp
 private val MAX_HEART_RATE_WIDTH = 56.dp
-private val TABLE_WIDTH = NUMBER_WIDTH + DISTANCE_WIDTH + TIME_WIDTH + PACE_WIDTH +
-        SPM_WIDTH + AVG_HEART_RATE_WIDTH + MAX_HEART_RATE_WIDTH
+
+private val COLUMN_WIDTHS = mapOf(
+    TrainingDetailField.DISTANCE to DISTANCE_WIDTH,
+    TrainingDetailField.TIME to TIME_WIDTH,
+    TrainingDetailField.PACE to PACE_WIDTH,
+    TrainingDetailField.STROKE_RATE to SPM_WIDTH,
+    TrainingDetailField.AVG_HEART_RATE to AVG_HEART_RATE_WIDTH,
+    TrainingDetailField.MAX_HEART_RATE to MAX_HEART_RATE_WIDTH,
+)
 
 @Composable
 internal fun TrainingSplitTable(
     piece: TrainingDetailPiece,
     splits: List<TrainingPieceSplit>,
+    hiddenFields: Set<TrainingDetailField>,
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -62,8 +71,8 @@ internal fun TrainingSplitTable(
             .fillMaxWidth()
             .horizontalScroll(scrollState)
     ) {
-        Column(modifier = Modifier.width(TABLE_WIDTH)) {
-            SplitTableHeader()
+        Column(modifier = Modifier.width(tableWidth(hiddenFields = hiddenFields))) {
+            SplitTableHeader(hiddenFields = hiddenFields)
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             LazyColumn(modifier = Modifier.heightIn(max = LAZY_TABLE_MAX_HEIGHT)) {
                 items(
@@ -79,17 +88,21 @@ internal fun TrainingSplitTable(
                         avgHeartRate = split.avgHeartRate?.toString() ?: MISSING_VALUE,
                         maxHeartRate = split.maxHeartRate?.toString() ?: MISSING_VALUE,
                         style = TypographyPalette.Body2Regular,
+                        hiddenFields = hiddenFields,
                     )
                 }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            SplitTotalRow(piece = piece)
+            SplitTotalRow(
+                piece = piece,
+                hiddenFields = hiddenFields,
+            )
         }
     }
 }
 
 @Composable
-private fun SplitTableHeader() {
+private fun SplitTableHeader(hiddenFields: Set<TrainingDetailField>) {
     SplitTableRowLayout(
         modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant),
         index = stringResource(Res.string.training_split_column_number),
@@ -100,11 +113,15 @@ private fun SplitTableHeader() {
         avgHeartRate = stringResource(Res.string.training_split_column_avg_heart_rate),
         maxHeartRate = stringResource(Res.string.training_split_column_max_heart_rate),
         style = TypographyPalette.Caption1Medium,
+        hiddenFields = hiddenFields,
     )
 }
 
 @Composable
-private fun SplitTotalRow(piece: TrainingDetailPiece) {
+private fun SplitTotalRow(
+    piece: TrainingDetailPiece,
+    hiddenFields: Set<TrainingDetailField>,
+) {
     SplitTableRowLayout(
         modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant),
         index = stringResource(Res.string.training_split_total),
@@ -118,6 +135,7 @@ private fun SplitTotalRow(piece: TrainingDetailPiece) {
         avgHeartRate = piece.avgHeartRate?.toString() ?: MISSING_VALUE,
         maxHeartRate = piece.maxHeartRate?.toString() ?: MISSING_VALUE,
         style = TypographyPalette.Body2Medium,
+        hiddenFields = hiddenFields,
     )
 }
 
@@ -131,6 +149,7 @@ private fun SplitTableRowLayout(
     avgHeartRate: String,
     maxHeartRate: String,
     style: TextStyle,
+    hiddenFields: Set<TrainingDetailField>,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -143,36 +162,48 @@ private fun SplitTableRowLayout(
             align = TextAlign.Start,
             style = style,
         )
-        TableCell(
-            text = distance,
-            width = DISTANCE_WIDTH,
-            style = style
-        )
-        TableCell(
-            text = time,
-            width = TIME_WIDTH,
-            style = style
-        )
-        TableCell(
-            text = pace,
-            width = PACE_WIDTH,
-            style = style
-        )
-        TableCell(
-            text = strokeRate,
-            width = SPM_WIDTH,
-            style = style
-        )
-        TableCell(
-            text = avgHeartRate,
-            width = AVG_HEART_RATE_WIDTH,
-            style = style
-        )
-        TableCell(
-            text = maxHeartRate,
-            width = MAX_HEART_RATE_WIDTH,
-            style = style
-        )
+        if (TrainingDetailField.DISTANCE !in hiddenFields) {
+            TableCell(
+                text = distance,
+                width = DISTANCE_WIDTH,
+                style = style
+            )
+        }
+        if (TrainingDetailField.TIME !in hiddenFields) {
+            TableCell(
+                text = time,
+                width = TIME_WIDTH,
+                style = style
+            )
+        }
+        if (TrainingDetailField.PACE !in hiddenFields) {
+            TableCell(
+                text = pace,
+                width = PACE_WIDTH,
+                style = style
+            )
+        }
+        if (TrainingDetailField.STROKE_RATE !in hiddenFields) {
+            TableCell(
+                text = strokeRate,
+                width = SPM_WIDTH,
+                style = style
+            )
+        }
+        if (TrainingDetailField.AVG_HEART_RATE !in hiddenFields) {
+            TableCell(
+                text = avgHeartRate,
+                width = AVG_HEART_RATE_WIDTH,
+                style = style
+            )
+        }
+        if (TrainingDetailField.MAX_HEART_RATE !in hiddenFields) {
+            TableCell(
+                text = maxHeartRate,
+                width = MAX_HEART_RATE_WIDTH,
+                style = style
+            )
+        }
     }
 }
 
@@ -193,3 +224,7 @@ private fun TableCell(
         maxLines = 1,
     )
 }
+
+private fun tableWidth(hiddenFields: Set<TrainingDetailField>): Dp = COLUMN_WIDTHS.entries
+    .filterNot { (field, _) -> field in hiddenFields }
+    .fold(initial = NUMBER_WIDTH) { width, (_, columnWidth) -> width + columnWidth }
