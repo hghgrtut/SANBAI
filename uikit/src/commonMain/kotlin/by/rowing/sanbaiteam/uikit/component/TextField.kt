@@ -30,12 +30,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
-import by.rowing.sanbaiteam.uikit.modifier.clearFocusOnKeyboardDismiss
 import by.rowing.sanbaiteam.uikit.resources.Res
 import by.rowing.sanbaiteam.uikit.resources.ic_check_16
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+private const val DEFAULT_PADDING_VALUES = 16
 
 /** https://www.figma.com/design/J0LnHWw2Q3FMDPeIf4Wk2A/UI-Kit-3-Mobile?node-id=423-630 */
 @AllowDetektPublic
@@ -174,9 +175,7 @@ fun TextField(
 
     BasicTextField(
         value = value,
-        modifier = modifier
-            .textFieldPadding(isLabelPassed = label != null)
-            .clearFocusOnKeyboardDismiss(),
+        modifier = modifier.textFieldPadding(isLabelPassed = label != null),
         onValueChange = onValueChange,
         enabled = enabled,
         readOnly = readOnly,
@@ -427,5 +426,3 @@ private fun TextFieldPreview() {
         }
     }
 }
-
-private const val DEFAULT_PADDING_VALUES = 16

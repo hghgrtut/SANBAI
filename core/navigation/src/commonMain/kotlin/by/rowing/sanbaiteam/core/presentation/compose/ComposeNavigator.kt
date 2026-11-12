@@ -6,6 +6,7 @@ import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlin.concurrent.Volatile
 
 @AllowDetektPublic
 abstract class ComposeNavigator(
@@ -19,6 +20,25 @@ abstract class ComposeNavigator(
     )
 
     val sharedFlow = _sharedFlow.asSharedFlow()
+
+    /**
+     * Сколько экранов сейчас слушают навигатор. Пока слушателей нет (Activity пересоздаётся),
+     * события не копятся в replay-кэше: иначе накопленный `navigateBack` повторился бы после
+     * восстановления UI и мог вытолкнуть последний экран — NavHost остался бы пустым (белый экран).
+     */
+    @Volatile
+    private var attachedUiCount: Int = 0
+
+    fun attachUi() {
+        attachedUiCount++
+    }
+
+    fun detachUi() {
+        attachedUiCount = (attachedUiCount - 1).coerceAtLeast(minimumValue = 0)
+        if (attachedUiCount == 0) {
+            resetCachedNavigation()
+        }
+    }
 
     /**
      * @param navTarget строковый путь навигации или сериализуемый объект
@@ -35,7 +55,7 @@ abstract class ComposeNavigator(
         removeCurrentScreen: Boolean = false,
         shouldRememberBottomSheet: Boolean = false,
     ) {
-        _sharedFlow.tryEmit(
+        emitEvent(
             NavigationEvent.NavigateForward(
                 navTarget = navTarget,
                 navOptions = navOptions,
@@ -58,7 +78,7 @@ abstract class ComposeNavigator(
         additionalArgs: NavigationDataArgs? = null,
         restoreBottomSheetDialog: Boolean = false,
     ) {
-        _sharedFlow.tryEmit(
+        emitEvent(
             NavigationEvent.NavigateBack(
                 navTarget = navScreen,
                 args = additionalArgs,
@@ -75,8 +95,14 @@ abstract class ComposeNavigator(
     /** Полностью удалить стек навигации для текущего навигатора
      */
     fun clearBackStack() {
-        _sharedFlow.tryEmit(NavigationEvent.ClearBackStack)
+        emitEvent(NavigationEvent.ClearBackStack)
         resetCachedNavigation()
+    }
+
+    private fun emitEvent(event: NavigationEvent) {
+        if (attachedUiCount > 0) {
+            _sharedFlow.tryEmit(event)
+        }
     }
 }
 

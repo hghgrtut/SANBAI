@@ -26,6 +26,7 @@ import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
@@ -73,6 +74,7 @@ internal class TrainingRepository(
         dao.observeAllTrainingEntities(),
         workDisplaySettingsRepository.modes,
     ) { trainings, modes -> trainings to modes }
+        .conflate()
         .map { (trainings, modes) ->
             toListItems(
                 trainings = trainings,
