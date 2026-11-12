@@ -37,9 +37,6 @@ fun App(importUri: String? = null) {
         val clickableState = koinInject<ClickableState>()
         val navController = rememberNavController()
 
-        // Пока UI подключён к навигатору, события навигации доставляются, а при разрушении
-        // вьюхи (пересоздание Activity) навигатор сбрасывает replay-кэш: иначе накопленный
-        // «назад» повторился бы после восстановления и вытолкнул последний экран.
         DisposableEffect(composeNavigator) {
             composeNavigator.attachUi()
             onDispose { composeNavigator.detachUi() }
