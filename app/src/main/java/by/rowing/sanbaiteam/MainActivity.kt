@@ -23,7 +23,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pendingImportUri = extractImportUri(intent)
+        // Файл из Intent отдаём в UI только при первом создании Activity. При пересоздании
+        // (поворот экрана, возврат из фона, смена конфигурации) Intent остаётся тем же, и
+        // повторная навигация открывала бы второй экран импорта поверх восстановленного стека
+        // с повторным разбором того же файла.
+        pendingImportUri = if (savedInstanceState == null) extractImportUri(intent) else null
         enableEdgeToEdge()
         setContentView(
             ComposeView(this).apply {

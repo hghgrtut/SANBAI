@@ -9,6 +9,7 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.core.util.nowInMillis
+import by.rowing.sanbaiteam.core.util.roundToTenths
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
@@ -31,6 +32,7 @@ import by.rowing.sanbaiteam.training.resources.add_training_import_success
 import by.rowing.sanbaiteam.training.resources.add_training_import_unsupported_format
 import by.rowing.sanbaiteam.uikit.component.UiText
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,7 +41,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import kotlin.math.roundToInt
 import kotlin.time.Instant
 
 internal class AddTrainingViewModel(
@@ -61,6 +62,18 @@ internal class AddTrainingViewModel(
 
     private var pendingInitialImportUri: String? = importUri
 
+    /**
+     * Защита от параллельных импортов:
+     * два набора файлов не должны перемешиваться в состоянии.
+     */
+    private var importJob: Job? = null
+
+    /**
+     * Идёт сохранение: повторный запуск создал бы дубль тренировки
+     * и лишний переход назад.
+     */
+    private var saveJob: Job? = null
+
     init {
         viewModelScope.launch {
             athleteRepository.allAthletes.collectLatest { athletes ->
@@ -81,6 +94,7 @@ internal class AddTrainingViewModel(
 
     override fun navigateBack() {
         when {
+            saveJob?.isActive == true -> return
             state.showSaveDialog || state.showExitDialog -> changeState {
                 copy(
                     showSaveDialog = false,
@@ -275,6 +289,7 @@ internal class AddTrainingViewModel(
     }
 
     fun saveTraining() {
+        if (saveJob?.isActive == true) return
         val validation = validateAddTraining(
             crewAthletes = state.crewAthletes,
             pieces = state.pieces,
@@ -293,7 +308,7 @@ internal class AddTrainingViewModel(
             }
             return
         }
-        viewModelScope.launch(context = Dispatchers.Default) {
+        saveJob = viewModelScope.launch(context = Dispatchers.Default) {
             val piecesToSave = state.crewAthletes.flatMap { crewAthlete ->
                 state.pieces.mapIndexed { index, piece ->
                     TrainingAthletePieceEntity(
@@ -361,7 +376,7 @@ internal class AddTrainingViewModel(
 
     fun importTrainingBatch(handles: List<String>) {
         if (handles.isEmpty()) return
-        viewModelScope.launch {
+        importJob = viewModelScope.launch {
             val fileContents = trainingFileReader.readFiles(handles)
             val sources = fileContents.map { file -> TrainingImportParsers.detect(file.bytes)?.source }
             val importSource = sources.filterNotNull().distinct().singleOrNull()
@@ -410,13 +425,10 @@ internal class AddTrainingViewModel(
 
     private fun parseIntFromText(text: String): Int? = text.filter { it.isDigit() }.toIntOrNull()
 
-    private fun parseLactateFromText(text: String): Double? {
-        val value = text.filter { it.isDigit() || it == ',' || it == '.' }
-            .replace(',', '.')
-            .toDoubleOrNull()
-            ?: return null
-        return (value * 10).roundToInt() / 10.0
-    }
+    private fun parseLactateFromText(text: String): Double? = text.filter { it.isDigit() || it == ',' || it == '.' }
+        .replace(',', '.')
+        .toDoubleOrNull()
+        ?.roundToTenths()
 
     private suspend fun applyParsedImport(
         parsed: ParsedTrainingImport,

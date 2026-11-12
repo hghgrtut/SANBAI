@@ -23,7 +23,9 @@ import by.rowing.sanbaiteam.training.resources.training_transfer_export_success
 import by.rowing.sanbaiteam.training.resources.training_transfer_import_error
 import by.rowing.sanbaiteam.training.resources.training_transfer_import_result
 import by.rowing.sanbaiteam.uikit.component.UiText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class ListTrainingViewModel(
     private val repository: TrainingRepository,
@@ -261,10 +263,12 @@ internal class ListTrainingViewModel(
         if (state.isTransferring) return
         changeState { copy(isTransferring = true) }
         viewModelScope.launch {
-            val result = backupFileAccess.read(handle)?.let { jsonText ->
-                runCatching {
-                    trainingTransferRepository.importBackup(TrainingBackupSerializer.decode(text = jsonText))
-                }.getOrNull()
+            val result = withContext(Dispatchers.Default) {
+                backupFileAccess.read(handle)?.let { jsonText ->
+                    runCatching {
+                        trainingTransferRepository.importBackup(TrainingBackupSerializer.decode(text = jsonText))
+                    }.getOrNull()
+                }
             }
             changeState {
                 copy(

@@ -2,6 +2,7 @@ package by.rowing.sanbaiteam.shared
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,6 +36,14 @@ fun App(importUri: String? = null) {
         val composeNavigator = koinInject<ComposeNavigator>()
         val clickableState = koinInject<ClickableState>()
         val navController = rememberNavController()
+
+        // Пока UI подключён к навигатору, события навигации доставляются, а при разрушении
+        // вьюхи (пересоздание Activity) навигатор сбрасывает replay-кэш: иначе накопленный
+        // «назад» повторился бы после восстановления и вытолкнул последний экран.
+        DisposableEffect(composeNavigator) {
+            composeNavigator.attachUi()
+            onDispose { composeNavigator.detachUi() }
+        }
 
         LaunchedEffect(Unit) {
             composeNavigator.sharedFlow.collect { navigation ->
@@ -140,7 +149,10 @@ private fun navigateBack(
             navigation.args?.let { args ->
                 navController.previousBackStackEntry?.savedStateHandle?.set(args.key, args.value)
             }
-            navController.popBackStack()
+            // Последний экран не выталкиваем: пустой back stack — это пустой NavHost, что приведёт к «белому экрану»
+            if (navController.previousBackStackEntry != null) {
+                navController.popBackStack()
+            }
         }
 
         is String -> {
