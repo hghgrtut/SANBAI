@@ -296,24 +296,24 @@ private fun RecordTypeBlock(
         records.forEach { record ->
             RecordRow(
                 record = record,
-                onDistanceChange = {
+                onDistanceChange = { newDistance ->
                     actions.changeRecordDistance(
-                        type,
-                        record.localId,
-                        it
+                        type = type,
+                        localId = record.localId,
+                        text = newDistance
                     )
                 },
-                onTimeChange = {
+                onTimeChange = { newRecordTime ->
                     actions.changeRecordTime(
-                        type,
-                        record.localId,
-                        it
+                        type = type,
+                        localId = record.localId,
+                        text = newRecordTime
                     )
                 },
                 onRemove = {
                     actions.removeRecord(
-                        type,
-                        record.localId
+                        type = type,
+                        localId = record.localId
                     )
                 },
             )
