@@ -62,7 +62,6 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_detail_gender_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_not_found
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_distance_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_time_label
-import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_time_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_records_header
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_save_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_title
@@ -376,7 +375,6 @@ private fun RecordRow(
             value = record.timeText,
             onValueChange = onTimeChange,
             label = stringResource(Res.string.athletes_detail_record_time_label),
-            placeholder = stringResource(Res.string.athletes_detail_record_time_placeholder),
             contentPadding = RECORD_FIELD_CONTENT_PADDING,
             textStyle = TypographyPaletteSp.Body1Regular,
             keyboardOptions = KeyboardOptions.time(imeAction = ImeAction.Done),

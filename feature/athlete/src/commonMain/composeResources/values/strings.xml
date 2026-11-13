@@ -36,8 +36,7 @@
     <string name="athletes_detail_title">Спортсмен</string>
     <string name="athletes_detail_records_header">Рекорды</string>
     <string name="athletes_detail_record_distance_label">Дистанция (м)</string>
-    <string name="athletes_detail_record_time_label">Время</string>
-    <string name="athletes_detail_record_time_placeholder">0:00.0</string>
+    <string name="athletes_detail_record_time_label">Время (м:сс.д)</string>
     <string name="athletes_detail_add_record">Добавить</string>
     <string name="athletes_detail_delete_record">Удалить рекорд</string>
     <string name="athletes_detail_not_found">Спортсмен не найден</string>
