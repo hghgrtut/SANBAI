@@ -15,20 +15,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,7 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_detail_gender_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_not_found
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_distance_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_time_label
+import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_time_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_records_header
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_save_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_title
@@ -83,6 +85,14 @@ import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+
+private val RECORD_ICON_SIZE = 20.dp
+private val ADD_RECORD_ICON_SIZE = 18.dp
+
+private val RECORD_FIELD_CONTENT_PADDING = PaddingValues(
+    horizontal = Spacing.S,
+    vertical = Spacing.M
+)
 
 @Composable
 internal fun AthleteDetailScreen(viewModel: AthleteDetailViewModel) {
@@ -261,22 +271,81 @@ private fun RecordsSection(
             style = TypographyPalette.H4
         )
         for (type in TrainingPieceType.entries) {
-            Text(
-                text = stringResource(type.uiResId),
-                style = TypographyPalette.H4
+            RecordTypeBlock(
+                type = type,
+                records = state.recordsByType[type].orEmpty(),
+                actions = actions
             )
-            state.recordsByType[type]?.forEach { record ->
-                RecordRow(
-                    record = record,
-                    onDistanceChange = { actions.changeRecordDistance(type, record.localId, it) },
-                    onTimeChange = { actions.changeRecordTime(type, record.localId, it) },
-                    onRemove = { actions.removeRecord(type, record.localId) },
-                )
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
+        }
+    }
+}
+
+@Composable
+private fun RecordTypeBlock(
+    type: TrainingPieceType,
+    records: List<PersonalBestDraft>,
+    actions: AthleteDetailScreenActions,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(space = Spacing.S)
+    ) {
+        RecordTypeHeader(
+            title = stringResource(type.uiResId),
+            onAdd = { actions.addRecord(type) }
+        )
+        records.forEach { record ->
+            RecordRow(
+                record = record,
+                onDistanceChange = {
+                    actions.changeRecordDistance(
+                        type,
+                        record.localId,
+                        it
+                    )
+                },
+                onTimeChange = {
+                    actions.changeRecordTime(
+                        type,
+                        record.localId,
+                        it
+                    )
+                },
+                onRemove = {
+                    actions.removeRecord(
+                        type,
+                        record.localId
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun RecordTypeHeader(
+    title: String,
+    onAdd: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = TypographyPalette.H4,
+            modifier = Modifier.weight(weight = 1f)
+        )
+        TextButton(onClick = onAdd) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier.size(ADD_RECORD_ICON_SIZE)
+            )
+            SpacerXS()
+            Text(
                 text = stringResource(Res.string.athletes_detail_add_record),
-                debounceClick = { actions.addRecord(type) }
+                style = TypographyPalette.Body2Medium
             )
         }
     }
@@ -289,36 +358,36 @@ private fun RecordRow(
     onTimeChange: (String) -> Unit,
     onRemove: () -> Unit,
 ) {
-    Card(
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        )
+        horizontalArrangement = Arrangement.spacedBy(space = Spacing.XS),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier.padding(Spacing.S)) {
-            TextField(
-                value = record.distanceText,
-                onValueChange = onDistanceChange,
-                label = stringResource(Res.string.athletes_detail_record_distance_label),
-                textStyle = TypographyPaletteSp.Body1Regular,
-                keyboardOptions = KeyboardOptions.number(),
-                modifier = Modifier.fillMaxWidth()
-            )
-            SpacerXS()
-            TextField(
-                value = record.timeText,
-                onValueChange = onTimeChange,
-                label = stringResource(Res.string.athletes_detail_record_time_label),
-                textStyle = TypographyPaletteSp.Body1Regular,
-                keyboardOptions = KeyboardOptions.time(imeAction = ImeAction.Done),
-                modifier = Modifier.fillMaxWidth()
-            )
-            SpacerXS()
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(Res.string.athletes_detail_delete_record),
-                buttonColors = ButtonColors.text(),
-                debounceClick = onRemove
+        TextField(
+            value = record.distanceText,
+            onValueChange = onDistanceChange,
+            label = stringResource(Res.string.athletes_detail_record_distance_label),
+            contentPadding = RECORD_FIELD_CONTENT_PADDING,
+            textStyle = TypographyPaletteSp.Body1Regular,
+            keyboardOptions = KeyboardOptions.number(),
+            modifier = Modifier.weight(weight = 1f)
+        )
+        TextField(
+            value = record.timeText,
+            onValueChange = onTimeChange,
+            label = stringResource(Res.string.athletes_detail_record_time_label),
+            placeholder = stringResource(Res.string.athletes_detail_record_time_placeholder),
+            contentPadding = RECORD_FIELD_CONTENT_PADDING,
+            textStyle = TypographyPaletteSp.Body1Regular,
+            keyboardOptions = KeyboardOptions.time(imeAction = ImeAction.Done),
+            modifier = Modifier.weight(weight = 1f)
+        )
+        IconButton(onClick = onRemove) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = stringResource(Res.string.athletes_detail_delete_record),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(RECORD_ICON_SIZE)
             )
         }
     }
