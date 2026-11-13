@@ -35,9 +35,9 @@
     <string name="athletes_add_athlete_gender_female">Женский</string>
     <string name="athletes_detail_title">Спортсмен</string>
     <string name="athletes_detail_records_header">Рекорды</string>
-    <string name="athletes_detail_record_distance_label">Дистанция (метры)</string>
+    <string name="athletes_detail_record_distance_label">Дистанция (м)</string>
     <string name="athletes_detail_record_time_label">Время (м:сс.д)</string>
-    <string name="athletes_detail_add_record">Добавить рекорд</string>
+    <string name="athletes_detail_add_record">Добавить</string>
     <string name="athletes_detail_delete_record">Удалить рекорд</string>
     <string name="athletes_detail_not_found">Спортсмен не найден</string>
     <string name="athletes_add_athlete_name_error">Введите ФИО спортсмена</string>
