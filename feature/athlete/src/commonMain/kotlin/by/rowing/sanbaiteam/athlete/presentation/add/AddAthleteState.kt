@@ -8,5 +8,7 @@ internal data class AddAthleteState(
     val speedCoachSerial: String = "",
     val isMale: Boolean = true,
     val nameError: UiText? = null,
-    val dateError: UiText? = null
+    val dateError: UiText? = null,
+    val weightError: UiText? = null,
+    val weight: String = "",
 )

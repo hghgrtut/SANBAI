@@ -2,6 +2,7 @@ package by.rowing.sanbaiteam.training.data.repository
 
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
+import by.rowing.sanbaiteam.athlete.data.entity.AthleteWeightEntity
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -11,6 +12,8 @@ import kotlinx.coroutines.flow.emptyFlow
 internal open class StubAthletesRepository : AthletesRepository {
 
     override val allAthletes: Flow<List<AthleteItemModel>> = emptyFlow()
+
+    private var weights: List<AthleteWeightEntity> = emptyList()
 
     override suspend fun getAllAthletesOnce(): List<AthleteEntity> = emptyList()
 
@@ -37,4 +40,25 @@ internal open class StubAthletesRepository : AthletesRepository {
         athleteIds.associateWith { "Гребец $it" }
 
     override suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long? = null
+
+    override suspend fun getWeights(athleteId: Long): List<AthleteWeightEntity> = weights
+
+    override suspend fun saveWeight(
+        athleteId: Long,
+        dateMillis: Long,
+        weightTenths: Int
+    ) {
+        weights += AthleteWeightEntity(
+            athleteId = athleteId,
+            dateMillis = dateMillis,
+            weightTenths = weightTenths,
+        )
+    }
+
+    override suspend fun deleteWeight(
+        athleteId: Long,
+        dateMillis: Long
+    ) {
+        weights = weights.filter { it.athleteId != athleteId || it.dateMillis != dateMillis }
+    }
 }

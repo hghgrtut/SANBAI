@@ -2,8 +2,10 @@ package by.rowing.sanbaiteam.athlete.data.repository
 
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
+import by.rowing.sanbaiteam.athlete.data.entity.AthleteWeightEntity
 import by.rowing.sanbaiteam.athlete.data.local.AthleteDao
 import by.rowing.sanbaiteam.athlete.data.local.AthletePersonalBestDao
+import by.rowing.sanbaiteam.athlete.data.local.AthleteWeightDao
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -16,6 +18,7 @@ import kotlinx.coroutines.withContext
 internal class AthletesRepositoryImpl(
     private val dao: AthleteDao,
     private val personalBestDao: AthletePersonalBestDao,
+    private val weightDao: AthleteWeightDao,
 ) : AthletesRepository {
 
     override val allAthletes: Flow<List<AthleteItemModel>> = dao.getAllAthletes().map { athleteEntities ->
@@ -80,4 +83,31 @@ internal class AthletesRepositoryImpl(
 
     override suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long? =
         dao.getAthleteBySpeedCoachSerial(serial = serial)?.id
+
+    override suspend fun getWeights(athleteId: Long): List<AthleteWeightEntity> =
+        weightDao.getByAthlete(athleteId = athleteId)
+
+    override suspend fun saveWeight(
+        athleteId: Long,
+        dateMillis: Long,
+        weightTenths: Int,
+    ) {
+        weightDao.upsert(
+            weight = AthleteWeightEntity(
+                athleteId = athleteId,
+                dateMillis = TimeUtils.noonOfDay(timeInMillis = dateMillis),
+                weightTenths = weightTenths,
+            )
+        )
+    }
+
+    override suspend fun deleteWeight(
+        athleteId: Long,
+        dateMillis: Long,
+    ) {
+        weightDao.deleteByDate(
+            athleteId = athleteId,
+            dateMillis = TimeUtils.noonOfDay(timeInMillis = dateMillis),
+        )
+    }
 }

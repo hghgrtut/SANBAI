@@ -3,11 +3,13 @@ package by.rowing.sanbaiteam.core.util
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
 import kotlinx.datetime.number
 import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
 
 @AllowDetektPublic
 object TimeUtils {
@@ -16,7 +18,7 @@ object TimeUtils {
     const val MILLIS_PER_SECOND = 1_000L
     const val SECONDS_PER_MINUTE = 60L
 
-    private const val MILLIS_PER_DAY = 86_400_000L
+    const val MILLIS_PER_DAY = 86_400_000L
     private const val DATE_DIGITS_LENGTH = 8
 
     private val SHORT_MONTH_NAMES = listOf(
@@ -45,6 +47,20 @@ object TimeUtils {
         return "$day$month${date.year}"
     }
 
+    /** `dd.MM.yy` — компактный формат для таблиц. */
+    fun formatDateShort(timeInMillis: Long): String {
+        val year = (timeInMillis.toLocalDate().year % 100).toString().padStart(2, '0')
+        return "${formatDayMonth(timeInMillis)}.$year"
+    }
+
+    /** `dd.MM` — подписи оси дат на графике. */
+    fun formatDayMonth(timeInMillis: Long): String {
+        val date = timeInMillis.toLocalDate()
+        val day = date.day.toString().padStart(2, '0')
+        val month = date.month.number.toString().padStart(2, '0')
+        return "$day.$month"
+    }
+
     fun parseDateDigits(digits: String): Long? {
         if (digits.length != DATE_DIGITS_LENGTH || !digits.all { it.isDigit() }) return null
         val day = digits.substring(0, 2).toInt()
@@ -62,9 +78,13 @@ object TimeUtils {
         month: Int,
         day: Int
     ): Long? = try {
-        LocalDate(year, month, day)
-            .atStartOfDayIn(TimeZone.currentSystemDefault())
-            .toEpochMilliseconds()
+        startOfDayMillis(
+            localDate = LocalDate(
+                year = year,
+                month = month,
+                day = day
+            )
+        )
     } catch (_: IllegalArgumentException) {
         null
     }
@@ -74,10 +94,16 @@ object TimeUtils {
         month: Int,
         day: Int
     ): Long? = try {
-        LocalDate(year, month, day)
-            .plus(1, DateTimeUnit.DAY)
-            .atStartOfDayIn(TimeZone.currentSystemDefault())
-            .toEpochMilliseconds() - 1
+        startOfDayMillis(
+            localDate = LocalDate(
+                year = year,
+                month = month,
+                day = day
+            ).plus(
+                value = 1,
+                unit = DateTimeUnit.DAY
+            )
+        ) - 1
     } catch (_: IllegalArgumentException) {
         null
     }
@@ -97,6 +123,47 @@ object TimeUtils {
         return if (hasHadBirthday) yearDiff else yearDiff - 1
     }
 
+    fun startOfDayMillis(timeInMillis: Long): Long = startOfDayMillis(localDate = timeInMillis.toLocalDate())
+
+    /** Полдень локального дня — защита от сдвига даты при смене таймзоны. */
+    fun noonOfDay(timeInMillis: Long): Long = noonOfLocalDate(timeInMillis.toLocalDate())
+
+    fun noonMillis(
+        year: Int,
+        month: Int,
+        day: Int,
+    ): Long? = try {
+        noonOfLocalDate(LocalDate(year, month, day))
+    } catch (_: IllegalArgumentException) {
+        null
+    }
+
+    fun plusDaysMillis(
+        timeInMillis: Long,
+        days: Int,
+    ): Long = startOfDayMillis(
+        localDate = timeInMillis.toLocalDate().plus(
+            value = days,
+            unit = DateTimeUnit.DAY
+        )
+    )
+
+    fun daysBetween(
+        fromMillis: Long,
+        toMillis: Long,
+    ): Int = (toMillis.toLocalDate().toEpochDays() - fromMillis.toLocalDate().toEpochDays()).toInt()
+
+    private fun noonOfLocalDate(date: LocalDate): Long = LocalDateTime(
+        year = date.year,
+        month = date.month.number,
+        day = date.day,
+        hour = 12,
+        minute = 0,
+    ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+
+    private fun startOfDayMillis(localDate: LocalDate): Long =
+        localDate.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+
     /**
      * Локальная для epoch-миллисекунд.
      *
@@ -105,14 +172,13 @@ object TimeUtils {
      * сравнивая границы суток в нужной таймзоне.
      */
     private fun Long.toLocalDate(): LocalDate {
-        val zone = TimeZone.currentSystemDefault()
-        var date = LocalDate.fromEpochDays(floorDiv(MILLIS_PER_DAY).toInt())
-        if (date.atStartOfDayIn(zone).toEpochMilliseconds() > this) {
-            date = date.minus(1, DateTimeUnit.DAY)
-        } else if (date.plus(1, DateTimeUnit.DAY).atStartOfDayIn(zone).toEpochMilliseconds() <= this) {
-            date = date.plus(1, DateTimeUnit.DAY)
+        val date = LocalDate.fromEpochDays(floorDiv(MILLIS_PER_DAY).toInt())
+        return when {
+            startOfDayMillis(localDate = date) > this -> date.minus(1, DateTimeUnit.DAY)
+            startOfDayMillis(localDate = date.plus(1, DateTimeUnit.DAY)) <= this ->
+                date.plus(1, DateTimeUnit.DAY)
+            else -> date
         }
-        return date
     }
 }
 

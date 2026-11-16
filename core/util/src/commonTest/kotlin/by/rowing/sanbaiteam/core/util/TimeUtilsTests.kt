@@ -72,7 +72,7 @@ internal class TimeUtilsTests {
             day = 15
         )
 
-        assertEquals(start!! + MILLIS_PER_DAY - 1, end)
+        assertEquals(start!! + TimeUtils.MILLIS_PER_DAY - 1, end)
         assertTrue(
             TimeUtils.isSameCalendarDay(
                 firstMillis = start,
@@ -92,6 +92,124 @@ internal class TimeUtilsTests {
         )
     }
 
+    @Test
+    fun startOfDayMillis_normalizesTimeOfDay() {
+        val expected = TimeUtils.startOfDayMillis(
+            year = 2024,
+            month = 1,
+            day = 15
+        )
+
+        assertEquals(
+            expected,
+            TimeUtils.startOfDayMillis(
+                timeInMillis = localMillis(
+                    day = 15,
+                    hour = 18,
+                    minute = 42
+                )
+            )
+        )
+    }
+
+    @Test
+    fun noonOfDay_returnsLocalNoon() {
+        val noon = TimeUtils.noonOfDay(
+            timeInMillis = localMillis(
+                day = 15,
+                hour = 1,
+                minute = 0
+            )
+        )
+
+        assertEquals(
+            localMillis(
+                day = 15,
+                hour = 12,
+                minute = 0
+            ),
+            noon
+        )
+        assertTrue(
+            TimeUtils.isSameCalendarDay(
+                firstMillis = localMillis(
+                    day = 15,
+                    hour = 0,
+                    minute = 0
+                ),
+                secondMillis = noon
+            )
+        )
+    }
+
+    @Test
+    fun plusDaysMillis_movesToNextDayStart() {
+        val start = TimeUtils.startOfDayMillis(
+            year = 2024,
+            month = 1,
+            day = 15
+        )!!
+
+        assertEquals(
+            TimeUtils.startOfDayMillis(
+                year = 2024,
+                month = 1,
+                day = 16
+            ),
+            TimeUtils.plusDaysMillis(
+                timeInMillis = start,
+                days = 1
+            )
+        )
+    }
+
+    @Test
+    fun daysBetween_countsCalendarDays() {
+        assertEquals(
+            2,
+            TimeUtils.daysBetween(
+                fromMillis = localMillis(
+                    day = 15,
+                    hour = 23,
+                    minute = 59
+                ),
+                toMillis = localMillis(
+                    day = 17,
+                    hour = 0,
+                    minute = 1
+                )
+            )
+        )
+    }
+
+    @Test
+    fun formatDateShort_usesTwoDigitYear() {
+        assertEquals(
+            "15.01.24",
+            TimeUtils.formatDateShort(
+                localMillis(
+                    day = 15,
+                    hour = 12,
+                    minute = 0
+                )
+            )
+        )
+    }
+
+    @Test
+    fun formatDayMonth_omitsYear() {
+        assertEquals(
+            "15.01",
+            TimeUtils.formatDayMonth(
+                localMillis(
+                    day = 15,
+                    hour = 12,
+                    minute = 0
+                )
+            )
+        )
+    }
+
     private fun localMillis(
         day: Int,
         hour: Int,
@@ -104,8 +222,4 @@ internal class TimeUtilsTests {
         minute = minute,
         second = 0,
     ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
-
-    private companion object {
-        const val MILLIS_PER_DAY = 86_400_000L
-    }
 }

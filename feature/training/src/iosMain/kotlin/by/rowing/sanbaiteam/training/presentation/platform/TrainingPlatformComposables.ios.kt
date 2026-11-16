@@ -1,26 +1,10 @@
 package by.rowing.sanbaiteam.training.presentation.platform
 
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.window.DialogProperties
-import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.cancel
-import by.rowing.sanbaiteam.training.resources.ok
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.stringResource
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSTimer
@@ -33,7 +17,6 @@ import platform.UIKit.UIDocumentPickerViewController
 import platform.UIKit.UIViewController
 import platform.UniformTypeIdentifiers.UTType
 import platform.darwin.NSObject
-import kotlin.time.Instant
 
 private const val UT_TYPE_DATA = "public.data"
 private const val UT_TYPE_JSON = "public.json"
@@ -47,7 +30,6 @@ private const val SHARE_WAIT_INTERVAL_SECONDS = 0.05
  * Возвращает действие, открывающее системный выбор файлов тренировки.
  * Выбранные файлы копируются во временный каталог, пути возвращаются как строки.
  */
-@OptIn(ExperimentalForeignApi::class)
 @Composable
 internal actual fun rememberTrainingImportPicker(onFilesPicked: (List<String>) -> Unit): () -> Unit {
     val presenter = rememberDocumentPickerPresenter(
@@ -65,7 +47,6 @@ internal actual fun rememberTrainingImportPicker(onFilesPicked: (List<String>) -
  * Принимает предлагаемое имя файла; путь для записи бэкапа передаётся в [onCreated]
  * до показа Share Sheet, чтобы файл успел записаться, пока пользователь выбирает назначение.
  */
-@OptIn(ExperimentalForeignApi::class)
 @Composable
 internal actual fun rememberCreateBackupLauncher(onCreated: (String) -> Unit): (String) -> Unit {
     val currentOnCreated by rememberUpdatedState(onCreated)
@@ -88,7 +69,6 @@ internal actual fun rememberCreateBackupLauncher(onCreated: (String) -> Unit): (
  * Возвращает действие, открывающее системный выбор файла резервной копии.
  * Выбранный файл копируется во временный каталог, путь возвращается как строка.
  */
-@OptIn(ExperimentalForeignApi::class)
 @Composable
 internal actual fun rememberOpenBackupLauncher(onOpened: (String) -> Unit): () -> Unit {
     val presenter = rememberDocumentPickerPresenter(
@@ -101,58 +81,9 @@ internal actual fun rememberOpenBackupLauncher(onOpened: (String) -> Unit): () -
     }
 }
 
-/**
- * Возвращает действие, открывающее выбор даты.
- * Месяц в [onDatePicked] — от 1 до 12.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal actual fun rememberTrainingDatePicker(
-    initialDateMillis: Long,
-    onDatePicked: (year: Int, month: Int, dayOfMonth: Int) -> Unit,
-): () -> Unit {
-    val openDialog = remember { mutableStateOf(false) }
-
-    if (openDialog.value) {
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialDateMillis)
-        DatePickerDialog(
-            onDismissRequest = { openDialog.value = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        openDialog.value = false
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            val date = Instant.fromEpochMilliseconds(epochMilliseconds = millis)
-                                .toLocalDateTime(timeZone = TimeZone.currentSystemDefault())
-                            onDatePicked(date.year, date.month.number, date.day)
-                        }
-                    }
-                ) { Text(text = stringResource(resource = Res.string.ok)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { openDialog.value = false }) {
-                    Text(text = stringResource(resource = Res.string.cancel))
-                }
-            },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            DatePicker(
-                state = datePickerState,
-                colors = DatePickerDefaults.colors(),
-            )
-        }
-    }
-
-    return remember {
-        { openDialog.value = true }
-    }
-}
-
-@OptIn(ExperimentalForeignApi::class)
 private fun utType(identifier: String): UTType =
     UTType.typeWithIdentifier(identifier) ?: error("Unknown UTType: $identifier")
 
-@OptIn(ExperimentalForeignApi::class)
 @Composable
 private fun rememberDocumentPickerPresenter(
     onFilesPicked: (List<String>) -> Unit,
@@ -269,7 +200,6 @@ private class DocumentPickerDelegateHolder {
     var delegate: DocumentPickerDelegate? = null
 }
 
-@OptIn(ExperimentalForeignApi::class)
 private class DocumentPickerDelegate(
     private val onFinished: () -> Unit,
     private val onPicked: (List<NSURL>) -> Unit,

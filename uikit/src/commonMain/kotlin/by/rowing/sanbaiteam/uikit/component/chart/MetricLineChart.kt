@@ -39,6 +39,8 @@ fun MetricLineChart(
     averageValue: Double? = null,
     reverseValueAxis: Boolean = false,
     valueBounds: ClosedFloatingPointRange<Double>? = null,
+    timeTicks: List<Long>? = null,
+    connectAllPoints: Boolean = false,
 ) {
     val textMeasurer = rememberTextMeasurer()
     val gridColor = MaterialTheme.colorScheme.outlineVariant
@@ -89,6 +91,7 @@ fun MetricLineChart(
         drawTimeAxis(
             layout = layout,
             timeFormatter = timeFormatter,
+            timeTicks = timeTicks,
         )
 
         clipRect(
@@ -108,7 +111,8 @@ fun MetricLineChart(
                 durationMillis = durationMillis,
                 lineColor = lineColor,
                 xForValue = layout::xForValue,
-                yForTime = layout::yForTime
+                yForTime = layout::yForTime,
+                connectAllPoints = connectAllPoints,
             )
         }
     }
@@ -119,12 +123,17 @@ private fun DrawScope.drawValuesLine(
     durationMillis: Long,
     lineColor: Color,
     xForValue: (Double) -> Float,
-    yForTime: (Long) -> Float
+    yForTime: (Long) -> Float,
+    connectAllPoints: Boolean,
 ) {
-    buildContinuousSegments(
-        points = points,
-        durationMillis = durationMillis
-    ).forEach { segment ->
+    (if (connectAllPoints) {
+        listOf(points)
+    } else {
+        buildContinuousSegments(
+            points = points,
+            durationMillis = durationMillis
+        )
+    }).forEach { segment ->
         if (segment.size == 1) {
             drawValueDot(
                 point = segment.first(),
@@ -271,23 +280,9 @@ private fun DrawScope.drawValueAxis(
 private fun DrawScope.drawTimeAxis(
     layout: ChartLayout,
     timeFormatter: (Long) -> String,
+    timeTicks: List<Long>?,
 ) {
-    val step = timeTickStep(durationMillis = layout.durationMillis)
-    val ticks = buildList {
-        var value = 0L
-        while (value <= layout.durationMillis) {
-            add(value)
-            value += step
-        }
-        if (lastOrNull() != layout.durationMillis) {
-            if (layout.durationMillis - last() > step / 2) {
-                add(layout.durationMillis)
-            } else {
-                set(lastIndex, layout.durationMillis)
-            }
-        }
-    }
-    ticks.forEach { tick ->
+    (timeTicks ?: defaultTimeTicks(durationMillis = layout.durationMillis)).forEach { tick ->
         val y = layout.yForTime(tick)
         drawLine(
             color = layout.gridColor,
@@ -316,5 +311,23 @@ private fun DrawScope.drawTimeAxis(
             ),
             style = layout.labelStyle,
         )
+    }
+}
+
+private fun defaultTimeTicks(durationMillis: Long): List<Long> {
+    val step = timeTickStep(durationMillis = durationMillis)
+    return buildList {
+        var value = 0L
+        while (value <= durationMillis) {
+            add(value)
+            value += step
+        }
+        if (lastOrNull() != durationMillis) {
+            if (durationMillis - last() > step / 2) {
+                add(durationMillis)
+            } else {
+                set(lastIndex, durationMillis)
+            }
+        }
     }
 }
