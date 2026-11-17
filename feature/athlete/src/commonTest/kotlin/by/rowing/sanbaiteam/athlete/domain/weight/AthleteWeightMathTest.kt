@@ -204,7 +204,14 @@ internal class AthleteWeightMathTest {
             700,
             AthleteWeightMath.weightAtTenths(
                 records = records,
-                dateMillis = day(day = 3)
+                dateMillis = day(day = 2)
+            )
+        )
+        assertEquals(
+            750,
+            AthleteWeightMath.weightAtTenths(
+                records = records,
+                dateMillis = day(day = 5)
             )
         )
         assertEquals(
@@ -212,6 +219,105 @@ internal class AthleteWeightMathTest {
             AthleteWeightMath.weightAtTenths(
                 records = records,
                 dateMillis = day(day = 9)
+            )
+        )
+    }
+
+    @Test
+    fun weightAtTenths_interpolatesLinearlyBetweenRecords() {
+        val records = listOf(
+            record(
+                day = 1,
+                weightTenths = 910
+            ),
+            record(
+                day = 5,
+                weightTenths = 950
+            ),
+        )
+
+        // 91, 92, 93, 94, 95
+        assertEquals(
+            920,
+            AthleteWeightMath.weightAtTenths(
+                records = records,
+                dateMillis = day(day = 2)
+            )
+        )
+        assertEquals(
+            930,
+            AthleteWeightMath.weightAtTenths(
+                records = records,
+                dateMillis = day(day = 3)
+            )
+        )
+        assertEquals(
+            940,
+            AthleteWeightMath.weightAtTenths(
+                records = records,
+                dateMillis = day(day = 4)
+            )
+        )
+    }
+
+    @Test
+    fun weightAtTenths_roundsInterpolatedValueToTenths() {
+        val records = listOf(
+            record(
+                day = 1,
+                weightTenths = 910
+            ),
+            record(
+                day = 4,
+                weightTenths = 950
+            ),
+        )
+
+        // 910 + 40/3 = 923.33; 910 + 80/3 = 936.67
+        assertEquals(
+            923,
+            AthleteWeightMath.weightAtTenths(
+                records = records,
+                dateMillis = day(day = 2)
+            )
+        )
+        assertEquals(
+            937,
+            AthleteWeightMath.weightAtTenths(
+                records = records,
+                dateMillis = day(day = 3)
+            )
+        )
+    }
+
+    @Test
+    fun weightAtTenths_interpolatesDecreasingTrend() {
+        val records = listOf(
+            record(
+                day = 1,
+                weightTenths = 950
+            ),
+            record(
+                day = 5,
+                weightTenths = 910
+            ),
+        )
+
+        assertEquals(
+            940,
+            AthleteWeightMath.weightAtTenths(
+                records = records,
+                dateMillis = day(day = 2)
+            )
+        )
+    }
+
+    @Test
+    fun weightAtTenths_returnsNullForEmptyRecords() {
+        assertNull(
+            AthleteWeightMath.weightAtTenths(
+                records = emptyList(),
+                dateMillis = day(day = 3)
             )
         )
     }

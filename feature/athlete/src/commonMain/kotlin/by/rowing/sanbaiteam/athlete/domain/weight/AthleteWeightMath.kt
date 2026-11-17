@@ -1,6 +1,7 @@
 package by.rowing.sanbaiteam.athlete.domain.weight
 
 import by.rowing.sanbaiteam.core.util.TimeUtils
+import kotlin.math.roundToInt
 
 internal object AthleteWeightMath {
 
@@ -15,8 +16,11 @@ internal object AthleteWeightMath {
     }
 
     /**
-     * Последнее известное значение на дату (или первое, если записей до неё нет).
-     * Заготовка для будущих расчётов эффективности тренировок по весу.
+     * Вес на дату.
+     *
+     * Если записи на эту дату нет, вес считается линейно между соседними записями
+     * (день 1 — 91 кг, день 5 — 95 кг ⇒ день 2 — 92 кг). До первой записи и после
+     * последней возвращается ближайшая крайняя запись.
      */
     fun weightAtTenths(
         records: List<AthleteWeightRecord>,
@@ -24,8 +28,18 @@ internal object AthleteWeightMath {
     ): Int? {
         val date = TimeUtils.startOfDayMillis(timeInMillis = dateMillis)
         val sorted = sortedByDay(records = records)
-        return sorted.lastOrNull { it.dateMillis <= date }?.weightTenths
-            ?: sorted.firstOrNull()?.weightTenths
+        val previous = sorted.lastOrNull { it.dateMillis <= date }
+        val next = sorted.firstOrNull { it.dateMillis >= date }
+        return when {
+            previous == null -> next?.weightTenths
+            next == null -> previous.weightTenths
+            previous.dateMillis == next.dateMillis -> previous.weightTenths
+            else -> interpolateWeightTenths(
+                previous = previous,
+                next = next,
+                dateMillis = date,
+            )
+        }
     }
 
     /**
@@ -116,6 +130,25 @@ internal object AthleteWeightMath {
         records.map { record ->
             record.copy(dateMillis = TimeUtils.startOfDayMillis(timeInMillis = record.dateMillis))
         }.sortedBy { it.dateMillis }
+
+    private fun interpolateWeightTenths(
+        previous: AthleteWeightRecord,
+        next: AthleteWeightRecord,
+        dateMillis: Long,
+    ): Int {
+        val totalDays = TimeUtils.daysBetween(
+            fromMillis = previous.dateMillis,
+            toMillis = next.dateMillis,
+        )
+        if (totalDays <= 0) return previous.weightTenths
+        val passedDays = TimeUtils.daysBetween(
+            fromMillis = previous.dateMillis,
+            toMillis = dateMillis,
+        )
+        val weight = previous.weightTenths +
+                (next.weightTenths - previous.weightTenths).toDouble() * passedDays / totalDays
+        return weight.roundToInt()
+    }
 
     private fun weightAtDayTenths(
         records: List<AthleteWeightRecord>,
