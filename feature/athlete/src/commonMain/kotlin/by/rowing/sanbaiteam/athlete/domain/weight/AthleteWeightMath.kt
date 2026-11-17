@@ -10,9 +10,7 @@ internal object AthleteWeightMath {
         todayMillis: Long,
     ): Int? {
         val today = TimeUtils.startOfDayMillis(timeInMillis = todayMillis)
-        return sortedByDay(records = records)
-            .lastOrNull { it.dateMillis <= today }
-            ?.weightTenths
+        return sortedByDay(records = records).lastOrNull { it.dateMillis <= today }?.weightTenths
     }
 
     /**
@@ -25,7 +23,7 @@ internal object AthleteWeightMath {
     fun weightAtTenths(
         records: List<AthleteWeightRecord>,
         dateMillis: Long,
-    ): Int? {
+    ): Int {
         val date = TimeUtils.startOfDayMillis(timeInMillis = dateMillis)
         val sorted = sortedByDay(records = records)
         val previous = sorted.lastOrNull { it.dateMillis <= date }
@@ -39,33 +37,24 @@ internal object AthleteWeightMath {
                 next = next,
                 dateMillis = date,
             )
-        }
+        } ?: 0
     }
 
-    /**
-     * Средний вес по календарным дням.
-     *
-     * До первой записи берётся первое значение, после последней — последнее,
-     * в дни между двумя записями — среднее двух соседних значений.
-     */
+    /** Средний вес по календарным дням. */
     fun averageWeightTenths(
         records: List<AthleteWeightRecord>,
         fromMillis: Long,
         toMillis: Long,
     ): Double? {
-        val sorted = sortedByDay(records = records)
-        if (sorted.isEmpty()) return null
-        val from = TimeUtils.startOfDayMillis(timeInMillis = fromMillis)
+        val sorted = sortedByDay(records = records).ifEmpty { return null }
         val to = TimeUtils.startOfDayMillis(timeInMillis = toMillis)
-        if (to < from) return null
-
-        var day = from
-        var total = 0.0
+        var day = TimeUtils.startOfDayMillis(timeInMillis = fromMillis)
+        var total = 0
         var days = 0
         while (day <= to) {
-            total += weightAtDayTenths(
+            total += weightAtTenths(
                 records = sorted,
-                dayMillis = day,
+                dateMillis = day,
             )
             days++
             day = TimeUtils.plusDaysMillis(
@@ -73,7 +62,7 @@ internal object AthleteWeightMath {
                 days = 1,
             )
         }
-        return total / days
+        return total / days / TENTHS_IN_KILOGRAM
     }
 
     /** Только реальные записи внутри диапазона — график соединяет их линиями. */
@@ -84,7 +73,6 @@ internal object AthleteWeightMath {
     ): List<AthleteWeightRecord> {
         val from = TimeUtils.startOfDayMillis(timeInMillis = fromMillis)
         val to = TimeUtils.startOfDayMillis(timeInMillis = toMillis)
-        if (to < from) return emptyList()
         return sortedByDay(records = records)
             .filter { it.dateMillis in from..to }
             .map { record ->
@@ -122,7 +110,9 @@ internal object AthleteWeightMath {
             fromMillis = from,
             days = days,
         )
-        if (result.last() != lastOffset) result += lastOffset
+        if (result.last() != lastOffset) {
+            result += lastOffset
+        }
         return result
     }
 
@@ -140,7 +130,9 @@ internal object AthleteWeightMath {
             fromMillis = previous.dateMillis,
             toMillis = next.dateMillis,
         )
-        if (totalDays <= 0) return previous.weightTenths
+        if (totalDays <= 0) {
+            return previous.weightTenths
+        }
         val passedDays = TimeUtils.daysBetween(
             fromMillis = previous.dateMillis,
             toMillis = dateMillis,
@@ -148,20 +140,6 @@ internal object AthleteWeightMath {
         val weight = previous.weightTenths +
                 (next.weightTenths - previous.weightTenths).toDouble() * passedDays / totalDays
         return weight.roundToInt()
-    }
-
-    private fun weightAtDayTenths(
-        records: List<AthleteWeightRecord>,
-        dayMillis: Long,
-    ): Double {
-        val previous = records.lastOrNull { it.dateMillis <= dayMillis }
-        val next = records.firstOrNull { it.dateMillis >= dayMillis }
-        return when {
-            previous == null -> next?.weightTenths?.toDouble() ?: 0.0
-            next == null -> previous.weightTenths.toDouble()
-            previous.dateMillis == next.dateMillis -> previous.weightTenths.toDouble()
-            else -> (previous.weightTenths + next.weightTenths) / 2.0
-        }
     }
 
     private fun tickStepDays(dayCount: Int): Int = when {

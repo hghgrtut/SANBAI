@@ -50,15 +50,14 @@ internal class AthleteWeightChartViewModel(
             )
         }
         val from = TimeUtils.startOfDayMillis(timeInMillis = fromMillis)
-        val to = TimeUtils.startOfDayMillis(timeInMillis = toMillis)
         val timeTicks = AthleteWeightMath.dateTickOffsets(
-            fromMillis = from,
-            toMillis = to,
+            fromMillis = fromMillis,
+            toMillis = toMillis,
         )
         val points = AthleteWeightMath.chartPoints(
             records = records,
             fromMillis = from,
-            toMillis = to,
+            toMillis = toMillis,
         ).map { point ->
             MetricChartPoint(
                 elapsedMillis = TimeUtils.startOfDayMillis(timeInMillis = point.dateMillis) - from,
@@ -73,7 +72,7 @@ internal class AthleteWeightChartViewModel(
                 averageWeightTenths = AthleteWeightMath.averageWeightTenths(
                     records = records,
                     fromMillis = from,
-                    toMillis = to,
+                    toMillis = toMillis,
                 ),
                 isLoading = false,
             )
