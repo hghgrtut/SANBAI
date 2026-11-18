@@ -115,7 +115,6 @@
     <string name="add_training_import_success">Тренировка импортирована.</string>
     <string name="add_training_import_multi_success">Импортировано %1$d файлов, %2$d отрезков.</string>
     <string name="training_detail_title">Тренировка</string>
-    <string name="training_detail_crew_header">Экипаж</string>
     <string name="training_detail_not_found">Тренировка не найдена</string>
     <string name="training_detail_settings_title">Настройка экрана</string>
     <string name="training_detail_settings_fields">Отображаемые данные</string>

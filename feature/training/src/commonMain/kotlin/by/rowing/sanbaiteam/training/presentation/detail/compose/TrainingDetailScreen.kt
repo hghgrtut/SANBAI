@@ -37,7 +37,6 @@ import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_action
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_clear
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_count
-import by.rowing.sanbaiteam.training.resources.training_detail_crew_header
 import by.rowing.sanbaiteam.training.resources.training_detail_not_found
 import by.rowing.sanbaiteam.training.resources.training_detail_settings_title
 import by.rowing.sanbaiteam.training.resources.training_detail_title
@@ -224,16 +223,11 @@ private fun Training(
                 modifier = Modifier.fillMaxWidth(),
                 verticalSpacing = 0.dp
             ) {
-                Text(
-                    modifier = Modifier.padding(bottom = Spacing.S),
-                    text = stringResource(Res.string.training_detail_crew_header),
-                    style = TypographyPalette.H4
-                )
                 state.athleteNames.forEach { name ->
                     Text(
                         modifier = Modifier.padding(bottom = Spacing.XS),
                         text = name,
-                        style = TypographyPaletteSp.Body1Regular
+                        style = TypographyPaletteSp.H4
                     )
                 }
             }

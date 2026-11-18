@@ -8,7 +8,7 @@ internal data class AthleteWeightChartState(
     val durationMillis: Long = 0,
     val points: List<MetricChartPoint> = emptyList(),
     val timeTicks: List<Long> = emptyList(),
-    val averageWeightTenths: Double? = null,
+    val averageWeightTenths: Int? = null,
     val isLoading: Boolean = true,
     val notFound: Boolean = false,
 )
