@@ -2,6 +2,7 @@ package by.rowing.sanbaiteam.athlete.data.repository
 
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
+import by.rowing.sanbaiteam.athlete.data.entity.AthleteWeightEntity
 import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -36,4 +37,17 @@ interface AthletesRepository {
     suspend fun getAthleteNameMap(athleteIds: List<Long>): Map<Long, String>
 
     suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long?
+
+    suspend fun getWeights(athleteId: Long): List<AthleteWeightEntity>
+
+    suspend fun saveWeight(
+        athleteId: Long,
+        dateMillis: Long,
+        weightTenths: Int,
+    )
+
+    suspend fun deleteWeight(
+        athleteId: Long,
+        dateMillis: Long,
+    )
 }

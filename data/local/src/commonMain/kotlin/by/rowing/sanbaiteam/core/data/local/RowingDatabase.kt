@@ -9,8 +9,10 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
+import by.rowing.sanbaiteam.athlete.data.entity.AthleteWeightEntity
 import by.rowing.sanbaiteam.athlete.data.local.AthleteDao
 import by.rowing.sanbaiteam.athlete.data.local.AthletePersonalBestDao
+import by.rowing.sanbaiteam.athlete.data.local.AthleteWeightDao
 import by.rowing.sanbaiteam.core.data.local.RowingDatabase.Companion.DATABASE_VERSION
 import by.rowing.sanbaiteam.training.data.entity.SavedTrainingFilterEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
@@ -26,6 +28,7 @@ import by.rowing.sanbaiteam.training.data.local.TrainingWorkDisplaySettingDao
     entities = [
         AthleteEntity::class,
         AthletePersonalBestEntity::class,
+        AthleteWeightEntity::class,
         TrainingEntity::class,
         TrainingAthletePieceEntity::class,
         SavedTrainingFilterEntity::class,
@@ -40,6 +43,7 @@ internal abstract class RowingDatabase : RoomDatabase() {
 
     abstract fun athleteDao(): AthleteDao
     abstract fun athletePersonalBestDao(): AthletePersonalBestDao
+    abstract fun athleteWeightDao(): AthleteWeightDao
     abstract fun trainingDao(): TrainingDao
     abstract fun savedTrainingFilterDao(): SavedTrainingFilterDao
     abstract fun trainingWorkDisplaySettingDao(): TrainingWorkDisplaySettingDao
@@ -47,7 +51,7 @@ internal abstract class RowingDatabase : RoomDatabase() {
 
     companion object {
 
-        const val DATABASE_VERSION = 5
+        const val DATABASE_VERSION = 6
         const val DATABASE_NAME = "rowing_database"
 
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -103,7 +107,30 @@ internal abstract class RowingDatabase : RoomDatabase() {
             }
         }
 
-        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `${AthleteWeightDao.TABLE_NAME}` (
+                        `athleteId` INTEGER NOT NULL,
+                        `dateMillis` INTEGER NOT NULL,
+                        `weightTenths` INTEGER NOT NULL,
+                        PRIMARY KEY(`athleteId`, `dateMillis`),
+                        FOREIGN KEY(`athleteId`) REFERENCES `athlete_entity`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                connection.execSQL(
+                    """
+                    CREATE INDEX IF NOT EXISTS `index_athlete_weight_athleteId`
+                        ON `${AthleteWeightDao.TABLE_NAME}` (`athleteId`)
+                    """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
     }
 }
 

@@ -13,4 +13,11 @@ internal sealed interface AthletesNavigation {
 
     @Serializable
     data class AthleteDetail(val athleteId: Long) : NavigationDestination<Unit>
+
+    @Serializable
+    data class AthleteWeightChart(
+        val athleteId: Long,
+        val fromMillis: Long,
+        val toMillis: Long,
+    ) : NavigationDestination<Unit>
 }

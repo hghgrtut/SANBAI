@@ -12,6 +12,8 @@ internal interface AddAthleteScreenActions : NavigateBackAware {
 
     fun changeSpeedCoachSerial(newSerial: String)
 
+    fun changeWeight(text: String)
+
     fun changeGender(isMale: Boolean)
 
     companion object {
@@ -23,6 +25,7 @@ internal interface AddAthleteScreenActions : NavigateBackAware {
                 override fun changeName(newName: String) {}
                 override fun changeBirthDate(newDate: String) {}
                 override fun changeSpeedCoachSerial(newSerial: String) {}
+                override fun changeWeight(text: String) {}
                 override fun changeGender(isMale: Boolean) {}
             }
     }

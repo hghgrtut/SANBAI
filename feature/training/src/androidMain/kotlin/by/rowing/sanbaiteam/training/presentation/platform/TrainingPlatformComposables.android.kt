@@ -1,12 +1,9 @@
 package by.rowing.sanbaiteam.training.presentation.platform
 
-import android.app.DatePickerDialog
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import java.util.Calendar
 
 private const val JSON_APP_MIME_TYPE = "application/json"
 private const val JSON_TEXT_MIME_TYPE = "text/json"
@@ -40,27 +37,5 @@ internal actual fun rememberOpenBackupLauncher(onOpened: (String) -> Unit): () -
     ) { uri -> if (uri != null) onOpened(uri.toString()) }
     return remember(launcher) {
         { launcher.launch(arrayOf(JSON_APP_MIME_TYPE, JSON_TEXT_MIME_TYPE, TEXT_PLAIN_MIME_TYPE)) }
-    }
-}
-
-@Composable
-internal actual fun rememberTrainingDatePicker(
-    initialDateMillis: Long,
-    onDatePicked: (year: Int, month: Int, dayOfMonth: Int) -> Unit,
-): () -> Unit {
-    val context = LocalContext.current
-    val calendar = remember(initialDateMillis) {
-        Calendar.getInstance().apply { timeInMillis = initialDateMillis }
-    }
-    return remember(context, calendar) {
-        {
-            DatePickerDialog(
-                context,
-                { _, year, month, dayOfMonth -> onDatePicked(year, month + 1, dayOfMonth) },
-                calendar[Calendar.YEAR],
-                calendar[Calendar.MONTH],
-                calendar[Calendar.DAY_OF_MONTH],
-            ).show()
-        }
     }
 }

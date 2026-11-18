@@ -17,7 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
@@ -37,7 +36,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,10 +49,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
-import by.rowing.sanbaiteam.training.presentation.platform.rememberTrainingDatePicker
 import by.rowing.sanbaiteam.training.presentation.platform.rememberTrainingImportPicker
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.add_training_add_piece_action
 import by.rowing.sanbaiteam.training.resources.add_training_athlete_header
 import by.rowing.sanbaiteam.training.resources.add_training_crew_header
 import by.rowing.sanbaiteam.training.resources.add_training_date_label
@@ -88,20 +84,20 @@ import by.rowing.sanbaiteam.training.resources.training_detail_piece_number
 import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.component.TextField
+import by.rowing.sanbaiteam.uikit.component.button.AddTextButton
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.number
+import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
 import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private val FIELD_ICON_SIZE = 20.dp
-private val ADD_PIECE_ICON_SIZE = 18.dp
 
 private val CompactFieldContentPadding = PaddingValues(
     horizontal = Spacing.S,
@@ -216,7 +212,7 @@ private fun AddTrainingDataInputs(
         )
         SectionHeader(
             title = stringResource(Res.string.add_training_pieces_header),
-            trailing = { AddPieceButton(onClick = viewModel::addPiece) }
+            trailing = { AddTextButton(onClick = viewModel::addPiece) }
         )
         TrainingPieces(
             state = state,
@@ -226,22 +222,6 @@ private fun AddTrainingDataInputs(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(Res.string.add_training_import_csv),
             debounceClick = launchImport
-        )
-    }
-}
-
-@Composable
-private fun AddPieceButton(onClick: () -> Unit) {
-    TextButton(onClick = onClick) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = null,
-            modifier = Modifier.size(ADD_PIECE_ICON_SIZE),
-        )
-        SpacerXS()
-        Text(
-            text = stringResource(Res.string.add_training_add_piece_action),
-            style = TypographyPalette.Body2Medium,
         )
     }
 }
@@ -331,7 +311,7 @@ private fun Date(
     state: AddTrainingState,
     viewModel: AddTrainingViewModel
 ) {
-    val launchDatePicker = rememberTrainingDatePicker(
+    val launchDatePicker = rememberDatePicker(
         initialDateMillis = state.dateMillis,
         onDatePicked = viewModel::onDatePicked
     )

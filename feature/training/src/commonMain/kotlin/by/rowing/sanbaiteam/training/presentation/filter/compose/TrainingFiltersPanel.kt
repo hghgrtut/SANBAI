@@ -30,7 +30,6 @@ import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterTimeParser
 import by.rowing.sanbaiteam.training.presentation.filter.models.TrainingFiltersState
-import by.rowing.sanbaiteam.training.presentation.platform.rememberTrainingDatePicker
 import by.rowing.sanbaiteam.training.resources.Res
 import by.rowing.sanbaiteam.training.resources.training_filter_athletes
 import by.rowing.sanbaiteam.training.resources.training_filter_athletes_count
@@ -83,6 +82,7 @@ import by.rowing.sanbaiteam.uikit.component.MultiSelectList
 import by.rowing.sanbaiteam.uikit.component.RangeFields
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonSize
+import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.stringResource
@@ -433,7 +433,7 @@ private fun DateFilterSheet(
     var fromMillis by remember(filter.dateRange) { mutableStateOf(filter.dateRange?.first) }
     var toMillis by remember(filter.dateRange) { mutableStateOf(filter.dateRange?.last) }
 
-    val pickFrom = rememberTrainingDatePicker(
+    val pickFrom = rememberDatePicker(
         initialDateMillis = fromMillis ?: nowInMillis(),
         onDatePicked = { year, month, day ->
             fromMillis = TimeUtils.startOfDayMillis(
@@ -443,7 +443,7 @@ private fun DateFilterSheet(
             )
         },
     )
-    val pickTo = rememberTrainingDatePicker(
+    val pickTo = rememberDatePicker(
         initialDateMillis = toMillis ?: nowInMillis(),
         onDatePicked = { year, month, day ->
             toMillis = TimeUtils.endOfDayMillis(

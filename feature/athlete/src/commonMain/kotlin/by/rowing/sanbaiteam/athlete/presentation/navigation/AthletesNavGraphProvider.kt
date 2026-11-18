@@ -4,6 +4,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import by.rowing.sanbaiteam.athlete.presentation.add.AddAthleteViewModel
 import by.rowing.sanbaiteam.athlete.presentation.add.compose.AddAthleteScreen
+import by.rowing.sanbaiteam.athlete.presentation.chart.AthleteWeightChartViewModel
+import by.rowing.sanbaiteam.athlete.presentation.chart.compose.AthleteWeightChartScreen
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailViewModel
 import by.rowing.sanbaiteam.athlete.presentation.detail.compose.AthleteDetailScreen
 import by.rowing.sanbaiteam.athlete.presentation.list.AthletesViewModel
@@ -37,6 +39,13 @@ object AthletesNavGraphProvider {
                     koinViewModel<AthleteDetailViewModel> { parametersOf(navigator, route.athleteId) }
                 }
             ) { viewModel -> AthleteDetailScreen(viewModel = viewModel) }
+            composable<AthletesNavigation.AthleteWeightChart, AthleteWeightChartViewModel>(
+                viewModelFactory = { route ->
+                    koinViewModel<AthleteWeightChartViewModel> {
+                        parametersOf(navigator, route.athleteId, route.fromMillis, route.toMillis)
+                    }
+                }
+            ) { viewModel -> AthleteWeightChartScreen(viewModel = viewModel) }
         }
     }
 

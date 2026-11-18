@@ -8,6 +8,7 @@ expect val databaseModule: Module
 internal fun Module.databaseDaos() {
     single { get<RowingDatabase>().athleteDao() }
     single { get<RowingDatabase>().athletePersonalBestDao() }
+    single { get<RowingDatabase>().athleteWeightDao() }
     single { get<RowingDatabase>().trainingDao() }
     single { get<RowingDatabase>().savedTrainingFilterDao() }
     single { get<RowingDatabase>().trainingWorkDisplaySettingDao() }

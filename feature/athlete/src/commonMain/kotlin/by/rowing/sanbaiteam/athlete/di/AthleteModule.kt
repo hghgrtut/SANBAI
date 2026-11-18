@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.athlete.di
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepositoryImpl
 import by.rowing.sanbaiteam.athlete.presentation.add.AddAthleteViewModel
+import by.rowing.sanbaiteam.athlete.presentation.chart.AthleteWeightChartViewModel
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailViewModel
 import by.rowing.sanbaiteam.athlete.presentation.list.AthletesViewModel
 import org.koin.core.module.dsl.singleOf
@@ -16,4 +17,5 @@ val athleteModule = module {
     viewModelOf(::AthletesViewModel)
     viewModelOf(::AddAthleteViewModel)
     viewModelOf(::AthleteDetailViewModel)
+    viewModelOf(::AthleteWeightChartViewModel)
 }

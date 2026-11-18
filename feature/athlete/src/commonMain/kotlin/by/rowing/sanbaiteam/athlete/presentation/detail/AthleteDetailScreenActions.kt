@@ -36,6 +36,46 @@ internal interface AthleteDetailScreenActions : NavigateBackAware {
 
     fun clearRecordsError()
 
+    fun openWeightDialog()
+
+    fun dismissWeightDialog()
+
+    fun changeWeightDate(
+        year: Int,
+        month: Int,
+        day: Int,
+    )
+
+    fun changeWeightValue(text: String)
+
+    fun saveWeight()
+
+    fun requestDeleteWeight(dateMillis: Long)
+
+    fun dismissDeleteWeight()
+
+    fun confirmDeleteWeight()
+
+    fun toggleWeightTable()
+
+    fun openWeightRangeDialog()
+
+    fun dismissWeightRangeDialog()
+
+    fun changeWeightRangeFrom(
+        year: Int,
+        month: Int,
+        day: Int,
+    )
+
+    fun changeWeightRangeTo(
+        year: Int,
+        month: Int,
+        day: Int,
+    )
+
+    fun buildWeightChart()
+
     companion object {
 
         fun empty(): AthleteDetailScreenActions =
@@ -68,6 +108,38 @@ internal interface AthleteDetailScreenActions : NavigateBackAware {
                 }
 
                 override fun clearRecordsError() {}
+                override fun openWeightDialog() {}
+                override fun dismissWeightDialog() {}
+                override fun changeWeightDate(
+                    year: Int,
+                    month: Int,
+                    day: Int
+                ) {
+                }
+
+                override fun changeWeightValue(text: String) {}
+                override fun saveWeight() {}
+                override fun requestDeleteWeight(dateMillis: Long) {}
+                override fun dismissDeleteWeight() {}
+                override fun confirmDeleteWeight() {}
+                override fun toggleWeightTable() {}
+                override fun openWeightRangeDialog() {}
+                override fun dismissWeightRangeDialog() {}
+                override fun changeWeightRangeFrom(
+                    year: Int,
+                    month: Int,
+                    day: Int
+                ) {
+                }
+
+                override fun changeWeightRangeTo(
+                    year: Int,
+                    month: Int,
+                    day: Int
+                ) {
+                }
+
+                override fun buildWeightChart() {}
             }
     }
 }

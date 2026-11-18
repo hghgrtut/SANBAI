@@ -4,16 +4,31 @@ import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightMath
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightRecord
+import by.rowing.sanbaiteam.athlete.domain.weight.formatWeightTenths
+import by.rowing.sanbaiteam.athlete.domain.weight.parseWeightTenths
+import by.rowing.sanbaiteam.athlete.domain.weight.sanitizeWeightInput
+import by.rowing.sanbaiteam.athlete.presentation.detail.state.AthleteDetailState
+import by.rowing.sanbaiteam.athlete.presentation.detail.state.PersonalBestDraft
+import by.rowing.sanbaiteam.athlete.presentation.detail.state.WeightDialogState
+import by.rowing.sanbaiteam.athlete.presentation.detail.state.WeightRangeDialogState
+import by.rowing.sanbaiteam.athlete.presentation.navigation.AthletesNavigation
 import by.rowing.sanbaiteam.athlete.resources.Res
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_date_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_duplicate_distance
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_distance_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_time_error
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_future_date
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_invalid
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_range_error
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
+import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.uikit.component.UiText
 import kotlinx.coroutines.launch
@@ -144,6 +159,177 @@ internal class AthleteDetailViewModel(
         changeState { copy(recordsError = null) }
     }
 
+    override fun openWeightDialog() {
+        changeState {
+            copy(
+                weightDialog = WeightDialogState(
+                    dateMillis = TimeUtils.noonOfDay(timeInMillis = nowInMillis()),
+                    weightText = currentWeightTenths?.let { formatWeightTenths(tenths = it) }.orEmpty(),
+                )
+            )
+        }
+    }
+
+    override fun dismissWeightDialog() {
+        changeState { copy(weightDialog = null) }
+    }
+
+    override fun changeWeightDate(
+        year: Int,
+        month: Int,
+        day: Int,
+    ) {
+        TimeUtils.noonMillis(
+            year = year,
+            month = month,
+            day = day,
+        )?.let { dateMillis ->
+            changeState {
+                copy(
+                    weightDialog = weightDialog?.copy(
+                        dateMillis = dateMillis,
+                        error = null,
+                    )
+                )
+            }
+        }
+    }
+
+    override fun changeWeightValue(text: String) {
+        changeState {
+            copy(
+                weightDialog = weightDialog?.copy(
+                    weightText = sanitizeWeightInput(text = text),
+                    error = null,
+                )
+            )
+        }
+    }
+
+    override fun saveWeight() {
+        val dialog = state.weightDialog ?: return
+        val weightTenths = parseWeightTenths(text = dialog.weightText)
+        val error = when {
+            weightTenths == null -> UiText.of(Res.string.athletes_weight_invalid)
+            isFutureDate(dateMillis = dialog.dateMillis) -> UiText.of(Res.string.athletes_weight_future_date)
+            else -> null
+        }
+        if (error != null) {
+            changeState { copy(weightDialog = dialog.copy(error = error)) }
+        } else {
+            viewModelScope.launch {
+                athleteRepository.saveWeight(
+                    athleteId = athleteId,
+                    dateMillis = dialog.dateMillis,
+                    weightTenths = weightTenths ?: return@launch,
+                )
+                loadWeights()
+                changeState { copy(weightDialog = null) }
+            }
+        }
+    }
+
+    override fun requestDeleteWeight(dateMillis: Long) {
+        changeState { copy(deleteWeightMillis = dateMillis) }
+    }
+
+    override fun dismissDeleteWeight() {
+        changeState { copy(deleteWeightMillis = null) }
+    }
+
+    override fun confirmDeleteWeight() {
+        val dateMillis = state.deleteWeightMillis ?: return
+        viewModelScope.launch {
+            athleteRepository.deleteWeight(
+                athleteId = athleteId,
+                dateMillis = dateMillis,
+            )
+            loadWeights()
+            changeState { copy(deleteWeightMillis = null) }
+        }
+    }
+
+    override fun toggleWeightTable() {
+        changeState { copy(isWeightTableVisible = !isWeightTableVisible) }
+    }
+
+    override fun openWeightRangeDialog() {
+        val today = TimeUtils.noonOfDay(timeInMillis = nowInMillis())
+        changeState {
+            copy(
+                weightRangeDialog = WeightRangeDialogState(
+                    fromMillis = weights.firstOrNull()?.dateMillis ?: today,
+                    toMillis = today,
+                )
+            )
+        }
+    }
+
+    override fun dismissWeightRangeDialog() {
+        changeState { copy(weightRangeDialog = null) }
+    }
+
+    override fun changeWeightRangeFrom(
+        year: Int,
+        month: Int,
+        day: Int,
+    ) {
+        val dateMillis = TimeUtils.noonMillis(
+            year = year,
+            month = month,
+            day = day,
+        ) ?: return
+        changeState {
+            copy(
+                weightRangeDialog = weightRangeDialog?.copy(
+                    fromMillis = dateMillis,
+                    error = null,
+                )
+            )
+        }
+    }
+
+    override fun changeWeightRangeTo(
+        year: Int,
+        month: Int,
+        day: Int,
+    ) {
+        val dateMillis = TimeUtils.noonMillis(
+            year = year,
+            month = month,
+            day = day,
+        ) ?: return
+        changeState {
+            copy(
+                weightRangeDialog = weightRangeDialog?.copy(
+                    toMillis = dateMillis,
+                    error = null,
+                )
+            )
+        }
+    }
+
+    override fun buildWeightChart() {
+        val dialog = state.weightRangeDialog ?: return
+        val from = TimeUtils.startOfDayMillis(timeInMillis = dialog.fromMillis)
+        val to = TimeUtils.startOfDayMillis(timeInMillis = dialog.toMillis)
+        if (from > to) {
+            changeState {
+                copy(weightRangeDialog = dialog.copy(error = UiText.of(Res.string.athletes_weight_range_error)))
+            }
+            return
+        }
+        AthletesNavigation.AthleteWeightChart(
+            athleteId = athleteId,
+            fromMillis = TimeUtils.noonOfDay(timeInMillis = from),
+            toMillis = TimeUtils.noonOfDay(timeInMillis = to),
+        ).navigateTo(
+            composeNavigator = composeNavigator,
+            navOptions = getReturnToScreenNavOptions<AthletesNavigation.AthleteDetail>(),
+        )
+        changeState { copy(weightRangeDialog = null) }
+    }
+
     private suspend fun savePersonalBests() {
         athleteRepository.replacePersonalBests(
             athleteId = athleteId,
@@ -195,7 +381,29 @@ internal class AthleteDetailViewModel(
                 notFound = false,
             )
         }
+        loadWeights()
     }
+
+    private suspend fun loadWeights() {
+        val weights = athleteRepository.getWeights(athleteId).map { entity ->
+            AthleteWeightRecord(
+                dateMillis = entity.dateMillis,
+                weightTenths = entity.weightTenths,
+            )
+        }
+        changeState {
+            copy(
+                weights = weights,
+                currentWeightTenths = AthleteWeightMath.currentWeightTenths(
+                    records = weights,
+                    todayMillis = nowInMillis(),
+                ),
+            )
+        }
+    }
+
+    private fun isFutureDate(dateMillis: Long): Boolean =
+        TimeUtils.startOfDayMillis(timeInMillis = dateMillis) > TimeUtils.startOfDayMillis(timeInMillis = nowInMillis())
 
     private fun loadRecordsByType(
         bests: List<AthletePersonalBestEntity>,

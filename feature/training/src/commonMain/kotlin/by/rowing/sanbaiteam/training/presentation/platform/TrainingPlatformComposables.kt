@@ -22,13 +22,3 @@ internal expect fun rememberCreateBackupLauncher(onCreated: (String) -> Unit): (
  */
 @Composable
 internal expect fun rememberOpenBackupLauncher(onOpened: (String) -> Unit): () -> Unit
-
-/**
- * Возвращает действие, открывающее системный выбор даты.
- * Месяц в [onDatePicked] — от 1 до 12.
- */
-@Composable
-internal expect fun rememberTrainingDatePicker(
-    initialDateMillis: Long,
-    onDatePicked: (year: Int, month: Int, dayOfMonth: Int) -> Unit,
-): () -> Unit

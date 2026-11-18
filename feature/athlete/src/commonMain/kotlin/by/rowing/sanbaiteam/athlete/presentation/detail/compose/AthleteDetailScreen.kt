@@ -1,92 +1,118 @@
 package by.rowing.sanbaiteam.athlete.presentation.detail.compose
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Female
-import androidx.compose.material.icons.filled.Male
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.filled.TableRows
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightRecord
+import by.rowing.sanbaiteam.athlete.domain.weight.formatWeightTenths
+import by.rowing.sanbaiteam.athlete.presentation.common.AthleteDateTransformation
+import by.rowing.sanbaiteam.athlete.presentation.common.GenderSegmentedSelector
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailScreenActions
-import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailState
+import by.rowing.sanbaiteam.athlete.presentation.detail.state.AthleteDetailState
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailViewModel
-import by.rowing.sanbaiteam.athlete.presentation.detail.PersonalBestDraft
+import by.rowing.sanbaiteam.athlete.presentation.detail.state.PersonalBestDraft
 import by.rowing.sanbaiteam.athlete.resources.Res
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_birth_date_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_birth_date_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_birth_date_supporting_text
-import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_gender_female
-import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_gender_male
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_placeholder
-import by.rowing.sanbaiteam.athlete.resources.athletes_detail_add_record
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_delete_record
-import by.rowing.sanbaiteam.athlete.resources.athletes_detail_gender_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_not_found
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_distance_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_time_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_records_header
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_save_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_title
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_add_title
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_chart_content_description
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_date_label
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_delete_confirm
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_delete_content_description
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_delete_message
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_delete_title
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_empty_value
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_label
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_range_build
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_range_from
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_range_title
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_range_to
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_table_content_description
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_table_header
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_kg
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_label
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_placeholder
 import by.rowing.sanbaiteam.athlete.resources.cancel
 import by.rowing.sanbaiteam.athlete.resources.save
+import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.EmptyState
 import by.rowing.sanbaiteam.uikit.component.Skeleton
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
+import by.rowing.sanbaiteam.uikit.component.button.AddTextButton
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
+import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.number
+import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
 import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.Spacing
-import by.rowing.sanbaiteam.uikit.theme.Spacing.SpacerXS
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private val RECORD_ICON_SIZE = 20.dp
-private val ADD_RECORD_ICON_SIZE = 18.dp
+private val TABLE_DELETE_BUTTON_SIZE = 28.dp
+private val TABLE_DELETE_ICON_SIZE = 18.dp
+private val GENDER_SELECTOR_WIDTH = 104.dp
+private val SKELETON_AVATAR_SIZE = 60.dp
+private val SKELETON_NAME_HEIGHT = 20.dp
+private val SKELETON_BADGE_HEIGHT = 16.dp
+private val SKELETON_CARD_HEIGHT = 96.dp
+private const val SKELETON_NAME_FRACTION = 0.5f
+private const val SKELETON_BADGE_FRACTION = 0.3f
+private const val SKELETON_CARD_COUNT = 3
+private const val TABLE_COLUMNS = 2
 
 private val RECORD_FIELD_CONTENT_PADDING = PaddingValues(
     horizontal = Spacing.S,
@@ -134,6 +160,18 @@ private fun AthleteDetailScreenContent(
             error = error.resolve()
         )
     }
+    WeightDialog(
+        state = state,
+        actions = actions,
+    )
+    DeleteWeightDialog(
+        state = state,
+        actions = actions,
+    )
+    WeightRangeDialog(
+        state = state,
+        actions = actions,
+    )
 }
 
 @Composable
@@ -198,24 +236,37 @@ private fun ProfileFields(
         textStyle = TypographyPaletteSp.Body1Regular,
         modifier = Modifier.fillMaxWidth(),
     )
-    TextField(
-        value = state.dateOfBirth,
-        onValueChange = actions::changeBirthDate,
-        label = stringResource(Res.string.athletes_add_athlete_birth_date_label),
-        placeholder = stringResource(Res.string.athletes_add_athlete_birth_date_placeholder),
-        supportingText = state.dateError?.resolve()
-            ?: stringResource(Res.string.athletes_add_athlete_birth_date_supporting_text),
-        error = state.dateError != null,
-        singleLine = true,
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        textStyle = TypographyPaletteSp.Body1Regular,
-        keyboardOptions = KeyboardOptions(
-            autoCorrectEnabled = false,
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
-        visualTransformation = DateTransformation()
-    )
+        horizontalArrangement = Arrangement.spacedBy(Spacing.S),
+        verticalAlignment = Alignment.Top,
+    ) {
+        TextField(
+            value = state.dateOfBirth,
+            onValueChange = actions::changeBirthDate,
+            label = stringResource(Res.string.athletes_add_athlete_birth_date_label),
+            placeholder = stringResource(Res.string.athletes_add_athlete_birth_date_placeholder),
+            supportingText = state.dateError?.resolve()
+                ?: stringResource(Res.string.athletes_add_athlete_birth_date_supporting_text),
+            error = state.dateError != null,
+            singleLine = true,
+            modifier = Modifier.weight(weight = 1f),
+            textStyle = TypographyPaletteSp.Body1Regular,
+            keyboardOptions = KeyboardOptions(
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            visualTransformation = AthleteDateTransformation()
+        )
+        GenderSegmentedSelector(
+            isMale = state.isMale,
+            onGenderChange = actions::changeGender,
+            modifier = Modifier
+                .width(width = GENDER_SELECTOR_WIDTH)
+                .padding(top = Spacing.SM),
+        )
+    }
     TextField(
         value = state.speedCoachSerial,
         onValueChange = actions::changeSpeedCoachSerial,
@@ -230,29 +281,336 @@ private fun ProfileFields(
             imeAction = ImeAction.Done,
         )
     )
+    WeightBlock(
+        state = state,
+        actions = actions,
+    )
+}
+
+@Composable
+private fun WeightBlock(
+    state: AthleteDetailState,
+    actions: AthleteDetailScreenActions,
+) {
     DataCard(
         modifier = Modifier.fillMaxWidth(),
         verticalSpacing = Spacing.S
     ) {
-        Text(
-            text = stringResource(Res.string.athletes_detail_gender_label),
-            style = TypographyPaletteSp.Body2Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
-            GenderOption(
-                textRes = Res.string.athletes_add_athlete_gender_male,
-                isSelected = state.isMale,
-                onClick = { actions.changeGender(isMale = true) },
-                icon = Icons.Default.Male
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(Res.string.athletes_weight_label),
+                style = TypographyPaletteSp.Body1Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            GenderOption(
-                textRes = Res.string.athletes_add_athlete_gender_female,
-                isSelected = !state.isMale,
-                onClick = { actions.changeGender(isMale = false) },
-                icon = Icons.Default.Female
+            Spacer(modifier = Modifier.width(width = Spacing.XS))
+            Text(
+                text = state.currentWeightTenths
+                    ?.let { stringResource(Res.string.athletes_weight_value_kg, formatWeightTenths(tenths = it)) }
+                    ?: stringResource(Res.string.athletes_weight_empty_value),
+                style = TypographyPalette.H4,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(modifier = Modifier.weight(weight = 1f))
+            AddTextButton(onClick = actions::openWeightDialog)
+            IconButton(onClick = actions::openWeightRangeDialog) {
+                Icon(
+                    imageVector = Icons.Filled.Timeline,
+                    contentDescription = stringResource(Res.string.athletes_weight_chart_content_description),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = actions::toggleWeightTable) {
+                Icon(
+                    imageVector = Icons.Default.TableRows,
+                    contentDescription = stringResource(Res.string.athletes_weight_table_content_description),
+                    tint = if (state.isWeightTableVisible) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+        }
+        if (state.isWeightTableVisible) {
+            WeightTable(
+                weights = state.weights,
+                onDelete = actions::requestDeleteWeight,
             )
         }
+    }
+}
+
+@Composable
+private fun WeightTable(
+    weights: List<AthleteWeightRecord>,
+    onDelete: (Long) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.XS),
+    ) {
+        Text(
+            text = stringResource(Res.string.athletes_weight_table_header),
+            style = TypographyPaletteSp.Body2Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        weights.reversed().chunked(size = TABLE_COLUMNS).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.S),
+            ) {
+                row.forEach { weight ->
+                    WeightTableItem(
+                        weight = weight,
+                        onDelete = onDelete,
+                        modifier = Modifier.weight(weight = 1f),
+                    )
+                }
+                if (row.size < TABLE_COLUMNS) {
+                    Spacer(modifier = Modifier.weight(weight = 1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeightTableItem(
+    weight: AthleteWeightRecord,
+    onDelete: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .clip(shape = MaterialTheme.shapes.small)
+            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+            .padding(start = Spacing.S)
+            .padding(vertical = Spacing.XS),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(weight = 1f)) {
+            Text(
+                text = TimeUtils.formatDateShort(timeInMillis = weight.dateMillis),
+                style = TypographyPalette.Caption1Regular,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(
+                    Res.string.athletes_weight_value_kg,
+                    formatWeightTenths(tenths = weight.weightTenths)
+                ),
+                style = TypographyPaletteSp.Body2Medium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        IconButton(
+            modifier = Modifier.size(size = TABLE_DELETE_BUTTON_SIZE),
+            onClick = { onDelete(weight.dateMillis) },
+        ) {
+            Icon(
+                modifier = Modifier.size(size = TABLE_DELETE_ICON_SIZE),
+                imageVector = Icons.Default.Delete,
+                contentDescription = stringResource(Res.string.athletes_weight_delete_content_description),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WeightDialog(
+    state: AthleteDetailState,
+    actions: AthleteDetailScreenActions,
+) {
+    val dialog = state.weightDialog ?: return
+    val pickDate = rememberDatePicker(
+        initialDateMillis = dialog.dateMillis,
+        onDatePicked = actions::changeWeightDate,
+    )
+    AlertDialog(
+        onDismissRequest = actions::dismissWeightDialog,
+        title = {
+            Text(
+                text = stringResource(Res.string.athletes_weight_add_title),
+                style = TypographyPalette.H4
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.S)) {
+                DateField(
+                    label = stringResource(Res.string.athletes_weight_date_label),
+                    value = TimeUtils.formatDate(timeInMillis = dialog.dateMillis),
+                    onClick = pickDate,
+                )
+                TextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = dialog.weightText,
+                    onValueChange = actions::changeWeightValue,
+                    label = stringResource(Res.string.athletes_weight_value_label),
+                    placeholder = stringResource(Res.string.athletes_weight_value_placeholder),
+                    error = dialog.error != null,
+                    supportingText = dialog.error?.resolve(),
+                    keyboardOptions = KeyboardOptions.decimal(imeAction = ImeAction.Done),
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                text = stringResource(Res.string.save),
+                debounceClick = actions::saveWeight,
+            )
+        },
+        dismissButton = {
+            Button(
+                text = stringResource(Res.string.cancel),
+                buttonColors = ButtonColors.text(),
+                debounceClick = actions::dismissWeightDialog,
+            )
+        },
+    )
+}
+
+@Composable
+private fun DeleteWeightDialog(
+    state: AthleteDetailState,
+    actions: AthleteDetailScreenActions,
+) {
+    val dateMillis = state.deleteWeightMillis ?: return
+    AlertDialog(
+        onDismissRequest = actions::dismissDeleteWeight,
+        title = {
+            Text(
+                text = stringResource(Res.string.athletes_weight_delete_title),
+                style = TypographyPalette.H4
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(
+                    Res.string.athletes_weight_delete_message,
+                    TimeUtils.formatDate(timeInMillis = dateMillis)
+                ),
+                style = TypographyPalette.Body1Regular
+            )
+        },
+        confirmButton = {
+            Button(
+                text = stringResource(Res.string.athletes_weight_delete_confirm),
+                buttonColors = ButtonColors.attention,
+                debounceClick = actions::confirmDeleteWeight,
+            )
+        },
+        dismissButton = {
+            Button(
+                text = stringResource(Res.string.cancel),
+                buttonColors = ButtonColors.text(),
+                debounceClick = actions::dismissDeleteWeight,
+            )
+        },
+    )
+}
+
+@Composable
+private fun WeightRangeDialog(
+    state: AthleteDetailState,
+    actions: AthleteDetailScreenActions,
+) {
+    val dialog = state.weightRangeDialog ?: return
+    val pickFrom = rememberDatePicker(
+        initialDateMillis = dialog.fromMillis,
+        onDatePicked = actions::changeWeightRangeFrom,
+    )
+    val pickTo = rememberDatePicker(
+        initialDateMillis = dialog.toMillis,
+        onDatePicked = actions::changeWeightRangeTo,
+    )
+    AlertDialog(
+        onDismissRequest = actions::dismissWeightRangeDialog,
+        title = {
+            Text(
+                text = stringResource(Res.string.athletes_weight_range_title),
+                style = TypographyPalette.H4
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.S)) {
+                DateField(
+                    label = stringResource(Res.string.athletes_weight_range_from),
+                    value = TimeUtils.formatDate(timeInMillis = dialog.fromMillis),
+                    onClick = pickFrom,
+                )
+                DateField(
+                    label = stringResource(Res.string.athletes_weight_range_to),
+                    value = TimeUtils.formatDate(timeInMillis = dialog.toMillis),
+                    onClick = pickTo,
+                )
+                dialog.error?.resolve()?.let { error ->
+                    Text(
+                        text = error,
+                        style = TypographyPalette.Body3Regular,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                text = stringResource(Res.string.athletes_weight_range_build),
+                debounceClick = actions::buildWeightChart,
+            )
+        },
+        dismissButton = {
+            Button(
+                text = stringResource(Res.string.cancel),
+                buttonColors = ButtonColors.text(),
+                debounceClick = actions::dismissWeightRangeDialog,
+            )
+        },
+    )
+}
+
+@Composable
+private fun DateField(
+    label: String,
+    value: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = MaterialTheme.shapes.medium
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = shape,
+            )
+            .clickable(onClick = onClick)
+            .padding(Spacing.M),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.S),
+    ) {
+        Column(modifier = Modifier.weight(weight = 1f)) {
+            Text(
+                text = label,
+                style = TypographyPalette.Body3Regular,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = value,
+                style = TypographyPalette.Body1Regular,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        Icon(
+            imageVector = Icons.Default.CalendarMonth,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -335,18 +693,7 @@ private fun RecordTypeHeader(
             style = TypographyPalette.H4,
             modifier = Modifier.weight(weight = 1f)
         )
-        TextButton(onClick = onAdd) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-                modifier = Modifier.size(ADD_RECORD_ICON_SIZE)
-            )
-            SpacerXS()
-            Text(
-                text = stringResource(Res.string.athletes_detail_add_record),
-                style = TypographyPalette.Body2Medium
-            )
-        }
+        AddTextButton(onClick = onAdd)
     }
 }
 
@@ -386,51 +733,6 @@ private fun RecordRow(
                 contentDescription = stringResource(Res.string.athletes_detail_delete_record),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(RECORD_ICON_SIZE)
-            )
-        }
-    }
-}
-
-@Composable
-private fun GenderOption(
-    textRes: StringResource,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    icon: ImageVector
-) {
-    val containerColor = if (isSelected) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
-    val contentColor = if (isSelected) {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    OutlinedButton(
-        onClick = onClick,
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = containerColor,
-            contentColor = contentColor
-        ),
-        border = BorderStroke(
-            width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-        )
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Spacing.XS)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = stringResource(textRes),
-                style = TypographyPaletteSp.Body2Medium
             )
         }
     }
@@ -493,14 +795,6 @@ private fun NotLoadedRower(
     }
 }
 
-private val SKELETON_AVATAR_SIZE = 60.dp
-private val SKELETON_NAME_HEIGHT = 20.dp
-private val SKELETON_BADGE_HEIGHT = 16.dp
-private val SKELETON_CARD_HEIGHT = 96.dp
-private const val SKELETON_NAME_FRACTION = 0.5f
-private const val SKELETON_BADGE_FRACTION = 0.3f
-private const val SKELETON_CARD_COUNT = 3
-
 @Composable
 private fun RecordErrorAlert(
     actions: AthleteDetailScreenActions,
@@ -528,47 +822,4 @@ private fun RecordErrorAlert(
             )
         }
     )
-}
-
-private class DateTransformation : VisualTransformation {
-
-    val firstDelimiterOffset = 2
-    val secondDelimiterOffset = 3
-    val dateFormatLength = 8
-
-    override fun filter(text: AnnotatedString): TransformedText {
-        val originalText = text.text
-        val formattedText = buildAnnotatedString {
-            if (originalText.isNotEmpty()) {
-                for (i in originalText.indices) {
-                    append(originalText[i])
-                    if ((i == firstDelimiterOffset - 1 || i == secondDelimiterOffset) && i < originalText.lastIndex) {
-                        append(".")
-                    }
-                }
-            }
-        }
-        return TransformedText(
-            text = formattedText,
-            offsetMapping = object : OffsetMapping {
-                override fun originalToTransformed(offset: Int): Int {
-                    return when {
-                        offset <= firstDelimiterOffset -> offset
-                        offset <= secondDelimiterOffset + 1 -> offset + 1
-                        offset <= dateFormatLength -> offset + 2
-                        else -> dateFormatLength + 2
-                    }
-                }
-
-                override fun transformedToOriginal(offset: Int): Int {
-                    return when {
-                        offset <= firstDelimiterOffset - 1 -> offset
-                        offset <= secondDelimiterOffset - 1 -> offset - 1
-                        offset <= dateFormatLength + 1 -> offset - 2
-                        else -> dateFormatLength
-                    }.coerceIn(0, formattedText.length)
-                }
-            }
-        )
-    }
 }

@@ -3,13 +3,17 @@ package by.rowing.sanbaiteam.athlete.presentation.add
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.athlete.domain.weight.parseWeightTenths
+import by.rowing.sanbaiteam.athlete.domain.weight.sanitizeWeightInput
 import by.rowing.sanbaiteam.athlete.presentation.add.compose.AddAthleteScreenActions
 import by.rowing.sanbaiteam.athlete.resources.Res
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_date_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_error
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_invalid
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.uikit.component.UiText
 import kotlinx.coroutines.launch
 
@@ -40,7 +44,9 @@ internal class AddAthleteViewModel(
                     nameError = UiText.of(Res.string.athletes_add_athlete_name_error)
                         .takeIf { name.isBlank() },
                     dateError = UiText.of(Res.string.athletes_add_athlete_date_error)
-                        .takeIf { !isValidDate(dateOfBirth) }
+                        .takeIf { !isValidDate(dateOfBirth) },
+                    weightError = UiText.of(Res.string.athletes_weight_invalid)
+                        .takeIf { weight.isNotBlank() && parseWeightTenths(text = weight) == null },
                 )
             }
         }
@@ -76,13 +82,23 @@ internal class AddAthleteViewModel(
         }
     }
 
+    override fun changeWeight(text: String) {
+        changeState {
+            copy(
+                weight = sanitizeWeightInput(text = text),
+                weightError = null,
+            )
+        }
+    }
+
     private fun isValidDate(dateString: String): Boolean = TimeUtils.parseDateDigits(dateString) != null
 
-    private fun validateForm(): Boolean = state.name.isNotBlank() && isValidDate(state.dateOfBirth)
+    private fun validateForm(): Boolean = state.name.isNotBlank() && isValidDate(state.dateOfBirth) &&
+            (state.weight.isBlank() || parseWeightTenths(text = state.weight) != null)
 
     private fun saveRower() {
         viewModelScope.launch {
-            athleteRepository.addAthlete(
+            val athleteId = athleteRepository.addAthlete(
                 athlete = AthleteEntity(
                     name = state.name,
                     dateOfBirth = TimeUtils.parseDateDigits(state.dateOfBirth) ?: return@launch,
@@ -90,6 +106,13 @@ internal class AddAthleteViewModel(
                     speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null }
                 )
             )
+            parseWeightTenths(text = state.weight)?.let { weightTenths ->
+                athleteRepository.saveWeight(
+                    athleteId = athleteId,
+                    dateMillis = nowInMillis(),
+                    weightTenths = weightTenths,
+                )
+            }
             navigateBack()
         }
     }
