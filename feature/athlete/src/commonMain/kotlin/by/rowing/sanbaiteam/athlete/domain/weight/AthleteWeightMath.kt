@@ -45,7 +45,7 @@ internal object AthleteWeightMath {
         records: List<AthleteWeightRecord>,
         fromMillis: Long,
         toMillis: Long,
-    ): Double? {
+    ): Int? {
         val sorted = sortedByDay(records = records).ifEmpty { return null }
         val to = TimeUtils.startOfDayMillis(timeInMillis = toMillis)
         var day = TimeUtils.startOfDayMillis(timeInMillis = fromMillis)
@@ -62,7 +62,7 @@ internal object AthleteWeightMath {
                 days = 1,
             )
         }
-        return total / days / TENTHS_IN_KILOGRAM
+        return total / days
     }
 
     /** Только реальные записи внутри диапазона — график соединяет их линиями. */

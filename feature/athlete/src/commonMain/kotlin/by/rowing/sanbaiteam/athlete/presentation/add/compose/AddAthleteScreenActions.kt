@@ -10,6 +10,12 @@ internal interface AddAthleteScreenActions : NavigateBackAware {
 
     fun changeBirthDate(newDate: String)
 
+    fun pickBirthDate(
+        year: Int,
+        month: Int,
+        day: Int,
+    )
+
     fun changeSpeedCoachSerial(newSerial: String)
 
     fun changeWeight(text: String)
@@ -24,6 +30,13 @@ internal interface AddAthleteScreenActions : NavigateBackAware {
                 override fun onSaveClick() {}
                 override fun changeName(newName: String) {}
                 override fun changeBirthDate(newDate: String) {}
+                override fun pickBirthDate(
+                    year: Int,
+                    month: Int,
+                    day: Int
+                ) {
+                }
+
                 override fun changeSpeedCoachSerial(newSerial: String) {}
                 override fun changeWeight(text: String) {}
                 override fun changeGender(isMale: Boolean) {}

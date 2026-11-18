@@ -29,7 +29,8 @@
     <string name="athletes_add_athlete_birth_date_label">Дата рождения</string>
     <string name="athletes_add_athlete_birth_date_placeholder">дд.мм.гггг</string>
     <string name="athletes_add_athlete_birth_date_supporting_text">Формат: дд.мм.гггг</string>
-    <string name="athletes_add_athlete_speedcoach_serial_label">Серийный номер выданного SpeedCoach</string>
+    <string name="athletes_add_athlete_birth_date_pick">Выбрать дату рождения</string>
+    <string name="athletes_add_athlete_speedcoach_serial_label">Серийный номер SpeedCoach</string>
     <string name="athletes_add_athlete_speedcoach_serial_placeholder">Например, 2693559</string>
     <string name="athletes_add_athlete_gender_male">Мужской</string>
     <string name="athletes_add_athlete_gender_female">Женский</string>
@@ -63,7 +64,6 @@
     <string name="athletes_weight_delete_content_description">Удалить запись веса</string>
     <string name="athletes_weight_invalid">Укажите вес от 20 до 300 кг</string>
     <string name="athletes_weight_future_date">Нельзя указать будущую дату</string>
-    <string name="athletes_weight_optional">Необязательно, можно изменить позже</string>
     <string name="athletes_weight_range_title">Период графика</string>
     <string name="athletes_weight_range_from">С</string>
     <string name="athletes_weight_range_to">По</string>

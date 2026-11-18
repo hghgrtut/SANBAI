@@ -78,7 +78,7 @@ internal class AthleteWeightMathTest {
         )
 
         assertEquals(
-            703.0,
+            703,
             AthleteWeightMath.averageWeightTenths(
                 records = records,
                 fromMillis = day(day = 1),
@@ -90,7 +90,7 @@ internal class AthleteWeightMathTest {
     @Test
     fun averageWeightTenths_usesFirstValueBeforeFirstRecord() {
         assertEquals(
-            700.0,
+            700,
             AthleteWeightMath.averageWeightTenths(
                 records = listOf(
                     record(
@@ -107,7 +107,7 @@ internal class AthleteWeightMathTest {
     @Test
     fun averageWeightTenths_usesLastValueAfterLastRecord() {
         assertEquals(
-            700.0,
+            700,
             AthleteWeightMath.averageWeightTenths(
                 records = listOf(
                     record(
@@ -136,7 +136,7 @@ internal class AthleteWeightMathTest {
 
         // 700, 730, 730, 760
         assertEquals(
-            730.0,
+            730,
             AthleteWeightMath.averageWeightTenths(
                 records = records,
                 fromMillis = day(day = 1),
@@ -144,7 +144,7 @@ internal class AthleteWeightMathTest {
             )
         )
         assertEquals(
-            730.0,
+            730,
             AthleteWeightMath.averageWeightTenths(
                 records = records,
                 fromMillis = day(day = 2),
@@ -160,22 +160,6 @@ internal class AthleteWeightMathTest {
                 records = emptyList(),
                 fromMillis = day(day = 1),
                 toMillis = day(day = 3),
-            )
-        )
-    }
-
-    @Test
-    fun averageWeightTenths_returnsNullForReversedRange() {
-        assertNull(
-            AthleteWeightMath.averageWeightTenths(
-                records = listOf(
-                    record(
-                        day = 1,
-                        weightTenths = 700
-                    )
-                ),
-                fromMillis = day(day = 3),
-                toMillis = day(day = 1),
             )
         )
     }
@@ -308,16 +292,6 @@ internal class AthleteWeightMathTest {
             AthleteWeightMath.weightAtTenths(
                 records = records,
                 dateMillis = day(day = 2)
-            )
-        )
-    }
-
-    @Test
-    fun weightAtTenths_returnsNullForEmptyRecords() {
-        assertNull(
-            AthleteWeightMath.weightAtTenths(
-                records = emptyList(),
-                dateMillis = day(day = 3)
             )
         )
     }

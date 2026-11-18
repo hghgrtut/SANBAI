@@ -123,7 +123,7 @@ private fun ChartBody(
 }
 
 @Composable
-private fun AverageCard(averageWeightTenths: Double?) {
+private fun AverageCard(averageWeightTenths: Int?) {
     DataCard(
         modifier = Modifier.fillMaxWidth(),
         verticalSpacing = Spacing.None,

@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,6 +39,7 @@ import by.rowing.sanbaiteam.athlete.presentation.common.GenderSegmentedSelector
 import by.rowing.sanbaiteam.athlete.resources.Res
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_birth_date_label
+import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_birth_date_pick
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_birth_date_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_birth_date_supporting_text
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_label
@@ -46,14 +48,16 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_se
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_speedcoach_serial_placeholder
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_preview_header
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_section_main
-import by.rowing.sanbaiteam.athlete.resources.athletes_weight_optional
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_placeholder
 import by.rowing.sanbaiteam.athlete.resources.save
+import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.decimal
+import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
@@ -127,6 +131,7 @@ private fun AddAthleteForm(
             DateOfBirthInput(
                 state = state,
                 onBirthDateChange = actions::changeBirthDate,
+                onBirthDatePicked = actions::pickBirthDate,
                 modifier = Modifier.weight(weight = 1f),
             )
             GenderSegmentedSelector(
@@ -146,8 +151,7 @@ private fun AddAthleteForm(
             onValueChange = actions::changeWeight,
             label = stringResource(Res.string.athletes_weight_value_label),
             placeholder = stringResource(Res.string.athletes_weight_value_placeholder),
-            supportingText = state.weightError?.resolve()
-                ?: stringResource(Res.string.athletes_weight_optional),
+            supportingText = state.weightError?.resolve(),
             error = state.weightError != null,
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
@@ -188,8 +192,18 @@ private fun NameInput(
 private fun DateOfBirthInput(
     state: AddAthleteState,
     onBirthDateChange: (String) -> Unit,
+    onBirthDatePicked: (year: Int, month: Int, day: Int) -> Unit,
     modifier: Modifier,
 ) {
+    val initialDateMillis = remember(state.dateOfBirth) {
+        TimeUtils.noonOfDay(
+            timeInMillis = TimeUtils.parseDateDigits(state.dateOfBirth) ?: nowInMillis()
+        )
+    }
+    val launchDatePicker = rememberDatePicker(
+        initialDateMillis = initialDateMillis,
+        onDatePicked = onBirthDatePicked,
+    )
     TextField(
         value = state.dateOfBirth,
         onValueChange = onBirthDateChange,
@@ -201,7 +215,14 @@ private fun DateOfBirthInput(
         singleLine = true,
         modifier = modifier,
         textStyle = TypographyPaletteSp.Body1Regular,
-        leadingIcon = { FieldIcon(icon = Icons.Default.Cake) },
+        leadingIcon = {
+            IconButton(onClick = launchDatePicker) {
+                FieldIcon(
+                    icon = Icons.Default.Cake,
+                    contentDescription = stringResource(Res.string.athletes_add_athlete_birth_date_pick),
+                )
+            }
+        },
         keyboardOptions = KeyboardOptions(
             autoCorrectEnabled = false,
             keyboardType = KeyboardType.Number,
@@ -247,10 +268,13 @@ private fun AthleteCardPreview(state: AddAthleteState) {
 }
 
 @Composable
-private fun FieldIcon(icon: ImageVector) {
+private fun FieldIcon(
+    icon: ImageVector,
+    contentDescription: String? = null,
+) {
     Icon(
         imageVector = icon,
-        contentDescription = null,
+        contentDescription = contentDescription,
         modifier = Modifier.size(FIELD_ICON_SIZE),
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
     )

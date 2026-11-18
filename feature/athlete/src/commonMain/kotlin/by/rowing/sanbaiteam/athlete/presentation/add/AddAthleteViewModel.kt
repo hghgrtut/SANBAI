@@ -72,6 +72,24 @@ internal class AddAthleteViewModel(
         }
     }
 
+    override fun pickBirthDate(
+        year: Int,
+        month: Int,
+        day: Int,
+    ) {
+        val dateMillis = TimeUtils.noonMillis(
+            year = year,
+            month = month,
+            day = day,
+        ) ?: return
+        changeState {
+            copy(
+                dateOfBirth = TimeUtils.formatDateDigits(timeInMillis = dateMillis),
+                dateError = null,
+            )
+        }
+    }
+
     override fun changeGender(isMale: Boolean) {
         changeState { copy(isMale = isMale) }
     }
