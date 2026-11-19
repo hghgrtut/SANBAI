@@ -1,5 +1,6 @@
-package by.rowing.sanbaiteam.athlete.data.transfer.models
+package by.rowing.sanbaiteam.athlete.data.transfer
 
+import by.rowing.sanbaiteam.athlete.data.transfer.models.AthleteBackup
 import kotlinx.serialization.json.Json
 
 internal object AthleteBackupSerializer {

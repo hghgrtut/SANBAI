@@ -1,7 +1,6 @@
 package by.rowing.sanbaiteam.athlete.data.transfer
 
 import by.rowing.sanbaiteam.athlete.data.transfer.models.AthleteBackup
-import by.rowing.sanbaiteam.athlete.data.transfer.models.AthleteBackupSerializer
 import by.rowing.sanbaiteam.athlete.data.transfer.models.BackupAthlete
 import by.rowing.sanbaiteam.athlete.data.transfer.models.BackupPersonalBest
 import by.rowing.sanbaiteam.athlete.data.transfer.models.BackupWeight

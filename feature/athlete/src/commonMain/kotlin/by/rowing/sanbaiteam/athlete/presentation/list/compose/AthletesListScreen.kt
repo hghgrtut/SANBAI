@@ -53,7 +53,6 @@ import by.rowing.sanbaiteam.athlete.data.model.AthleteItemModel
 import by.rowing.sanbaiteam.athlete.presentation.common.AthleteListItem
 import by.rowing.sanbaiteam.athlete.presentation.list.AthletesUiState
 import by.rowing.sanbaiteam.athlete.presentation.list.AthletesViewModel
-import by.rowing.sanbaiteam.athlete.presentation.list.suggestedAthletesBackupFileName
 import by.rowing.sanbaiteam.athlete.resources.Res
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_someone_to_team
@@ -80,6 +79,8 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_import_action
 import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_notice_title
 import by.rowing.sanbaiteam.core.file.rememberCreateTextFileLauncher
 import by.rowing.sanbaiteam.core.file.rememberOpenTextFileLauncher
+import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.EmptyState
 import by.rowing.sanbaiteam.uikit.component.Skeleton
@@ -89,13 +90,13 @@ import by.rowing.sanbaiteam.uikit.component.UiText
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
-import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
 import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
 import by.rowing.sanbaiteam.uikit.resources.uikit_ok
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
 
 private const val CONTENT_FADE_IN_MILLIS = 220
 private const val CONTENT_FADE_OUT_MILLIS = 140
@@ -133,7 +134,7 @@ private fun AthleteListScreenContent(
 
     LaunchedEffect(state.exportPromptRequested) {
         if (state.exportPromptRequested) {
-            createBackupLauncher(suggestedAthletesBackupFileName())
+            createBackupLauncher("sanbai-athletes-backup-${TimeUtils.formatDateDigits(nowInMillis())}.json")
             actions.onExportPromptLaunched()
         }
     }

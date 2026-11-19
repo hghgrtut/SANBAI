@@ -16,7 +16,11 @@ private const val ANY_MIME_TYPE = "*/*"
 actual fun rememberCreateTextFileLauncher(onCreated: (String) -> Unit): (String) -> Unit {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument(mimeType = JSON_APP_MIME_TYPE)
-    ) { uri -> if (uri != null) onCreated(uri.toString()) }
+    ) { uri ->
+        if (uri != null) {
+            onCreated(uri.toString())
+        }
+    }
     return remember(launcher) {
         { fileName -> launcher.launch(fileName) }
     }
@@ -25,9 +29,11 @@ actual fun rememberCreateTextFileLauncher(onCreated: (String) -> Unit): (String)
 @AllowDetektPublic
 @Composable
 actual fun rememberOpenTextFileLauncher(onOpened: (String) -> Unit): () -> Unit {
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri -> if (uri != null) onOpened(uri.toString()) }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            onOpened(uri.toString())
+        }
+    }
     return remember(launcher) {
         { launcher.launch(arrayOf(JSON_APP_MIME_TYPE, JSON_TEXT_MIME_TYPE, TEXT_PLAIN_MIME_TYPE)) }
     }
@@ -36,9 +42,9 @@ actual fun rememberOpenTextFileLauncher(onOpened: (String) -> Unit): () -> Unit 
 @AllowDetektPublic
 @Composable
 actual fun rememberOpenFilesLauncher(onFilesPicked: (List<String>) -> Unit): () -> Unit {
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
-    ) { uris -> onFilesPicked(uris.map { it.toString() }) }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetMultipleContents()) { uris ->
+        onFilesPicked(uris.map { it.toString() })
+    }
     return remember(launcher) {
         { launcher.launch(ANY_MIME_TYPE) }
     }

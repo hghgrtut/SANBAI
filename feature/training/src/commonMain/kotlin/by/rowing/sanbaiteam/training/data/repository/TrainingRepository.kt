@@ -63,7 +63,7 @@ internal class TrainingRepository(
         )
     }
 
-    suspend fun deleteTrainings(trainingIds: List<Long>) = withContext(Dispatchers.Default) {
+    suspend fun deleteTrainings(trainingIds: List<Long>): Int = withContext(Dispatchers.Default) {
         dao.getImportPathsByIds(trainingIds).forEach { relativePath ->
             runCatching { importStorage.deleteImportFile(relativePath) }
         }
@@ -75,11 +75,7 @@ internal class TrainingRepository(
     }
 
     suspend fun deleteTrainingsForAthletes(athleteIds: List<Long>): Int = withContext(Dispatchers.Default) {
-        val trainingIds = dao.getTrainingIdsForAthletes(athleteIds)
-        if (trainingIds.isNotEmpty()) {
-            deleteTrainings(trainingIds)
-        }
-        trainingIds.size
+        deleteTrainings(dao.getTrainingIdsForAthletes(athleteIds))
     }
 
     fun observeTrainingsList(): Flow<List<ListTrainingStateItem>> = combine(

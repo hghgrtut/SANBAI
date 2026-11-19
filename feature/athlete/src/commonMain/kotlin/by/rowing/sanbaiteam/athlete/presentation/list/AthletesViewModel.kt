@@ -2,7 +2,7 @@ package by.rowing.sanbaiteam.athlete.presentation.list
 
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
-import by.rowing.sanbaiteam.athlete.data.transfer.models.AthleteBackupSerializer
+import by.rowing.sanbaiteam.athlete.data.transfer.AthleteBackupSerializer
 import by.rowing.sanbaiteam.athlete.data.transfer.AthleteTransferRepository
 import by.rowing.sanbaiteam.athlete.data.transfer.AthleteTransferResult
 import by.rowing.sanbaiteam.athlete.domain.trainings.AthleteTrainingsCleaner
@@ -17,16 +17,11 @@ import by.rowing.sanbaiteam.core.file.TextFileAccess
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
-import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.uikit.component.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
 
 internal class AthletesViewModel(
     private val repository: AthletesRepository,
@@ -109,24 +104,17 @@ internal class AthletesViewModel(
     }
 
     override fun onToggleSelectAllClick(athleteIds: List<Long>) {
-        if (athleteIds.isEmpty()) return
-        changeState {
-            val allSelected = athleteIds.all { athleteId -> athleteId in selectedAthleteIds }
-            copy(
-                selectedAthleteIds = if (allSelected) {
-                    emptySet()
-                } else {
-                    selectedAthleteIds + athleteIds
-                }
-            )
+        if (athleteIds.isNotEmpty()) {
+            changeState {
+                val allSelected = athleteIds.all { athleteId -> athleteId in selectedAthleteIds }
+                copy(selectedAthleteIds = if (allSelected) emptySet() else selectedAthleteIds + athleteIds)
+            }
         }
     }
 
     override fun onDeleteClick() {
-        val selectedIds = state.selectedAthleteIds.toList()
-        if (selectedIds.isEmpty()) return
         viewModelScope.launch {
-            val count = trainingsCleaner.countRelatedTrainings(athleteIds = selectedIds)
+            val count = trainingsCleaner.countRelatedTrainings(athleteIds = state.selectedAthleteIds.toList())
             changeState {
                 copy(
                     relatedTrainingsCount = count,
@@ -153,7 +141,6 @@ internal class AthletesViewModel(
                 relatedTrainingsCount = 0,
             )
         }
-        if (selectedIds.isEmpty()) return
         viewModelScope.launch {
             trainingsCleaner.deleteRelatedTrainings(athleteIds = selectedIds)
             repository.deleteAthletes(athleteIds = selectedIds)
@@ -262,11 +249,4 @@ internal class AthletesViewModel(
             it.weightsImported,
         )
     } ?: UiText.of(Res.string.athletes_transfer_import_error)
-}
-
-internal fun suggestedAthletesBackupFileName(): String {
-    val date = Instant.fromEpochMilliseconds(nowInMillis()).toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val month = date.month.number.toString().padStart(2, '0')
-    val day = date.day.toString().padStart(2, '0')
-    return "sanbai-athletes-backup-${date.year}$month$day.json"
 }

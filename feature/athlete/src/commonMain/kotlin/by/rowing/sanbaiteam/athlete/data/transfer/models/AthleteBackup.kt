@@ -8,6 +8,7 @@ internal data class AthleteBackup(
     val formatVersion: Int,
     val athletes: List<BackupAthlete> = emptyList(),
 ) {
+
     companion object {
 
         const val KIND = "sanbai-athletes"

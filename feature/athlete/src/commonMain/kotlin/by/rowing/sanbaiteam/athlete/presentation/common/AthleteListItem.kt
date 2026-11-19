@@ -45,9 +45,6 @@ private val AVATAR_SIZE = 60.dp
 private val ICON_SIZE = 20.dp
 private const val CHECKBOX_ENTER_SCALE = 0.7f
 
-/**
- * Набор брендовых цветов с достаточным контрастом для белых инициалов.
- */
 private val AVATAR_COLORS = listOf(
     ColorPalette.Blue50,
     ColorPalette.Blue30,

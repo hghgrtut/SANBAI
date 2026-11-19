@@ -17,9 +17,7 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-internal class AthleteTransferRepository(
-    private val athletesRepository: AthletesRepository,
-) {
+internal class AthleteTransferRepository(private val athletesRepository: AthletesRepository) {
 
     suspend fun exportBackup(athleteIds: Set<Long>): AthleteBackup = withContext(Dispatchers.Default) {
         AthleteBackup(

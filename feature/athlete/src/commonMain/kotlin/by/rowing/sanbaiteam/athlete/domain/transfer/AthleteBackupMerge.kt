@@ -52,8 +52,7 @@ internal object AthleteBackupMerge {
     fun weightsToWrite(incoming: List<AthleteWeightEntity>): List<AthleteWeightEntity> =
         incoming.associateBy { weight -> weight.dateMillis }.values.toList()
 
-    private fun normalizeName(name: String): String =
-        name.trim().split(WHITESPACE_REGEX).joinToString(separator = " ")
+    private fun normalizeName(name: String): String = name.trim().split(WHITESPACE_REGEX).joinToString(separator = " ")
 
     private fun AthletePersonalBestEntity.key(): Pair<TrainingPieceType, Int> = boatType to distanceMeters
 }
