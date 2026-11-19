@@ -1,5 +1,10 @@
 package by.rowing.sanbaiteam.athlete.presentation.common
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +32,8 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_age_years
 import by.rowing.sanbaiteam.athlete.resources.athletes_gender_female_short
 import by.rowing.sanbaiteam.athlete.resources.athletes_gender_male_short
 import by.rowing.sanbaiteam.uikit.component.Badge
+import by.rowing.sanbaiteam.uikit.component.Checkbox
+import by.rowing.sanbaiteam.uikit.component.CheckedState
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -34,15 +41,36 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 
+private val AVATAR_SIZE = 60.dp
+private val ICON_SIZE = 20.dp
+private const val CHECKBOX_ENTER_SCALE = 0.7f
+
+/**
+ * Набор брендовых цветов с достаточным контрастом для белых инициалов.
+ */
+private val AVATAR_COLORS = listOf(
+    ColorPalette.Blue50,
+    ColorPalette.Blue30,
+    ColorPalette.Blue20,
+    ColorPalette.Grey20,
+    ColorPalette.Grey30,
+    ColorPalette.Red50,
+)
+
 @Composable
 internal fun AthleteListItem(
     modifier: Modifier = Modifier,
     athlete: AthleteItemModel,
+    isSelectionMode: Boolean,
+    selected: Boolean,
     onAthleteClick: (AthleteItemModel) -> Unit,
+    onAthleteLongClick: (AthleteItemModel) -> Unit,
 ) {
     ItemCard(
         modifier = modifier,
         onClick = { onAthleteClick(athlete) },
+        onLongClick = { onAthleteLongClick(athlete) },
+        selected = selected,
     ) {
         Row(
             modifier = Modifier
@@ -99,30 +127,27 @@ internal fun AthleteListItem(
                     }
                 }
             }
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(ICON_SIZE)
-            )
+            AnimatedVisibility(
+                visible = isSelectionMode,
+                enter = fadeIn() + scaleIn(initialScale = CHECKBOX_ENTER_SCALE),
+                exit = fadeOut() + scaleOut(targetScale = CHECKBOX_ENTER_SCALE),
+            ) {
+                Checkbox(
+                    checked = if (selected) CheckedState.CHECKED else CheckedState.UNCHECKED,
+                    click = { onAthleteClick(athlete) },
+                )
+            }
+            if (!isSelectionMode) {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(ICON_SIZE)
+                )
+            }
         }
     }
 }
-
-private val AVATAR_SIZE = 60.dp
-private val ICON_SIZE = 20.dp
-
-/**
- * Набор брендовых цветов с достаточным контрастом для белых инициалов.
- */
-private val AVATAR_COLORS = listOf(
-    ColorPalette.Blue50,
-    ColorPalette.Blue30,
-    ColorPalette.Blue20,
-    ColorPalette.Grey20,
-    ColorPalette.Grey30,
-    ColorPalette.Red50,
-)
 
 private fun getAvatarColor(name: String): Color =
     AVATAR_COLORS[abs(name.hashCode()) % AVATAR_COLORS.size]

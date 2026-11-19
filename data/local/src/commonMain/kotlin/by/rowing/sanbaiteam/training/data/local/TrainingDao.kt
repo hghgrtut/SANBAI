@@ -88,6 +88,22 @@ interface TrainingDao {
     )
     suspend fun getAthleteIdsInTraining(trainingId: Long): List<Long>
 
+    @Query(
+        """
+        SELECT COUNT(DISTINCT trainingId) FROM $TABLE_TRAINING_ATHLETE_PIECE
+        WHERE athleteId IN (:athleteIds)
+        """
+    )
+    suspend fun countTrainingsForAthletes(athleteIds: List<Long>): Int
+
+    @Query(
+        """
+        SELECT DISTINCT trainingId FROM $TABLE_TRAINING_ATHLETE_PIECE
+        WHERE athleteId IN (:athleteIds)
+        """
+    )
+    suspend fun getTrainingIdsForAthletes(athleteIds: List<Long>): List<Long>
+
     companion object {
         const val TABLE_TRAINING = "table_training"
         const val TABLE_TRAINING_ATHLETE_PIECE = "table_training_athlete_piece"

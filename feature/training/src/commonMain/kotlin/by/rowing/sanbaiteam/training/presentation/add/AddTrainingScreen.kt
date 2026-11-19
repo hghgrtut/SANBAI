@@ -78,8 +78,6 @@ import by.rowing.sanbaiteam.training.resources.add_training_save_are_you_sure
 import by.rowing.sanbaiteam.training.resources.add_training_select_athlete
 import by.rowing.sanbaiteam.training.resources.add_training_title
 import by.rowing.sanbaiteam.training.resources.add_training_validation_title
-import by.rowing.sanbaiteam.training.resources.cancel
-import by.rowing.sanbaiteam.training.resources.save
 import by.rowing.sanbaiteam.training.resources.training_detail_piece_number
 import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
@@ -92,6 +90,9 @@ import by.rowing.sanbaiteam.uikit.component.number
 import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
 import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
+import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
+import by.rowing.sanbaiteam.uikit.resources.uikit_save
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.StringResource
@@ -336,7 +337,7 @@ private fun Date(
 private fun SaveIcon() {
     Icon(
         imageVector = Icons.Default.Save,
-        contentDescription = stringResource(Res.string.save)
+        contentDescription = stringResource(UikitRes.string.uikit_save)
     )
 }
 
@@ -657,8 +658,8 @@ private fun Alert(
     title: StringResource,
     text: String,
     onDismiss: () -> Unit,
-    confirmText: StringResource = Res.string.save,
-    dismissText: StringResource = Res.string.cancel,
+    confirmText: StringResource = UikitRes.string.uikit_save,
+    dismissText: StringResource = UikitRes.string.uikit_cancel,
     onConfirm: (() -> Unit)? = null
 ) {
     AlertDialog(

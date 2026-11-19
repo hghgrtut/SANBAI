@@ -8,17 +8,3 @@ import androidx.compose.runtime.Composable
  */
 @Composable
 internal expect fun rememberTrainingImportPicker(onFilesPicked: (List<String>) -> Unit): () -> Unit
-
-/**
- * Возвращает действие, открывающее системный диалог сохранения резервной копии.
- * Принимает предлагаемое имя файла, возвращает выбранный дескриптор (на Android — URI).
- */
-@Composable
-internal expect fun rememberCreateBackupLauncher(onCreated: (String) -> Unit): (String) -> Unit
-
-/**
- * Возвращает действие, открывающее системный выбор файла резервной копии.
- * Выбранный файл передаётся как строковый дескриптор (на Android — URI).
- */
-@Composable
-internal expect fun rememberOpenBackupLauncher(onOpened: (String) -> Unit): () -> Unit

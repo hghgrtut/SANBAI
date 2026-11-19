@@ -110,7 +110,12 @@ Button(
 
 ## 4. Строки и ресурсы uikit
 
-- `uikit/src/commonMain/composeResources/values/strings.xml`: `uikit_back`, `uikit_close`, `uikit_range_from`, `uikit_range_to`.
+- `uikit/src/commonMain/composeResources/values/strings.xml`: `uikit_back`, `uikit_close`, `uikit_range_from`, `uikit_range_to`,
+  `uikit_ok`, `uikit_cancel`, `uikit_save`, `uikit_add` — универсальные подписи действий («ОК», «Отмена», «Сохранить», «Добавить»).
+  Не дублируйте их в фичах: берите `uikit`-строку, при необходимости с алиасом
+  `import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes`.
+  Поэтому у `uikit` включён `publicResClass = true` — иначе сгенерированный `Res` будет `internal`
+  и фичи не смогут обратиться к этим строкам.
 - Drawable: `ic_check_16`, `ic_minus_16`, `ic_close_16`, `ic_chevron_left_24`.
 - Пакет ресурсов: `by.rowing.sanbaiteam.uikit.resources.Res`.
 

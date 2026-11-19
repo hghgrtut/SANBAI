@@ -28,8 +28,6 @@ import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
 import by.rowing.sanbaiteam.training.presentation.filter.models.QuickFilterDialog
 import by.rowing.sanbaiteam.training.presentation.filter.models.TrainingFiltersState
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.cancel
-import by.rowing.sanbaiteam.training.resources.save
 import by.rowing.sanbaiteam.training.resources.training_quick_filter_delete_action
 import by.rowing.sanbaiteam.training.resources.training_quick_filter_delete_confirm_message
 import by.rowing.sanbaiteam.training.resources.training_quick_filter_delete_confirm_title
@@ -51,6 +49,9 @@ import by.rowing.sanbaiteam.uikit.component.ChipRow
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.component.button.ButtonSize
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
+import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
+import by.rowing.sanbaiteam.uikit.resources.uikit_save
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.stringResource
@@ -146,11 +147,11 @@ private fun QuickFilterSaveSheet(
                     onClick = actions::onQuickFilterDialogDismiss,
                     modifier = Modifier.weight(weight = 1f),
                 ) {
-                    Text(text = stringResource(Res.string.cancel))
+                    Text(text = stringResource(UikitRes.string.uikit_cancel))
                 }
                 Button(
                     modifier = Modifier.weight(weight = 1f),
-                    text = stringResource(Res.string.save),
+                    text = stringResource(UikitRes.string.uikit_save),
                     debounceClick = { actions.onQuickFilterSave(name) },
                     enabled = name.isNotBlank(),
                     size = ButtonSize.SMALL,
@@ -204,7 +205,7 @@ private fun QuickFilterManageSheet(
                 }
                 Button(
                     modifier = Modifier.weight(weight = 1f),
-                    text = stringResource(Res.string.save),
+                    text = stringResource(UikitRes.string.uikit_save),
                     debounceClick = { actions.onQuickFilterRename(savedFilter.id, name) },
                     enabled = normalizedName.isNotEmpty() && !nameTaken,
                     size = ButtonSize.SMALL,
@@ -300,7 +301,7 @@ private fun QuickFilterOverwriteDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.cancel)) }
+            TextButton(onClick = onDismiss) { Text(text = stringResource(UikitRes.string.uikit_cancel)) }
         },
     )
 }
@@ -331,7 +332,7 @@ private fun QuickFilterDeleteDialog(
         },
         dismissButton = {
             Button(
-                text = stringResource(Res.string.cancel),
+                text = stringResource(UikitRes.string.uikit_cancel),
                 buttonColors = ButtonColors.text(),
                 debounceClick = onDismiss,
             )

@@ -70,6 +70,18 @@ internal class TrainingRepository(
         dao.deleteTrainingsWithPieces(trainingIds)
     }
 
+    suspend fun countTrainingsForAthletes(athleteIds: List<Long>): Int = withContext(Dispatchers.Default) {
+        dao.countTrainingsForAthletes(athleteIds)
+    }
+
+    suspend fun deleteTrainingsForAthletes(athleteIds: List<Long>): Int = withContext(Dispatchers.Default) {
+        val trainingIds = dao.getTrainingIdsForAthletes(athleteIds)
+        if (trainingIds.isNotEmpty()) {
+            deleteTrainings(trainingIds)
+        }
+        trainingIds.size
+    }
+
     fun observeTrainingsList(): Flow<List<ListTrainingStateItem>> = combine(
         dao.observeAllTrainingEntities(),
         workDisplaySettingsRepository.modes,

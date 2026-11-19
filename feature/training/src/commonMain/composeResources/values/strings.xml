@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="save">Сохранить</string>
-    <string name="cancel">Отмена</string>
     <string name="add_training_crew_max_size">В экипаже максимум %1$d спортсменов</string>
     <string name="add_training_validation_need_athlete">Добавьте хотя бы одного спортсмена</string>
     <string name="add_training_validation_select_athlete">Выберите спортсмена</string>
@@ -215,5 +213,4 @@
     <string name="training_split_column_avg_heart_rate">Ср. ЧСС</string>
     <string name="training_split_column_max_heart_rate">Макс. ЧСС</string>
     <string name="training_split_total">Итого</string>
-    <string name="ok">ОК</string>
 </resources>

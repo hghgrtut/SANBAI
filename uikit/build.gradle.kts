@@ -61,4 +61,5 @@ kotlin {
 
 compose.resources {
     packageOfResClass = "by.rowing.sanbaiteam.uikit.resources"
+    publicResClass = true
 }

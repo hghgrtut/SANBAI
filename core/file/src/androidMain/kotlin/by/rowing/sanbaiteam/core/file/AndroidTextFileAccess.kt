@@ -1,18 +1,19 @@
-package by.rowing.sanbaiteam.training.data.trainingtransfer
+package by.rowing.sanbaiteam.core.file
 
 import android.content.Context
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.core.net.toUri
 
-internal class AndroidBackupFileAccess(private val context: Context) : BackupFileAccess {
+internal class AndroidTextFileAccess(private val context: Context) : TextFileAccess {
 
     override suspend fun write(
         handle: String,
-        text: String
+        text: String,
     ): Boolean = withContext(Dispatchers.IO) {
         runCatching {
-            context.contentResolver.openOutputStream(Uri.parse(handle))
+            context.contentResolver.openOutputStream(handle.toUri())
                 ?.use { stream -> stream.write(text.toByteArray()) }
                 ?: throw IllegalStateException("Unable to open output stream")
         }.isSuccess
@@ -20,7 +21,7 @@ internal class AndroidBackupFileAccess(private val context: Context) : BackupFil
 
     override suspend fun read(handle: String): String? = withContext(Dispatchers.IO) {
         runCatching {
-            context.contentResolver.openInputStream(Uri.parse(handle))?.bufferedReader()?.use { it.readText() }
+            context.contentResolver.openInputStream(handle.toUri())?.bufferedReader()?.use { it.readText() }
         }.getOrNull()
     }
 }

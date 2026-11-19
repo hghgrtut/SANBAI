@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="save">Сохранить</string>
-    <string name="cancel">Отмена</string>
     <string name="athletes_list_title">Спортсмены</string>
     <string name="athletes_search_placeholder">Поиск спортсменов</string>
     <string name="athletes_search_content_description">Поиск</string>
@@ -73,4 +71,24 @@
     <string name="athletes_weight_chart_average">Средний вес</string>
     <string name="athletes_weight_chart_empty">Нет записей веса за период</string>
     <string name="athletes_weight_table_header">Записи веса</string>
+    <string name="athletes_selection_title">Выбрано: %1$d</string>
+    <string name="athletes_selection_cancel">Отменить выбор</string>
+    <string name="athletes_selection_select_all">Выбрать все</string>
+    <string name="athletes_selection_clear_all">Снять выбор со всех</string>
+    <string name="athletes_transfer_notice_title">Перенос данных</string>
+    <string name="athletes_transfer_import_action">Импорт спортсменов</string>
+    <string name="athletes_transfer_export_selected_action">Поделиться выбранными спортсменами</string>
+    <string name="athletes_transfer_export_success">Резервная копия сохранена.</string>
+    <string name="athletes_transfer_export_error">Не удалось создать резервную копию.</string>
+    <string name="athletes_transfer_import_result">Добавлено спортсменов: %1$d, обновлено: %2$d, импортировано рекордов: %3$d, записей веса: %4$d</string>
+    <string name="athletes_transfer_import_error">Не удалось импортировать файл.</string>
+    <string name="athletes_delete_action">Удалить</string>
+    <string name="athletes_delete_confirm_title">Удаление спортсменов</string>
+    <string name="athletes_delete_confirm_message">Удалить выбранных спортсменов (%1$d)?</string>
+    <plurals name="athletes_delete_related_trainings">
+        <item quantity="one">У выбранных спортсменов есть %1$d тренировка. Она будет удалена вместе с ними.</item>
+        <item quantity="few">У выбранных спортсменов есть %1$d тренировки. Они будут удалены вместе с ними.</item>
+        <item quantity="many">У выбранных спортсменов есть %1$d тренировок. Они будут удалены вместе с ними.</item>
+        <item quantity="other">У выбранных спортсменов есть %1$d тренировки. Они будут удалены вместе с ними.</item>
+    </plurals>
 </resources>

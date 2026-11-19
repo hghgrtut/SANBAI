@@ -39,6 +39,7 @@ kotlin {
             implementation(project(":data:local"))
             implementation(project(":core:util"))
             implementation(project(":core:annotation"))
+            implementation(project(":core:file"))
             implementation(project(":core:navigation"))
             implementation(project(":core:base"))
             implementation(project(":uikit"))

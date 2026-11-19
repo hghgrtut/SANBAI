@@ -33,7 +33,11 @@ interface AthleteDao {
     @Update
     suspend fun updateAthlete(athlete: AthleteEntity)
 
+    @Query("DELETE FROM $TABLE_NAME WHERE id IN (:athleteIds)")
+    suspend fun deleteAthletes(athleteIds: List<Long>)
+
     companion object {
-        const val TABLE_NAME = "athlete_entity"
+
+        internal const val TABLE_NAME = "athlete_entity"
     }
 }

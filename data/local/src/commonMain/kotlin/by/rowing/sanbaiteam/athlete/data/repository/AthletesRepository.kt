@@ -17,11 +17,15 @@ interface AthletesRepository {
 
     suspend fun addAthlete(athlete: AthleteEntity): Long
 
+    suspend fun deleteAthletes(athleteIds: List<Long>)
+
     suspend fun getAthlete(athleteId: Long): AthleteEntity?
 
     suspend fun updateAthlete(athlete: AthleteEntity)
 
     suspend fun getPersonalBests(athleteId: Long): List<AthletePersonalBestEntity>
+
+    suspend fun upsertPersonalBests(bests: List<AthletePersonalBestEntity>)
 
     suspend fun replacePersonalBests(
         athleteId: Long,
@@ -39,6 +43,8 @@ interface AthletesRepository {
     suspend fun findAthleteIdBySpeedCoachSerial(serial: String): Long?
 
     suspend fun getWeights(athleteId: Long): List<AthleteWeightEntity>
+
+    suspend fun upsertWeights(weights: List<AthleteWeightEntity>)
 
     suspend fun saveWeight(
         athleteId: Long,

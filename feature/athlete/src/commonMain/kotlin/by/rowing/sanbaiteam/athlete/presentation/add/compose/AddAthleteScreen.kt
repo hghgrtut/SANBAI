@@ -50,7 +50,6 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_add_preview_header
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_section_main
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_placeholder
-import by.rowing.sanbaiteam.athlete.resources.save
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.uikit.component.SectionHeader
@@ -59,9 +58,11 @@ import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
+import by.rowing.sanbaiteam.uikit.resources.uikit_save
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import org.jetbrains.compose.resources.stringResource
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
 
 private val FIELD_ICON_SIZE = 20.dp
 private val GENDER_SELECTOR_WIDTH = 104.dp
@@ -96,7 +97,7 @@ private fun AddAthleteTopBar(actions: AddAthleteScreenActions) {
             IconButton(onClick = actions::onSaveClick) {
                 Icon(
                     imageVector = Icons.Default.Save,
-                    contentDescription = stringResource(Res.string.save),
+                    contentDescription = stringResource(UikitRes.string.uikit_save),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -263,8 +264,12 @@ private fun AthleteCardPreview(state: AddAthleteState) {
             dateOfBirth = state.dateOfBirth,
             isMale = state.isMale,
             speedCoachSerial = state.speedCoachSerial.ifBlank { null },
-        )
-    ) {}
+        ),
+        isSelectionMode = false,
+        selected = false,
+        onAthleteClick = {},
+        onAthleteLongClick = {},
+    )
 }
 
 @Composable
