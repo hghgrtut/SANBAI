@@ -63,11 +63,19 @@ internal class TrainingRepository(
         )
     }
 
-    suspend fun deleteTrainings(trainingIds: List<Long>) = withContext(Dispatchers.Default) {
+    suspend fun deleteTrainings(trainingIds: List<Long>): Int = withContext(Dispatchers.Default) {
         dao.getImportPathsByIds(trainingIds).forEach { relativePath ->
             runCatching { importStorage.deleteImportFile(relativePath) }
         }
         dao.deleteTrainingsWithPieces(trainingIds)
+    }
+
+    suspend fun countTrainingsForAthletes(athleteIds: List<Long>): Int = withContext(Dispatchers.Default) {
+        dao.countTrainingsForAthletes(athleteIds)
+    }
+
+    suspend fun deleteTrainingsForAthletes(athleteIds: List<Long>): Int = withContext(Dispatchers.Default) {
+        deleteTrainings(dao.getTrainingIdsForAthletes(athleteIds))
     }
 
     fun observeTrainingsList(): Flow<List<ListTrainingStateItem>> = combine(

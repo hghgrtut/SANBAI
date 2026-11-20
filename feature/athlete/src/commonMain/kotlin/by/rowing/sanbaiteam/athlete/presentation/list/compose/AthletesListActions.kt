@@ -12,6 +12,28 @@ internal interface AthletesListActions : NavigateBackAware {
 
     fun onAthleteClick(athleteId: Long)
 
+    fun onAthleteLongClick(athleteId: Long)
+
+    fun onCancelSelection()
+
+    fun onToggleSelectAllClick(athleteIds: List<Long>)
+
+    fun onDeleteClick()
+
+    fun onDeleteDismiss()
+
+    fun onDeleteConfirm()
+
+    fun onExportSelectedClick()
+
+    fun onExportPromptLaunched()
+
+    fun onExportToHandle(handle: String)
+
+    fun onImportFromHandle(handle: String)
+
+    fun onDismissTransferNotice()
+
     companion object {
 
         fun empty(): AthletesListActions =
@@ -21,6 +43,17 @@ internal interface AthletesListActions : NavigateBackAware {
                 override fun onShowFiltersChange(showFilters: Boolean) {}
                 override fun onAddAthleteClick() {}
                 override fun onAthleteClick(athleteId: Long) {}
+                override fun onAthleteLongClick(athleteId: Long) {}
+                override fun onCancelSelection() {}
+                override fun onToggleSelectAllClick(athleteIds: List<Long>) {}
+                override fun onDeleteClick() {}
+                override fun onDeleteDismiss() {}
+                override fun onDeleteConfirm() {}
+                override fun onExportSelectedClick() {}
+                override fun onExportPromptLaunched() {}
+                override fun onExportToHandle(handle: String) {}
+                override fun onImportFromHandle(handle: String) {}
+                override fun onDismissTransferNotice() {}
             }
     }
 }

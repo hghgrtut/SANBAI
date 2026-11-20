@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Debug-сборка ставится рядом с релизной (applicationIdSuffix), поэтому иконка
+         со значком DEBUG, чтобы приложения не путались на устройстве. -->
+    <application
+        android:icon="@drawable/ic_app_icon_debug"
+        android:roundIcon="@drawable/ic_app_icon_debug"
+        tools:replace="android:icon,android:roundIcon" />
+
+</manifest>

@@ -38,12 +38,22 @@ internal class AthletesRepositoryImpl(
 
     override suspend fun addAthlete(athlete: AthleteEntity): Long = dao.addAthlete(athlete = athlete)
 
+    override suspend fun deleteAthletes(athleteIds: List<Long>) {
+        dao.deleteAthletes(athleteIds = athleteIds)
+    }
+
     override suspend fun getAthlete(athleteId: Long): AthleteEntity? = dao.getById(athleteId = athleteId)
 
-    override suspend fun updateAthlete(athlete: AthleteEntity) = dao.updateAthlete(athlete = athlete)
+    override suspend fun updateAthlete(athlete: AthleteEntity) {
+        dao.updateAthlete(athlete = athlete)
+    }
 
     override suspend fun getPersonalBests(athleteId: Long): List<AthletePersonalBestEntity> =
         personalBestDao.getByAthlete(athleteId = athleteId)
+
+    override suspend fun upsertPersonalBests(bests: List<AthletePersonalBestEntity>) {
+        personalBestDao.upsertAll(bests = bests)
+    }
 
     override suspend fun replacePersonalBests(
         athleteId: Long,
@@ -86,6 +96,10 @@ internal class AthletesRepositoryImpl(
 
     override suspend fun getWeights(athleteId: Long): List<AthleteWeightEntity> =
         weightDao.getByAthlete(athleteId = athleteId)
+
+    override suspend fun upsertWeights(weights: List<AthleteWeightEntity>) {
+        weightDao.upsertAll(weights = weights)
+    }
 
     override suspend fun saveWeight(
         athleteId: Long,

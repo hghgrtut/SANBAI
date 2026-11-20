@@ -38,6 +38,7 @@ kotlin {
             implementation(project(":data:local"))
             implementation(project(":core:util"))
             implementation(project(":core:annotation"))
+            implementation(project(":core:file"))
             implementation(project(":core:navigation"))
             implementation(project(":core:base"))
             implementation(project(":uikit"))
@@ -54,10 +55,12 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

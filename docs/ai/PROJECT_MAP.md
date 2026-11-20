@@ -32,6 +32,7 @@ app (Android: MainActivity, RowingApp, manifest, res)
      ├─ uikit ───────────── компоненты, тема, модификаторы, UiText
      ├─ core:navigation ─── ComposeNavigator, NavigationDestination, composable<>
      ├─ core:base ───────── ComposeBaseViewModel / ComposeStateHolder
+     ├─ core:file ───────── TextFileAccess, системные JSON-пикеры файлов (Android/iOS)
      ├─ core:util ───────── форматтеры времени/чисел/дат, расчёты PB
      ├─ core:annotation ─── @AllowDetektPublic
      └─ data:local ──────── Room-БД, entity, DAO, AthletesRepository (интерфейс), DataModule
@@ -44,6 +45,7 @@ iosApp (Xcode) → framework Shared (shared/src/iosMain/.../MainViewController.k
 | `shared` | Корневой экран, навигационный хост, DI приложения | `App.kt` — единственный NavHost; `publicResClass = true` |
 | `core/navigation` | Обёртка над navigation-compose | `composable<T, VM>` + авто-`BackHandler` для `NavigateBackAware` |
 | `core/base` | Базовая ViewModel | `ComposeBaseViewModel<T>` + `changeState {}` |
+| `core/file` | Общий файловый слой | `TextFileAccess` (Android URI / iOS путь), `rememberCreateTextFileLauncher`, `rememberOpenTextFileLauncher`, `rememberOpenFilesLauncher` |
 | `core/util` | Форматтеры и расчёты | Всё, что связано с `m:ss.t`, темпом, датами, % от PB |
 | `core/annotation` | `@AllowDetektPublic` | Пометка намеренно публичных top-level объявлений |
 | `data/local` | Room + DAO + entities + `AthletesRepository` | Версия БД = 6, миграции внутри `RowingDatabase` |
@@ -156,6 +158,8 @@ DAO предоставляются Koin в `data/local/.../data/di/DataModule.kt
 - `TrainingRepository` (`feature/training/.../data/repository/TrainingRepository.kt`, `internal`) — сохранение/удаление/наблюдение списка, деталь, график; **строит presentation-модели** (`ListTrainingStateItem`, `TrainingDetailState`, `TrainingDetailPiece`).
 - `SavedTrainingFiltersRepository`, `TrainingDetailSettingsRepository` — там же; `WorkDisplaySettingsRepository` — `feature/settings/.../data/repository/`.
 - `TrainingTransferRepository` + `TrainingBackupSerializer` (JSON-бэкап, `FORMAT_VERSION = 2`) — `feature/training/.../data/trainingtransfer/`.
+- `AthleteTransferRepository` + `AthleteBackupSerializer` (JSON-бэкап спортсменов, `kind = "sanbai-athletes"`, `FORMAT_VERSION = 1`) — `feature/athlete/.../data/transfer/`; чистое слияние — `AthleteBackupMerge`.
+- `AthleteTrainingsCleaner` — интерфейс в `feature/athlete/.../domain/trainings/`, реализация `TrainingAthleteTrainingsCleaner` в `feature/training/.../data/repository/` (удаление связанных тренировок при удалении спортсменов).
 
 ---
 

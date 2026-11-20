@@ -1,9 +1,11 @@
 package by.rowing.sanbaiteam.training.di
 
+import by.rowing.sanbaiteam.athlete.domain.trainings.AthleteTrainingsCleaner
 import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboard
 import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboardImpl
 import by.rowing.sanbaiteam.training.data.repository.SavedTrainingFiltersRepository
+import by.rowing.sanbaiteam.training.data.repository.TrainingAthleteTrainingsCleaner
 import by.rowing.sanbaiteam.training.data.repository.TrainingDetailSettingsRepository
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
@@ -16,6 +18,7 @@ import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val trainingModule = module {
@@ -27,6 +30,7 @@ val trainingModule = module {
     singleOf(::TrainingDetailSettingsRepository)
     singleOf(::TrainingTransferRepository)
     singleOf(::TrainingComparisonSelectionStore)
+    singleOf(::TrainingAthleteTrainingsCleaner) bind AthleteTrainingsCleaner::class
     single<TrainingDashboard> { TrainingDashboardImpl(repository = get()) }
 
     viewModelOf(::ListTrainingViewModel)

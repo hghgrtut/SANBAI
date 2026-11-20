@@ -6,5 +6,6 @@
     <string name="uikit_range_to">До</string>
     <string name="uikit_ok">ОК</string>
     <string name="uikit_cancel">Отмена</string>
+    <string name="uikit_save">Сохранить</string>
     <string name="uikit_add">Добавить</string>
 </resources>

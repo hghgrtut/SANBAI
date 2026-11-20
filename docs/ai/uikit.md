@@ -105,14 +105,3 @@ Button(
 
 `modifier/ClickableState.kt` + `LocalClickableState.kt` — общий debounce (300 мс), `ClickableState` создаётся в Koin (`sharedAppModule`), провайдится в `App.kt`.
 В `@Preview` нужен `ComposePreviewWrapper` (`uikit/Util.kt`), он подставляет `ClickableState`.
-
----
-
-## 4. Строки и ресурсы uikit
-
-- `uikit/src/commonMain/composeResources/values/strings.xml`: `uikit_back`, `uikit_close`, `uikit_range_from`, `uikit_range_to`.
-- Drawable: `ic_check_16`, `ic_minus_16`, `ic_close_16`, `ic_chevron_left_24`.
-- Пакет ресурсов: `by.rowing.sanbaiteam.uikit.resources.Res`.
-
-Общие строки фич живут в своих модулях (`feature/*/src/commonMain/composeResources/values/strings.xml`), а подписи типов
-тренировок — в `data/local` (см. [training.md](training.md)).

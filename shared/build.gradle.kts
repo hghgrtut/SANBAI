@@ -38,6 +38,7 @@ kotlin {
             implementation(project(":core:annotation"))
             implementation(project(":core:navigation"))
             implementation(project(":core:base"))
+            implementation(project(":core:file"))
             implementation(project(":data:local"))
             implementation(project(":feature:calculator"))
             implementation(project(":feature:athlete"))

@@ -1,5 +1,6 @@
 package by.rowing.sanbaiteam.shared.di
 
+import by.rowing.sanbaiteam.core.file.di.coreFileModule
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.shared.main.presentation.MainViewModel
 import by.rowing.sanbaiteam.shared.main.presentation.navigation.MainNavigator
@@ -10,6 +11,8 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val sharedAppModule = module {
+    includes(coreFileModule)
+
     singleOf(::ClickableState)
 
     singleOf(::MainNavigator) bind ComposeNavigator::class

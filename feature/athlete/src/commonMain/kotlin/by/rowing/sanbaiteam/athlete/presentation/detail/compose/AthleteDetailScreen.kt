@@ -79,8 +79,6 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_weight_table_header
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_kg
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_placeholder
-import by.rowing.sanbaiteam.athlete.resources.cancel
-import by.rowing.sanbaiteam.athlete.resources.save
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.uikit.component.DataCard
@@ -96,6 +94,9 @@ import by.rowing.sanbaiteam.uikit.component.number
 import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
 import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
+import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
+import by.rowing.sanbaiteam.uikit.resources.uikit_save
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
@@ -186,7 +187,7 @@ private fun RowDetailsTopBar(
                 IconButton(onClick = actions::onSaveClick) {
                     Icon(
                         imageVector = Icons.Default.Save,
-                        contentDescription = stringResource(Res.string.save),
+                        contentDescription = stringResource(UikitRes.string.uikit_save),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
@@ -459,13 +460,13 @@ private fun WeightDialog(
         },
         confirmButton = {
             Button(
-                text = stringResource(Res.string.save),
+                text = stringResource(UikitRes.string.uikit_save),
                 debounceClick = actions::saveWeight,
             )
         },
         dismissButton = {
             Button(
-                text = stringResource(Res.string.cancel),
+                text = stringResource(UikitRes.string.uikit_cancel),
                 buttonColors = ButtonColors.text(),
                 debounceClick = actions::dismissWeightDialog,
             )
@@ -505,7 +506,7 @@ private fun DeleteWeightDialog(
         },
         dismissButton = {
             Button(
-                text = stringResource(Res.string.cancel),
+                text = stringResource(UikitRes.string.uikit_cancel),
                 buttonColors = ButtonColors.text(),
                 debounceClick = actions::dismissDeleteWeight,
             )
@@ -564,7 +565,7 @@ private fun WeightRangeDialog(
         },
         dismissButton = {
             Button(
-                text = stringResource(Res.string.cancel),
+                text = stringResource(UikitRes.string.uikit_cancel),
                 buttonColors = ButtonColors.text(),
                 debounceClick = actions::dismissWeightRangeDialog,
             )
@@ -816,7 +817,7 @@ private fun RecordErrorAlert(
         },
         confirmButton = {
             Button(
-                text = stringResource(Res.string.cancel),
+                text = stringResource(UikitRes.string.uikit_cancel),
                 buttonColors = ButtonColors.text(),
                 debounceClick = actions::clearRecordsError
             )

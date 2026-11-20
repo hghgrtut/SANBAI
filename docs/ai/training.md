@@ -22,7 +22,7 @@
 | `presentation/comparison/*` | Экран выбора тренировок для сравнения (`TrainingCompareScreen`, `TrainingCompareViewModel`) и `TrainingComparisonSelectionStore` (сессионный стейт) |
 | `presentation/chart/*` | Экран графика отрезка (`TrainingChartViewModel`, `TrainingChartState`, `TrainingChartValueBounds`) |
 | `presentation/filter/*` | Движок фильтров: `TrainingFilter`, `TrainingFilterParameter`, `TrainingFilterMatcher`, `TrainingFilterTimeParser`, `TrainingFiltersController`, `FilterableTraining`, `models/*`, `compose/*` (панель, чипы, диалоги) |
-| `presentation/platform/TrainingPlatformComposables.kt` | `expect`-пикеры: `rememberTrainingImportPicker`, `rememberCreateBackupLauncher`, `rememberOpenBackupLauncher`, `rememberTrainingDatePicker` (+ actual в android/ios) |
+| `presentation/platform/TrainingPlatformComposables.kt` | `expect`-пикеры: `rememberTrainingImportPicker`, `rememberTrainingDatePicker` (+ actual в android/ios); файловые диалоги — из `core:file` |
 | `presentation/navigation/*` | `TrainingNavigation`, `TrainingNavGraphProvider` |
 
 ### Data
@@ -151,7 +151,7 @@ UI: `TrainingChartScreen` использует `MetricLineChart` (см. [uikit.m
 `TrainingBackup(formatVersion, athletes: [name, dateOfBirthMillis, isMale], trainings: [dateMillis, type, source?, sourceFileBase64?, sourceFileExtension?, pieces])`.
 `TrainingTransferRepository.exportSelectedBackup(ids)` / `importBackup(backup)` → `TrainingTransferResult(trainingsImported, athletesCreated)`; исходные файлы кодируются base64 и восстанавливаются в storage.
 Атлеты сопоставляются `TrainingTransferAthleteMatcher.matchBackupAthletesToExisting` (совпадение по данным, не по id).
-UI: экспорт/импорт в `ListTrainingScreen` через `rememberCreateBackupLauncher` / `rememberOpenBackupLauncher`; уведомления — `UiText`.
+UI: экспорт/импорт в `ListTrainingScreen` через `rememberCreateTextFileLauncher` / `rememberOpenTextFileLauncher` из `core:file`; запись/чтение — `TextFileAccess`; уведомления — `UiText`.
 
 ---
 

@@ -48,7 +48,6 @@ import by.rowing.sanbaiteam.calculator.resources.calculator_record_pace_label
 import by.rowing.sanbaiteam.calculator.resources.calculator_result_label
 import by.rowing.sanbaiteam.calculator.resources.calculator_subtitle
 import by.rowing.sanbaiteam.calculator.resources.calculator_title
-import by.rowing.sanbaiteam.calculator.resources.cancel
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.button.Button
@@ -56,6 +55,8 @@ import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
+import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
@@ -318,7 +319,7 @@ private fun InputErrorAlert(
         },
         confirmButton = {
             Button(
-                text = stringResource(Res.string.cancel),
+                text = stringResource(UikitRes.string.uikit_cancel),
                 buttonColors = ButtonColors.text(),
                 debounceClick = onClearError
             )

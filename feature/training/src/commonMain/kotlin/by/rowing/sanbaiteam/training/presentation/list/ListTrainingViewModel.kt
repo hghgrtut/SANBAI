@@ -2,13 +2,13 @@ package by.rowing.sanbaiteam.training.presentation.list
 
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.core.file.TextFileAccess
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
 import by.rowing.sanbaiteam.training.data.models.TrainingTransferResult
 import by.rowing.sanbaiteam.training.data.repository.SavedTrainingFiltersRepository
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
-import by.rowing.sanbaiteam.training.data.trainingtransfer.BackupFileAccess
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingBackupSerializer
 import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
@@ -30,7 +30,7 @@ import kotlinx.coroutines.withContext
 internal class ListTrainingViewModel(
     private val repository: TrainingRepository,
     private val trainingTransferRepository: TrainingTransferRepository,
-    private val backupFileAccess: BackupFileAccess,
+    private val backupFileAccess: TextFileAccess,
     private val athletesRepository: AthletesRepository,
     private val composeNavigator: ComposeNavigator,
     savedFiltersRepository: SavedTrainingFiltersRepository

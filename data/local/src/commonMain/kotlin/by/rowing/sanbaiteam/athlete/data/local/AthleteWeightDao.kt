@@ -16,6 +16,9 @@ interface AthleteWeightDao {
     @Upsert
     suspend fun upsert(weight: AthleteWeightEntity)
 
+    @Upsert
+    suspend fun upsertAll(weights: List<AthleteWeightEntity>)
+
     @Query("DELETE FROM $TABLE_NAME WHERE athleteId = :athleteId AND dateMillis = :dateMillis")
     suspend fun deleteByDate(
         athleteId: Long,

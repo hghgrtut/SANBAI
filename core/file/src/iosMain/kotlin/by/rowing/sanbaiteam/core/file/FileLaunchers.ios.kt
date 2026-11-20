@@ -1,9 +1,10 @@
-package by.rowing.sanbaiteam.training.presentation.platform
+package by.rowing.sanbaiteam.core.file
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSTemporaryDirectory
@@ -22,38 +23,18 @@ private const val UT_TYPE_DATA = "public.data"
 private const val UT_TYPE_JSON = "public.json"
 private const val UT_TYPE_TEXT = "public.plain-text"
 
-/** Сколько раз (с шагом [SHARE_WAIT_INTERVAL_SECONDS]) ждём появления файла бэкапа перед Share Sheet. */
+/** Сколько раз (с шагом [SHARE_WAIT_INTERVAL_SECONDS]) ждём появления файла перед Share Sheet. */
 private const val SHARE_WAIT_ATTEMPTS = 40
 private const val SHARE_WAIT_INTERVAL_SECONDS = 0.05
 
-/**
- * Возвращает действие, открывающее системный выбор файлов тренировки.
- * Выбранные файлы копируются во временный каталог, пути возвращаются как строки.
- */
+@AllowDetektPublic
 @Composable
-internal actual fun rememberTrainingImportPicker(onFilesPicked: (List<String>) -> Unit): () -> Unit {
-    val presenter = rememberDocumentPickerPresenter(
-        onFilesPicked = onFilesPicked,
-        contentTypes = listOf(utType(UT_TYPE_DATA)),
-        allowsMultipleSelection = true,
-    )
-    return remember {
-        { presenter() }
-    }
-}
-
-/**
- * Возвращает действие, открывающее Share Sheet для сохранения резервной копии.
- * Принимает предлагаемое имя файла; путь для записи бэкапа передаётся в [onCreated]
- * до показа Share Sheet, чтобы файл успел записаться, пока пользователь выбирает назначение.
- */
-@Composable
-internal actual fun rememberCreateBackupLauncher(onCreated: (String) -> Unit): (String) -> Unit {
+actual fun rememberCreateTextFileLauncher(onCreated: (String) -> Unit): (String) -> Unit {
     val currentOnCreated by rememberUpdatedState(onCreated)
     return remember {
         { fileName: String ->
             topMostViewController()?.let { root ->
-                val tempPath = "${NSTemporaryDirectory()}backup_${NSUUID().UUIDString()}_$fileName"
+                val tempPath = "${NSTemporaryDirectory()}export_${NSUUID().UUIDString()}_$fileName"
                 currentOnCreated(tempPath)
                 presentShareSheetWhenReady(
                     root = root,
@@ -65,16 +46,26 @@ internal actual fun rememberCreateBackupLauncher(onCreated: (String) -> Unit): (
     }
 }
 
-/**
- * Возвращает действие, открывающее системный выбор файла резервной копии.
- * Выбранный файл копируется во временный каталог, путь возвращается как строка.
- */
+@AllowDetektPublic
 @Composable
-internal actual fun rememberOpenBackupLauncher(onOpened: (String) -> Unit): () -> Unit {
+actual fun rememberOpenTextFileLauncher(onOpened: (String) -> Unit): () -> Unit {
     val presenter = rememberDocumentPickerPresenter(
         onFilesPicked = { paths -> paths.firstOrNull()?.let { path -> onOpened(path) } },
         contentTypes = listOf(utType(UT_TYPE_JSON), utType(UT_TYPE_TEXT)),
         allowsMultipleSelection = false,
+    )
+    return remember {
+        { presenter() }
+    }
+}
+
+@AllowDetektPublic
+@Composable
+actual fun rememberOpenFilesLauncher(onFilesPicked: (List<String>) -> Unit): () -> Unit {
+    val presenter = rememberDocumentPickerPresenter(
+        onFilesPicked = onFilesPicked,
+        contentTypes = listOf(utType(UT_TYPE_DATA)),
+        allowsMultipleSelection = true,
     )
     return remember {
         { presenter() }
@@ -112,7 +103,7 @@ private fun rememberDocumentPickerPresenter(
                 root.presentViewController(
                     documentPicker,
                     animated = true,
-                    completion = null
+                    completion = null,
                 )
             }
         }
@@ -130,12 +121,6 @@ private fun copyToTempDirectory(url: NSURL): String {
     return if (copied) tempFile else url.path ?: tempFile
 }
 
-/**
- * Показывает Share Sheet, когда файл появился на диске.
- * Вьюмодель пишет бэкап асинхронно после [rememberCreateBackupLauncher]'s onCreated,
- * поэтому дожидаемся записи с коротким интервалом и ограниченным числом попыток.
- */
-@OptIn(ExperimentalForeignApi::class)
 private fun presentShareSheetWhenReady(
     root: UIViewController,
     tempPath: String,
@@ -144,7 +129,7 @@ private fun presentShareSheetWhenReady(
     if (NSFileManager.defaultManager.fileExistsAtPath(tempPath)) {
         presentShareSheet(
             root = root,
-            tempPath = tempPath
+            tempPath = tempPath,
         )
     } else if (attemptsLeft > 0) {
         NSTimer.scheduledTimerWithTimeInterval(
@@ -155,7 +140,7 @@ private fun presentShareSheetWhenReady(
             presentShareSheetWhenReady(
                 root = root,
                 tempPath = tempPath,
-                attemptsLeft = attemptsLeft - 1
+                attemptsLeft = attemptsLeft - 1,
             )
         }
     }
@@ -164,7 +149,7 @@ private fun presentShareSheetWhenReady(
 @OptIn(ExperimentalForeignApi::class)
 private fun presentShareSheet(
     root: UIViewController,
-    tempPath: String
+    tempPath: String,
 ) {
     val shareSheet = UIActivityViewController(
         activityItems = listOf(NSURL.fileURLWithPath(tempPath)),
@@ -173,17 +158,16 @@ private fun presentShareSheet(
     shareSheet.completionWithItemsHandler = { _, _, _, _ ->
         NSFileManager.defaultManager.removeItemAtPath(
             tempPath,
-            error = null
+            error = null,
         )
     }
     root.presentViewController(
         shareSheet,
         animated = true,
-        completion = null
+        completion = null,
     )
 }
 
-@OptIn(ExperimentalForeignApi::class)
 private fun topMostViewController(): UIViewController? {
     var controller = UIApplication.sharedApplication.keyWindow?.rootViewController
     while (controller?.presentedViewController != null) {

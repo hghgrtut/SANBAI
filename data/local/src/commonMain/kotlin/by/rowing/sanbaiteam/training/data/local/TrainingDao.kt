@@ -48,12 +48,12 @@ interface TrainingDao {
     suspend fun deletePiecesForTrainings(trainingIds: List<Long>)
 
     @Query("DELETE FROM $TABLE_TRAINING WHERE id IN (:trainingIds)")
-    suspend fun deleteTrainings(trainingIds: List<Long>)
+    suspend fun deleteTrainings(trainingIds: List<Long>): Int
 
     @Transaction
-    suspend fun deleteTrainingsWithPieces(trainingIds: List<Long>) {
+    suspend fun deleteTrainingsWithPieces(trainingIds: List<Long>): Int {
         deletePiecesForTrainings(trainingIds)
-        deleteTrainings(trainingIds)
+        return deleteTrainings(trainingIds)
     }
 
     @Query("UPDATE $TABLE_TRAINING SET sourceFileRelativePath = :relativePath WHERE id = :trainingId")
@@ -88,8 +88,25 @@ interface TrainingDao {
     )
     suspend fun getAthleteIdsInTraining(trainingId: Long): List<Long>
 
+    @Query(
+        """
+        SELECT COUNT(DISTINCT trainingId) FROM $TABLE_TRAINING_ATHLETE_PIECE
+        WHERE athleteId IN (:athleteIds)
+        """
+    )
+    suspend fun countTrainingsForAthletes(athleteIds: List<Long>): Int
+
+    @Query(
+        """
+        SELECT DISTINCT trainingId FROM $TABLE_TRAINING_ATHLETE_PIECE
+        WHERE athleteId IN (:athleteIds)
+        """
+    )
+    suspend fun getTrainingIdsForAthletes(athleteIds: List<Long>): List<Long>
+
     companion object {
-        const val TABLE_TRAINING = "table_training"
-        const val TABLE_TRAINING_ATHLETE_PIECE = "table_training_athlete_piece"
+
+        internal const val TABLE_TRAINING = "table_training"
+        internal const val TABLE_TRAINING_ATHLETE_PIECE = "table_training_athlete_piece"
     }
 }

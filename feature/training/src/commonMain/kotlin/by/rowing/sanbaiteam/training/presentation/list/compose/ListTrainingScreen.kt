@@ -47,6 +47,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.athlete.presentation.common.ItemCard
+import by.rowing.sanbaiteam.core.file.rememberCreateTextFileLauncher
+import by.rowing.sanbaiteam.core.file.rememberOpenTextFileLauncher
 import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.presentation.filter.applyTrainingFilter
@@ -57,11 +59,7 @@ import by.rowing.sanbaiteam.training.presentation.filter.compose.TrainingQuickFi
 import by.rowing.sanbaiteam.training.presentation.list.ListTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingStateItem
-import by.rowing.sanbaiteam.training.presentation.platform.rememberCreateBackupLauncher
-import by.rowing.sanbaiteam.training.presentation.platform.rememberOpenBackupLauncher
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.cancel
-import by.rowing.sanbaiteam.training.resources.ok
 import by.rowing.sanbaiteam.training.resources.training_add_some_training
 import by.rowing.sanbaiteam.training.resources.training_add_training
 import by.rowing.sanbaiteam.training.resources.training_delete_action
@@ -89,6 +87,9 @@ import by.rowing.sanbaiteam.uikit.component.UiText
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
+import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
+import by.rowing.sanbaiteam.uikit.resources.uikit_ok
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
@@ -129,8 +130,8 @@ private fun ListTrainingScreenContent(
         state.items.applyTrainingFilter(trainingFilter = state.filters.filter)
     }
 
-    val createBackupLauncher = rememberCreateBackupLauncher(onCreated = actions::onExportToHandle)
-    val openBackupLauncher = rememberOpenBackupLauncher(onOpened = actions::onImportFromHandle)
+    val createBackupLauncher = rememberCreateTextFileLauncher(onCreated = actions::onExportToHandle)
+    val openBackupLauncher = rememberOpenTextFileLauncher(onOpened = actions::onImportFromHandle)
 
     LaunchedEffect(state.exportPromptRequested) {
         if (state.exportPromptRequested) {
@@ -580,7 +581,7 @@ private fun TransferDataAlert(
         title = { Text(text = stringResource(Res.string.training_transfer_notice_title)) },
         text = { Text(text = notice.resolve()) },
         confirmButton = {
-            TextButton(onClick = actions::onDismissTransferNotice) { Text(text = stringResource(Res.string.ok)) }
+            TextButton(onClick = actions::onDismissTransferNotice) { Text(text = stringResource(UikitRes.string.uikit_ok)) }
         }
     )
 }
@@ -614,7 +615,7 @@ private fun DeleteTrainingsConfirmDialog(
         },
         dismissButton = {
             Button(
-                text = stringResource(Res.string.cancel),
+                text = stringResource(UikitRes.string.uikit_cancel),
                 buttonColors = ButtonColors.text(),
                 debounceClick = onDismiss
             )
