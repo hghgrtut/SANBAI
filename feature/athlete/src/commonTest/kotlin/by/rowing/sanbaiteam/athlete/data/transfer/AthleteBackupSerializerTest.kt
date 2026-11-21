@@ -8,7 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class AthleteBackupSerializerTest {
+internal class AthleteBackupSerializerTest {
 
     @Test
     fun `round trip keeps athletes records and weights`() {

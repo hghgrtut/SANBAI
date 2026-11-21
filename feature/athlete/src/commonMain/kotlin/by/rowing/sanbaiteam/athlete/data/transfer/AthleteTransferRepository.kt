@@ -97,7 +97,7 @@ internal class AthleteTransferRepository(private val athletesRepository: Athlete
                     dateMillis = TimeUtils.noonOfDay(timeInMillis = dateMillis),
                     weightTenths = weight.weightTenths,
                 ).takeIf {
-                    dateMillis > todayMillis || weight.weightTenths !in MIN_WEIGHT_TENTHS..MAX_WEIGHT_TENTHS
+                    dateMillis <= todayMillis && weight.weightTenths in MIN_WEIGHT_TENTHS..MAX_WEIGHT_TENTHS
                 }
             }
             val weightsToWrite = AthleteBackupMerge.weightsToWrite(incoming = incomingWeights)

@@ -14,7 +14,9 @@ Kotlin Multiplatform + Compose Multiplatform (Android + iOS). UI на русск
 Room (KMP) + Koin + JetBrains navigation-compose + kotlinx-serialization + kotlinx-datetime.
 
 Версии: Kotlin 2.4.21, Compose MP 1.10.0, AGP 9.4.1, Room 2.8.5, Koin 4.2.2, compileSdk 37, minSdk 25.
-Каталог версий — `gradle/libs.versions.toml`. Конвеншн-плагины — `gradle/plugins/convention` (detekt-анализ + detekt-правила).
+Каталог версий — `gradle/libs.versions.toml` (там же `compileSdk`/`minSdk`/`targetSdk`/`jvmTarget`).
+Конвеншн-плагины: KMP-плагины модулей (`honest-sign-kmp-library`, `honest-sign-kmp-compose`, `honest-sign-kmp-feature`)
+и detekt-анализ+правила (`gradle/plugins/convention`) .
 
 **Не запускать Gradle/тесты** — верификацию делает пользователь (AGENTS.md, `opencode.json`).
 
@@ -54,6 +56,30 @@ iosApp (Xcode) → framework Shared (shared/src/iosMain/.../MainViewController.k
 | `feature/athlete` | Список/добавление/деталь спортсмена | PB-рекорды по типам лодок, история веса и график среднего веса |
 | `feature/settings` | Настройки отображения объёма | Режим метров/минут по типу тренировки |
 | `feature/calculator` | Калькулятор % от рекорда ↔ темп | Только одна вьюмодель, без `*Actions`-интерфейса (легаси) |
+
+### Новый KMP-модуль
+
+Настройки (KMP, Android `compileSdk`/`minSdk`, `jvmTarget`, iOS-таргеты, `kotlin-test`) не копируются в модуль —
+их даёт конвеншн-плагин из `gradle/plugins/convention`. В `build.gradle.kts` остаётся только уникальное:
+
+```kotlin
+import plugin.iosFramework
+
+plugins {
+    id("honest-sign-kmp-feature")   // compose-модуль без экранных зависимостей → honest-sign-kmp-compose
+}                                   //                         data/утилитарный → honest-sign-kmp-library
+
+kotlin {
+    android { namespace = "by.rowing.sanbaiteam.newfeature" }
+    iosFramework("NewFeature")      // только если модулю нужен собственный iOS-framework
+}
+```
+
+`withHostTest {}` добавляется в `android { }` вручную — оно включает JVM-прогон `commonTest`.
+У модулей с каталогом `src/commonMain/composeResources` обязательно: `implementation(compose.components.resources)`
+в `commonMain` **и** `compose.resources { packageOfResClass = "by.rowing.sanbaiteam.<модуль>.resources" }`
+(без явного пакета Compose берёт `project.group`/`project.name`, а в имени корня есть пробел — DEX такое не примет).
+`compileSdk`/`minSdk`/`targetSdk`/`jvmTarget` меняются одной строкой в `gradle/libs.versions.toml`.
 
 ---
 

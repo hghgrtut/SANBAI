@@ -9,8 +9,7 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
-internal open class StubAthletesRepository(bests: List<AthletePersonalBestEntity> = emptyList())
-    : AthletesRepository {
+internal open class StubAthletesRepository(bests: List<AthletePersonalBestEntity> = emptyList()) : AthletesRepository {
 
     var requestedBoatType: TrainingPieceType? = null
         private set
