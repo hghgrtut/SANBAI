@@ -33,7 +33,7 @@ internal object AthleteBackupMerge {
         fileSerial: String?,
     ): AthleteEntity? = fileSerial?.trim()
         ?.takeIf { it.isNotEmpty() && it != existing.speedCoachSerial }
-        ?.let { serial ->existing.copy(speedCoachSerial = serial) }
+        ?.let { serial -> existing.copy(speedCoachSerial = serial) }
 
     /** Возвращает рекорды из файла с id существующих записей, чтобы конфликт обновился, а не задвоился. */
     fun personalBestsToWrite(

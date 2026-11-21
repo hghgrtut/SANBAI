@@ -13,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class AthleteTransferRepositoryTest {
+internal class AthleteTransferRepositoryTest {
 
     private val birthday = TimeUtils.startOfDayMillis(timeInMillis = 1_700_000_000_000L)
 
@@ -167,8 +167,14 @@ class AthleteTransferRepositoryTest {
                             ),
                         ),
                         weights = listOf(
-                            BackupWeight(dateMillis = FUTURE_MILLIS, weightTenths = 700),
-                            BackupWeight(dateMillis = birthday, weightTenths = 100),
+                            BackupWeight(
+                                dateMillis = FUTURE_MILLIS,
+                                weightTenths = 700
+                            ),
+                            BackupWeight(
+                                dateMillis = birthday,
+                                weightTenths = 100
+                            ),
                         ),
                     )
                 )

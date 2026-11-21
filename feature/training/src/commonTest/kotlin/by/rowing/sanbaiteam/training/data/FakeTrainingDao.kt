@@ -15,8 +15,6 @@ internal class FakeTrainingDao(
     private val trainingsFlow = MutableStateFlow(trainings.sortedByDescending { it.dateMillis })
     private val piecesFlow = MutableStateFlow(pieces)
 
-    val deletedIds = mutableListOf<List<Long>>()
-
     val trainings: List<TrainingEntity> get() = trainingsFlow.value
 
     val pieces: List<TrainingAthletePieceEntity> get() = piecesFlow.value
@@ -61,10 +59,10 @@ internal class FakeTrainingDao(
         updatePieces(pieces.filterNot { it.trainingId in trainingIds })
     }
 
-    override suspend fun deleteTrainings(trainingIds: List<Long>) {
-        if (trainingIds.isEmpty()) return
-        deletedIds += trainingIds
+    override suspend fun deleteTrainings(trainingIds: List<Long>): Int {
+        val deletedTrainingsCount = trainings.count { it.id in trainingIds }
         updateTrainings(trainings.filterNot { it.id in trainingIds })
+        return deletedTrainingsCount
     }
 
     override suspend fun updateImportMetadata(
@@ -94,6 +92,13 @@ internal class FakeTrainingDao(
         pieces.filter { it.trainingId == trainingId }
             .map { it.athleteId }
             .distinct()
+
+    override suspend fun countTrainingsForAthletes(athleteIds: List<Long>): Int =
+        getTrainingIdsForAthletes(athleteIds = athleteIds).size
+
+    override suspend fun getTrainingIdsForAthletes(athleteIds: List<Long>): List<Long> = pieces.mapNotNull { piece ->
+        piece.trainingId.takeIf { it in athleteIds }
+    }.distinct()
 
     private fun nextTrainingId(): Long = (trainings.maxOfOrNull { it.id } ?: 0L) + 1L
 }

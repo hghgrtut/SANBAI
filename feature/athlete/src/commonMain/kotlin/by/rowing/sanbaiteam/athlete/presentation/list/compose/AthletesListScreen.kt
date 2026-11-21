@@ -1,7 +1,9 @@
 package by.rowing.sanbaiteam.athlete.presentation.list.compose
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -108,6 +110,11 @@ private const val SKELETON_NAME_FRACTION = 0.5f
 private const val SKELETON_BADGE_FRACTION = 0.3f
 private const val SKELETON_ITEM_COUNT = 6
 
+private val transitionAnimation: AnimatedContentTransitionScope<AthleteListContentState>.() -> ContentTransform = {
+    fadeIn(animationSpec = tween(durationMillis = CONTENT_FADE_IN_MILLIS)) togetherWith
+            fadeOut(animationSpec = tween(durationMillis = CONTENT_FADE_OUT_MILLIS))
+}
+
 @Composable
 internal fun AthleteListScreen(viewModel: AthletesViewModel) {
     AthleteListScreenContent(
@@ -121,7 +128,6 @@ private fun AthleteListScreenContent(
     actions: AthletesListActions,
     state: AthletesUiState
 ) {
-
     val filteredAthletes = remember(state.searchQuery, state.items) {
         state.items.filter { athlete -> athlete.name.contains(state.searchQuery, ignoreCase = true) }
     }
@@ -170,39 +176,12 @@ private fun AthleteListScreenContent(
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.scaffoldContentInsets(paddingValues)) {
-            if (state.showFilters) {
-                AthleteFilters(modifier = Modifier.padding(Spacing.M))
-            }
-
-            val contentState = when {
-                state.isLoading -> AthleteListContentState.LOADING
-                filteredAthletes.isEmpty() -> AthleteListContentState.EMPTY
-                else -> AthleteListContentState.CONTENT
-            }
-            AnimatedContent(
-                targetState = contentState,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(durationMillis = CONTENT_FADE_IN_MILLIS)) togetherWith
-                        fadeOut(animationSpec = tween(durationMillis = CONTENT_FADE_OUT_MILLIS))
-                },
-                label = "athleteListContent"
-            ) { targetState ->
-                when (targetState) {
-                    AthleteListContentState.LOADING -> AthleteListSkeleton()
-                    AthleteListContentState.EMPTY -> EmptyAthletesContent(
-                        state = state,
-                        actions = actions
-                    )
-
-                    AthleteListContentState.CONTENT -> AthleteList(
-                        athletes = filteredAthletes,
-                        state = state,
-                        actions = actions
-                    )
-                }
-            }
-        }
+        AthletesMainContent(
+            paddingValues = paddingValues,
+            state = state,
+            filteredAthletes = filteredAthletes,
+            actions = actions
+        )
     }
     state.transferNotice?.let { notice ->
         AthletesTransferNotice(
@@ -217,6 +196,45 @@ private fun AthleteListScreenContent(
             onDismiss = actions::onDeleteDismiss,
             onConfirm = actions::onDeleteConfirm,
         )
+    }
+}
+
+@Composable
+private fun AthletesMainContent(
+    paddingValues: PaddingValues,
+    state: AthletesUiState,
+    filteredAthletes: List<AthleteItemModel>,
+    actions: AthletesListActions
+) {
+    Column(modifier = Modifier.scaffoldContentInsets(paddingValues)) {
+        if (state.showFilters) {
+            AthleteFilters(modifier = Modifier.padding(Spacing.M))
+        }
+
+        val contentState = when {
+            state.isLoading -> AthleteListContentState.LOADING
+            filteredAthletes.isEmpty() -> AthleteListContentState.EMPTY
+            else -> AthleteListContentState.CONTENT
+        }
+        AnimatedContent(
+            targetState = contentState,
+            transitionSpec = transitionAnimation,
+            label = "athleteListContent"
+        ) { targetState ->
+            when (targetState) {
+                AthleteListContentState.LOADING -> AthleteListSkeleton()
+                AthleteListContentState.EMPTY -> EmptyAthletesContent(
+                    state = state,
+                    actions = actions
+                )
+
+                AthleteListContentState.CONTENT -> AthleteList(
+                    athletes = filteredAthletes,
+                    state = state,
+                    actions = actions
+                )
+            }
+        }
     }
 }
 

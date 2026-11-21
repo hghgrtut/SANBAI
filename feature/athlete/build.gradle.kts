@@ -5,7 +5,10 @@ plugins {
 }
 
 kotlin {
-    android { namespace = "by.rowing.sanbaiteam.athlete" }
+    android {
+        namespace = "by.rowing.sanbaiteam.athlete"
+        withHostTest {}
+    }
 
     iosFramework("Athlete")
 
