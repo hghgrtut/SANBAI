@@ -1,35 +1,13 @@
+import plugin.iosFramework
+
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.kotlin.multiplatform.library)
-    alias(libs.plugins.jetbrains.compose)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.jetbrains.kotlin.plugin.serialization)
+    id("honest-sign-kmp-feature")
 }
 
 kotlin {
-    android {
-        namespace = "by.rowing.sanbaiteam.shared"
-        compileSdk = 37
-        minSdk = 25
-        androidResources { enable = true }
-        compilations.configureEach {
-            compileTaskProvider.configure {
-                compilerOptions {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-                }
-            }
-        }
-    }
+    android { namespace = "by.rowing.sanbaiteam.shared" }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "Shared"
-            isStatic = true
-        }
-    }
+    iosFramework("Shared")
 
     sourceSets {
         commonMain.dependencies {
@@ -44,25 +22,8 @@ kotlin {
             implementation(project(":feature:athlete"))
             implementation(project(":feature:training"))
             implementation(project(":feature:settings"))
-
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
-            implementation(libs.jetbrains.lifecycle.runtime.compose)
-            implementation(libs.jetbrains.navigation.compose)
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
-            implementation(libs.kotlinx.serialization.json)
-        }
-        commonTest.dependencies {
-            implementation(kotlin("test"))
         }
     }
 }

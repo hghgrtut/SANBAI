@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "by.rowing.sanbaiteam"
-    compileSdk = 37
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "by.rowing.sanbaiteam"
-        minSdk = 25
-        targetSdk = 37
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 2
         versionName = "1.1"
 
