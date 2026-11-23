@@ -47,6 +47,15 @@ internal object TrainingComparisonCalculator {
 
         putMetricIfPresent(
             metrics = metrics,
+            metric = ComparisonMetric.AVG_POWER,
+            values = compared.mapNotNull { it.avgPowerWatts },
+            base = base.avgPowerWatts,
+            higherIsBetter = true,
+            round = { it.roundToInt().toDouble() },
+        )
+
+        putMetricIfPresent(
+            metrics = metrics,
             metric = ComparisonMetric.STROKE_RATE,
             values = compared.map { it.strokeRate },
             base = base.strokeRate,

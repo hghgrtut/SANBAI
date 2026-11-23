@@ -9,6 +9,7 @@ import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.core.util.roundToTenths
 import by.rowing.sanbaiteam.settings.data.repository.WorkDisplaySettingsRepository
 import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
+import by.rowing.sanbaiteam.training.data.chart.TrainingPower
 import by.rowing.sanbaiteam.training.data.comparison.TrainingComparisonCalculator
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
@@ -133,6 +134,12 @@ internal class TrainingRepository(
                         distanceMeters = piece.distanceMeters,
                         timeMillis = piece.timeMillis,
                         strokeRate = piece.strokeRate,
+                        avgPowerWatts = source.chartDataByOrder[piece.order]?.avgPowerWatts
+                            ?: TrainingPower.estimatedWatts(
+                                pieceType = training.type,
+                                distanceMeters = piece.distanceMeters,
+                                timeMillis = piece.timeMillis,
+                            ),
                         avgHeartRate = piece.avgHeartRate,
                         maxHeartRate = piece.maxHeartRate,
                         recoveryHeartRate = piece.recoveryHeartRate,
@@ -164,6 +171,7 @@ internal class TrainingRepository(
                     training = training,
                     pieces = pieces,
                 ),
+                pieceType = training.type,
             ),
             comparedTrainingIds = comparedSources.map { it.trainingId },
             isLoading = false,
@@ -226,6 +234,7 @@ internal class TrainingRepository(
         personalBests: Map<Long, AthletePersonalBestEntity>,
         comparedByOrder: Map<Int, List<ComparablePiece>>,
         chartDataByOrder: Map<Int, TrainingPieceChartData>,
+        pieceType: TrainingPieceType,
     ): List<TrainingDetailPiece> = baseCrewPieces.map { piece ->
         val percentOfPb = personalBestPercent(
             piece = piece,
@@ -233,6 +242,11 @@ internal class TrainingRepository(
             personalBests = personalBests,
         )
         val chartData = chartDataByOrder[piece.order]
+        val avgPowerWatts = chartData?.avgPowerWatts ?: TrainingPower.estimatedWatts(
+            pieceType = pieceType,
+            distanceMeters = piece.distanceMeters,
+            timeMillis = piece.timeMillis,
+        )
         TrainingDetailPiece(
             order = piece.order + 1,
             distanceMeters = piece.distanceMeters,
@@ -243,6 +257,7 @@ internal class TrainingRepository(
                 distanceMeters = piece.distanceMeters
             ).orEmpty(),
             strokeRateFormatted = formatTenths(value = piece.strokeRate),
+            avgPowerWatts = avgPowerWatts,
             avgHeartRate = piece.avgHeartRate,
             maxHeartRate = piece.maxHeartRate,
             recoveryHeartRate = piece.recoveryHeartRate,
@@ -255,6 +270,7 @@ internal class TrainingRepository(
                     distanceMeters = piece.distanceMeters,
                     timeMillis = piece.timeMillis,
                     strokeRate = piece.strokeRate,
+                    avgPowerWatts = avgPowerWatts,
                     avgHeartRate = piece.avgHeartRate,
                     maxHeartRate = piece.maxHeartRate,
                     recoveryHeartRate = piece.recoveryHeartRate,
@@ -271,12 +287,16 @@ internal class TrainingRepository(
         comparedTrainingIds: List<Long>,
     ): List<ComparedTrainingSource> = comparedTrainingIds.distinct().mapNotNull { trainingId ->
         if (trainingId == base.id) return@mapNotNull null
-        dao.getTrainingById(trainingId)?.takeIf { it.type == base.type } ?: return@mapNotNull null
+        val training = dao.getTrainingById(trainingId)?.takeIf { it.type == base.type } ?: return@mapNotNull null
         val pieces = dao.getPiecesForTraining(trainingId).ifEmpty { return@mapNotNull null }
         ComparedTrainingSource(
             trainingId = trainingId,
             athleteIds = pieces.map { it.athleteId }.distinct(),
             crewPieces = pieces,
+            chartDataByOrder = loadChartData(
+                training = training,
+                pieces = pieces
+            ),
         )
     }
 
@@ -382,5 +402,6 @@ internal class TrainingRepository(
         val trainingId: Long,
         val athleteIds: List<Long>,
         val crewPieces: List<TrainingAthletePieceEntity>,
+        val chartDataByOrder: Map<Int, TrainingPieceChartData>,
     )
 }

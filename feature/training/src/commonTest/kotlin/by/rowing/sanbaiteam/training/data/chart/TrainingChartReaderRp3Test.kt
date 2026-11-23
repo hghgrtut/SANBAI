@@ -30,6 +30,7 @@ internal class TrainingChartReaderRp3Test {
         assertEquals(3, data.availableMetrics.size)
         assertEquals(listOf(0.0, 15.0, 30.0), data.distance.map { it.value })
         assertEquals(listOf(0L, 2_000L, 4_000L), data.distance.map { it.elapsedMillis })
+        assertEquals(null, data.avgPowerWatts)
     }
 
     @Test
@@ -66,6 +67,38 @@ internal class TrainingChartReaderRp3Test {
         )
     }
 
+    @Test
+    fun `rp3 csv with power produces average power`() {
+        val reader = TrainingChartReader()
+
+        val data = assertNotNull(
+            reader.read(
+                sourceFileBytes = RP3_CSV_WITH_POWER.encodeToByteArray(),
+                sourceFileIndex = 0,
+                sourceIntervalIndex = 0,
+                pieceType = TrainingPieceType.RP_3
+            )
+        )
+
+        assertEquals(210, data.avgPowerWatts)
+    }
+
+    @Test
+    fun `rp3 csv prefers last stroke avg power`() {
+        val reader = TrainingChartReader()
+
+        val data = assertNotNull(
+            reader.read(
+                sourceFileBytes = RP3_CSV_WITH_AVG_POWER.encodeToByteArray(),
+                sourceFileIndex = 0,
+                sourceIntervalIndex = 0,
+                pieceType = TrainingPieceType.RP_3
+            )
+        )
+
+        assertEquals(205, data.avgPowerWatts)
+    }
+
     private companion object {
         val RP3_CSV = """
             id,workout_interval_id,stroke_number,stroke_rate,time,distance,estimated_500m_time,pulse
@@ -74,6 +107,20 @@ internal class TrainingChartReaderRp3Test {
             ,1,3,22.0,5.0,40.0,110.0,0
             ,2,1,24.0,10.0,10.0,105.0,110
             ,2,2,25.0,11.0,22.0,104.0,112
+        """.trimIndent()
+
+        val RP3_CSV_WITH_POWER = """
+            id,workout_interval_id,stroke_number,stroke_rate,time,distance,estimated_500m_time,pulse,power
+            ,1,1,20.0,1.0,10.0,120.0,100,200
+            ,1,2,21.0,3.0,25.0,115.0,105,210
+            ,1,3,22.0,5.0,40.0,110.0,0,220
+            ,2,1,24.0,10.0,10.0,105.0,110,300
+        """.trimIndent()
+
+        val RP3_CSV_WITH_AVG_POWER = """
+            id,workout_interval_id,stroke_number,stroke_rate,time,distance,estimated_500m_time,pulse,power,avg_power
+            ,1,1,20.0,1.0,10.0,120.0,100,200,190
+            ,1,2,21.0,3.0,25.0,115.0,105,220,205
         """.trimIndent()
     }
 }

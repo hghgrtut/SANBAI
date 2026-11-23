@@ -145,6 +145,7 @@ internal class FieldCollector {
     var cadence: Int? = null
     var speed: Double? = null
     var enhancedSpeed: Double? = null
+    var powerWatts: Int? = null
     var sport: UShort? = null
     var subSport: UShort? = null
     var manufacturer: UShort? = null
@@ -259,6 +260,7 @@ private fun applyCollector(
                     cadence = collector.cadence?.takeIf { it > 0 },
                     distanceMeters = collector.distance?.takeIf { it >= 0.0 },
                     speedMetersPerSecond = (collector.speed ?: collector.enhancedSpeed)?.takeIf { it >= 0.0 },
+                    powerWatts = collector.powerWatts,
                 )
             )
         }
@@ -527,6 +529,16 @@ private fun readLapField(
     }
 }
 
+private fun readPower(
+    reader: ByteReader,
+    size: Int,
+    le: Boolean,
+): Int? = when (size) {
+    1 -> reader.readUByte().toInt().takeIf { it != 0xFF }
+    2 -> reader.readUShort(le).toInt().takeIf { it != 0xFFFF }
+    else -> null
+}?.takeIf { it > 0 }
+
 private fun readRecordField(
     reader: ByteReader,
     collector: FieldCollector,
@@ -573,5 +585,11 @@ private fun readRecordField(
                 collector.enhancedSpeed = scaleSpeed(raw)
             }
         }
+
+        FIELD_RECORD_POWER -> readPower(
+            reader = reader,
+            size = size,
+            le = le
+        )?.let { collector.powerWatts = it }
     }
 }

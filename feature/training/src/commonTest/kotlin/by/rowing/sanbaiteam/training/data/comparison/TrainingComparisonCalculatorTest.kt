@@ -18,6 +18,7 @@ internal class TrainingComparisonCalculatorTest {
             distanceMeters = 1000,
             timeMillis = 200_000L,
             strokeRate = 30.0,
+            avgPowerWatts = 200,
             avgHeartRate = 150,
             maxHeartRate = 170,
             recoveryHeartRate = 120,
@@ -28,6 +29,7 @@ internal class TrainingComparisonCalculatorTest {
             distanceMeters = 950,
             timeMillis = 210_000L,
             strokeRate = 31.0,
+            avgPowerWatts = 220,
             avgHeartRate = 148,
             maxHeartRate = 172,
             recoveryHeartRate = 118,
@@ -44,6 +46,7 @@ internal class TrainingComparisonCalculatorTest {
         assertMetric(result, ComparisonMetric.DISTANCE, 950.0, 50.0, ComparisonTrend.BETTER)
         assertMetric(result, ComparisonMetric.TIME, 210_000.0, -10_000.0, ComparisonTrend.BETTER)
         assertMetric(result, ComparisonMetric.PACE, 110_526.0, -10_526.0, ComparisonTrend.BETTER)
+        assertMetric(result, ComparisonMetric.AVG_POWER, 220.0, -20.0, ComparisonTrend.WORSE)
         assertMetric(result, ComparisonMetric.STROKE_RATE, 31.0, -1.0, ComparisonTrend.NEUTRAL)
         assertMetric(result, ComparisonMetric.AVG_HEART_RATE, 148.0, 2.0, ComparisonTrend.WORSE)
         assertMetric(result, ComparisonMetric.MAX_HEART_RATE, 172.0, -2.0, ComparisonTrend.BETTER)
@@ -77,6 +80,7 @@ internal class TrainingComparisonCalculatorTest {
         requireNotNull(result)
         assertMetric(result, ComparisonMetric.AVG_HEART_RATE, 140.0, null, ComparisonTrend.NEUTRAL)
         assertMetric(result, ComparisonMetric.LACTATE, 4.4, -0.4, ComparisonTrend.BETTER)
+        assertFalse(result.metrics.containsKey(ComparisonMetric.AVG_POWER))
         assertFalse(result.metrics.containsKey(ComparisonMetric.MAX_HEART_RATE))
         assertFalse(result.metrics.containsKey(ComparisonMetric.RECOVERY_HEART_RATE))
         assertFalse(result.metrics.containsKey(ComparisonMetric.PERCENT_OF_PB))
@@ -145,6 +149,7 @@ internal class TrainingComparisonCalculatorTest {
         distanceMeters: Int = 1000,
         timeMillis: Long = 200_000L,
         strokeRate: Double = 30.0,
+        avgPowerWatts: Int? = null,
         avgHeartRate: Int? = null,
         maxHeartRate: Int? = null,
         recoveryHeartRate: Int? = null,
@@ -154,6 +159,7 @@ internal class TrainingComparisonCalculatorTest {
         distanceMeters = distanceMeters,
         timeMillis = timeMillis,
         strokeRate = strokeRate,
+        avgPowerWatts = avgPowerWatts,
         avgHeartRate = avgHeartRate,
         maxHeartRate = maxHeartRate,
         recoveryHeartRate = recoveryHeartRate,

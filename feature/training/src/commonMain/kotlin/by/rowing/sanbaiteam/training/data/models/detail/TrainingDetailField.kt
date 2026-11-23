@@ -7,6 +7,7 @@ import by.rowing.sanbaiteam.training.resources.training_detail_lactate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_max_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_pace_label
 import by.rowing.sanbaiteam.training.resources.training_detail_percent_of_pb_label
+import by.rowing.sanbaiteam.training.resources.training_detail_power_label
 import by.rowing.sanbaiteam.training.resources.training_detail_recovery_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_stroke_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_time_label
@@ -17,6 +18,7 @@ internal enum class TrainingDetailField(val labelRes: StringResource) {
     DISTANCE(labelRes = Res.string.training_detail_distance_label),
     TIME(labelRes = Res.string.training_detail_time_label),
     PACE(labelRes = Res.string.training_detail_pace_label),
+    AVG_POWER(labelRes = Res.string.training_detail_power_label),
     STROKE_RATE(labelRes = Res.string.training_detail_stroke_rate_label),
     AVG_HEART_RATE(labelRes = Res.string.training_detail_avg_heart_rate_label),
     MAX_HEART_RATE(labelRes = Res.string.training_detail_max_heart_rate_label),

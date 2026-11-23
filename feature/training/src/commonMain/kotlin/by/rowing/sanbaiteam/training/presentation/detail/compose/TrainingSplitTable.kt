@@ -32,6 +32,7 @@ import by.rowing.sanbaiteam.training.resources.training_split_column_distance
 import by.rowing.sanbaiteam.training.resources.training_split_column_max_heart_rate
 import by.rowing.sanbaiteam.training.resources.training_split_column_number
 import by.rowing.sanbaiteam.training.resources.training_split_column_pace
+import by.rowing.sanbaiteam.training.resources.training_split_column_power
 import by.rowing.sanbaiteam.training.resources.training_split_column_spm
 import by.rowing.sanbaiteam.training.resources.training_split_column_time
 import by.rowing.sanbaiteam.training.resources.training_split_total
@@ -46,6 +47,7 @@ private val NUMBER_WIDTH = 26.dp
 private val DISTANCE_WIDTH = 56.dp
 private val TIME_WIDTH = 72.dp
 private val PACE_WIDTH = 76.dp
+private val POWER_WIDTH = 56.dp
 private val SPM_WIDTH = 56.dp
 private val AVG_HEART_RATE_WIDTH = 56.dp
 private val MAX_HEART_RATE_WIDTH = 56.dp
@@ -54,6 +56,7 @@ private val COLUMN_WIDTHS = mapOf(
     TrainingDetailField.DISTANCE to DISTANCE_WIDTH,
     TrainingDetailField.TIME to TIME_WIDTH,
     TrainingDetailField.PACE to PACE_WIDTH,
+    TrainingDetailField.AVG_POWER to POWER_WIDTH,
     TrainingDetailField.STROKE_RATE to SPM_WIDTH,
     TrainingDetailField.AVG_HEART_RATE to AVG_HEART_RATE_WIDTH,
     TrainingDetailField.MAX_HEART_RATE to MAX_HEART_RATE_WIDTH,
@@ -84,6 +87,7 @@ internal fun TrainingSplitTable(
                         distance = split.distanceMeters.toString(),
                         time = RowingTimeFormat.formatDuration(split.timeMillis),
                         pace = split.paceMillis?.let { RowingTimeFormat.formatDuration(it) } ?: MISSING_VALUE,
+                        avgPowerWatts = split.avgPowerWatts?.toString() ?: MISSING_VALUE,
                         strokeRate = split.strokeRate?.let { formatTenths(it) } ?: MISSING_VALUE,
                         avgHeartRate = split.avgHeartRate?.toString() ?: MISSING_VALUE,
                         maxHeartRate = split.maxHeartRate?.toString() ?: MISSING_VALUE,
@@ -109,6 +113,7 @@ private fun SplitTableHeader(hiddenFields: Set<TrainingDetailField>) {
         distance = stringResource(Res.string.training_split_column_distance),
         time = stringResource(Res.string.training_split_column_time),
         pace = stringResource(Res.string.training_split_column_pace),
+        avgPowerWatts = stringResource(Res.string.training_split_column_power),
         strokeRate = stringResource(Res.string.training_split_column_spm),
         avgHeartRate = stringResource(Res.string.training_split_column_avg_heart_rate),
         maxHeartRate = stringResource(Res.string.training_split_column_max_heart_rate),
@@ -131,6 +136,7 @@ private fun SplitTotalRow(
             timeMillis = piece.timeMillis,
             distanceMeters = piece.distanceMeters,
         )?.let { RowingTimeFormat.formatDuration(it) } ?: MISSING_VALUE,
+        avgPowerWatts = piece.avgPowerWatts?.toString() ?: MISSING_VALUE,
         strokeRate = piece.strokeRateFormatted.ifEmpty { MISSING_VALUE },
         avgHeartRate = piece.avgHeartRate?.toString() ?: MISSING_VALUE,
         maxHeartRate = piece.maxHeartRate?.toString() ?: MISSING_VALUE,
@@ -145,6 +151,7 @@ private fun SplitTableRowLayout(
     distance: String,
     time: String,
     pace: String,
+    avgPowerWatts: String,
     strokeRate: String,
     avgHeartRate: String,
     maxHeartRate: String,
@@ -180,6 +187,13 @@ private fun SplitTableRowLayout(
             TableCell(
                 text = pace,
                 width = PACE_WIDTH,
+                style = style
+            )
+        }
+        if (TrainingDetailField.AVG_POWER !in hiddenFields) {
+            TableCell(
+                text = avgPowerWatts,
+                width = POWER_WIDTH,
                 style = style
             )
         }

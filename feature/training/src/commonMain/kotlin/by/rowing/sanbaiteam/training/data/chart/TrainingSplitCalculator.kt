@@ -196,6 +196,12 @@ internal object TrainingSplitCalculator {
             endMillis = end.timeMillis,
             includeEnd = isLast,
         )
+        val powers = valuesInRange(
+            points = chart.power,
+            startMillis = start.timeMillis,
+            endMillis = end.timeMillis,
+            includeEnd = isLast,
+        )
         return TrainingPieceSplit(
             index = index,
             distanceMeters = distanceMeters,
@@ -205,6 +211,7 @@ internal object TrainingSplitCalculator {
                 distanceMeters = distanceMeters,
             ),
             strokeRate = strokeRates.takeIf { it.isNotEmpty() }?.average()?.roundToTenths(),
+            avgPowerWatts = powers.takeIf { it.isNotEmpty() }?.average()?.roundToInt(),
             avgHeartRate = heartRates.takeIf { it.isNotEmpty() }?.average()?.roundToInt(),
             maxHeartRate = heartRates.maxOrNull()?.roundToInt(),
         )

@@ -26,6 +26,9 @@ internal object Rp3CsvParser : TrainingImportParser {
     private const val COLUMN_TIME = "time"
     private const val COLUMN_DISTANCE = "distance"
     private const val COLUMN_PULSE = "pulse"
+    private const val COLUMN_POWER = "power"
+    private const val COLUMN_AVG_POWER = "avg_power"
+    private const val COLUMN_AVG_CALCULATED_POWER = "avg_calculated_power"
     private const val COLUMN_ESTIMATED_500M_TIME = "estimated_500m_time"
 
     private val FILE_NAME_DATE_REGEX = Regex("^(\\d{12})")
@@ -64,19 +67,36 @@ internal object Rp3CsvParser : TrainingImportParser {
         val header = lines[headerIndex].splitRp3Row()
         val columns = header.withIndex().associate { (index, name) -> name.trim() to index }
 
-        fun getColumnIndex(columnName: String): Int = columns[columnName]
-            ?: throwParseError("Missing RP3 column $columnName.")
+        fun getColumnIndex(columnName: String): Int = columns.getOrElse(columnName) { -1 }
+
+        val intervalIndex = getColumnIndex(columnName = COLUMN_INTERVAL_ID)
+        val timeIndex = getColumnIndex(columnName = COLUMN_TIME)
+        val distanceIndex = getColumnIndex(columnName = COLUMN_DISTANCE)
+        val strokeRateIndex = getColumnIndex(columnName = COLUMN_STROKE_RATE)
+        val pulseIndex = getColumnIndex(columnName = COLUMN_PULSE)
+        val estimated500mIndex = getColumnIndex(columnName = COLUMN_ESTIMATED_500M_TIME)
+        val powerIndex = getColumnIndex(columnName = COLUMN_POWER)
+        val avgPowerIndex = getColumnIndex(columnName = COLUMN_AVG_POWER)
+        val avgCalculatedPowerIndex = getColumnIndex(columnName = COLUMN_AVG_CALCULATED_POWER)
+        val maxIndex = maxOf(intervalIndex, timeIndex, distanceIndex, strokeRateIndex, pulseIndex)
 
         return lines.asSequence()
             .drop(headerIndex + 1)
             .mapNotNull { line ->
-                line.parseStroke(
-                    intervalIndex = getColumnIndex(columnName = COLUMN_INTERVAL_ID),
-                    timeIndex = getColumnIndex(columnName = COLUMN_TIME),
-                    distanceIndex = getColumnIndex(columnName = COLUMN_DISTANCE),
-                    strokeRateIndex = getColumnIndex(columnName = COLUMN_STROKE_RATE),
-                    pulseIndex = getColumnIndex(columnName = COLUMN_PULSE),
-                    estimated500mIndex = getColumnIndex(columnName = COLUMN_ESTIMATED_500M_TIME),
+                val columns = line.splitRp3Row()
+                if (columns.size <= maxIndex) {
+                    return@mapNotNull null
+                }
+                Rp3StrokeRow(
+                    intervalId = columns.getOrNull(intervalIndex)?.trim() ?: return@mapNotNull null,
+                    timeSeconds = columns.getOrNull(timeIndex)?.takeDouble() ?: return@mapNotNull null,
+                    distanceMeters = columns.getOrNull(distanceIndex)?.takeDouble() ?: return@mapNotNull null,
+                    strokeRate = columns.getOrNull(strokeRateIndex)?.takeDouble(),
+                    pulse = columns.getOrNull(pulseIndex)?.takePositiveInt(),
+                    estimated500mTimeSeconds = columns[estimated500mIndex].takeDouble()?.takeIf { it > 0 },
+                    powerWatts = columns.getOrNull(powerIndex)?.takePositiveInt(),
+                    avgPowerWatts = columns.getOrNull(avgPowerIndex)?.takePositiveInt(),
+                    avgCalculatedPowerWatts = columns.getOrNull(avgCalculatedPowerIndex)?.takePositiveInt(),
                 )
             }
             .toList()
@@ -119,31 +139,9 @@ internal object Rp3CsvParser : TrainingImportParser {
         )
     }
 
-    private fun String.parseStroke(
-        intervalIndex: Int,
-        timeIndex: Int,
-        distanceIndex: Int,
-        strokeRateIndex: Int,
-        pulseIndex: Int,
-        estimated500mIndex: Int,
-    ): Rp3StrokeRow? {
-        if (isBlank()) return null
-        val columns = splitRp3Row()
-        if (columns.size <= maxOf(intervalIndex, timeIndex, distanceIndex, strokeRateIndex, pulseIndex)) {
-            return null
-        }
-        val intervalId = columns[intervalIndex].trim()
-        val time = columns[timeIndex].trim().toDoubleOrNull() ?: return null
-        val distance = columns[distanceIndex].trim().toDoubleOrNull() ?: return null
-        return Rp3StrokeRow(
-            intervalId = intervalId,
-            timeSeconds = time,
-            distanceMeters = distance,
-            strokeRate = columns[strokeRateIndex].trim().toDoubleOrNull(),
-            pulse = columns[pulseIndex].trim().toDoubleOrNull()?.roundToInt()?.takeIf { it > 0 },
-            estimated500mTimeSeconds = columns[estimated500mIndex].trim().toDoubleOrNull()?.takeIf { it > 0 },
-        )
-    }
+    private fun String.takeDouble(): Double? = trim().toDoubleOrNull()
+
+    private fun String.takePositiveInt(): Int? = takeDouble()?.roundToInt()?.takeIf { it > 0 }
 
     private fun parseStartTimeMillis(fileName: String?): Long? {
         val date = FILE_NAME_DATE_REGEX.find(fileName ?: return null)?.value ?: return null
@@ -172,6 +170,9 @@ internal object Rp3CsvParser : TrainingImportParser {
         val strokeRate: Double?,
         val pulse: Int?,
         val estimated500mTimeSeconds: Double? = null,
+        val powerWatts: Int? = null,
+        val avgPowerWatts: Int? = null,
+        val avgCalculatedPowerWatts: Int? = null,
     )
 
     private const val MILLIS_PER_SECOND = 1000L

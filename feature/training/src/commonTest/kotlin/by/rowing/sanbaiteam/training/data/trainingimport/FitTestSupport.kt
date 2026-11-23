@@ -19,6 +19,7 @@ internal data class FitTestRecord(
     val cadence: Int? = null,
     val distanceMeters: Double? = null,
     val speedMetersPerSecond: Double? = null,
+    val powerWatts: Int? = null,
 )
 
 /**
@@ -86,7 +87,7 @@ internal fun concept2FitFile(
         definition(
             local = 3,
             global = 20,
-            fields = listOf(253 to 4, 3 to 1, 4 to 1, 5 to 4, 6 to 2)
+            fields = listOf(253 to 4, 3 to 1, 4 to 1, 5 to 4, 6 to 2, 7 to 2)
         )
         records.forEach { record ->
             dataMessage(
@@ -96,6 +97,7 @@ internal fun concept2FitFile(
                 invalidU8(record.cadence),
                 invalidU32(record.distanceMeters?.let { (it * DISTANCE_SCALE).roundToInt().toLong() }),
                 invalidU16(record.speedMetersPerSecond?.let { (it * SPEED_SCALE).roundToInt() }),
+                invalidU16(record.powerWatts),
             )
         }
     }.toByteArray()

@@ -4,6 +4,7 @@ internal data class ComparablePiece(
     val distanceMeters: Int,
     val timeMillis: Long,
     val strokeRate: Double,
+    val avgPowerWatts: Int?,
     val avgHeartRate: Int?,
     val maxHeartRate: Int?,
     val recoveryHeartRate: Int?,

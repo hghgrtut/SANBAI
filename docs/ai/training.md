@@ -26,20 +26,21 @@
 | `presentation/navigation/*` | `TrainingNavigation`, `TrainingNavGraphProvider` |
 
 ### Data
-| Файл | Что |
-|---|---|
-| `data/repository/TrainingRepository.kt` | Сохранение/удаление, наблюдение списка, деталь, данные графика; **маппинг в presentation-модели** |
-| `data/repository/SavedTrainingFiltersRepository.kt` | CRUD быстрых фильтров (payload = JSON) |
-| `data/repository/TrainingDetailSettingsRepository.kt` | Скрытые показатели детали (в БД — только скрытые) |
-| `data/chart/TrainingChartReader.kt` | Чтение точек графика из сохранённого файла (FIT/RP3) |
-| `data/chart/TrainingSplitCalculator.kt` | Расчёт сплитов по дистанции/времени из точек графика |
-| `data/comparison/TrainingComparisonCalculator.kt` | Сравнение базового отрезка со средним по выбранным тренировкам |
-| `data/dashboard/TrainingDashboard.kt` | Дашборд: счётчик тренировок + 4 последних (`RECENT_TRAININGS_LIMIT = 4`) |
-| `data/filter/SavedTrainingFilter.kt`, `SavedTrainingFilterSerializer.kt` | Сериализация фильтра для быстрых фильтров |
-| `data/models/...` | `FitLap/FitRecord/FitWorkout`, `TrainingChart*`, `Comparison*`, `TrainingDetailField`, `TrainingTransferResult` |
-| `data/trainingimport/*` | Парсеры FIT/CSV, FIT-декодер, контейнер `.fitpack`, `CsvWriter`, интерфейсы storage/reader |
-| `data/trainingtransfer/*` | JSON-бэкап (`TrainingBackupSerializer`), импорт/экспорт (`TrainingTransferRepository`), матчинг атлетов |
-| `di/TrainingModule.kt` | Koin: репозитории + все VM (`AddTrainingViewModel` — вручную из-за `importUri`) |
+| Файл                                                                     | Что                                                                                                               |
+|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| `data/repository/TrainingRepository.kt`                                  | Сохранение/удаление, наблюдение списка, деталь, данные графика; **маппинг в presentation-модели**                 |
+| `data/repository/SavedTrainingFiltersRepository.kt`                      | CRUD быстрых фильтров (payload = JSON)                                                                            |
+| `data/repository/TrainingDetailSettingsRepository.kt`                    | Скрытые показатели детали (в БД — только скрытые)                                                                 |
+| `data/chart/TrainingChartReader.kt`                                      | Чтение точек графика из сохранённого файла (FIT/RP3)                                                              |
+| `data/chart/TrainingSplitCalculator.kt`                                  | Расчёт сплитов по дистанции/времени из точек графика                                                              |
+| `data/chart/TrainingPower.kt`                                            | Оценка мощности Concept2 по скорости (`2.8*v^3` RowErg, `0.35*v^3` BikeErg); fallback, когда мощности нет в файле |
+| `data/comparison/TrainingComparisonCalculator.kt`                        | Сравнение базового отрезка со средним по выбранным тренировкам                                                    |
+| `data/dashboard/TrainingDashboard.kt`                                    | Дашборд: счётчик тренировок + 4 последних (`RECENT_TRAININGS_LIMIT = 4`)                                          |
+| `data/filter/SavedTrainingFilter.kt`, `SavedTrainingFilterSerializer.kt` | Сериализация фильтра для быстрых фильтров                                                                         |
+| `data/models/...`                                                        | `FitLap/FitRecord/FitWorkout`, `TrainingChart*`, `Comparison*`, `TrainingDetailField`, `TrainingTransferResult`   |
+| `data/trainingimport/*`                                                  | Парсеры FIT/CSV, FIT-декодер, контейнер `.fitpack`, `CsvWriter`, интерфейсы storage/reader                        |
+| `data/trainingtransfer/*`                                                | JSON-бэкап (`TrainingBackupSerializer`), импорт/экспорт (`TrainingTransferRepository`), матчинг атлетов           |
+| `di/TrainingModule.kt`                                                   | Koin: репозитории + все VM (`AddTrainingViewModel` — вручную из-за `importUri`)                                   |
 
 ---
 
@@ -79,16 +80,22 @@ FIT-декодер: `FitDecoderImpl.kt` (`ByteReader`, `FileHeader`, разбо�
 - берёт `TrainingEntity`, pieces, имена атлетов, PB (только `PersonalBestPercent.DEFAULT_PB_DISTANCE_METERS = 2000` и `boatType = training.type`);
 - PB-процент отрезка — среднее по экипажу (`PersonalBestPercent.calculate` + `roundToTenths`);
 - `chartData` — перечитывается из исходного файла по `sourceFileIndex/sourceIntervalIndex` (`TrainingChartReader.read`);
+- средняя мощность отрезка: `chartData.avgPowerWatts` из файла (FIT `record.power`; RP3 — `avg_power`/
+  `avg_calculated_power` последнего гребка, иначе среднее по `power`), иначе fallback `TrainingPower.estimatedWatts` для
+  Concept2 Row/Bike; для RP3/воды/WattBike без мощности в файле — `null`;
 - `comparison` — `TrainingComparisonCalculator.compare(base, compared)` по тому же `order`;
 - строки форматируются здесь: `RowingTimeFormat.formatDuration/formatPace`, `formatTenths`, `PersonalBestPercent.format`.
 
 Состояние `TrainingDetailState`: `pieces`, `comparedTrainingIds`, `expandedComparisonOrders`, `splitLength`, `splitsByOrder`, `hiddenFields`, `showSettingsDialog`.
 `TrainingDetailViewModel` подписан на `TrainingDetailSettingsRepository.hiddenFields` и на `TrainingComparisonSelectionStore.selection` (`distinctUntilChanged` + `collectLatest`), поэтому после экрана сравнения деталь перезагружается сама.
 
-Скрываемые показатели — `data/models/detail/TrainingDetailField.kt` (9 значений: DISTANCE, TIME, PACE, STROKE_RATE, AVG/MAX/RECOVERY_HEART_RATE, LACTATE, PERCENT_OF_PB). Последний видимый скрыть нельзя — `Set<TrainingDetailField>.canToggle(field)`.
+Скрываемые показатели — `data/models/detail/TrainingDetailField.kt` (10 значений: DISTANCE, TIME, PACE, AVG_POWER,
+STROKE_RATE, AVG/MAX/RECOVERY_HEART_RATE, LACTATE, PERCENT_OF_PB). Последний видимый скрыть нельзя —
+`Set<TrainingDetailField>.canToggle(field)`.
 
 Сплиты: `TrainingSplitCalculator.calculate(chart: TrainingPieceChartData, totalDistanceMeters, totalTimeMillis, length: TrainingSplitLength)` → `List<TrainingPieceSplit>?`.
-`TrainingSplitLength.Distance(meters)` / `.Time(millis)`; дистанция/время нормализуются (`scale`), значения SR/HR берутся из точек в диапазоне.
+`TrainingSplitLength.Distance(meters)` / `.Time(millis)`; дистанция/время нормализуются (`scale`), значения
+SR/HR/мощности берутся из точек в диапазоне.
 
 ---
 
@@ -100,8 +107,9 @@ FIT-декодер: `FitDecoderImpl.kt` (`ByteReader`, `FileHeader`, разбо�
 - отбрасываются значения вне `paceRange` (MIN/MAX секунд).
 Для RP3: точки из строк, темп из `estimated_500m_time` или расчётный.
 
-`TrainingPieceChartData(durationMillis, speed, strokeRate, heartRate, distance)`:
-`availableMetrics` (SPEED/SR/HR) и `points(metric)`.
+`TrainingPieceChartData(durationMillis, speed, strokeRate, heartRate, distance, avgPowerWatts)`:
+`availableMetrics` (SPEED/SR/HR) и `points(metric)`. `avgPowerWatts` — скаляр средней мощности из файла, не серия
+графика.
 `TrainingChartMetric { SPEED, STROKE_RATE, HEART_RATE }` — иконки + строки.
 `TrainingChartResult`: `Success(data, pieceType)`, `PieceNotFound`, `SourceUnavailable`.
 Запрос: `TrainingRepository.getTrainingChart(trainingId, order)` — `order` 1-based, в БД 0-based.
@@ -114,7 +122,7 @@ UI: `TrainingChartScreen` использует `MetricLineChart` (см. [uikit.m
 - `TrainingComparisonSelectionStore` (Koin single) — `selection: StateFlow<Set<Long>?>`; выбирается одна база (экран детали открыт) + набор сравниваемых.
 - `TrainingCompareViewModel` грузит кандидатов того же типа (`TrainingRepository.getComparisonCandidates`), применяет те же фильтры, `onConfirm()` пишет выбор в store и делает `navigateBack()`.
 - `TrainingComparisonCalculator.compare(base: ComparablePiece, compared: List<ComparablePiece>)` → `PieceComparison(comparedTrainingsCount, metrics)`.
-  `ComparisonMetric`: DISTANCE, TIME, PACE, STROKE_RATE, AVG/MAX/RECOVERY_HEART_RATE, LACTATE, PERCENT_OF_PB.
+  `ComparisonMetric`: DISTANCE, TIME, PACE, AVG_POWER, STROKE_RATE, AVG/MAX/RECOVERY_HEART_RATE, LACTATE, PERCENT_OF_PB.
   Для каждого показателя — `MetricComparison` (база, среднее, дельта, тренд `ComparisonTrend`), проценты считаются по среднему.
 - UI: `TrainingDetailPiece.comparison` → раскрывающиеся блоки в `TrainingPieceCard`/`TrainingSplitTable`; дельты — `ComparisonFormat.kt` (`formatSignedInt/Tenths/Seconds`).
 

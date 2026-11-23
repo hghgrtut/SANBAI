@@ -4,6 +4,7 @@ internal enum class ComparisonMetric {
     DISTANCE,
     TIME,
     PACE,
+    AVG_POWER,
     STROKE_RATE,
     AVG_HEART_RATE,
     MAX_HEART_RATE,

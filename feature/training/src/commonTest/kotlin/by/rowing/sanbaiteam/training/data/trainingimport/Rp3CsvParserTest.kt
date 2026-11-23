@@ -39,6 +39,16 @@ internal class Rp3CsvParserTest {
     }
 
     @Test
+    fun readStrokes_parsesPowerWhenPresent() {
+        val strokes = Rp3CsvParser.readStrokes(rp3Csv())
+
+        assertEquals(5, strokes.size)
+        assertEquals(100, strokes.first().powerWatts)
+        assertEquals(100, strokes.first().avgPowerWatts)
+        assertEquals(100, strokes.first().avgCalculatedPowerWatts)
+    }
+
+    @Test
     fun parse_keepsRawCsvTextUntouched() {
         val csv = rp3Csv()
 
