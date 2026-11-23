@@ -87,7 +87,7 @@ FIT-декодер: `FitDecoderImpl.kt` (`ByteReader`, `FileHeader`, разбо�
 
 Скрываемые показатели — `data/models/detail/TrainingDetailField.kt` (9 значений: DISTANCE, TIME, PACE, STROKE_RATE, AVG/MAX/RECOVERY_HEART_RATE, LACTATE, PERCENT_OF_PB). Последний видимый скрыть нельзя — `Set<TrainingDetailField>.canToggle(field)`.
 
-Сплиты: `TrainingSplitCalculator.calculate(chart: TrainingPieceChartData, totalDistanceMeters, totalTimeMillis, length: TrainingSplitLength)` → `List<TrainingPieceSplit>?`.
+Сплиты: `TrainingSplitCalculator.calculate(chart: TrainingPieceChartData, totalDistanceMeters, totalTimeMillis, length: TrainingSplitLength, paceDistanceMeters)` → `List<TrainingPieceSplit>?`.
 `TrainingSplitLength.Distance(meters)` / `.Time(millis)`; дистанция/время нормализуются (`scale`), значения SR/HR берутся из точек в диапазоне.
 
 ---
@@ -96,7 +96,7 @@ FIT-декодер: `FitDecoderImpl.kt` (`ByteReader`, `FileHeader`, разбо�
 
 `TrainingChartReader.read(sourceFileIndex, sourceFileBytes, sourceIntervalIndex, pieceType)` → `TrainingPieceChartData?`.
 Для FIT: объединяет нужные лапы, считает elapsed, дистанцию, SR (`record.cadence`), HR (`record.heartRate`); «speed»-серия на самом деле темп (время на дистанцию):
-- гребля/прочее — на 500 м, BikeErg — на 1000 м (`chartPaceDistanceMeters` в `data/models/chart/TrainingChartPace.kt`);
+- гребля — на 500 м, BikeErg и WattBike — на 1000 м (`TrainingPieceType.paceDistanceMeters` в `data/local/.../TrainingPieceType.kt` — единый источник для графика, деталей, сравнения и сплитов);
 - отбрасываются значения вне `paceRange` (MIN/MAX секунд).
 Для RP3: точки из строк, темп из `estimated_500m_time` или расчётный.
 

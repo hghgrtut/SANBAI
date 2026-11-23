@@ -189,6 +189,7 @@ internal class TrainingDetailViewModel(
                     totalDistanceMeters = piece.distanceMeters,
                     totalTimeMillis = piece.timeMillis,
                     length = length,
+                    paceDistanceMeters = piece.paceDistanceMeters,
                 )?.let { splits -> piece.order to splits }
             }
         }

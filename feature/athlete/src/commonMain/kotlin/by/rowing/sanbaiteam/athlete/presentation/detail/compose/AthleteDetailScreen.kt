@@ -1,8 +1,6 @@
 package by.rowing.sanbaiteam.athlete.presentation.detail.compose
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SearchOff
@@ -38,13 +35,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightInput
 import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightRecord
-import by.rowing.sanbaiteam.athlete.domain.weight.formatWeightTenths
 import by.rowing.sanbaiteam.athlete.presentation.common.AthleteDateTransformation
+import by.rowing.sanbaiteam.athlete.presentation.common.AthleteWeightDialog
+import by.rowing.sanbaiteam.athlete.presentation.common.DateField
 import by.rowing.sanbaiteam.athlete.presentation.common.GenderSegmentedSelector
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailScreenActions
-import by.rowing.sanbaiteam.athlete.presentation.detail.state.AthleteDetailState
 import by.rowing.sanbaiteam.athlete.presentation.detail.AthleteDetailViewModel
+import by.rowing.sanbaiteam.athlete.presentation.detail.state.AthleteDetailState
 import by.rowing.sanbaiteam.athlete.presentation.detail.state.PersonalBestDraft
 import by.rowing.sanbaiteam.athlete.resources.Res
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_birth_date_label
@@ -61,9 +60,7 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_time_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_records_header
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_save_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_title
-import by.rowing.sanbaiteam.athlete.resources.athletes_weight_add_title
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_chart_content_description
-import by.rowing.sanbaiteam.athlete.resources.athletes_weight_date_label
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_delete_confirm
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_delete_content_description
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_delete_message
@@ -77,8 +74,6 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_weight_range_to
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_table_content_description
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_table_header
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_kg
-import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_label
-import by.rowing.sanbaiteam.athlete.resources.athletes_weight_value_placeholder
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.uikit.component.DataCard
@@ -89,18 +84,17 @@ import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.component.button.AddTextButton
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
-import by.rowing.sanbaiteam.uikit.component.decimal
 import by.rowing.sanbaiteam.uikit.component.number
 import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
 import by.rowing.sanbaiteam.uikit.component.time
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
-import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
 import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
 import by.rowing.sanbaiteam.uikit.resources.uikit_save
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
 import org.jetbrains.compose.resources.stringResource
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
 
 private val RECORD_ICON_SIZE = 20.dp
 private val TABLE_DELETE_BUTTON_SIZE = 28.dp
@@ -161,10 +155,17 @@ private fun AthleteDetailScreenContent(
             error = error.resolve()
         )
     }
-    WeightDialog(
-        state = state,
-        actions = actions,
-    )
+    state.weightDialog?.let { dialog ->
+        AthleteWeightDialog(
+            dateMillis = dialog.dateMillis,
+            weightText = dialog.weightText,
+            error = dialog.error,
+            onDateChange = actions::changeWeightDate,
+            onWeightChange = actions::changeWeightValue,
+            onDismiss = actions::dismissWeightDialog,
+            onSave = actions::saveWeight,
+        )
+    }
     DeleteWeightDialog(
         state = state,
         actions = actions,
@@ -309,7 +310,7 @@ private fun WeightBlock(
             Spacer(modifier = Modifier.width(width = Spacing.XS))
             Text(
                 text = state.currentWeightTenths
-                    ?.let { stringResource(Res.string.athletes_weight_value_kg, formatWeightTenths(tenths = it)) }
+                    ?.let { stringResource(Res.string.athletes_weight_value_kg, AthleteWeightInput.formatWeight(tenths = it)) }
                     ?: stringResource(Res.string.athletes_weight_empty_value),
                 style = TypographyPalette.H4,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -401,7 +402,7 @@ private fun WeightTableItem(
             Text(
                 text = stringResource(
                     Res.string.athletes_weight_value_kg,
-                    formatWeightTenths(tenths = weight.weightTenths)
+                    AthleteWeightInput.formatWeight(tenths = weight.weightTenths)
                 ),
                 style = TypographyPaletteSp.Body2Medium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -419,59 +420,6 @@ private fun WeightTableItem(
             )
         }
     }
-}
-
-@Composable
-private fun WeightDialog(
-    state: AthleteDetailState,
-    actions: AthleteDetailScreenActions,
-) {
-    val dialog = state.weightDialog ?: return
-    val pickDate = rememberDatePicker(
-        initialDateMillis = dialog.dateMillis,
-        onDatePicked = actions::changeWeightDate,
-    )
-    AlertDialog(
-        onDismissRequest = actions::dismissWeightDialog,
-        title = {
-            Text(
-                text = stringResource(Res.string.athletes_weight_add_title),
-                style = TypographyPalette.H4
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.S)) {
-                DateField(
-                    label = stringResource(Res.string.athletes_weight_date_label),
-                    value = TimeUtils.formatDate(timeInMillis = dialog.dateMillis),
-                    onClick = pickDate,
-                )
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = dialog.weightText,
-                    onValueChange = actions::changeWeightValue,
-                    label = stringResource(Res.string.athletes_weight_value_label),
-                    placeholder = stringResource(Res.string.athletes_weight_value_placeholder),
-                    error = dialog.error != null,
-                    supportingText = dialog.error?.resolve(),
-                    keyboardOptions = KeyboardOptions.decimal(imeAction = ImeAction.Done),
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                text = stringResource(UikitRes.string.uikit_save),
-                debounceClick = actions::saveWeight,
-            )
-        },
-        dismissButton = {
-            Button(
-                text = stringResource(UikitRes.string.uikit_cancel),
-                buttonColors = ButtonColors.text(),
-                debounceClick = actions::dismissWeightDialog,
-            )
-        },
-    )
 }
 
 @Composable
@@ -571,48 +519,6 @@ private fun WeightRangeDialog(
             )
         },
     )
-}
-
-@Composable
-private fun DateField(
-    label: String,
-    value: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val shape = MaterialTheme.shapes.medium
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = shape,
-            )
-            .clickable(onClick = onClick)
-            .padding(Spacing.M),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.S),
-    ) {
-        Column(modifier = Modifier.weight(weight = 1f)) {
-            Text(
-                text = label,
-                style = TypographyPalette.Body3Regular,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = value,
-                style = TypographyPalette.Body1Regular,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        Icon(
-            imageVector = Icons.Default.CalendarMonth,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
 }
 
 @Composable

@@ -4,11 +4,9 @@ import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.entity.AthletePersonalBestEntity
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightInput
 import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightMath
 import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightRecord
-import by.rowing.sanbaiteam.athlete.domain.weight.formatWeightTenths
-import by.rowing.sanbaiteam.athlete.domain.weight.parseWeightTenths
-import by.rowing.sanbaiteam.athlete.domain.weight.sanitizeWeightInput
 import by.rowing.sanbaiteam.athlete.presentation.detail.state.AthleteDetailState
 import by.rowing.sanbaiteam.athlete.presentation.detail.state.PersonalBestDraft
 import by.rowing.sanbaiteam.athlete.presentation.detail.state.WeightDialogState
@@ -20,8 +18,6 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_name_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_duplicate_distance
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_distance_error
 import by.rowing.sanbaiteam.athlete.resources.athletes_detail_record_time_error
-import by.rowing.sanbaiteam.athlete.resources.athletes_weight_future_date
-import by.rowing.sanbaiteam.athlete.resources.athletes_weight_invalid
 import by.rowing.sanbaiteam.athlete.resources.athletes_weight_range_error
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
@@ -164,7 +160,7 @@ internal class AthleteDetailViewModel(
             copy(
                 weightDialog = WeightDialogState(
                     dateMillis = TimeUtils.noonOfDay(timeInMillis = nowInMillis()),
-                    weightText = currentWeightTenths?.let { formatWeightTenths(tenths = it) }.orEmpty(),
+                    weightText = currentWeightTenths?.let { AthleteWeightInput.formatWeight(tenths = it) }.orEmpty(),
                 )
             )
         }
@@ -199,7 +195,7 @@ internal class AthleteDetailViewModel(
         changeState {
             copy(
                 weightDialog = weightDialog?.copy(
-                    weightText = sanitizeWeightInput(text = text),
+                    weightText = AthleteWeightInput.sanitize(text = text),
                     error = null,
                 )
             )
@@ -208,12 +204,12 @@ internal class AthleteDetailViewModel(
 
     override fun saveWeight() {
         val dialog = state.weightDialog ?: return
-        val weightTenths = parseWeightTenths(text = dialog.weightText)
-        val error = when {
-            weightTenths == null -> UiText.of(Res.string.athletes_weight_invalid)
-            isFutureDate(dateMillis = dialog.dateMillis) -> UiText.of(Res.string.athletes_weight_future_date)
-            else -> null
-        }
+        val weightTenths = AthleteWeightInput.parse(text = dialog.weightText)
+        val error = AthleteWeightInput.validate(
+            text = dialog.weightText,
+            dateMillis = dialog.dateMillis,
+            nowMillis = nowInMillis(),
+        )
         if (error != null) {
             changeState { copy(weightDialog = dialog.copy(error = error)) }
         } else {
@@ -401,9 +397,6 @@ internal class AthleteDetailViewModel(
             )
         }
     }
-
-    private fun isFutureDate(dateMillis: Long): Boolean =
-        TimeUtils.startOfDayMillis(timeInMillis = dateMillis) > TimeUtils.startOfDayMillis(timeInMillis = nowInMillis())
 
     private fun loadRecordsByType(
         bests: List<AthletePersonalBestEntity>,

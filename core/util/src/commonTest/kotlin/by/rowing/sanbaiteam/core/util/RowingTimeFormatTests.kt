@@ -71,4 +71,49 @@ internal class RowingTimeFormatTests {
         val sanitized = RowingTimeFormat.sanitizeTimeInput("45.5")
         assertEquals(45_500L, RowingTimeFormat.parseTimeInput(sanitized))
     }
+
+    @Test
+    fun paceMillis_usesRequestedPaceDistance() {
+        assertEquals(
+            100_000L,
+            RowingTimeFormat.paceMillis(
+                timeMillis = 200_000L,
+                distanceMeters = 1000
+            )
+        )
+        assertEquals(
+            200_000L,
+            RowingTimeFormat.paceMillis(
+                timeMillis = 200_000L,
+                distanceMeters = 1000,
+                paceDistanceMeters = 1000
+            )
+        )
+        assertNull(
+            RowingTimeFormat.paceMillis(
+                timeMillis = 200_000L,
+                distanceMeters = 1000,
+                paceDistanceMeters = 0
+            )
+        )
+    }
+
+    @Test
+    fun formatPace_appendsRequestedPaceDistance() {
+        assertEquals(
+            "1:40.0 /500м",
+            RowingTimeFormat.formatPace(
+                timeMillis = 200_000L,
+                distanceMeters = 1000
+            )
+        )
+        assertEquals(
+            "3:20.0 /1000м",
+            RowingTimeFormat.formatPace(
+                timeMillis = 200_000L,
+                distanceMeters = 1000,
+                paceDistanceMeters = 1000
+            )
+        )
+    }
 }

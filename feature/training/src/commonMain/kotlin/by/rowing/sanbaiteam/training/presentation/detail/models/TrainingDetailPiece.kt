@@ -10,6 +10,7 @@ internal data class TrainingDetailPiece(
     val timeMillis: Long,
     val timeFormatted: String,
     val paceFormatted: String,
+    val paceDistanceMeters: Int,
     val strokeRateFormatted: String,
     val avgHeartRate: Int?,
     val maxHeartRate: Int?,
