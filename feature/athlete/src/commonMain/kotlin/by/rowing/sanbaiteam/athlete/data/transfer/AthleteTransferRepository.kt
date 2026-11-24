@@ -9,8 +9,8 @@ import by.rowing.sanbaiteam.athlete.data.transfer.models.BackupAthlete
 import by.rowing.sanbaiteam.athlete.data.transfer.models.BackupPersonalBest
 import by.rowing.sanbaiteam.athlete.data.transfer.models.BackupWeight
 import by.rowing.sanbaiteam.athlete.domain.transfer.AthleteBackupMerge
-import by.rowing.sanbaiteam.athlete.domain.weight.MAX_WEIGHT_TENTHS
-import by.rowing.sanbaiteam.athlete.domain.weight.MIN_WEIGHT_TENTHS
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightInput.MAX_WEIGHT_TENTHS
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightInput.MIN_WEIGHT_TENTHS
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType

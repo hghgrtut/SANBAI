@@ -30,7 +30,6 @@ import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartMetric
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartPoint
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingPieceChartData
-import by.rowing.sanbaiteam.training.data.models.chart.chartPaceDistanceMeters
 import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartActions
 import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartViewModel
 import by.rowing.sanbaiteam.training.presentation.chart.models.TrainingChartState
@@ -322,7 +321,7 @@ private fun formatSummaryValue(
     TrainingChartMetric.SPEED -> stringResource(
         Res.string.training_chart_pace_value,
         RowingTimeFormat.formatDuration((value * TimeUtils.MILLIS_PER_SECOND).roundToLong()),
-        chartPaceDistanceMeters(pieceType),
+        pieceType?.paceDistanceMeters ?: TrainingPieceType.CONCEPT_ROW_ERG.paceDistanceMeters,
     )
 
     TrainingChartMetric.STROKE_RATE -> stringResource(

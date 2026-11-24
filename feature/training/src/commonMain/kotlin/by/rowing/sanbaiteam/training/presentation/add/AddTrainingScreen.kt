@@ -25,11 +25,6 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,10 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -81,6 +73,7 @@ import by.rowing.sanbaiteam.training.resources.add_training_validation_title
 import by.rowing.sanbaiteam.training.resources.training_detail_piece_number
 import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.SimpleTopAppBar
+import by.rowing.sanbaiteam.uikit.component.SingleSelectDropdown
 import by.rowing.sanbaiteam.uikit.component.TextField
 import by.rowing.sanbaiteam.uikit.component.button.AddTextButton
 import by.rowing.sanbaiteam.uikit.component.button.Button
@@ -194,10 +187,12 @@ private fun AddTrainingDataInputs(
         verticalArrangement = Arrangement.spacedBy(space = Spacing.M)
     ) {
         SectionHeader(title = stringResource(Res.string.add_training_general_header))
-        TrainingTypeDropdown(
-            state = state,
-            onTypeSelected = viewModel::changeTrainingType,
-            leadingIcon = { FieldIcon(icon = Icons.Default.Rowing) }
+        SingleSelectDropdown(
+            selectedItem = state.trainingType,
+            items = TrainingPieceType.entries,
+            itemText = { trainingType -> stringResource(trainingType.uiResId) },
+            onItemSelected = viewModel::changeTrainingType,
+            leadingIcon = { FieldIcon(icon = Icons.Default.Rowing) },
         )
         Date(
             state = state,
@@ -254,6 +249,7 @@ private fun TrainingPieces(
         state.pieces.forEachIndexed { pieceIndex, piece ->
             PieceForm(
                 index = pieceIndex,
+                trainingType = state.trainingType,
                 piece = piece,
                 canRemove = state.pieces.size > 1,
                 errors = state.pieceErrors[piece.localId] ?: AddPieceFieldErrors(),
@@ -344,6 +340,7 @@ private fun SaveIcon() {
 @Composable
 private fun PieceForm(
     index: Int,
+    trainingType: TrainingPieceType,
     piece: AddPieceDraft,
     canRemove: Boolean,
     errors: AddPieceFieldErrors,
@@ -360,7 +357,8 @@ private fun PieceForm(
 ) {
     val pace: String = RowingTimeFormat.formatPace(
         timeMillis = piece.timeMillis,
-        distanceMeters = piece.distanceMeters
+        distanceMeters = piece.distanceMeters,
+        paceDistanceMeters = trainingType.paceDistanceMeters,
     ) ?: stringResource(Res.string.add_training_pace_placeholder)
     val requester = remember { BringIntoViewRequester() }
     LaunchedEffect(scrollTarget) {
@@ -559,20 +557,19 @@ private fun DataInputRow(content: @Composable (RowScope.() -> Unit)) = Row(
     content = content
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AthleteDropdown(
+    modifier: Modifier = Modifier,
     state: AddTrainingState,
     onAthleteSelected: (crewId: Long, athleteId: Long) -> Unit,
     leadingIcon: (@Composable () -> Unit)? = null,
     error: String? = null,
-    modifier: Modifier = Modifier,
 ) {
     val rowers = state.rowersCatalog
     val selectedRower = state.crewAthletes.first()
-    ExposedSelectionDropdown(
-        selectedLabel = rowers.find { it.id == selectedRower.rowerId }?.name
-            ?: stringResource(Res.string.add_training_select_athlete),
+    SingleSelectDropdown(
+        placeholder = stringResource(Res.string.add_training_select_athlete),
+        selectedItem = rowers.find { it.id == selectedRower.rowerId },
         items = rowers,
         label = stringResource(Res.string.add_training_athlete_header),
         itemText = { rower -> rower.name },
@@ -581,76 +578,6 @@ private fun AthleteDropdown(
         error = error,
         modifier = modifier,
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TrainingTypeDropdown(
-    state: AddTrainingState,
-    onTypeSelected: (trainingType: TrainingPieceType) -> Unit,
-    leadingIcon: (@Composable () -> Unit)? = null,
-) {
-    ExposedSelectionDropdown(
-        selectedLabel = stringResource(state.trainingType.uiResId),
-        items = TrainingPieceType.entries,
-        itemText = { trainingType -> stringResource(trainingType.uiResId) },
-        onItemSelected = onTypeSelected,
-        leadingIcon = leadingIcon,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun <T> ExposedSelectionDropdown(
-    selectedLabel: String,
-    items: List<T>,
-    itemText: @Composable (item: T) -> String,
-    onItemSelected: (item: T) -> Unit,
-    label: String? = null,
-    leadingIcon: (@Composable () -> Unit)? = null,
-    error: String? = null,
-    modifier: Modifier = Modifier,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-        TextField(
-            value = selectedLabel,
-            onValueChange = {},
-            readOnly = true,
-            label = label,
-            textStyle = TypographyPalette.Body1Regular,
-            leadingIcon = leadingIcon,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            error = error != null,
-            supportingText = error,
-            modifier = modifier
-                .fillMaxWidth()
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            items.forEach { item ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = itemText(item),
-                            style = TypographyPalette.Body1Regular
-                        )
-                    },
-                    onClick = {
-                        expanded = false
-                        onItemSelected(item)
-                    }
-                )
-            }
-        }
-    }
 }
 
 @Composable

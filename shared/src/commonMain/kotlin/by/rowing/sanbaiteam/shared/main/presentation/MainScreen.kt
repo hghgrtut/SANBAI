@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
@@ -36,9 +37,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import by.rowing.sanbaiteam.athlete.presentation.common.AthleteWeightDialog
 import by.rowing.sanbaiteam.shared.resources.Res
 import by.rowing.sanbaiteam.shared.resources.calculator_title
 import by.rowing.sanbaiteam.shared.resources.main_add_training
+import by.rowing.sanbaiteam.shared.resources.main_add_weight
 import by.rowing.sanbaiteam.shared.resources.main_empty_trainings_hint
 import by.rowing.sanbaiteam.shared.resources.main_empty_trainings_title
 import by.rowing.sanbaiteam.shared.resources.main_recent_trainings
@@ -48,9 +51,12 @@ import by.rowing.sanbaiteam.shared.resources.main_stats_athletes
 import by.rowing.sanbaiteam.shared.resources.main_stats_trainings
 import by.rowing.sanbaiteam.shared.resources.main_subtitle
 import by.rowing.sanbaiteam.shared.resources.main_title
+import by.rowing.sanbaiteam.shared.resources.main_weight_athlete_label
+import by.rowing.sanbaiteam.shared.resources.main_weight_athlete_placeholder
 import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboardItem
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
 import by.rowing.sanbaiteam.uikit.component.SectionHeader
+import by.rowing.sanbaiteam.uikit.component.SingleSelectDropdown
 import by.rowing.sanbaiteam.uikit.component.StatCard
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
@@ -91,13 +97,20 @@ private fun MainScreenContent(
                 state = state,
                 actions = actions,
             )
-            QuickActionsSection(actions = actions)
+            QuickActionsSection(
+                state = state,
+                actions = actions,
+            )
             RecentTrainingsSection(
                 state = state,
                 actions = actions,
             )
         }
     }
+    WeightDialog(
+        state = state,
+        actions = actions,
+    )
 }
 
 @Composable
@@ -155,7 +168,7 @@ private fun StatsSection(
     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
         StatCard(
             modifier = Modifier.weight(weight = 1f),
-            value = if (state.isLoading) LOADING_VALUE else state.athletesCount.toString(),
+            value = if (state.isLoading) LOADING_VALUE else state.athletes.size.toString(),
             label = stringResource(Res.string.main_stats_athletes),
             icon = Icons.Default.People,
             accentColor = MaterialTheme.colorScheme.primary,
@@ -173,12 +186,53 @@ private fun StatsSection(
 }
 
 @Composable
-private fun QuickActionsSection(actions: MainScreenActions) {
-    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+private fun QuickActionsSection(
+    state: MainUiState,
+    actions: MainScreenActions,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.M)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.M)) {
+            Button(
+                modifier = Modifier.weight(weight = 1f),
+                text = stringResource(Res.string.main_add_weight),
+                size = ButtonSize.SMALL,
+                enabled = state.athletes.isNotEmpty(),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.MonitorWeight,
+                        contentDescription = null,
+                    )
+                },
+                buttonColors = ButtonColors.primary(
+                    enabledText = MaterialTheme.colorScheme.onPrimary,
+                    enabledBackground = MaterialTheme.colorScheme.primary,
+                    disabledText = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledBackground = MaterialTheme.colorScheme.surfaceVariant,
+                ),
+                debounceClick = actions::openWeightDialog,
+            )
+            Button(
+                modifier = Modifier.weight(weight = 1f),
+                text = stringResource(Res.string.calculator_title),
+                size = ButtonSize.SMALL,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Calculate,
+                        contentDescription = null,
+                    )
+                },
+                buttonColors = ButtonColors.secondary(
+                    enabledText = MaterialTheme.colorScheme.onSurface,
+                    enabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledText = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledBackground = MaterialTheme.colorScheme.surfaceVariant,
+                ),
+                debounceClick = actions::navigateToCalculatorScreen,
+            )
+        }
         Button(
-            modifier = Modifier.weight(weight = 1f),
+            modifier = Modifier.fillMaxWidth(),
             text = stringResource(Res.string.main_add_training),
-            size = ButtonSize.SMALL,
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -193,25 +247,34 @@ private fun QuickActionsSection(actions: MainScreenActions) {
             ),
             debounceClick = actions::navigateToAddTrainingScreen,
         )
-        Button(
-            modifier = Modifier.weight(weight = 1f),
-            text = stringResource(Res.string.calculator_title),
-            size = ButtonSize.SMALL,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Calculate,
-                    contentDescription = null,
-                )
-            },
-            buttonColors = ButtonColors.secondary(
-                enabledText = MaterialTheme.colorScheme.onSurface,
-                enabledBorderColor = MaterialTheme.colorScheme.outline,
-                disabledText = MaterialTheme.colorScheme.onSurfaceVariant,
-                disabledBackground = MaterialTheme.colorScheme.surfaceVariant,
-            ),
-            debounceClick = actions::navigateToCalculatorScreen,
-        )
     }
+}
+
+@Composable
+private fun WeightDialog(
+    state: MainUiState,
+    actions: MainScreenActions,
+) {
+    val dialog = state.weightDialog ?: return
+    AthleteWeightDialog(
+        dateMillis = dialog.dateMillis,
+        weightText = dialog.weightText,
+        error = dialog.error,
+        onDateChange = actions::changeWeightDate,
+        onWeightChange = actions::changeWeightValue,
+        onDismiss = actions::dismissWeightDialog,
+        onSave = actions::saveWeight,
+        contentBeforeFields = {
+            SingleSelectDropdown(
+                selectedItem = state.athletes.firstOrNull { athlete -> athlete.id == dialog.athleteId },
+                items = state.athletes,
+                itemText = { athlete -> athlete.name },
+                onItemSelected = { athlete -> actions.changeWeightAthlete(athleteId = athlete.id) },
+                label = stringResource(Res.string.main_weight_athlete_label),
+                placeholder = stringResource(Res.string.main_weight_athlete_placeholder),
+            )
+        },
+    )
 }
 
 @Composable
@@ -376,7 +439,6 @@ private fun MainScreenPreview() {
             MainScreenContent(
                 state = MainUiState(
                     isLoading = false,
-                    athletesCount = 12,
                     trainingsCount = 3,
                     recentTrainings = emptyList(),
                 ),

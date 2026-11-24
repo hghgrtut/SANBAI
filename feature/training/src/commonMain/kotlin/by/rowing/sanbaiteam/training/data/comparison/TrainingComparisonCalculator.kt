@@ -3,6 +3,7 @@ package by.rowing.sanbaiteam.training.data.comparison
 import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.roundToTenths
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparablePiece
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonMetric
 import by.rowing.sanbaiteam.training.data.models.comparison.ComparisonTrend
@@ -19,7 +20,8 @@ internal object TrainingComparisonCalculator {
 
     fun compare(
         base: ComparablePiece,
-        compared: List<ComparablePiece>
+        compared: List<ComparablePiece>,
+        paceDistanceMeters: Int = TrainingPieceType.CONCEPT_ROW_ERG.paceDistanceMeters,
     ): PieceComparison {
         val metrics = mutableMapOf<ComparisonMetric, MetricComparison>()
         putMetricIfPresent(
@@ -40,8 +42,16 @@ internal object TrainingComparisonCalculator {
         putMetricIfPresent(
             metrics = metrics,
             metric = ComparisonMetric.PACE,
-            values = compared.mapNotNull { paceOf(it) },
-            base = paceOf(base),
+            values = compared.mapNotNull { comparedPiece ->
+                paceOf(
+                    piece = comparedPiece,
+                    paceDistanceMeters = paceDistanceMeters
+                )
+            },
+            base = paceOf(
+                piece = base,
+                paceDistanceMeters = paceDistanceMeters
+            ),
             higherIsBetter = false,
         )
 
@@ -102,9 +112,13 @@ internal object TrainingComparisonCalculator {
         )
     }
 
-    private fun paceOf(piece: ComparablePiece): Double? = RowingTimeFormat.paceMillis(
+    private fun paceOf(
+        piece: ComparablePiece,
+        paceDistanceMeters: Int,
+    ): Double? = RowingTimeFormat.paceMillis(
         timeMillis = piece.timeMillis,
         distanceMeters = piece.distanceMeters,
+        paceDistanceMeters = paceDistanceMeters,
     )?.toDouble()
 
     private fun <T> putMetricIfPresent(

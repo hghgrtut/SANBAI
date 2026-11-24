@@ -16,7 +16,7 @@ private const val ERG_STROKE_RATE_MARGIN = 10.0
  *
  * Окно всегда пересекается с текущим диапазоном точек, поэтому существующие ограничения
  * (например, отбрасывание темпа вне 60..500 секунд на 500 м в TrainingChartReader) остаются в силе.
- * Для BikeErg темп считается на 1000 м, поэтому и запас для него вдвое больше.
+ * Для вело-типов (темп на 1000 м) запас вдвое больше.
  */
 internal fun trainingChartValueBounds(
     metric: TrainingChartMetric,
@@ -34,7 +34,9 @@ internal fun trainingChartValueBounds(
         TrainingChartMetric.SPEED -> {
             val margin = when {
                 pieceType.isWater -> WATER_PACE_MARGIN_SECONDS
-                pieceType == TrainingPieceType.CONCEPT_BIKE_ERG -> BIKE_PACE_MARGIN_SECONDS
+                pieceType.paceDistanceMeters != TrainingPieceType.CONCEPT_ROW_ERG.paceDistanceMeters ->
+                    BIKE_PACE_MARGIN_SECONDS
+
                 else -> ERG_PACE_MARGIN_SECONDS
             }
             average - margin to average + margin

@@ -2,9 +2,9 @@ package by.rowing.sanbaiteam.athlete.presentation.chart
 
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightInput.TENTHS_IN_KILOGRAM
 import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightMath
 import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightRecord
-import by.rowing.sanbaiteam.athlete.domain.weight.TENTHS_IN_KILOGRAM
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigateBackAware
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
