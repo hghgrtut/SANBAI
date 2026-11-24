@@ -311,13 +311,15 @@ private fun PaceMetricRow(
         averageValue = comparison?.let {
             stringResource(
                 Res.string.training_detail_pace_average,
-                RowingTimeFormat.formatDuration(it.average.roundToLong())
+                RowingTimeFormat.formatDuration(it.average.roundToLong()),
+                piece.paceDistanceMeters,
             )
         },
         deltaValue = comparison?.delta?.let {
             stringResource(
                 Res.string.training_detail_delta_pace,
-                formatSignedSeconds(it.roundToLong())
+                formatSignedSeconds(it.roundToLong()),
+                piece.paceDistanceMeters,
             )
         },
         trend = comparison?.trend,

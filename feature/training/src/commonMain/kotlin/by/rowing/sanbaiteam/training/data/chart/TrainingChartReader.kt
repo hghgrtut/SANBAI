@@ -5,7 +5,6 @@ import by.rowing.sanbaiteam.training.data.models.FitLap
 import by.rowing.sanbaiteam.training.data.models.FitRecord
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartPoint
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingPieceChartData
-import by.rowing.sanbaiteam.training.data.models.chart.chartPaceDistanceMeters
 import by.rowing.sanbaiteam.training.data.trainingimport.FitWorkoutReader
 import by.rowing.sanbaiteam.training.data.trainingimport.Rp3CsvParser
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportContainer
@@ -95,7 +94,7 @@ internal class TrainingChartReader {
         val power = mutableListOf<TrainingChartPoint>()
         var powerSum = 0L
         var powerCount = 0
-        val paceDistance = chartPaceDistanceMeters(pieceType).toDouble()
+        val paceDistance = pieceType.paceDistanceMeters.toDouble()
         val paceRange = paceRange(pieceType)
         var previous: FitRecord? = null
         var offsetMillis = 0L
@@ -197,8 +196,8 @@ internal class TrainingChartReader {
         return previousDistance + (speedMetersPerSecond ?: 0.0) * deltaMillis / MILLIS_PER_SECOND
     }
 
-    private fun paceRange(pieceType: TrainingPieceType?): ClosedFloatingPointRange<Double> =
-        if (pieceType == TrainingPieceType.CONCEPT_BIKE_ERG) {
+    private fun paceRange(pieceType: TrainingPieceType): ClosedFloatingPointRange<Double> =
+        if (pieceType.paceDistanceMeters == TrainingPieceType.CONCEPT_BIKE_ERG.paceDistanceMeters) {
             MIN_BIKE_PACE_SECONDS..MAX_PACE_SECONDS
         } else {
             MIN_PACE_SECONDS..MAX_PACE_SECONDS

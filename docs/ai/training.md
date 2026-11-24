@@ -26,21 +26,21 @@
 | `presentation/navigation/*` | `TrainingNavigation`, `TrainingNavGraphProvider` |
 
 ### Data
-| Файл                                                                     | Что                                                                                                               |
-|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-| `data/repository/TrainingRepository.kt`                                  | Сохранение/удаление, наблюдение списка, деталь, данные графика; **маппинг в presentation-модели**                 |
-| `data/repository/SavedTrainingFiltersRepository.kt`                      | CRUD быстрых фильтров (payload = JSON)                                                                            |
-| `data/repository/TrainingDetailSettingsRepository.kt`                    | Скрытые показатели детали (в БД — только скрытые)                                                                 |
-| `data/chart/TrainingChartReader.kt`                                      | Чтение точек графика из сохранённого файла (FIT/RP3)                                                              |
-| `data/chart/TrainingSplitCalculator.kt`                                  | Расчёт сплитов по дистанции/времени из точек графика                                                              |
-| `data/chart/TrainingPower.kt`                                            | Оценка мощности Concept2 по скорости (`2.8*v^3` RowErg, `0.35*v^3` BikeErg); fallback, когда мощности нет в файле |
-| `data/comparison/TrainingComparisonCalculator.kt`                        | Сравнение базового отрезка со средним по выбранным тренировкам                                                    |
-| `data/dashboard/TrainingDashboard.kt`                                    | Дашборд: счётчик тренировок + 4 последних (`RECENT_TRAININGS_LIMIT = 4`)                                          |
-| `data/filter/SavedTrainingFilter.kt`, `SavedTrainingFilterSerializer.kt` | Сериализация фильтра для быстрых фильтров                                                                         |
-| `data/models/...`                                                        | `FitLap/FitRecord/FitWorkout`, `TrainingChart*`, `Comparison*`, `TrainingDetailField`, `TrainingTransferResult`   |
-| `data/trainingimport/*`                                                  | Парсеры FIT/CSV, FIT-декодер, контейнер `.fitpack`, `CsvWriter`, интерфейсы storage/reader                        |
-| `data/trainingtransfer/*`                                                | JSON-бэкап (`TrainingBackupSerializer`), импорт/экспорт (`TrainingTransferRepository`), матчинг атлетов           |
-| `di/TrainingModule.kt`                                                   | Koin: репозитории + все VM (`AddTrainingViewModel` — вручную из-за `importUri`)                                   |
+| Файл | Что |
+|---|---|
+| `data/repository/TrainingRepository.kt` | Сохранение/удаление, наблюдение списка, деталь, данные графика; **маппинг в presentation-модели** |
+| `data/repository/SavedTrainingFiltersRepository.kt` | CRUD быстрых фильтров (payload = JSON) |
+| `data/repository/TrainingDetailSettingsRepository.kt` | Скрытые показатели детали (в БД — только скрытые) |
+| `data/chart/TrainingChartReader.kt` | Чтение точек графика из сохранённого файла (FIT/RP3) |
+| `data/chart/TrainingSplitCalculator.kt` | Расчёт сплитов по дистанции/времени из точек графика |
+| `data/chart/TrainingPower.kt` | Оценка мощности Concept2 по скорости (`2.8*v^3` RowErg, `0.35*v^3` BikeErg); fallback, когда мощности нет в файле |
+| `data/comparison/TrainingComparisonCalculator.kt` | Сравнение базового отрезка со средним по выбранным тренировкам |
+| `data/dashboard/TrainingDashboard.kt` | Дашборд: счётчик тренировок + 4 последних (`RECENT_TRAININGS_LIMIT = 4`) |
+| `data/filter/SavedTrainingFilter.kt`, `SavedTrainingFilterSerializer.kt` | Сериализация фильтра для быстрых фильтров |
+| `data/models/...` | `FitLap/FitRecord/FitWorkout`, `TrainingChart*`, `Comparison*`, `TrainingDetailField`, `TrainingTransferResult` |
+| `data/trainingimport/*` | Парсеры FIT/CSV, FIT-декодер, контейнер `.fitpack`, `CsvWriter`, интерфейсы storage/reader |
+| `data/trainingtransfer/*` | JSON-бэкап (`TrainingBackupSerializer`), импорт/экспорт (`TrainingTransferRepository`), матчинг атлетов |
+| `di/TrainingModule.kt` | Koin: репозитории + все VM (`AddTrainingViewModel` — вручную из-за `importUri`) |
 
 ---
 
@@ -93,7 +93,7 @@ FIT-декодер: `FitDecoderImpl.kt` (`ByteReader`, `FileHeader`, разбо�
 STROKE_RATE, AVG/MAX/RECOVERY_HEART_RATE, LACTATE, PERCENT_OF_PB). Последний видимый скрыть нельзя —
 `Set<TrainingDetailField>.canToggle(field)`.
 
-Сплиты: `TrainingSplitCalculator.calculate(chart: TrainingPieceChartData, totalDistanceMeters, totalTimeMillis, length: TrainingSplitLength)` → `List<TrainingPieceSplit>?`.
+Сплиты: `TrainingSplitCalculator.calculate(chart: TrainingPieceChartData, totalDistanceMeters, totalTimeMillis, length: TrainingSplitLength, paceDistanceMeters)` → `List<TrainingPieceSplit>?`.
 `TrainingSplitLength.Distance(meters)` / `.Time(millis)`; дистанция/время нормализуются (`scale`), значения
 SR/HR/мощности берутся из точек в диапазоне.
 
@@ -103,7 +103,7 @@ SR/HR/мощности берутся из точек в диапазоне.
 
 `TrainingChartReader.read(sourceFileIndex, sourceFileBytes, sourceIntervalIndex, pieceType)` → `TrainingPieceChartData?`.
 Для FIT: объединяет нужные лапы, считает elapsed, дистанцию, SR (`record.cadence`), HR (`record.heartRate`); «speed»-серия на самом деле темп (время на дистанцию):
-- гребля/прочее — на 500 м, BikeErg — на 1000 м (`chartPaceDistanceMeters` в `data/models/chart/TrainingChartPace.kt`);
+- гребля — на 500 м, BikeErg и WattBike — на 1000 м (`TrainingPieceType.paceDistanceMeters` в `data/local/.../TrainingPieceType.kt` — единый источник для графика, деталей, сравнения и сплитов);
 - отбрасываются значения вне `paceRange` (MIN/MAX секунд).
 Для RP3: точки из строк, темп из `estimated_500m_time` или расчётный.
 

@@ -81,28 +81,36 @@ object RowingTimeFormat {
         parseDurationMmSsTenths(input = trimmed) ?: parseDurationMmSsTenths(input = "0:$trimmed")
     }
 
+    /**
+     * Время на [paceDistanceMeters] метров при равномерном прохождении [distanceMeters] за [timeMillis].
+     */
     fun paceMillis(
         timeMillis: Long,
-        distanceMeters: Int
-    ): Long? = if (distanceMeters <= 0 || timeMillis <= 0) {
+        distanceMeters: Int,
+        paceDistanceMeters: Int = PACE_DISTANCE_METERS,
+    ): Long? = if (distanceMeters <= 0 || timeMillis <= 0 || paceDistanceMeters <= 0) {
         null
     } else {
-        (timeMillis.toDouble() * PACE_DISTANCE_METERS / distanceMeters).roundToTenths().roundToLong()
+        (timeMillis.toDouble() * paceDistanceMeters / distanceMeters).roundToTenths().roundToLong()
     }
 
     fun formatPace(
         timeMillis: Long,
-        distanceMeters: Int
+        distanceMeters: Int,
+        paceDistanceMeters: Int = PACE_DISTANCE_METERS,
     ): String? {
-        val pace = paceMillis(timeMillis, distanceMeters) ?: return null
-        return "${formatDuration(pace)} /500м"
+        val pace = paceMillis(
+            timeMillis = timeMillis,
+            distanceMeters = distanceMeters,
+            paceDistanceMeters = paceDistanceMeters,
+        ) ?: return null
+        return "${formatDuration(pace)} /${paceDistanceMeters}м"
     }
 
-    fun parseStrokeRate(input: String): Double? {
-        val value = input.trim().replace(',', '.').toDoubleOrNull() ?: return null
-        if (value < 0) return null
-        return (value * 10).roundToInt() / 10.0
-    }
+    fun parseStrokeRate(input: String): Double? =
+        input.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it > 0 }?.let { value ->
+            (value * 10).roundToInt() / 10.0
+        }
 
     /**
      * Parses `m:ss.t` / `mm:ss.t` or `m:ss` into millis rounded to tenths.

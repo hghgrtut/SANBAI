@@ -58,6 +58,7 @@ Button(
 - `component/Chip.kt` — `Chip(text, onClick, selected, enabled, leadingIcon, onLongClick, longClickLabel, onClearClick, clearContentDescription)`.
 - `component/ChipRow.kt` — горизонтальный скроллируемый контейнер для `Chip` (`contentPadding`, `spacing`).
 - `component/MultiSelectList.kt` — `MultiSelectList<T>(items, selectedItems, onItemToggle, itemLabel, itemSubtitle?, itemKey?, maxHeight = 360.dp, emptyText?)`. Используется в фильтрах (атлеты, типы).
+- `component/SingleSelectDropdown.kt` — `SingleSelectDropdown<T>(items, itemText, onItemSelected, selectedItem?, label?, placeholder?, leadingIcon?, error?)` — выпадающий список с одним выбором (тип тренировки, спортсмен).
 - `component/BottomSheet.kt` — `BottomSheet(onDismissRequest, title?, subtitle?, footer?, content: ColumnScope.() -> Unit)`.
 
 ### Карточки и текст

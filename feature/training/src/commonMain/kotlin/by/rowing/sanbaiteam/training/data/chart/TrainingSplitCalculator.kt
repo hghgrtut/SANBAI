@@ -4,6 +4,7 @@ import by.rowing.sanbaiteam.core.util.RowingTimeFormat
 import by.rowing.sanbaiteam.core.util.roundToTenths
 import by.rowing.sanbaiteam.training.data.chart.models.TrainingPieceSplit
 import by.rowing.sanbaiteam.training.data.chart.models.TrainingSplitLength
+import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingChartPoint
 import by.rowing.sanbaiteam.training.data.models.chart.TrainingPieceChartData
 import kotlin.math.roundToInt
@@ -23,6 +24,7 @@ internal object TrainingSplitCalculator {
         totalDistanceMeters: Int,
         totalTimeMillis: Long,
         length: TrainingSplitLength,
+        paceDistanceMeters: Int = TrainingPieceType.CONCEPT_ROW_ERG.paceDistanceMeters,
     ): List<TrainingPieceSplit>? {
         if (totalDistanceMeters <= 0 || totalTimeMillis <= 0) return null
         val boundaries = buildBoundaries(
@@ -38,6 +40,7 @@ internal object TrainingSplitCalculator {
                 start = boundaries[index],
                 end = boundaries[index + 1],
                 isLast = index == boundaries.lastIndex - 1,
+                paceDistanceMeters = paceDistanceMeters,
             )
         }
     }
@@ -181,6 +184,7 @@ internal object TrainingSplitCalculator {
         start: SplitBoundary,
         end: SplitBoundary,
         isLast: Boolean,
+        paceDistanceMeters: Int,
     ): TrainingPieceSplit {
         val timeMillis = (end.timeMillis - start.timeMillis).coerceAtLeast(0L)
         val distanceMeters = (end.distanceMeters - start.distanceMeters).coerceAtLeast(0)
@@ -209,6 +213,7 @@ internal object TrainingSplitCalculator {
             paceMillis = RowingTimeFormat.paceMillis(
                 timeMillis = timeMillis,
                 distanceMeters = distanceMeters,
+                paceDistanceMeters = paceDistanceMeters,
             ),
             strokeRate = strokeRates.takeIf { it.isNotEmpty() }?.average()?.roundToTenths(),
             avgPowerWatts = powers.takeIf { it.isNotEmpty() }?.average()?.roundToInt(),

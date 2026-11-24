@@ -197,7 +197,7 @@ DAO предоставляются Koin в `data/local/.../data/di/DataModule.kt
 |---|---|
 | `m:ss.t` из миллисекунд | `RowingTimeFormat.formatDuration(timeMillis)` |
 | `m:ss` (без десятых) | `RowingTimeFormat.formatDurationMmSs(timeMillis)` |
-| темп /500 м | `RowingTimeFormat.formatPace(timeMillis, distanceMeters)` → `"m:ss.t /500м"`; сырой — `paceMillis(...)` |
+| темп на дистанцию | `RowingTimeFormat.formatPace(timeMillis, distanceMeters, paceDistanceMeters = 500)` → `"m:ss.t /500м"`; сырой — `paceMillis(...)`. Для вело-типов дистанция берётся из `TrainingPieceType.paceDistanceMeters` (1000 м) |
 | ввод времени: фильтр символов / парсинг | `RowingTimeFormat.sanitizeTimeInput(text)` / `parseTimeInput(text)` (принимает `m:ss.t` и просто секунды) |
 | темп гребли (stroke rate) из текста | `RowingTimeFormat.parseStrokeRate(text)` |
 | число с одним знаком после точки | `formatTenths(value)`, округление — `Double.roundToTenths()` |

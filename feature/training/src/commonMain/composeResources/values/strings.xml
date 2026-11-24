@@ -126,7 +126,7 @@
     <string name="training_detail_pace_label">Скорость</string>
     <string name="training_detail_power_label">Мощность</string>
     <string name="training_detail_power_value">%1$d Вт</string>
-    <string name="training_detail_pace_average">%1$s /500м</string>
+    <string name="training_detail_pace_average">%1$s /%2$dм</string>
     <string name="training_detail_stroke_rate">%1$s гр/мин</string>
     <string name="training_detail_stroke_rate_label">SPM</string>
     <string name="training_detail_avg_heart_rate_label">Ср. ЧСС</string>
@@ -136,7 +136,7 @@
     <string name="training_detail_percent_of_pb_label">% рекорда</string>
     <string name="training_detail_delta_meters">%1$s м</string>
     <string name="training_detail_delta_seconds">%1$s с</string>
-    <string name="training_detail_delta_pace">%1$s с/500м</string>
+    <string name="training_detail_delta_pace">%1$s с/%2$dм</string>
     <string name="training_detail_delta_watts">%1$s Вт</string>
     <string name="training_detail_delta_percent_points">%1$s п.п.</string>
     <string name="training_detail_compare_action">Сравнить тренировки</string>
@@ -211,7 +211,7 @@
     <string name="training_split_column_number">№</string>
     <string name="training_split_column_distance">Дист., м</string>
     <string name="training_split_column_time">Время</string>
-    <string name="training_split_column_pace">Темп /500м</string>
+    <string name="training_split_column_pace">Темп /%1$dм</string>
     <string name="training_split_column_power">Вт</string>
     <string name="training_split_column_spm">SPM</string>
     <string name="training_split_column_avg_heart_rate">Ср. ЧСС</string>

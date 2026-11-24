@@ -62,6 +62,23 @@ internal class TrainingChartValueBoundsTest {
     }
 
     @Test
+    fun `watt bike pace bounds are cut by thirty seconds`() {
+        val values = List(100) { 120.0 } + listOf(60.0, 400.0)
+        val average = values.average()
+
+        val bounds = assertNotNull(
+            trainingChartValueBounds(
+                metric = TrainingChartMetric.SPEED,
+                pieceType = TrainingPieceType.WATT_BIKE,
+                points = points(values),
+            )
+        )
+
+        assertEquals(average - 30.0, bounds.start, 0.001)
+        assertEquals(average + 30.0, bounds.endInclusive, 0.001)
+    }
+
+    @Test
     fun `water stroke rate bounds are absolute`() {
         val bounds = assertNotNull(
             trainingChartValueBounds(

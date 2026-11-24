@@ -3,8 +3,7 @@ package by.rowing.sanbaiteam.athlete.presentation.add
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.entity.AthleteEntity
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
-import by.rowing.sanbaiteam.athlete.domain.weight.parseWeightTenths
-import by.rowing.sanbaiteam.athlete.domain.weight.sanitizeWeightInput
+import by.rowing.sanbaiteam.athlete.domain.weight.AthleteWeightInput
 import by.rowing.sanbaiteam.athlete.presentation.add.compose.AddAthleteScreenActions
 import by.rowing.sanbaiteam.athlete.resources.Res
 import by.rowing.sanbaiteam.athlete.resources.athletes_add_athlete_date_error
@@ -46,7 +45,7 @@ internal class AddAthleteViewModel(
                     dateError = UiText.of(Res.string.athletes_add_athlete_date_error)
                         .takeIf { !isValidDate(dateOfBirth) },
                     weightError = UiText.of(Res.string.athletes_weight_invalid)
-                        .takeIf { weight.isNotBlank() && parseWeightTenths(text = weight) == null },
+                        .takeIf { weight.isNotBlank() && AthleteWeightInput.parse(text = weight) == null },
                 )
             }
         }
@@ -103,7 +102,7 @@ internal class AddAthleteViewModel(
     override fun changeWeight(text: String) {
         changeState {
             copy(
-                weight = sanitizeWeightInput(text = text),
+                weight = AthleteWeightInput.sanitize(text = text),
                 weightError = null,
             )
         }
@@ -112,7 +111,7 @@ internal class AddAthleteViewModel(
     private fun isValidDate(dateString: String): Boolean = TimeUtils.parseDateDigits(dateString) != null
 
     private fun validateForm(): Boolean = state.name.isNotBlank() && isValidDate(state.dateOfBirth) &&
-            (state.weight.isBlank() || parseWeightTenths(text = state.weight) != null)
+            (state.weight.isBlank() || AthleteWeightInput.parse(text = state.weight) != null)
 
     private fun saveRower() {
         viewModelScope.launch {
@@ -124,7 +123,7 @@ internal class AddAthleteViewModel(
                     speedCoachSerial = state.speedCoachSerial.trim().ifBlank { null }
                 )
             )
-            parseWeightTenths(text = state.weight)?.let { weightTenths ->
+            AthleteWeightInput.parse(text = state.weight)?.let { weightTenths ->
                 athleteRepository.saveWeight(
                     athleteId = athleteId,
                     dateMillis = nowInMillis(),

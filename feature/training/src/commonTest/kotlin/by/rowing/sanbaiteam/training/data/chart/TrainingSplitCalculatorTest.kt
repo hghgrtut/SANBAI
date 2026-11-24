@@ -35,6 +35,28 @@ internal class TrainingSplitCalculatorTest {
     }
 
     @Test
+    fun `split pace uses requested pace distance`() {
+        val chart = chart(
+            distance = linearDistance(
+                durationMillis = 300_000L,
+                distance = 1_500.0
+            )
+        )
+
+        val splits = assertNotNull(
+            TrainingSplitCalculator.calculate(
+                chart = chart,
+                totalDistanceMeters = 1_500,
+                totalTimeMillis = 300_000L,
+                length = TrainingSplitLength.Distance(meters = 500),
+                paceDistanceMeters = 1000,
+            )
+        )
+
+        assertEquals(listOf(200_000L, 200_000L, 200_000L), splits.map { it.paceMillis })
+    }
+
+    @Test
     fun `distance splits keep remainder in the last split`() {
         val chart = chart(
             distance = linearDistance(

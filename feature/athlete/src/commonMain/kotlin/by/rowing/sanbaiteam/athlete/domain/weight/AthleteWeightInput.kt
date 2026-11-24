@@ -1,0 +1,62 @@
+package by.rowing.sanbaiteam.athlete.domain.weight
+
+import by.rowing.sanbaiteam.athlete.resources.Res
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_future_date
+import by.rowing.sanbaiteam.athlete.resources.athletes_weight_invalid
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
+import by.rowing.sanbaiteam.core.util.TimeUtils
+import by.rowing.sanbaiteam.core.util.formatTenths
+import by.rowing.sanbaiteam.uikit.component.UiText
+
+@AllowDetektPublic
+object AthleteWeightInput {
+
+    internal const val MIN_WEIGHT_TENTHS = 200
+    internal const val MAX_WEIGHT_TENTHS = 3000
+
+    internal const val TENTHS_IN_KILOGRAM = 10.0
+
+    private val WEIGHT_INPUT_REGEX = Regex(pattern = """\d{1,3}(\.\d?)?""")
+    private const val MAX_WHOLE_DIGITS = 3
+    private const val MAX_FRACTION_DIGITS = 1
+    private const val DECIMAL_SEPARATOR = '.'
+    private const val COMMA_SEPARATOR = ','
+
+    fun validate(
+        text: String,
+        dateMillis: Long,
+        nowMillis: Long,
+    ): UiText? = when {
+        parse(text = text) == null -> UiText.of(Res.string.athletes_weight_invalid)
+        TimeUtils.startOfDayMillis(timeInMillis = dateMillis) > TimeUtils.startOfDayMillis(timeInMillis = nowMillis) ->
+            UiText.of(Res.string.athletes_weight_future_date)
+        else -> null
+    }
+
+    /** Оставляет цифры и один десятичный разделитель; запятая нормализуется в точку. */
+    fun sanitize(text: String): String {
+        val separatorIndex = text.indexOfFirst { it == DECIMAL_SEPARATOR || it == COMMA_SEPARATOR }
+        if (separatorIndex < 0) {
+            return text.filter { it.isDigit() }.take(MAX_WHOLE_DIGITS)
+        }
+        val whole = text.substring(0, separatorIndex)
+            .filter { it.isDigit() }
+            .take(MAX_WHOLE_DIGITS)
+        val fraction = text.substring(separatorIndex + 1)
+            .filter { it.isDigit() }
+            .take(MAX_FRACTION_DIGITS)
+        return "$whole$DECIMAL_SEPARATOR$fraction"
+    }
+
+    /** Парсит вес в десятых килограмма; `null`, если значение пустое или вне 20–300 кг. */
+    fun parse(text: String): Int? {
+        val normalized = sanitize(text).takeIf { WEIGHT_INPUT_REGEX.matches(it) } ?: return null
+        val parts = normalized.split(DECIMAL_SEPARATOR).map { it.toIntOrNull() ?: 0 }
+        val whole = parts.getOrElse(0) { 0 }
+        val fraction = parts.getOrElse(1) { 0 }
+        val tenths = whole * 10 + fraction
+        return tenths.takeIf { it in MIN_WEIGHT_TENTHS..MAX_WEIGHT_TENTHS }
+    }
+
+    internal fun formatWeight(tenths: Int): String = formatTenths(value = tenths / TENTHS_IN_KILOGRAM)
+}

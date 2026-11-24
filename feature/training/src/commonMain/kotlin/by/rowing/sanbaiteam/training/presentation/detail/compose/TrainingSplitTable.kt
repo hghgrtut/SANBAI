@@ -75,7 +75,10 @@ internal fun TrainingSplitTable(
             .horizontalScroll(scrollState)
     ) {
         Column(modifier = Modifier.width(tableWidth(hiddenFields = hiddenFields))) {
-            SplitTableHeader(hiddenFields = hiddenFields)
+            SplitTableHeader(
+                hiddenFields = hiddenFields,
+                paceDistanceMeters = piece.paceDistanceMeters,
+            )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             LazyColumn(modifier = Modifier.heightIn(max = LAZY_TABLE_MAX_HEIGHT)) {
                 items(
@@ -106,13 +109,16 @@ internal fun TrainingSplitTable(
 }
 
 @Composable
-private fun SplitTableHeader(hiddenFields: Set<TrainingDetailField>) {
+private fun SplitTableHeader(
+    hiddenFields: Set<TrainingDetailField>,
+    paceDistanceMeters: Int,
+) {
     SplitTableRowLayout(
         modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant),
         index = stringResource(Res.string.training_split_column_number),
         distance = stringResource(Res.string.training_split_column_distance),
         time = stringResource(Res.string.training_split_column_time),
-        pace = stringResource(Res.string.training_split_column_pace),
+        pace = stringResource(Res.string.training_split_column_pace, paceDistanceMeters),
         avgPowerWatts = stringResource(Res.string.training_split_column_power),
         strokeRate = stringResource(Res.string.training_split_column_spm),
         avgHeartRate = stringResource(Res.string.training_split_column_avg_heart_rate),
@@ -135,6 +141,7 @@ private fun SplitTotalRow(
         pace = RowingTimeFormat.paceMillis(
             timeMillis = piece.timeMillis,
             distanceMeters = piece.distanceMeters,
+            paceDistanceMeters = piece.paceDistanceMeters,
         )?.let { RowingTimeFormat.formatDuration(it) } ?: MISSING_VALUE,
         avgPowerWatts = piece.avgPowerWatts?.toString() ?: MISSING_VALUE,
         strokeRate = piece.strokeRateFormatted.ifEmpty { MISSING_VALUE },

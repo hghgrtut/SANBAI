@@ -14,10 +14,15 @@ import by.rowing.sanbaiteam.data.local.resources.training_piece_type_single
 import by.rowing.sanbaiteam.data.local.resources.training_piece_type_watt_bike
 import org.jetbrains.compose.resources.StringResource
 
+private const val ROW_ERG_PACE_DISTANCE_METERS = 500
+private const val BIKE_ERG_PACE_DISTANCE_METERS = 1000
+
 @AllowDetektPublic
 enum class TrainingPieceType(
     val uiResId: StringResource,
     val isWater: Boolean,
+    /** Дистанция для расчёта скорости тренировки. */
+    val paceDistanceMeters: Int = ROW_ERG_PACE_DISTANCE_METERS,
 ) {
     CONCEPT_ROW_ERG(
         uiResId = Res.string.training_piece_type_concept_row_erg,
@@ -29,11 +34,13 @@ enum class TrainingPieceType(
     ),
     CONCEPT_BIKE_ERG(
         uiResId = Res.string.training_piece_type_concept_bike_erg,
-        isWater = false
+        isWater = false,
+        paceDistanceMeters = BIKE_ERG_PACE_DISTANCE_METERS,
     ),
     WATT_BIKE(
         uiResId = Res.string.training_piece_type_watt_bike,
-        isWater = false
+        isWater = false,
+        paceDistanceMeters = BIKE_ERG_PACE_DISTANCE_METERS,
     ),
     SINGLE(
         uiResId = Res.string.training_piece_type_single,

@@ -6,7 +6,10 @@
     <string name="main_subtitle">Дневник гребли</string>
     <string name="main_stats_athletes">Спортсмены</string>
     <string name="main_stats_trainings">Тренировки</string>
-    <string name="main_add_training">Тренировка</string>
+    <string name="main_add_training">Добавить тренировку</string>
+    <string name="main_add_weight">+ вес</string>
+    <string name="main_weight_athlete_label">Спортсмен</string>
+    <string name="main_weight_athlete_placeholder">Выберите спортсмена</string>
     <string name="main_recent_trainings">Последние тренировки</string>
     <string name="main_show_all">Все</string>
     <string name="main_empty_trainings_title">Пока нет тренировок</string>

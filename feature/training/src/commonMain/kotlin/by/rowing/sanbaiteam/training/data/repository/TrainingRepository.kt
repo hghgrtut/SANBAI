@@ -163,6 +163,7 @@ internal class TrainingRepository(
             typeResId = training.type.uiResId,
             athleteNames = baseAthleteIds.mapNotNull { nameMap[it] },
             pieces = buildDetailPieces(
+                paceDistanceMeters = training.type.paceDistanceMeters,
                 baseCrewPieces = pieces,
                 baseAthleteIds = baseAthleteIds,
                 personalBests = personalBests,
@@ -229,6 +230,7 @@ internal class TrainingRepository(
         training.sourceFileRelativePath?.let { importStorage.readImportFile(it) }
 
     private fun buildDetailPieces(
+        paceDistanceMeters: Int,
         baseCrewPieces: List<TrainingAthletePieceEntity>,
         baseAthleteIds: List<Long>,
         personalBests: Map<Long, AthletePersonalBestEntity>,
@@ -254,8 +256,10 @@ internal class TrainingRepository(
             timeFormatted = RowingTimeFormat.formatDuration(piece.timeMillis),
             paceFormatted = RowingTimeFormat.formatPace(
                 timeMillis = piece.timeMillis,
-                distanceMeters = piece.distanceMeters
+                distanceMeters = piece.distanceMeters,
+                paceDistanceMeters = paceDistanceMeters,
             ).orEmpty(),
+            paceDistanceMeters = paceDistanceMeters,
             strokeRateFormatted = formatTenths(value = piece.strokeRate),
             avgPowerWatts = avgPowerWatts,
             avgHeartRate = piece.avgHeartRate,
@@ -266,6 +270,7 @@ internal class TrainingRepository(
             chartMetrics = chartData?.availableMetrics.orEmpty(),
             chartData = chartData,
             comparison = TrainingComparisonCalculator.compare(
+                paceDistanceMeters = paceDistanceMeters,
                 base = ComparablePiece(
                     distanceMeters = piece.distanceMeters,
                     timeMillis = piece.timeMillis,
