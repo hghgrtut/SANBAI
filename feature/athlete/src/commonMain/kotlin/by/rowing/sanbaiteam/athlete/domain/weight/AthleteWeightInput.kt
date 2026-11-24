@@ -28,8 +28,7 @@ object AthleteWeightInput {
         nowMillis: Long,
     ): UiText? = when {
         parse(text = text) == null -> UiText.of(Res.string.athletes_weight_invalid)
-        TimeUtils.startOfDayMillis(timeInMillis = dateMillis) >
-                TimeUtils.startOfDayMillis(timeInMillis = nowMillis) ->
+        TimeUtils.startOfDayMillis(timeInMillis = dateMillis) > TimeUtils.startOfDayMillis(timeInMillis = nowMillis) ->
             UiText.of(Res.string.athletes_weight_future_date)
         else -> null
     }
