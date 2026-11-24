@@ -16,7 +16,7 @@ object AthleteWeightInput {
 
     internal const val TENTHS_IN_KILOGRAM = 10.0
 
-    private val WEIGHT_INPUT_REGEX = Regex(pattern = """\d{1,3}(\.\d)?""")
+    private val WEIGHT_INPUT_REGEX = Regex(pattern = """\d{1,3}(\.\d?)?""")
     private const val MAX_WHOLE_DIGITS = 3
     private const val MAX_FRACTION_DIGITS = 1
     private const val DECIMAL_SEPARATOR = '.'
@@ -50,13 +50,10 @@ object AthleteWeightInput {
 
     /** Парсит вес в десятых килограмма; `null`, если значение пустое или вне 20–300 кг. */
     fun parse(text: String): Int? {
-        val normalized = text.trim()
-            .replace(COMMA_SEPARATOR, DECIMAL_SEPARATOR)
-            .removeSuffix(DECIMAL_SEPARATOR.toString())
-        if (!WEIGHT_INPUT_REGEX.matches(normalized)) return null
-        val parts = normalized.split(DECIMAL_SEPARATOR)
-        val whole = parts[0].toIntOrNull() ?: return null
-        val fraction = parts.getOrNull(1)?.toIntOrNull() ?: 0
+        val normalized = sanitize(text).takeIf { WEIGHT_INPUT_REGEX.matches(it) } ?: return null
+        val parts = normalized.split(DECIMAL_SEPARATOR).map { it.toIntOrNull() ?: 0 }
+        val whole = parts.getOrElse(0) { 0 }
+        val fraction = parts.getOrElse(1) { 0 }
         val tenths = whole * 10 + fraction
         return tenths.takeIf { it in MIN_WEIGHT_TENTHS..MAX_WEIGHT_TENTHS }
     }
