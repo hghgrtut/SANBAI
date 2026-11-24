@@ -35,15 +35,14 @@ object AthleteWeightInput {
 
     /** Оставляет цифры и один десятичный разделитель; запятая нормализуется в точку. */
     fun sanitize(text: String): String {
-        val normalized = text.replace(COMMA_SEPARATOR, DECIMAL_SEPARATOR)
-        val separatorIndex = normalized.indexOf(DECIMAL_SEPARATOR)
+        val separatorIndex = text.indexOfFirst { it == DECIMAL_SEPARATOR || it == COMMA_SEPARATOR }
         if (separatorIndex < 0) {
-            return normalized.filter { it.isDigit() }.take(MAX_WHOLE_DIGITS)
+            return text.filter { it.isDigit() }.take(MAX_WHOLE_DIGITS)
         }
-        val whole = normalized.substring(0, separatorIndex)
+        val whole = text.substring(0, separatorIndex)
             .filter { it.isDigit() }
             .take(MAX_WHOLE_DIGITS)
-        val fraction = normalized.substring(separatorIndex + 1)
+        val fraction = text.substring(separatorIndex + 1)
             .filter { it.isDigit() }
             .take(MAX_FRACTION_DIGITS)
         return "$whole$DECIMAL_SEPARATOR$fraction"
