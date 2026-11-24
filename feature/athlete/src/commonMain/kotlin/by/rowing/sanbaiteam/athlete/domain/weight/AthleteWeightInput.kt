@@ -8,7 +8,6 @@ import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.formatTenths
 import by.rowing.sanbaiteam.uikit.component.UiText
 
-
 @AllowDetektPublic
 object AthleteWeightInput {
 
