@@ -221,7 +221,9 @@ internal class AddTrainingViewModel(
             val sanitized = RowingTimeFormat.sanitizeTimeInput(text = text)
             piece.copy(
                 timeText = sanitized,
-                timeMillis = RowingTimeFormat.parseTimeInput(input = sanitized) ?: 0L
+                timeMillis = RowingTimeFormat.parseTimeInput(
+                    input = if (sanitized.contains(Regex("[:.]"))) sanitized else "$sanitized:00"
+                ) ?: 0L
             )
         }
     }
