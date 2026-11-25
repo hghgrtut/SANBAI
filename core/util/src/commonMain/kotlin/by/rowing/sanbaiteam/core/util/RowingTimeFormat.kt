@@ -19,10 +19,13 @@ object RowingTimeFormat {
      */
     fun formatDuration(timeMillis: Long): String {
         if (timeMillis < 0) return "0:00.0"
-        val tenths = (timeMillis + TimeUtils.MILLIS_PER_TENTH / 2) / TimeUtils.MILLIS_PER_TENTH % TENTH_PER_SECOND
+        // to compensate rounding of 0.0xxx (1:37.997 for example)
+        val timeMillis = timeMillis + TimeUtils.MILLIS_PER_TENTH / 2
+        val tenths = (timeMillis) / TimeUtils.MILLIS_PER_TENTH % TENTH_PER_SECOND
         return "${formatDurationMmSs(timeMillis = timeMillis)}.$tenths"
     }
 
+    /** milliseconds cuts (1:37.997 will be retuned as "1:37") */
     fun formatDurationMmSs(timeMillis: Long): String {
         val totalSeconds = (timeMillis / TimeUtils.MILLIS_PER_SECOND).coerceAtLeast(0L)
         val minutes = totalSeconds / TimeUtils.SECONDS_PER_MINUTE
