@@ -1,6 +1,9 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
-internal interface TrainingImportStorage {
+import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
+
+@AllowDetektPublic
+interface TrainingImportStorage {
 
     fun saveImportFile(
         trainingId: Long,

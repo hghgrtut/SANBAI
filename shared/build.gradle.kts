@@ -18,6 +18,7 @@ kotlin {
             implementation(project(":core:base"))
             implementation(project(":core:file"))
             implementation(project(":data:local"))
+            implementation(project(":data:backup"))
             implementation(project(":feature:calculator"))
             implementation(project(":feature:athlete"))
             implementation(project(":feature:training"))

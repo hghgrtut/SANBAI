@@ -2,6 +2,7 @@ package by.rowing.sanbaiteam
 
 import android.app.Application
 import by.rowing.sanbaiteam.athlete.di.athleteModule
+import by.rowing.sanbaiteam.backup.di.backupModule
 import by.rowing.sanbaiteam.calculator.di.calculatorModule
 import by.rowing.sanbaiteam.data.di.databaseModule
 import by.rowing.sanbaiteam.settings.di.settingsModule
@@ -21,6 +22,7 @@ internal class RowingApp : Application() {
                 athleteModule,
                 calculatorModule,
                 databaseModule,
+                backupModule,
                 trainingModule,
                 settingsModule,
             )
