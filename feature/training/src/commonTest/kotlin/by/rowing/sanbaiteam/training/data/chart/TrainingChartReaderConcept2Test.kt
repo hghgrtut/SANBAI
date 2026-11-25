@@ -30,7 +30,7 @@ internal class TrainingChartReaderConcept2Test {
         assertEquals(4, chart.speed.size)
         assertTrue(chart.strokeRate.last().elapsedMillis > 300_000L)
         assertEquals(listOf(0.0, 650.0, 1_250.0, 1_800.0), chart.distance.map { it.value })
-        assertEquals(205, chart.avgPowerWatts)
+        assertEquals(205, chart.averagePowerWatts)
     }
 
     @Test

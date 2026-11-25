@@ -30,7 +30,7 @@ internal class TrainingChartReaderRp3Test {
         assertEquals(3, data.availableMetrics.size)
         assertEquals(listOf(0.0, 15.0, 30.0), data.distance.map { it.value })
         assertEquals(listOf(0L, 2_000L, 4_000L), data.distance.map { it.elapsedMillis })
-        assertEquals(null, data.avgPowerWatts)
+        assertEquals(null, data.averagePowerWatts)
     }
 
     @Test
@@ -80,11 +80,11 @@ internal class TrainingChartReaderRp3Test {
             )
         )
 
-        assertEquals(210, data.avgPowerWatts)
+        assertEquals(210, data.averagePowerWatts)
     }
 
     @Test
-    fun `rp3 csv prefers last stroke avg power`() {
+    fun `rp3 csv prefers last stroke average power`() {
         val reader = TrainingChartReader()
 
         val data = assertNotNull(
@@ -96,7 +96,7 @@ internal class TrainingChartReaderRp3Test {
             )
         )
 
-        assertEquals(205, data.avgPowerWatts)
+        assertEquals(205, data.averagePowerWatts)
     }
 
     private companion object {

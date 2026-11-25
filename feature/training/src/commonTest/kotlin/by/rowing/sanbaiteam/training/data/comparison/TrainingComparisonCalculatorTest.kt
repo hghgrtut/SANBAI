@@ -18,8 +18,8 @@ internal class TrainingComparisonCalculatorTest {
             distanceMeters = 1000,
             timeMillis = 200_000L,
             strokeRate = 30.0,
-            avgPowerWatts = 200,
-            avgHeartRate = 150,
+            averagePowerWatts = 200,
+            averageHeartRate = 150,
             maxHeartRate = 170,
             recoveryHeartRate = 120,
             lactate = 4.0,
@@ -29,8 +29,8 @@ internal class TrainingComparisonCalculatorTest {
             distanceMeters = 950,
             timeMillis = 210_000L,
             strokeRate = 31.0,
-            avgPowerWatts = 220,
-            avgHeartRate = 148,
+            averagePowerWatts = 220,
+            averageHeartRate = 148,
             maxHeartRate = 172,
             recoveryHeartRate = 118,
             lactate = 4.2,
@@ -58,18 +58,18 @@ internal class TrainingComparisonCalculatorTest {
     @Test
     fun `optional metrics are averaged only over non null values`() {
         val base = piece(
-            avgHeartRate = null,
+            averageHeartRate = null,
             lactate = 4.0,
             percentOfPb = null,
         )
         val compared = listOf(
             piece(
-                avgHeartRate = 140,
+                averageHeartRate = 140,
                 lactate = null,
                 percentOfPb = null,
             ),
             piece(
-                avgHeartRate = null,
+                averageHeartRate = null,
                 lactate = 4.4,
                 percentOfPb = null,
             ),
@@ -116,7 +116,7 @@ internal class TrainingComparisonCalculatorTest {
             distanceMeters = 500,
             timeMillis = 100_000L,
             strokeRate = 32.0,
-            avgHeartRate = 150,
+            averageHeartRate = 150,
         )
 
         val result = TrainingComparisonCalculator.compare(base, listOf(base))
@@ -149,8 +149,8 @@ internal class TrainingComparisonCalculatorTest {
         distanceMeters: Int = 1000,
         timeMillis: Long = 200_000L,
         strokeRate: Double = 30.0,
-        avgPowerWatts: Int? = null,
-        avgHeartRate: Int? = null,
+        averagePowerWatts: Int? = null,
+        averageHeartRate: Int? = null,
         maxHeartRate: Int? = null,
         recoveryHeartRate: Int? = null,
         lactate: Double? = null,
@@ -159,8 +159,8 @@ internal class TrainingComparisonCalculatorTest {
         distanceMeters = distanceMeters,
         timeMillis = timeMillis,
         strokeRate = strokeRate,
-        avgPowerWatts = avgPowerWatts,
-        avgHeartRate = avgHeartRate,
+        averagePowerWatts = averagePowerWatts,
+        averageHeartRate = averageHeartRate,
         maxHeartRate = maxHeartRate,
         recoveryHeartRate = recoveryHeartRate,
         lactate = lactate,

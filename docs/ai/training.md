@@ -80,7 +80,7 @@ FIT-декодер: `FitDecoderImpl.kt` (`ByteReader`, `FileHeader`, разбо�
 - берёт `TrainingEntity`, pieces, имена атлетов, PB (только `PersonalBestPercent.DEFAULT_PB_DISTANCE_METERS = 2000` и `boatType = training.type`);
 - PB-процент отрезка — среднее по экипажу (`PersonalBestPercent.calculate` + `roundToTenths`);
 - `chartData` — перечитывается из исходного файла по `sourceFileIndex/sourceIntervalIndex` (`TrainingChartReader.read`);
-- средняя мощность отрезка: `chartData.avgPowerWatts` из файла (FIT `record.power`; RP3 — `avg_power`/
+- средняя мощность отрезка: `chartData.average`PowerWatts` из файла (FIT `record.power`; RP3 — `avg_power`/
   `avg_calculated_power` последнего гребка, иначе среднее по `power`), иначе fallback `TrainingPower.estimatedWatts` для
   Concept2 Row/Bike; для RP3/воды/WattBike без мощности в файле — `null`;
 - `comparison` — `TrainingComparisonCalculator.compare(base, compared)` по тому же `order`;
@@ -107,8 +107,8 @@ SR/HR/мощности берутся из точек в диапазоне.
 - отбрасываются значения вне `paceRange` (MIN/MAX секунд).
 Для RP3: точки из строк, темп из `estimated_500m_time` или расчётный.
 
-`TrainingPieceChartData(durationMillis, speed, strokeRate, heartRate, distance, avgPowerWatts)`:
-`availableMetrics` (SPEED/SR/HR) и `points(metric)`. `avgPowerWatts` — скаляр средней мощности из файла, не серия
+`TrainingPieceChartData(durationMillis, speed, strokeRate, heartRate, distance, averagePowerWatts)`:
+`availableMetrics` (SPEED/SR/HR) и `points(metric)`. `averagePowerWatts` — скаляр средней мощности из файла, не серия
 графика.
 `TrainingChartMetric { SPEED, STROKE_RATE, HEART_RATE }` — иконки + строки.
 `TrainingChartResult`: `Success(data, pieceType)`, `PieceNotFound`, `SourceUnavailable`.

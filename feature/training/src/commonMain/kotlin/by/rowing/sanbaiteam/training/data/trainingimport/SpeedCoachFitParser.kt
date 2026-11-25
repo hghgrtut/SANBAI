@@ -52,7 +52,7 @@ internal object SpeedCoachFitParser : TrainingImportParser {
                     distanceMeters = lap.distanceMeters.roundToInt(),
                     timeMillis = lap.elapsedMillis,
                     strokeRate = lapRecords.mapNotNull { it.cadence }.avg() ?: 0.0,
-                    avgHeartRate = heartRates.avg()?.roundToInt(),
+                    averageHeartRate = heartRates.avg()?.roundToInt(),
                     maxHeartRate = heartRates.maxOrNull(),
                     recoveryHeartRate = null,
                 )

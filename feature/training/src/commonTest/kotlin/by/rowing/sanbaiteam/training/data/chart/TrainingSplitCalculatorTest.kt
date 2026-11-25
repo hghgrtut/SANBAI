@@ -177,7 +177,7 @@ internal class TrainingSplitCalculatorTest {
 
         splits.forEach { split ->
             assertNull(split.strokeRate)
-            assertNull(split.avgHeartRate)
+            assertNull(split.averageHeartRate)
             assertNull(split.maxHeartRate)
         }
     }
@@ -238,7 +238,7 @@ internal class TrainingSplitCalculatorTest {
         )
 
         assertEquals(listOf(25.0, 45.0), splits.map { it.strokeRate })
-        assertEquals(listOf(110, 150), splits.map { it.avgHeartRate })
+        assertEquals(listOf(110, 150), splits.map { it.averageHeartRate })
         assertEquals(listOf(120, 160), splits.map { it.maxHeartRate })
     }
 

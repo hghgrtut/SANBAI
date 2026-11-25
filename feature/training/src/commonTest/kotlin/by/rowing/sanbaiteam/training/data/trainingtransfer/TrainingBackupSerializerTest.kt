@@ -35,7 +35,7 @@ internal class TrainingBackupSerializerTest {
                             distanceMeters = 2000,
                             timeMillis = 400000,
                             strokeRate = 22.0,
-                            avgHeartRate = 155,
+                            averageHeartRate = 155,
                             maxHeartRate = 161,
                             recoveryHeartRate = 120,
                             lactate = 12.3,
@@ -78,7 +78,7 @@ internal class TrainingBackupSerializerTest {
         val decoded = TrainingBackupSerializer.decode(json)
 
         assertNull(decoded.trainings[0].sourceFileBase64)
-        assertNull(decoded.trainings[0].pieces[0].avgHeartRate)
+        assertNull(decoded.trainings[0].pieces[0].averageHeartRate)
         assertNull(decoded.trainings[0].pieces[0].maxHeartRate)
         assertNull(decoded.trainings[0].pieces[0].recoveryHeartRate)
         assertNull(decoded.trainings[0].pieces[0].lactate)

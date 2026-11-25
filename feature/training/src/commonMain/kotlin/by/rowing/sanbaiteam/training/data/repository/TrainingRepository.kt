@@ -134,13 +134,13 @@ internal class TrainingRepository(
                         distanceMeters = piece.distanceMeters,
                         timeMillis = piece.timeMillis,
                         strokeRate = piece.strokeRate,
-                        avgPowerWatts = source.chartDataByOrder[piece.order]?.avgPowerWatts
+                        averagePowerWatts = source.chartDataByOrder[piece.order]?.averagePowerWatts
                             ?: TrainingPower.estimatedWatts(
                                 pieceType = training.type,
                                 distanceMeters = piece.distanceMeters,
                                 timeMillis = piece.timeMillis,
                             ),
-                        avgHeartRate = piece.avgHeartRate,
+                        averageHeartRate = piece.averageHeartRate,
                         maxHeartRate = piece.maxHeartRate,
                         recoveryHeartRate = piece.recoveryHeartRate,
                         lactate = piece.lactate,
@@ -244,7 +244,7 @@ internal class TrainingRepository(
             personalBests = personalBests,
         )
         val chartData = chartDataByOrder[piece.order]
-        val avgPowerWatts = chartData?.avgPowerWatts ?: TrainingPower.estimatedWatts(
+        val averagePowerWatts = chartData?.averagePowerWatts ?: TrainingPower.estimatedWatts(
             pieceType = pieceType,
             distanceMeters = piece.distanceMeters,
             timeMillis = piece.timeMillis,
@@ -261,8 +261,8 @@ internal class TrainingRepository(
             ).orEmpty(),
             paceDistanceMeters = paceDistanceMeters,
             strokeRateFormatted = formatTenths(value = piece.strokeRate),
-            avgPowerWatts = avgPowerWatts,
-            avgHeartRate = piece.avgHeartRate,
+            averagePowerWatts = averagePowerWatts,
+            averageHeartRate = piece.averageHeartRate,
             maxHeartRate = piece.maxHeartRate,
             recoveryHeartRate = piece.recoveryHeartRate,
             lactate = piece.lactate,
@@ -275,8 +275,8 @@ internal class TrainingRepository(
                     distanceMeters = piece.distanceMeters,
                     timeMillis = piece.timeMillis,
                     strokeRate = piece.strokeRate,
-                    avgPowerWatts = avgPowerWatts,
-                    avgHeartRate = piece.avgHeartRate,
+                    averagePowerWatts = averagePowerWatts,
+                    averageHeartRate = piece.averageHeartRate,
                     maxHeartRate = piece.maxHeartRate,
                     recoveryHeartRate = piece.recoveryHeartRate,
                     lactate = piece.lactate,

@@ -1,7 +1,7 @@
 package by.rowing.sanbaiteam.training.data.models.detail
 
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.training_detail_avg_heart_rate_label
+import by.rowing.sanbaiteam.training.resources.training_detail_average_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_distance_label
 import by.rowing.sanbaiteam.training.resources.training_detail_lactate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_max_heart_rate_label
@@ -20,7 +20,7 @@ internal enum class TrainingDetailField(val labelRes: StringResource) {
     PACE(labelRes = Res.string.training_detail_pace_label),
     AVG_POWER(labelRes = Res.string.training_detail_power_label),
     STROKE_RATE(labelRes = Res.string.training_detail_stroke_rate_label),
-    AVG_HEART_RATE(labelRes = Res.string.training_detail_avg_heart_rate_label),
+    AVG_HEART_RATE(labelRes = Res.string.training_detail_average_heart_rate_label),
     MAX_HEART_RATE(labelRes = Res.string.training_detail_max_heart_rate_label),
     RECOVERY_HEART_RATE(labelRes = Res.string.training_detail_recovery_heart_rate_label),
     LACTATE(labelRes = Res.string.training_detail_lactate_label),

@@ -48,8 +48,8 @@ internal object TrainingComparisonCalculator {
         putMetricIfPresent(
             metrics = metrics,
             metric = ComparisonMetric.AVG_POWER,
-            values = compared.mapNotNull { it.avgPowerWatts },
-            base = base.avgPowerWatts,
+            values = compared.mapNotNull { it.averagePowerWatts },
+            base = base.averagePowerWatts,
             higherIsBetter = true,
             round = { it.roundToInt().toDouble() },
         )
@@ -66,8 +66,8 @@ internal object TrainingComparisonCalculator {
         putMetricIfPresent(
             metrics = metrics,
             metric = ComparisonMetric.AVG_HEART_RATE,
-            values = compared.mapNotNull { it.avgHeartRate },
-            base = base.avgHeartRate,
+            values = compared.mapNotNull { it.averageHeartRate },
+            base = base.averageHeartRate,
             higherIsBetter = false,
             round = { it.roundToInt().toDouble() },
         )

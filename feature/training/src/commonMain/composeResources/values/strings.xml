@@ -95,7 +95,7 @@
     <string name="add_training_piece_time_label">Время</string>
     <string name="add_training_piece_time_placeholder">0:00.0</string>
     <string name="add_training_piece_stroke_rate_label">SPM</string>
-    <string name="add_training_piece_avg_heart_rate_label">Ср. ЧСС</string>
+    <string name="add_training_piece_average_heart_rate_label">Ср. ЧСС</string>
     <string name="add_training_piece_max_heart_rate_label">Max ЧСС</string>
     <string name="add_training_piece_recovery_heart_rate_label">ЧСС вос.</string>
     <string name="add_training_piece_lactate_label">Лактат</string>
@@ -129,7 +129,7 @@
     <string name="training_detail_pace_average">%1$s /%2$dм</string>
     <string name="training_detail_stroke_rate">%1$s гр/мин</string>
     <string name="training_detail_stroke_rate_label">SPM</string>
-    <string name="training_detail_avg_heart_rate_label">Ср. ЧСС</string>
+    <string name="training_detail_average_heart_rate_label">Ср. ЧСС</string>
     <string name="training_detail_max_heart_rate_label">Макс. ЧСС</string>
     <string name="training_detail_recovery_heart_rate_label">Восст. ЧСС</string>
     <string name="training_detail_lactate_label">Лактат</string>
@@ -214,7 +214,7 @@
     <string name="training_split_column_pace">Темп /%1$dм</string>
     <string name="training_split_column_power">Вт</string>
     <string name="training_split_column_spm">SPM</string>
-    <string name="training_split_column_avg_heart_rate">Ср. ЧСС</string>
+    <string name="training_split_column_average_heart_rate">Ср. ЧСС</string>
     <string name="training_split_column_max_heart_rate">Макс. ЧСС</string>
     <string name="training_split_total">Итого</string>
 </resources>

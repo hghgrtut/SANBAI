@@ -176,7 +176,7 @@ internal class TrainingChartReader {
             heartRate = heartRate,
             distance = distance,
             power = power,
-            avgPowerWatts = if (powerCount > 0) (powerSum / powerCount.toDouble()).roundToInt() else null,
+            averagePowerWatts = if (powerCount > 0) (powerSum / powerCount.toDouble()).roundToInt() else null,
         )
     }
 
@@ -291,7 +291,6 @@ internal class TrainingChartReader {
         }
 
         val lastStroke = group.last()
-        val sampleAvgPower = if (powerCount > 0) (powerSum / powerCount.toDouble()).roundToInt() else null
         return TrainingPieceChartData(
             durationMillis = durationMillis,
             speed = speed,
@@ -299,7 +298,8 @@ internal class TrainingChartReader {
             heartRate = heartRate,
             distance = distance,
             power = power,
-            avgPowerWatts = lastStroke.avgPowerWatts ?: lastStroke.avgCalculatedPowerWatts ?: sampleAvgPower,
+            averagePowerWatts = lastStroke.averagePowerWatts ?: lastStroke.averageCalculatedPowerWatts
+            ?: (if (powerCount > 0) (powerSum / powerCount.toDouble()).roundToInt() else null)
         )
     }
 

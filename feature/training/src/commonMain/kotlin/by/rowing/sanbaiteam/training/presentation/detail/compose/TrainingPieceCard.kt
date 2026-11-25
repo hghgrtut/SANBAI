@@ -35,7 +35,7 @@ import by.rowing.sanbaiteam.training.data.models.comparison.MetricComparison
 import by.rowing.sanbaiteam.training.data.models.detail.TrainingDetailField
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.training_detail_avg_heart_rate_label
+import by.rowing.sanbaiteam.training.resources.training_detail_average_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_average
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_hide
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_show
@@ -214,8 +214,8 @@ private fun PieceMetricRows(
     }
     if (TrainingDetailField.AVG_HEART_RATE !in hiddenFields) {
         HeartRateMetricRow(
-            label = stringResource(Res.string.training_detail_avg_heart_rate_label),
-            baseValue = piece.avgHeartRate,
+            label = stringResource(Res.string.training_detail_average_heart_rate_label),
+            baseValue = piece.averageHeartRate,
             comparison = metrics[ComparisonMetric.AVG_HEART_RATE],
             expanded = expanded
         )
@@ -361,7 +361,7 @@ private fun PowerMetricRow(
     val comparison = metrics[ComparisonMetric.AVG_POWER]
     TrainingMetricRow(
         label = stringResource(Res.string.training_detail_power_label),
-        baseValue = piece.avgPowerWatts?.let { stringResource(Res.string.training_detail_power_value, it) },
+        baseValue = piece.averagePowerWatts?.let { stringResource(Res.string.training_detail_power_value, it) },
         averageValue = comparison?.average?.roundToInt()?.let {
             stringResource(Res.string.training_detail_power_value, it)
         },

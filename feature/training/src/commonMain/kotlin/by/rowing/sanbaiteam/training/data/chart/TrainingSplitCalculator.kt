@@ -216,8 +216,8 @@ internal object TrainingSplitCalculator {
                 paceDistanceMeters = paceDistanceMeters,
             ),
             strokeRate = strokeRates.takeIf { it.isNotEmpty() }?.average()?.roundToTenths(),
-            avgPowerWatts = powers.takeIf { it.isNotEmpty() }?.average()?.roundToInt(),
-            avgHeartRate = heartRates.takeIf { it.isNotEmpty() }?.average()?.roundToInt(),
+            averagePowerWatts = powers.takeIf { it.isNotEmpty() }?.average()?.roundToInt(),
+            averageHeartRate = heartRates.takeIf { it.isNotEmpty() }?.average()?.roundToInt(),
             maxHeartRate = heartRates.maxOrNull()?.roundToInt(),
         )
     }

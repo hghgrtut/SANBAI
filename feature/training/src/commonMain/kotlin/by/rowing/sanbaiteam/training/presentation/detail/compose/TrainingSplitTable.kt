@@ -27,7 +27,7 @@ import by.rowing.sanbaiteam.training.data.chart.models.TrainingPieceSplit
 import by.rowing.sanbaiteam.training.data.models.detail.TrainingDetailField
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.training_split_column_avg_heart_rate
+import by.rowing.sanbaiteam.training.resources.training_split_column_average_heart_rate
 import by.rowing.sanbaiteam.training.resources.training_split_column_distance
 import by.rowing.sanbaiteam.training.resources.training_split_column_max_heart_rate
 import by.rowing.sanbaiteam.training.resources.training_split_column_number
@@ -90,9 +90,9 @@ internal fun TrainingSplitTable(
                         distance = split.distanceMeters.toString(),
                         time = RowingTimeFormat.formatDuration(split.timeMillis),
                         pace = split.paceMillis?.let { RowingTimeFormat.formatDuration(it) } ?: MISSING_VALUE,
-                        avgPowerWatts = split.avgPowerWatts?.toString() ?: MISSING_VALUE,
+                        averagePowerWatts = split.averagePowerWatts?.toString() ?: MISSING_VALUE,
                         strokeRate = split.strokeRate?.let { formatTenths(it) } ?: MISSING_VALUE,
-                        avgHeartRate = split.avgHeartRate?.toString() ?: MISSING_VALUE,
+                        averaageHeartRate = split.averageHeartRate?.toString() ?: MISSING_VALUE,
                         maxHeartRate = split.maxHeartRate?.toString() ?: MISSING_VALUE,
                         style = TypographyPalette.Body2Regular,
                         hiddenFields = hiddenFields,
@@ -119,9 +119,9 @@ private fun SplitTableHeader(
         distance = stringResource(Res.string.training_split_column_distance),
         time = stringResource(Res.string.training_split_column_time),
         pace = stringResource(Res.string.training_split_column_pace, paceDistanceMeters),
-        avgPowerWatts = stringResource(Res.string.training_split_column_power),
+        averagePowerWatts = stringResource(Res.string.training_split_column_power),
         strokeRate = stringResource(Res.string.training_split_column_spm),
-        avgHeartRate = stringResource(Res.string.training_split_column_avg_heart_rate),
+        averaageHeartRate = stringResource(Res.string.training_split_column_average_heart_rate),
         maxHeartRate = stringResource(Res.string.training_split_column_max_heart_rate),
         style = TypographyPalette.Caption1Medium,
         hiddenFields = hiddenFields,
@@ -143,9 +143,9 @@ private fun SplitTotalRow(
             distanceMeters = piece.distanceMeters,
             paceDistanceMeters = piece.paceDistanceMeters,
         )?.let { RowingTimeFormat.formatDuration(it) } ?: MISSING_VALUE,
-        avgPowerWatts = piece.avgPowerWatts?.toString() ?: MISSING_VALUE,
+        averagePowerWatts = piece.averagePowerWatts?.toString() ?: MISSING_VALUE,
         strokeRate = piece.strokeRateFormatted.ifEmpty { MISSING_VALUE },
-        avgHeartRate = piece.avgHeartRate?.toString() ?: MISSING_VALUE,
+        averaageHeartRate = piece.averageHeartRate?.toString() ?: MISSING_VALUE,
         maxHeartRate = piece.maxHeartRate?.toString() ?: MISSING_VALUE,
         style = TypographyPalette.Body2Medium,
         hiddenFields = hiddenFields,
@@ -158,9 +158,9 @@ private fun SplitTableRowLayout(
     distance: String,
     time: String,
     pace: String,
-    avgPowerWatts: String,
+    averagePowerWatts: String,
     strokeRate: String,
-    avgHeartRate: String,
+    averaageHeartRate: String,
     maxHeartRate: String,
     style: TextStyle,
     hiddenFields: Set<TrainingDetailField>,
@@ -199,7 +199,7 @@ private fun SplitTableRowLayout(
         }
         if (TrainingDetailField.AVG_POWER !in hiddenFields) {
             TableCell(
-                text = avgPowerWatts,
+                text = averagePowerWatts,
                 width = POWER_WIDTH,
                 style = style
             )
@@ -213,7 +213,7 @@ private fun SplitTableRowLayout(
         }
         if (TrainingDetailField.AVG_HEART_RATE !in hiddenFields) {
             TableCell(
-                text = avgHeartRate,
+                text = averaageHeartRate,
                 width = AVG_HEART_RATE_WIDTH,
                 style = style
             )

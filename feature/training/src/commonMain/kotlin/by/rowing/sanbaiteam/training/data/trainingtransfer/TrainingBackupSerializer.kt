@@ -38,7 +38,7 @@ internal data class BackupPiece(
     val distanceMeters: Int,
     val timeMillis: Long,
     val strokeRate: Double,
-    val avgHeartRate: Int? = null,
+    val averageHeartRate: Int? = null,
     val maxHeartRate: Int? = null,
     val recoveryHeartRate: Int? = null,
     val lactate: Double? = null,

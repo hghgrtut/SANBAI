@@ -166,7 +166,7 @@ internal class AddTrainingViewModel(
         text: String
     ) {
         updatePiece(pieceLocalId) { piece ->
-            piece.copy(avgHeartRate = parseIntFromText(text))
+            piece.copy(averageHeartRate = parseIntFromText(text))
         }
     }
 
@@ -248,7 +248,7 @@ internal class AddTrainingViewModel(
                     distanceMeters = template.distanceMeters,
                     timeMillis = template.timeMillis,
                     strokeRate = template.strokeRate,
-                    avgHeartRate = template.avgHeartRate,
+                    averageHeartRate = template.averageHeartRate,
                     maxHeartRate = template.maxHeartRate,
                     recoveryHeartRate = template.recoveryHeartRate,
                     lactate = template.lactate,
@@ -314,7 +314,7 @@ internal class AddTrainingViewModel(
                         distanceMeters = piece.distanceMeters,
                         timeMillis = RowingTimeFormat.parseTimeInput(input = piece.timeText) ?: piece.timeMillis,
                         strokeRate = RowingTimeFormat.parseStrokeRate(input = piece.strokeRateText) ?: piece.strokeRate,
-                        avgHeartRate = piece.avgHeartRate,
+                        averageHeartRate = piece.averageHeartRate,
                         maxHeartRate = piece.maxHeartRate,
                         recoveryHeartRate = piece.recoveryHeartRate,
                         lactate = parseLactateFromText(piece.lactateText) ?: piece.lactate,
@@ -440,7 +440,7 @@ internal class AddTrainingViewModel(
                 distanceMeters = interval.distanceMeters,
                 timeMillis = interval.timeMillis,
                 strokeRate = interval.strokeRate,
-                avgHeartRate = interval.avgHeartRate,
+                averageHeartRate = interval.averageHeartRate,
                 maxHeartRate = interval.maxHeartRate,
                 recoveryHeartRate = interval.recoveryHeartRate,
                 distanceText = interval.distanceMeters.toString(),
