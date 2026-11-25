@@ -93,7 +93,7 @@ internal object Rp3CsvParser : TrainingImportParser {
                     distanceMeters = columns.getOrNull(distanceIndex)?.takeDouble() ?: return@mapNotNull null,
                     strokeRate = columns.getOrNull(strokeRateIndex)?.takeDouble(),
                     pulse = columns.getOrNull(pulseIndex)?.takePositiveInt(),
-                    estimated500mTimeSeconds = columns[estimated500mIndex].takeDouble()?.takeIf { it > 0 },
+                    estimated500mTimeSeconds = columns.getOrNull(estimated500mIndex)?.takeDouble()?.takeIf { it > 0 },
                     powerWatts = columns.getOrNull(powerIndex)?.takePositiveInt(),
                     averagePowerWatts = columns.getOrNull(averagePowerIndex)?.takePositiveInt(),
                     averageCalculatedPowerWatts = columns.getOrNull(averageCalculatedPowerIndex)?.takePositiveInt(),
