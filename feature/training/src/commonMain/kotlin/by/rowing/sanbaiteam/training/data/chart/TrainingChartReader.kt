@@ -12,6 +12,7 @@ import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportParsers
 import by.rowing.sanbaiteam.training.data.trainingimport.TrainingImportSource
 import by.rowing.sanbaiteam.training.data.trainingimport.concept2PieceRanges
 import by.rowing.sanbaiteam.training.data.trainingimport.forLap
+import kotlin.math.roundToInt
 
 /**
  * Builds per-piece chart series from the original imported file.
@@ -90,6 +91,9 @@ internal class TrainingChartReader {
         val strokeRate = mutableListOf<TrainingChartPoint>()
         val heartRate = mutableListOf<TrainingChartPoint>()
         val distance = mutableListOf<TrainingChartPoint>()
+        val power = mutableListOf<TrainingChartPoint>()
+        var powerSum = 0L
+        var powerCount = 0
         val paceDistance = pieceType.paceDistanceMeters.toDouble()
         val paceRange = paceRange(pieceType)
         var previous: FitRecord? = null
@@ -149,6 +153,15 @@ internal class TrainingChartReader {
                     )
                 }
 
+                record.powerWatts?.takeIf { it in 1..MAX_POWER_WATTS }?.let {
+                    power.appendPoint(
+                        elapsedMillis = elapsed,
+                        value = it.toDouble()
+                    )
+                    powerSum += it
+                    powerCount++
+                }
+
                 previous = record
                 previousInLap = record
             }
@@ -162,6 +175,8 @@ internal class TrainingChartReader {
             strokeRate = strokeRate,
             heartRate = heartRate,
             distance = distance,
+            power = power,
+            averagePowerWatts = if (powerCount > 0) (powerSum / powerCount.toDouble()).roundToInt() else null,
         )
     }
 
@@ -218,6 +233,9 @@ internal class TrainingChartReader {
         val strokeRate = mutableListOf<TrainingChartPoint>()
         val heartRate = mutableListOf<TrainingChartPoint>()
         val distance = mutableListOf<TrainingChartPoint>()
+        val power = mutableListOf<TrainingChartPoint>()
+        var powerSum = 0L
+        var powerCount = 0
         val startDistance = group.first().distanceMeters
         var maxDistance = 0.0
         var previous: Rp3CsvParser.Rp3StrokeRow? = null
@@ -260,15 +278,28 @@ internal class TrainingChartReader {
                 )
             }
 
+            stroke.powerWatts?.takeIf { it in 1..MAX_POWER_WATTS }?.let {
+                power.appendPoint(
+                    elapsedMillis = elapsed,
+                    value = it.toDouble()
+                )
+                powerSum += it
+                powerCount++
+            }
+
             previous = stroke
         }
 
+        val lastStroke = group.last()
         return TrainingPieceChartData(
             durationMillis = durationMillis,
             speed = speed,
             strokeRate = strokeRate,
             heartRate = heartRate,
             distance = distance,
+            power = power,
+            averagePowerWatts = lastStroke.averagePowerWatts ?: lastStroke.averageCalculatedPowerWatts
+            ?: (if (powerCount > 0) (powerSum / powerCount.toDouble()).roundToInt() else null)
         )
     }
 
@@ -325,5 +356,6 @@ internal class TrainingChartReader {
         private const val MIN_BIKE_PACE_SECONDS = 40.0
         private const val MAX_PACE_SECONDS = 500.0
         private const val MILLIS_PER_SECOND = 1000.0
+        private const val MAX_POWER_WATTS = 3000
     }
 }

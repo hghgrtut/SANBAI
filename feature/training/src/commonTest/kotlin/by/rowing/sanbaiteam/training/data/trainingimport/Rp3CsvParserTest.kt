@@ -25,7 +25,7 @@ internal class Rp3CsvParserTest {
         assertEquals(22, first.distanceMeters)
         assertEquals(8_100L, first.timeMillis)
         assertEquals(21.0, first.strokeRate, DELTA)
-        assertEquals(100, first.avgHeartRate)
+        assertEquals(100, first.averageHeartRate)
         assertEquals(101, first.maxHeartRate)
         assertNull(first.recoveryHeartRate)
 
@@ -33,9 +33,19 @@ internal class Rp3CsvParserTest {
         assertEquals(15, second.distanceMeters)
         assertEquals(95_400L, second.timeMillis)
         assertEquals(18.5, second.strokeRate, DELTA)
-        assertEquals(121, second.avgHeartRate)
+        assertEquals(121, second.averageHeartRate)
         assertEquals(122, second.maxHeartRate)
         assertNull(second.recoveryHeartRate)
+    }
+
+    @Test
+    fun readStrokes_parsesPowerWhenPresent() {
+        val strokes = Rp3CsvParser.readStrokes(rp3Csv())
+
+        assertEquals(5, strokes.size)
+        assertEquals(100, strokes.first().powerWatts)
+        assertEquals(100, strokes.first().averagePowerWatts)
+        assertEquals(100, strokes.first().averageCalculatedPowerWatts)
     }
 
     @Test

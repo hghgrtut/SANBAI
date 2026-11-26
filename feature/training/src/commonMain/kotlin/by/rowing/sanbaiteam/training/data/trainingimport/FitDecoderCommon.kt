@@ -9,7 +9,6 @@ internal const val CSV_FILE_EXTENSION = "csv"
 internal const val FIT_HEADER_MIN_SIZE = 12
 internal const val FIT_HEADER_MAGIC_OFFSET = 8
 internal const val FIT_DATA_TYPE = ".FIT"
-internal const val CRC_SIZE = 2
 
 internal const val COMPRESSED_HEADER_MASK = 0x80
 internal const val DEFINITION_MASK = 0x40
@@ -42,6 +41,7 @@ internal val FIELD_RECORD_CADENCE = 4.toUByte()
 internal val FIELD_RECORD_DISTANCE = 5.toUByte()
 internal val FIELD_RECORD_SPEED = 6.toUByte()
 internal val FIELD_RECORD_ENHANCED_SPEED = 73.toUByte()
+internal val FIELD_RECORD_POWER = 7.toUByte()
 
 internal val MESG_FILE_ID = 0.toUShort()
 internal val MESG_DEVICE_INFO = 23.toUShort()
@@ -52,16 +52,12 @@ internal val MESG_RECORD = 20.toUShort()
 internal val SPORT_FITNESS_EQUIPMENT = 4.toUShort()
 internal val SPORT_CYCLING = 2.toUShort()
 internal val SPORT_ROWING = 15.toUShort()
-internal val SPORT_OTHER = 0.toUShort()
 
 internal val MANUFACTURER_CONCEPT2 = 40.toUShort()
-internal val MANUFACTURER_SPEEDCOACH = 87.toUShort()
 
 internal val SUB_SPORT_INDOOR_ROWING = 14.toUShort()
 internal val SUB_SPORT_INDOOR_CYCLING = 6.toUShort()
-internal val SUB_SPORT_GENERIC = 0.toUShort()
 
 internal val INTENSITY_ACTIVE = 0.toUByte()
-internal val INTENSITY_REST = 1.toUByte()
 
 internal const val FIT_EPOCH_OFFSET_SECONDS: Long = 631065600L

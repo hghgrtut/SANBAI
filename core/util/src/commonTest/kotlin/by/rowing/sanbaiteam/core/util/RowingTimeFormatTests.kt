@@ -108,6 +108,17 @@ internal class RowingTimeFormatTests {
             )
         )
         assertEquals(
+            "1:38.0",
+            RowingTimeFormat.formatDuration(timeMillis = 97_997L) // 97.997 seconds
+        )
+        assertEquals(
+            "1:38.0 /500м",
+            RowingTimeFormat.formatPace(
+                timeMillis = 900_000L,
+                distanceMeters = 4592
+            )
+        )
+        assertEquals(
             "3:20.0 /1000м",
             RowingTimeFormat.formatPace(
                 timeMillis = 200_000L,

@@ -35,7 +35,7 @@ import by.rowing.sanbaiteam.training.data.models.comparison.MetricComparison
 import by.rowing.sanbaiteam.training.data.models.detail.TrainingDetailField
 import by.rowing.sanbaiteam.training.presentation.detail.models.TrainingDetailPiece
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.training_detail_avg_heart_rate_label
+import by.rowing.sanbaiteam.training.resources.training_detail_average_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_average
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_hide
 import by.rowing.sanbaiteam.training.resources.training_detail_compare_show
@@ -44,6 +44,7 @@ import by.rowing.sanbaiteam.training.resources.training_detail_delta_meters
 import by.rowing.sanbaiteam.training.resources.training_detail_delta_pace
 import by.rowing.sanbaiteam.training.resources.training_detail_delta_percent_points
 import by.rowing.sanbaiteam.training.resources.training_detail_delta_seconds
+import by.rowing.sanbaiteam.training.resources.training_detail_delta_watts
 import by.rowing.sanbaiteam.training.resources.training_detail_distance
 import by.rowing.sanbaiteam.training.resources.training_detail_distance_label
 import by.rowing.sanbaiteam.training.resources.training_detail_lactate_label
@@ -52,6 +53,8 @@ import by.rowing.sanbaiteam.training.resources.training_detail_pace_average
 import by.rowing.sanbaiteam.training.resources.training_detail_pace_label
 import by.rowing.sanbaiteam.training.resources.training_detail_percent_of_pb_label
 import by.rowing.sanbaiteam.training.resources.training_detail_piece_number
+import by.rowing.sanbaiteam.training.resources.training_detail_power_label
+import by.rowing.sanbaiteam.training.resources.training_detail_power_value
 import by.rowing.sanbaiteam.training.resources.training_detail_recovery_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_stroke_rate
 import by.rowing.sanbaiteam.training.resources.training_detail_stroke_rate_label
@@ -195,6 +198,13 @@ private fun PieceMetricRows(
             expanded = expanded
         )
     }
+    if (TrainingDetailField.AVG_POWER !in hiddenFields) {
+        PowerMetricRow(
+            piece = piece,
+            metrics = metrics,
+            expanded = expanded
+        )
+    }
     if (TrainingDetailField.STROKE_RATE !in hiddenFields) {
         StrokeRateMetricRow(
             piece = piece,
@@ -204,8 +214,8 @@ private fun PieceMetricRows(
     }
     if (TrainingDetailField.AVG_HEART_RATE !in hiddenFields) {
         HeartRateMetricRow(
-            label = stringResource(Res.string.training_detail_avg_heart_rate_label),
-            baseValue = piece.avgHeartRate,
+            label = stringResource(Res.string.training_detail_average_heart_rate_label),
+            baseValue = piece.averageHeartRate,
             comparison = metrics[ComparisonMetric.AVG_HEART_RATE],
             expanded = expanded
         )
@@ -261,7 +271,7 @@ private fun DistanceMetricRow(
                 formatSignedInt(it.roundToInt())
             )
         },
-        trend = comparison?.trend ?: ComparisonTrend.NEUTRAL,
+        trend = comparison?.trend,
         compare = expanded
     )
 }
@@ -283,7 +293,7 @@ private fun TimeMetricRow(
                 formatSignedSeconds(it.roundToLong())
             )
         },
-        trend = comparison?.trend ?: ComparisonTrend.NEUTRAL,
+        trend = comparison?.trend,
         compare = expanded
     )
 }
@@ -297,7 +307,7 @@ private fun PaceMetricRow(
     val comparison = metrics[ComparisonMetric.PACE]
     TrainingMetricRow(
         label = stringResource(Res.string.training_detail_pace_label),
-        baseValue = piece.paceFormatted.ifEmpty { MISSING_VALUE },
+        baseValue = piece.paceFormatted,
         averageValue = comparison?.let {
             stringResource(
                 Res.string.training_detail_pace_average,
@@ -312,7 +322,7 @@ private fun PaceMetricRow(
                 piece.paceDistanceMeters,
             )
         },
-        trend = comparison?.trend ?: ComparisonTrend.NEUTRAL,
+        trend = comparison?.trend,
         compare = expanded
     )
 }
@@ -337,7 +347,28 @@ private fun StrokeRateMetricRow(
             )
         },
         deltaValue = comparison?.delta?.let { formatSignedTenths(it) },
-        trend = comparison?.trend ?: ComparisonTrend.NEUTRAL,
+        trend = comparison?.trend,
+        compare = expanded
+    )
+}
+
+@Composable
+private fun PowerMetricRow(
+    piece: TrainingDetailPiece,
+    metrics: Map<ComparisonMetric, MetricComparison>,
+    expanded: Boolean,
+) {
+    val comparison = metrics[ComparisonMetric.AVG_POWER]
+    TrainingMetricRow(
+        label = stringResource(Res.string.training_detail_power_label),
+        baseValue = piece.averagePowerWatts?.let { stringResource(Res.string.training_detail_power_value, it) },
+        averageValue = comparison?.average?.roundToInt()?.let {
+            stringResource(Res.string.training_detail_power_value, it)
+        },
+        deltaValue = comparison?.delta?.let {
+            stringResource(Res.string.training_detail_delta_watts, formatSignedInt(it.roundToInt()))
+        },
+        trend = comparison?.trend,
         compare = expanded
     )
 }
@@ -351,10 +382,10 @@ private fun HeartRateMetricRow(
 ) {
     TrainingMetricRow(
         label = label,
-        baseValue = baseValue?.toString() ?: MISSING_VALUE,
+        baseValue = baseValue?.toString(),
         averageValue = comparison?.average?.roundToInt()?.toString(),
         deltaValue = comparison?.delta?.let { formatSignedInt(it.roundToInt()) },
-        trend = comparison?.trend ?: ComparisonTrend.NEUTRAL,
+        trend = comparison?.trend,
         compare = expanded
     )
 }
@@ -368,10 +399,10 @@ private fun LactateMetricRow(
     val comparison = metrics[ComparisonMetric.LACTATE]
     TrainingMetricRow(
         label = stringResource(Res.string.training_detail_lactate_label),
-        baseValue = piece.lactate?.let { formatTenths(it) } ?: MISSING_VALUE,
+        baseValue = piece.lactate?.let { formatTenths(it) },
         averageValue = comparison?.let { formatTenths(it.average) },
         deltaValue = comparison?.delta?.let { formatSignedTenths(it) },
-        trend = comparison?.trend ?: ComparisonTrend.NEUTRAL,
+        trend = comparison?.trend,
         compare = expanded
     )
 }
@@ -393,7 +424,7 @@ private fun PercentOfPbMetricRow(
                 formatSignedTenths(it)
             )
         },
-        trend = comparison?.trend ?: ComparisonTrend.NEUTRAL,
+        trend = comparison?.trend,
         compare = expanded
     )
 }
@@ -401,21 +432,19 @@ private fun PercentOfPbMetricRow(
 @Composable
 private fun TrainingMetricRow(
     label: String,
-    baseValue: String,
+    baseValue: String?,
     averageValue: String?,
     deltaValue: String?,
-    trend: ComparisonTrend,
+    trend: ComparisonTrend?,
     compare: Boolean,
 ) {
-    val deltaColor = comparisonTrendColor(trend)
+    val baseValue = baseValue.takeIf { !it.isNullOrBlank() } ?: MISSING_VALUE
     val value = if (compare && averageValue != null) {
         buildAnnotatedString {
-            append(baseValue)
-            append(" ~ ")
-            append(averageValue)
+            append("$baseValue ~ $averageValue")
             if (deltaValue != null) {
                 append(" (")
-                withStyle(SpanStyle(color = deltaColor)) {
+                withStyle(SpanStyle(color = comparisonTrendColor(trend))) {
                     append(deltaValue)
                 }
                 append(")")
@@ -447,7 +476,7 @@ private fun TrainingMetricRow(
 }
 
 @Composable
-private fun comparisonTrendColor(trend: ComparisonTrend): Color = when (trend) {
+private fun comparisonTrendColor(trend: ComparisonTrend?): Color = when (trend) {
     ComparisonTrend.BETTER -> if (isSystemInDarkTheme()) {
         ColorPalette.Green50
     } else {
@@ -455,7 +484,7 @@ private fun comparisonTrendColor(trend: ComparisonTrend): Color = when (trend) {
     }
 
     ComparisonTrend.WORSE -> MaterialTheme.colorScheme.error
-    ComparisonTrend.NEUTRAL -> MaterialTheme.colorScheme.onSurfaceVariant
+    ComparisonTrend.NEUTRAL, null -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
 @Composable

@@ -30,7 +30,7 @@ internal class SpeedCoachFitParserTest {
         assertEquals(1001, first.distanceMeters)
         assertEquals(202_900L, first.timeMillis)
         assertEquals(32.0, first.strokeRate)
-        assertEquals(150, first.avgHeartRate)
+        assertEquals(150, first.averageHeartRate)
         assertEquals(160, first.maxHeartRate)
         assertNull(first.recoveryHeartRate)
 
@@ -38,7 +38,7 @@ internal class SpeedCoachFitParserTest {
         assertEquals(1000, second.distanceMeters)
         assertEquals(201_900L, second.timeMillis)
         assertEquals(38.0, second.strokeRate)
-        assertEquals(140, second.avgHeartRate)
+        assertEquals(140, second.averageHeartRate)
         assertEquals(145, second.maxHeartRate)
     }
 
@@ -47,7 +47,7 @@ internal class SpeedCoachFitParserTest {
         val parsed = SpeedCoachFitParser.parse(speedCoachFit(withHeartRate = false), fileName = null)
 
         assertEquals(2, parsed.intervals.size)
-        assertTrue(parsed.intervals.all { it.avgHeartRate == null && it.maxHeartRate == null })
+        assertTrue(parsed.intervals.all { it.averageHeartRate == null && it.maxHeartRate == null })
     }
 
     @Test

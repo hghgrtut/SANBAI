@@ -18,7 +18,8 @@ internal class TrainingComparisonCalculatorTest {
             distanceMeters = 1000,
             timeMillis = 200_000L,
             strokeRate = 30.0,
-            avgHeartRate = 150,
+            averagePowerWatts = 200,
+            averageHeartRate = 150,
             maxHeartRate = 170,
             recoveryHeartRate = 120,
             lactate = 4.0,
@@ -28,7 +29,8 @@ internal class TrainingComparisonCalculatorTest {
             distanceMeters = 950,
             timeMillis = 210_000L,
             strokeRate = 31.0,
-            avgHeartRate = 148,
+            averagePowerWatts = 220,
+            averageHeartRate = 148,
             maxHeartRate = 172,
             recoveryHeartRate = 118,
             lactate = 4.2,
@@ -44,6 +46,7 @@ internal class TrainingComparisonCalculatorTest {
         assertMetric(result, ComparisonMetric.DISTANCE, 950.0, 50.0, ComparisonTrend.BETTER)
         assertMetric(result, ComparisonMetric.TIME, 210_000.0, -10_000.0, ComparisonTrend.BETTER)
         assertMetric(result, ComparisonMetric.PACE, 110_526.0, -10_526.0, ComparisonTrend.BETTER)
+        assertMetric(result, ComparisonMetric.AVG_POWER, 220.0, -20.0, ComparisonTrend.WORSE)
         assertMetric(result, ComparisonMetric.STROKE_RATE, 31.0, -1.0, ComparisonTrend.NEUTRAL)
         assertMetric(result, ComparisonMetric.AVG_HEART_RATE, 148.0, 2.0, ComparisonTrend.WORSE)
         assertMetric(result, ComparisonMetric.MAX_HEART_RATE, 172.0, -2.0, ComparisonTrend.BETTER)
@@ -55,18 +58,18 @@ internal class TrainingComparisonCalculatorTest {
     @Test
     fun `optional metrics are averaged only over non null values`() {
         val base = piece(
-            avgHeartRate = null,
+            averageHeartRate = null,
             lactate = 4.0,
             percentOfPb = null,
         )
         val compared = listOf(
             piece(
-                avgHeartRate = 140,
+                averageHeartRate = 140,
                 lactate = null,
                 percentOfPb = null,
             ),
             piece(
-                avgHeartRate = null,
+                averageHeartRate = null,
                 lactate = 4.4,
                 percentOfPb = null,
             ),
@@ -77,6 +80,7 @@ internal class TrainingComparisonCalculatorTest {
         requireNotNull(result)
         assertMetric(result, ComparisonMetric.AVG_HEART_RATE, 140.0, null, ComparisonTrend.NEUTRAL)
         assertMetric(result, ComparisonMetric.LACTATE, 4.4, -0.4, ComparisonTrend.BETTER)
+        assertFalse(result.metrics.containsKey(ComparisonMetric.AVG_POWER))
         assertFalse(result.metrics.containsKey(ComparisonMetric.MAX_HEART_RATE))
         assertFalse(result.metrics.containsKey(ComparisonMetric.RECOVERY_HEART_RATE))
         assertFalse(result.metrics.containsKey(ComparisonMetric.PERCENT_OF_PB))
@@ -112,7 +116,7 @@ internal class TrainingComparisonCalculatorTest {
             distanceMeters = 500,
             timeMillis = 100_000L,
             strokeRate = 32.0,
-            avgHeartRate = 150,
+            averageHeartRate = 150,
         )
 
         val result = TrainingComparisonCalculator.compare(base, listOf(base))
@@ -145,7 +149,8 @@ internal class TrainingComparisonCalculatorTest {
         distanceMeters: Int = 1000,
         timeMillis: Long = 200_000L,
         strokeRate: Double = 30.0,
-        avgHeartRate: Int? = null,
+        averagePowerWatts: Int? = null,
+        averageHeartRate: Int? = null,
         maxHeartRate: Int? = null,
         recoveryHeartRate: Int? = null,
         lactate: Double? = null,
@@ -154,7 +159,8 @@ internal class TrainingComparisonCalculatorTest {
         distanceMeters = distanceMeters,
         timeMillis = timeMillis,
         strokeRate = strokeRate,
-        avgHeartRate = avgHeartRate,
+        averagePowerWatts = averagePowerWatts,
+        averageHeartRate = averageHeartRate,
         maxHeartRate = maxHeartRate,
         recoveryHeartRate = recoveryHeartRate,
         lactate = lactate,

@@ -27,7 +27,7 @@ internal class Concept2FitParserTest {
         assertEquals(4523, interval.distanceMeters)
         assertEquals(900_000L, interval.timeMillis)
         assertEquals(25.0, interval.strokeRate)
-        assertEquals(145, interval.avgHeartRate)
+        assertEquals(145, interval.averageHeartRate)
         assertEquals(150, interval.maxHeartRate)
         assertEquals(150, interval.recoveryHeartRate)
     }
@@ -61,7 +61,7 @@ internal class Concept2FitParserTest {
         assertEquals(900_000L, interval.timeMillis)
         assertEquals(8060, interval.distanceMeters)
         assertEquals(65.0, interval.strokeRate)
-        assertEquals(142, interval.avgHeartRate)
+        assertEquals(142, interval.averageHeartRate)
         assertEquals(145, interval.maxHeartRate)
         assertNull(interval.recoveryHeartRate)
     }
@@ -74,12 +74,12 @@ internal class Concept2FitParserTest {
         val first = parsed.intervals[0]
         assertEquals(300_000L, first.timeMillis)
         assertEquals(1000, first.distanceMeters)
-        assertEquals(145, first.avgHeartRate)
+        assertEquals(145, first.averageHeartRate)
         assertEquals(102, first.recoveryHeartRate)
 
         val second = parsed.intervals[1]
         assertEquals(300_000L, second.timeMillis)
-        assertEquals(165, second.avgHeartRate)
+        assertEquals(165, second.averageHeartRate)
         assertEquals(92, second.recoveryHeartRate)
     }
 
