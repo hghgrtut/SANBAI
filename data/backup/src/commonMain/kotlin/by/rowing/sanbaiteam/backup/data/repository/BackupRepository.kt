@@ -40,7 +40,10 @@ class BackupRepository(
         fromMillis: Long,
         toMillis: Long
     ): SanbaiBackup = withContext(Dispatchers.Default) {
-        val (rangeStart, rangeEnd) = normalizeDayRange(fromMillis = fromMillis, toMillis = toMillis)
+        val (rangeStart, rangeEnd) = normalizeDayRange(
+            fromMillis = fromMillis,
+            toMillis = toMillis
+        )
         val trainings = trainingDao.getTrainingEntitiesByDateRange(
             fromMillis = rangeStart,
             toMillis = rangeEnd,
@@ -311,7 +314,10 @@ class BackupRepository(
             existingSignatures += signature
             imported++
         }
-        return TrainingImportCounts(imported = imported, skippedAsDuplicates = skippedAsDuplicates)
+        return TrainingImportCounts(
+            imported = imported,
+            skippedAsDuplicates = skippedAsDuplicates
+        )
     }
 
     private fun buildExistingSignature(
@@ -327,7 +333,7 @@ class BackupRepository(
                 distanceMeters = it.distanceMeters,
                 timeMillis = it.timeMillis,
                 strokeRate = it.strokeRate,
-                avgHeartRate = it.avgHeartRate,
+                avgHeartRate = it.averageHeartRate,
                 maxHeartRate = it.maxHeartRate,
                 recoveryHeartRate = it.recoveryHeartRate,
                 lactate = it.lactate,
@@ -406,7 +412,10 @@ class BackupRepository(
             .thenBy { it }
     )
 
-    private fun normalizeDayRange(fromMillis: Long, toMillis: Long): Pair<Long, Long> {
+    private fun normalizeDayRange(
+        fromMillis: Long,
+        toMillis: Long
+    ): Pair<Long, Long> {
         val fromDayStart = TimeUtils.startOfDayMillis(timeInMillis = minOf(fromMillis, toMillis))
         val toDayStart = TimeUtils.startOfDayMillis(timeInMillis = maxOf(fromMillis, toMillis))
         return fromDayStart to (toDayStart + TimeUtils.MILLIS_PER_DAY - 1)
@@ -450,13 +459,20 @@ class BackupRepository(
         distanceMeters = distanceMeters,
         timeMillis = timeMillis,
         strokeRate = strokeRate,
-        avgHeartRate = avgHeartRate,
+        avgHeartRate = averageHeartRate,
         maxHeartRate = maxHeartRate,
         recoveryHeartRate = recoveryHeartRate,
         lactate = lactate,
         sourceFileIndex = sourceFileIndex,
         sourceIntervalIndex = sourceIntervalIndex,
     )
+
+    companion object {
+
+        private const val MIN_WEIGHT_TENTHS = 200
+        private const val MAX_WEIGHT_TENTHS = 3000
+        private val WHITESPACE_REGEX = Regex("\\s+")
+    }
 
     private data class TrainingDateHolder(val dateMillis: Long)
 
@@ -500,7 +516,7 @@ class BackupRepository(
             distanceMeters = distanceMeters,
             timeMillis = timeMillis,
             strokeRate = strokeRate,
-            avgHeartRate = avgHeartRate,
+            averageHeartRate = avgHeartRate,
             maxHeartRate = maxHeartRate,
             recoveryHeartRate = recoveryHeartRate,
             lactate = lactate,
@@ -553,17 +569,13 @@ class BackupRepository(
                     pieces == other.pieces &&
                     bytesEqual(sourceBytes, other.sourceBytes)
 
-        private fun bytesEqual(first: ByteArray?, second: ByteArray?): Boolean = when {
+        private fun bytesEqual(
+            first: ByteArray?,
+            second: ByteArray?
+        ): Boolean = when {
             first == null && second == null -> true
             first == null || second == null -> false
             else -> first.contentEquals(second)
         }
-    }
-
-    companion object {
-
-        private const val MIN_WEIGHT_TENTHS = 200
-        private const val MAX_WEIGHT_TENTHS = 3000
-        private val WHITESPACE_REGEX = Regex("\\s+")
     }
 }

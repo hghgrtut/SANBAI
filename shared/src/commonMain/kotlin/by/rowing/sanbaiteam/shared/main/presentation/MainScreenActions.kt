@@ -30,6 +30,32 @@ internal interface MainScreenActions {
 
     fun saveWeight()
 
+    fun openSyncDialog()
+
+    fun dismissSyncDialog()
+
+    fun changeSyncDateFrom(
+        year: Int,
+        month: Int,
+        day: Int,
+    )
+
+    fun changeSyncDateTo(
+        year: Int,
+        month: Int,
+        day: Int,
+    )
+
+    fun exportSyncBackup()
+
+    fun onSyncExportPromptLaunched()
+
+    fun onSyncExportToHandle(handle: String)
+
+    fun onSyncImportFromHandle(handle: String)
+
+    fun dismissSyncNotice()
+
     companion object {
 
         fun empty() = object : MainScreenActions {
@@ -52,6 +78,27 @@ internal interface MainScreenActions {
 
             override fun changeWeightValue(text: String) {}
             override fun saveWeight() {}
+            override fun openSyncDialog() {}
+            override fun dismissSyncDialog() {}
+            override fun changeSyncDateFrom(
+                year: Int,
+                month: Int,
+                day: Int
+            ) {
+            }
+
+            override fun changeSyncDateTo(
+                year: Int,
+                month: Int,
+                day: Int
+            ) {
+            }
+
+            override fun exportSyncBackup() {}
+            override fun onSyncExportPromptLaunched() {}
+            override fun onSyncExportToHandle(handle: String) {}
+            override fun onSyncImportFromHandle(handle: String) {}
+            override fun dismissSyncNotice() {}
         }
     }
 }

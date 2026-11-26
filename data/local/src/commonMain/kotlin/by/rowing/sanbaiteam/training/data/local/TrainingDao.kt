@@ -39,7 +39,10 @@ interface TrainingDao {
     suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity>
 
     @Query("SELECT * FROM $TABLE_TRAINING WHERE dateMillis >= :fromMillis AND dateMillis <= :toMillis ORDER BY dateMillis DESC")
-    suspend fun getTrainingEntitiesByDateRange(fromMillis: Long, toMillis: Long): List<TrainingEntity>
+    suspend fun getTrainingEntitiesByDateRange(
+        fromMillis: Long,
+        toMillis: Long
+    ): List<TrainingEntity>
 
     @Query("SELECT * FROM $TABLE_TRAINING WHERE id = :trainingId")
     suspend fun getTrainingById(trainingId: Long): TrainingEntity?

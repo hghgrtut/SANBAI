@@ -43,7 +43,10 @@ internal class FakeAthletesRepository(
 
     override suspend fun upsertPersonalBests(bests: List<AthletePersonalBestEntity>) = Unit
 
-    override suspend fun replacePersonalBests(athleteId: Long, bests: List<AthletePersonalBestEntity>) = Unit
+    override suspend fun replacePersonalBests(
+        athleteId: Long,
+        bests: List<AthletePersonalBestEntity>
+    ) = Unit
 
     override suspend fun getPersonalBestsForAthletes(
         athleteIds: List<Long>,
@@ -66,7 +69,14 @@ internal class FakeAthletesRepository(
         }
     }
 
-    override suspend fun saveWeight(athleteId: Long, dateMillis: Long, weightTenths: Int) = Unit
+    override suspend fun saveWeight(
+        athleteId: Long,
+        dateMillis: Long,
+        weightTenths: Int
+    ) = Unit
 
-    override suspend fun deleteWeight(athleteId: Long, dateMillis: Long) = Unit
+    override suspend fun deleteWeight(
+        athleteId: Long,
+        dateMillis: Long
+    ) = Unit
 }

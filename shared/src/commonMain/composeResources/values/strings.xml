@@ -15,4 +15,14 @@
     <string name="main_empty_trainings_title">Пока нет тренировок</string>
     <string name="main_empty_trainings_hint">Добавьте тренировку — она появится здесь</string>
     <string name="main_settings">Настройки</string>
+    <string name="main_sync_title">Синхронизация</string>
+    <string name="main_sync_export">Экспорт</string>
+    <string name="main_sync_import">Импорт</string>
+    <string name="main_sync_date_order_invalid">Дата начала позже даты окончания</string>
+    <string name="main_sync_notice_title">Результат</string>
+    <string name="main_sync_export_success">Бэкап сохранён</string>
+    <string name="main_sync_export_error">Не удалось сохранить бэкап</string>
+    <string name="main_sync_import_error">Не удалось прочитать бэкап</string>
+    <string name="main_sync_import_unsupported">Файл не является бэкапом SANBAITeam поддерживаемой версии</string>
+    <string name="main_sync_import_result">Добавлено тренировок: %1$d, пропущено дублей: %2$d, добавлено спортсменов: %3$d, обновлено спортсменов: %4$d, записей веса: %5$d</string>
 </resources>

@@ -21,7 +21,9 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -31,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +41,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.athlete.presentation.common.AthleteWeightDialog
+import by.rowing.sanbaiteam.core.file.rememberCreateTextFileLauncher
+import by.rowing.sanbaiteam.core.file.rememberOpenTextFileLauncher
+import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.shared.resources.Res
 import by.rowing.sanbaiteam.shared.resources.calculator_title
 import by.rowing.sanbaiteam.shared.resources.main_add_training
@@ -50,23 +56,33 @@ import by.rowing.sanbaiteam.shared.resources.main_show_all
 import by.rowing.sanbaiteam.shared.resources.main_stats_athletes
 import by.rowing.sanbaiteam.shared.resources.main_stats_trainings
 import by.rowing.sanbaiteam.shared.resources.main_subtitle
+import by.rowing.sanbaiteam.shared.resources.main_sync_export
+import by.rowing.sanbaiteam.shared.resources.main_sync_import
+import by.rowing.sanbaiteam.shared.resources.main_sync_notice_title
+import by.rowing.sanbaiteam.shared.resources.main_sync_title
 import by.rowing.sanbaiteam.shared.resources.main_title
 import by.rowing.sanbaiteam.shared.resources.main_weight_athlete_label
 import by.rowing.sanbaiteam.shared.resources.main_weight_athlete_placeholder
 import by.rowing.sanbaiteam.training.data.dashboard.TrainingDashboardItem
 import by.rowing.sanbaiteam.uikit.ComposePreviewWrapper
+import by.rowing.sanbaiteam.uikit.component.DateRangeFields
 import by.rowing.sanbaiteam.uikit.component.SectionHeader
 import by.rowing.sanbaiteam.uikit.component.SingleSelectDropdown
 import by.rowing.sanbaiteam.uikit.component.StatCard
+import by.rowing.sanbaiteam.uikit.component.UiText
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.component.button.ButtonSize
+import by.rowing.sanbaiteam.uikit.component.rememberDatePicker
+import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
+import by.rowing.sanbaiteam.uikit.resources.uikit_ok
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.SANBAITeamTheme
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
 
 private const val LOADING_VALUE = "—"
 
@@ -83,6 +99,19 @@ private fun MainScreenContent(
     state: MainUiState,
     actions: MainScreenActions,
 ) {
+    val createSyncBackupLauncher = rememberCreateTextFileLauncher(onCreated = actions::onSyncExportToHandle)
+    val openSyncBackupLauncher = rememberOpenTextFileLauncher(onOpened = actions::onSyncImportFromHandle)
+
+    LaunchedEffect(state.syncDialog?.exportPromptRequested) {
+        val dialog = state.syncDialog ?: return@LaunchedEffect
+        val exportFileName =
+            "sanbai-backup-${TimeUtils.formatDateDigits(dialog.fromMillis)}-${TimeUtils.formatDateDigits(dialog.toMillis)}.json"
+        if (dialog.exportPromptRequested) {
+            createSyncBackupLauncher(exportFileName)
+            actions.onSyncExportPromptLaunched()
+        }
+    }
+
     Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier = Modifier
@@ -92,7 +121,10 @@ private fun MainScreenContent(
                 .padding(all = Spacing.M),
             verticalArrangement = Arrangement.spacedBy(space = Spacing.L),
         ) {
-            DashboardHeader(onSettingsClick = actions::navigateToSettings)
+            DashboardHeader(
+                onSyncClick = actions::openSyncDialog,
+                onSettingsClick = actions::navigateToSettings,
+            )
             StatsSection(
                 state = state,
                 actions = actions,
@@ -111,10 +143,24 @@ private fun MainScreenContent(
         state = state,
         actions = actions,
     )
+    SyncDialog(
+        state = state,
+        actions = actions,
+        openBackupLauncher = openSyncBackupLauncher,
+    )
+    state.syncNotice?.let { notice ->
+        SyncNotice(
+            notice = notice,
+            actions = actions,
+        )
+    }
 }
 
 @Composable
-private fun DashboardHeader(onSettingsClick: () -> Unit) {
+private fun DashboardHeader(
+    onSyncClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -147,6 +193,13 @@ private fun DashboardHeader(onSettingsClick: () -> Unit) {
                     text = stringResource(Res.string.main_subtitle),
                     style = TypographyPalette.Body2Medium,
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = HEADER_SUBTITLE_ALPHA),
+                )
+            }
+            IconButton(onClick = onSyncClick) {
+                Icon(
+                    imageVector = Icons.Default.Sync,
+                    contentDescription = stringResource(Res.string.main_sync_title),
+                    tint = MaterialTheme.colorScheme.onPrimary,
                 )
             }
             IconButton(onClick = onSettingsClick) {
@@ -273,6 +326,94 @@ private fun WeightDialog(
                 label = stringResource(Res.string.main_weight_athlete_label),
                 placeholder = stringResource(Res.string.main_weight_athlete_placeholder),
             )
+        },
+    )
+}
+
+@Composable
+private fun SyncDialog(
+    state: MainUiState,
+    actions: MainScreenActions,
+    openBackupLauncher: () -> Unit,
+) {
+    val dialog = state.syncDialog ?: return
+    val pickFrom = rememberDatePicker(
+        initialDateMillis = dialog.fromMillis,
+        onDatePicked = actions::changeSyncDateFrom,
+    )
+    val pickTo = rememberDatePicker(
+        initialDateMillis = dialog.toMillis,
+        onDatePicked = actions::changeSyncDateTo,
+    )
+
+    AlertDialog(
+        onDismissRequest = actions::dismissSyncDialog,
+        title = {
+            Text(
+                text = stringResource(Res.string.main_sync_title),
+                style = TypographyPalette.H4,
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.M)) {
+                DateRangeFields(
+                    fromValue = TimeUtils.formatDate(dialog.fromMillis),
+                    onFromClick = pickFrom,
+                    toValue = TimeUtils.formatDate(dialog.toMillis),
+                    onToClick = pickTo,
+                    isError = dialog.error != null,
+                    supportingText = dialog.error?.resolve(),
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.S)) {
+                    Button(
+                        modifier = Modifier.weight(weight = 1f),
+                        text = stringResource(Res.string.main_sync_export),
+                        size = ButtonSize.SMALL,
+                        enabled = !dialog.isBusy,
+                        loading = dialog.isExporting,
+                        debounceClick = actions::exportSyncBackup,
+                    )
+                    Button(
+                        modifier = Modifier.weight(weight = 1f),
+                        text = stringResource(Res.string.main_sync_import),
+                        size = ButtonSize.SMALL,
+                        enabled = !dialog.isBusy,
+                        loading = dialog.isImporting,
+                        buttonColors = ButtonColors.secondary(
+                            enabledText = MaterialTheme.colorScheme.onSurface,
+                            enabledBorderColor = MaterialTheme.colorScheme.outline,
+                            disabledText = MaterialTheme.colorScheme.onSurfaceVariant,
+                            disabledBackground = MaterialTheme.colorScheme.surfaceVariant,
+                        ),
+                        debounceClick = openBackupLauncher,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = actions::dismissSyncDialog,
+                enabled = !dialog.isBusy,
+            ) {
+                Text(text = stringResource(UikitRes.string.uikit_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun SyncNotice(
+    notice: UiText,
+    actions: MainScreenActions,
+) {
+    AlertDialog(
+        onDismissRequest = actions::dismissSyncNotice,
+        title = { Text(text = stringResource(Res.string.main_sync_notice_title)) },
+        text = { Text(text = notice.resolve()) },
+        confirmButton = {
+            TextButton(onClick = actions::dismissSyncNotice) {
+                Text(text = stringResource(UikitRes.string.uikit_ok))
+            }
         },
     )
 }

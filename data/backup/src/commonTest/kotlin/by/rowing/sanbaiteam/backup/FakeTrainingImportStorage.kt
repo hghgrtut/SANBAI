@@ -16,7 +16,7 @@ internal class FakeTrainingImportStorage : TrainingImportStorage {
     ): String {
         val serialPart = serial?.takeIf { it.isNotBlank() } ?: "unknown"
         val safeExtension = fileExtension.trimStart('.').ifBlank { "fit" }
-        val relativePath = "${source.storageFolder}/${trainingId}_${serialPart}.$safeExtension"
+        val relativePath = "${source.storageFolder}/${trainingId}_$serialPart.$safeExtension"
         savedFiles[relativePath] = bytes
         return relativePath
     }
