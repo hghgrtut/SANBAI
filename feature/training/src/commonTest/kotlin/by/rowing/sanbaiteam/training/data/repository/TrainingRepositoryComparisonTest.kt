@@ -120,6 +120,231 @@ internal class TrainingRepositoryComparisonTest {
         assertNull(first.metrics[ComparisonMetric.PERCENT_OF_PB])
     }
 
+    @Test
+    fun `detail matches pieces by duration when piece count differs`() = runTest {
+        val repository = testTrainingRepository(
+            trainings = listOf(
+                training(
+                    id = 1,
+                    type = TrainingPieceType.SINGLE
+                ),
+                training(
+                    id = 2,
+                    type = TrainingPieceType.SINGLE
+                ),
+                training(
+                    id = 3,
+                    type = TrainingPieceType.SINGLE
+                ),
+            ),
+            pieces = listOf(
+                piece(
+                    trainingId = 1,
+                    order = 0,
+                    timeMillis = 900_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 1,
+                    order = 1,
+                    timeMillis = 900_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 1,
+                    order = 2,
+                    timeMillis = 900_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 1,
+                    order = 3,
+                    timeMillis = 420_000L,
+                    distanceMeters = 1400
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 0,
+                    timeMillis = 890_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 1,
+                    timeMillis = 890_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 2,
+                    timeMillis = 890_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 3,
+                    timeMillis = 430_000L,
+                    distanceMeters = 1400
+                ),
+                piece(
+                    trainingId = 3,
+                    order = 0,
+                    timeMillis = 880_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 3,
+                    order = 1,
+                    timeMillis = 880_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 3,
+                    order = 2,
+                    timeMillis = 440_000L,
+                    distanceMeters = 1400
+                ),
+            ),
+        )
+
+        val state = repository.getTrainingDetail(
+            trainingId = 1,
+            comparedTrainingIds = listOf(2L, 3L),
+        )
+
+        assertEquals(4, state.pieces.size)
+        val thirdPieceComparison = requireNotNull(state.pieces[2].comparison)
+        assertEquals(1, thirdPieceComparison.comparedTrainingsCount)
+        assertEquals(890_000.0, thirdPieceComparison.metrics.getValue(ComparisonMetric.TIME).average, 0.0001)
+
+        val lastPieceComparison = requireNotNull(state.pieces[3].comparison)
+        assertEquals(2, lastPieceComparison.comparedTrainingsCount)
+        assertEquals(435_000.0, lastPieceComparison.metrics.getValue(ComparisonMetric.TIME).average, 0.0001)
+    }
+
+    @Test
+    fun `detail falls back to order when durations do not match`() = runTest {
+        val repository = testTrainingRepository(
+            trainings = listOf(
+                training(id = 1, type = TrainingPieceType.SINGLE),
+                training(id = 2, type = TrainingPieceType.SINGLE),
+            ),
+            pieces = listOf(
+                piece(
+                    trainingId = 1,
+                    order = 0,
+                    timeMillis = 900_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 1,
+                    order = 1,
+                    timeMillis = 420_000L,
+                    distanceMeters = 1400
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 0,
+                    timeMillis = 600_000L,
+                    distanceMeters = 2000
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 1,
+                    timeMillis = 300_000L,
+                    distanceMeters = 1000
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 2,
+                    timeMillis = 720_000L,
+                    distanceMeters = 2400
+                ),
+            ),
+        )
+
+        val state = repository.getTrainingDetail(
+            trainingId = 1,
+            comparedTrainingIds = listOf(2L),
+        )
+
+        assertEquals(2, state.pieces.size)
+        state.pieces.forEach { piece ->
+            assertEquals(1, requireNotNull(piece.comparison).comparedTrainingsCount)
+        }
+        assertEquals(
+            600_000.0,
+            state.pieces[0].comparison!!.metrics.getValue(ComparisonMetric.TIME).average,
+            0.0001,
+        )
+        assertEquals(
+            300_000.0,
+            state.pieces[1].comparison!!.metrics.getValue(ComparisonMetric.TIME).average,
+            0.0001,
+        )
+    }
+
+    @Test
+    fun `detail compares by order when piece count is equal`() = runTest {
+        val repository = testTrainingRepository(
+            trainings = listOf(
+                training(
+                    id = 1,
+                    type = TrainingPieceType.SINGLE
+                ),
+                training(
+                    id = 2,
+                    type = TrainingPieceType.SINGLE
+                ),
+            ),
+            pieces = listOf(
+                piece(
+                    trainingId = 1,
+                    order = 0,
+                    timeMillis = 900_000L,
+                    distanceMeters = 3000
+                ),
+                piece(
+                    trainingId = 1,
+                    order = 1,
+                    timeMillis = 420_000L,
+                    distanceMeters = 1400
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 0,
+                    timeMillis = 420_000L,
+                    distanceMeters = 1400
+                ),
+                piece(
+                    trainingId = 2,
+                    order = 1,
+                    timeMillis = 900_000L,
+                    distanceMeters = 3000
+                ),
+            ),
+        )
+
+        val state = repository.getTrainingDetail(
+            trainingId = 1,
+            comparedTrainingIds = listOf(2L),
+        )
+
+        state.pieces.forEach { piece ->
+            assertEquals(1, requireNotNull(piece.comparison).comparedTrainingsCount)
+        }
+        assertEquals(
+            420_000.0,
+            state.pieces[0].comparison!!.metrics.getValue(ComparisonMetric.TIME).average,
+            0.0001,
+        )
+        assertEquals(
+            900_000.0,
+            state.pieces[1].comparison!!.metrics.getValue(ComparisonMetric.TIME).average,
+            0.0001,
+        )
+    }
+
     private fun training(
         id: Long,
         type: TrainingPieceType,
