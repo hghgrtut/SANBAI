@@ -226,8 +226,14 @@ internal class TrainingRepositoryComparisonTest {
     fun `detail falls back to order when durations do not match`() = runTest {
         val repository = testTrainingRepository(
             trainings = listOf(
-                training(id = 1, type = TrainingPieceType.SINGLE),
-                training(id = 2, type = TrainingPieceType.SINGLE),
+                training(
+                    id = 1,
+                    type = TrainingPieceType.SINGLE
+                ),
+                training(
+                    id = 2,
+                    type = TrainingPieceType.SINGLE
+                ),
             ),
             pieces = listOf(
                 piece(
