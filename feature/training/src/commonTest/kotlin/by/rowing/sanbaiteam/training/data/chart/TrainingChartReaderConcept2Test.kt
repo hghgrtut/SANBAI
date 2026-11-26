@@ -30,6 +30,7 @@ internal class TrainingChartReaderConcept2Test {
         assertEquals(4, chart.speed.size)
         assertTrue(chart.strokeRate.last().elapsedMillis > 300_000L)
         assertEquals(listOf(0.0, 650.0, 1_250.0, 1_800.0), chart.distance.map { it.value })
+        assertEquals(205, chart.averagePowerWatts)
     }
 
     @Test
@@ -80,24 +81,28 @@ internal class TrainingChartReaderConcept2Test {
                 heartRate = 130,
                 cadence = 28,
                 speedMetersPerSecond = 5.4,
+                powerWatts = 200,
             ),
             FitTestRecord(
                 offsetSeconds = 130,
                 heartRate = 140,
                 cadence = 28,
                 speedMetersPerSecond = 5.0,
+                powerWatts = 200,
             ),
             FitTestRecord(
                 offsetSeconds = 250,
                 heartRate = 150,
                 cadence = 27,
                 speedMetersPerSecond = 4.6,
+                powerWatts = 210,
             ),
             FitTestRecord(
                 offsetSeconds = 370,
                 heartRate = 160,
                 cadence = 27,
                 speedMetersPerSecond = 7.7,
+                powerWatts = 210,
             ),
         ),
     )

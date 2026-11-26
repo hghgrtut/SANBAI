@@ -39,7 +39,7 @@ internal class TrainingBackupSerializerTest {
                             distanceMeters = 2000,
                             timeMillis = 400000,
                             strokeRate = 22.0,
-                            avgHeartRate = 155,
+                            averageHeartRate = 155,
                             maxHeartRate = 161,
                             recoveryHeartRate = 120,
                             lactate = 12.3,

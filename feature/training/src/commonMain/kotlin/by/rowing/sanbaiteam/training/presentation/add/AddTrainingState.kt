@@ -46,7 +46,7 @@ internal data class AddPieceDraft(
     val distanceMeters: Int = 0,
     val timeMillis: Long = 0,
     val strokeRate: Double = 0.0,
-    val avgHeartRate: Int? = null,
+    val averageHeartRate: Int? = null,
     val maxHeartRate: Int? = null,
     val recoveryHeartRate: Int? = null,
     val lactate: Double? = null,

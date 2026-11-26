@@ -7,6 +7,7 @@ internal data class TrainingPieceSplit(
     val timeMillis: Long,
     val paceMillis: Long?,
     val strokeRate: Double?,
-    val avgHeartRate: Int?,
+    val averagePowerWatts: Int?,
+    val averageHeartRate: Int?,
     val maxHeartRate: Int?,
 )

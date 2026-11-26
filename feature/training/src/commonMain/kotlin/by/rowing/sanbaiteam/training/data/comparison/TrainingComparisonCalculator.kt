@@ -39,20 +39,19 @@ internal object TrainingComparisonCalculator {
             higherIsBetter = false,
             round = { ((it / TimeUtils.MILLIS_PER_TENTH).roundToLong() * TimeUtils.MILLIS_PER_TENTH).toDouble() }
         )
+        putPaceMetric(
+            metrics = metrics,
+            compared = compared,
+            paceDistanceMeters = paceDistanceMeters,
+            base = base
+        )
         putMetricIfPresent(
             metrics = metrics,
-            metric = ComparisonMetric.PACE,
-            values = compared.mapNotNull { comparedPiece ->
-                paceOf(
-                    piece = comparedPiece,
-                    paceDistanceMeters = paceDistanceMeters
-                )
-            },
-            base = paceOf(
-                piece = base,
-                paceDistanceMeters = paceDistanceMeters
-            ),
-            higherIsBetter = false,
+            metric = ComparisonMetric.AVG_POWER,
+            values = compared.mapNotNull { it.averagePowerWatts },
+            base = base.averagePowerWatts,
+            higherIsBetter = true,
+            round = { it.roundToInt().toDouble() },
         )
 
         putMetricIfPresent(
@@ -67,8 +66,8 @@ internal object TrainingComparisonCalculator {
         putMetricIfPresent(
             metrics = metrics,
             metric = ComparisonMetric.AVG_HEART_RATE,
-            values = compared.mapNotNull { it.avgHeartRate },
-            base = base.avgHeartRate,
+            values = compared.mapNotNull { it.averageHeartRate },
+            base = base.averageHeartRate,
             higherIsBetter = false,
             round = { it.roundToInt().toDouble() },
         )
@@ -120,6 +119,29 @@ internal object TrainingComparisonCalculator {
         distanceMeters = piece.distanceMeters,
         paceDistanceMeters = paceDistanceMeters,
     )?.toDouble()
+
+    private fun putPaceMetric(
+        metrics: MutableMap<ComparisonMetric, MetricComparison>,
+        compared: List<ComparablePiece>,
+        paceDistanceMeters: Int,
+        base: ComparablePiece
+    ) {
+        putMetricIfPresent(
+            metrics = metrics,
+            metric = ComparisonMetric.PACE,
+            values = compared.mapNotNull { comparedPiece ->
+                paceOf(
+                    piece = comparedPiece,
+                    paceDistanceMeters = paceDistanceMeters
+                )
+            },
+            base = paceOf(
+                piece = base,
+                paceDistanceMeters = paceDistanceMeters
+            ),
+            higherIsBetter = false,
+        )
+    }
 
     private fun <T> putMetricIfPresent(
         metrics: MutableMap<ComparisonMetric, MetricComparison>,

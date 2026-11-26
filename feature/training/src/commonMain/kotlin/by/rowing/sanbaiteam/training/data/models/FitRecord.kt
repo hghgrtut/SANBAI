@@ -6,4 +6,5 @@ internal data class FitRecord(
     val cadence: Int?,
     val distanceMeters: Double? = null,
     val speedMetersPerSecond: Double? = null,
+    val powerWatts: Int? = null,
 )

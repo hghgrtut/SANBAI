@@ -55,7 +55,7 @@ import by.rowing.sanbaiteam.training.resources.add_training_general_header
 import by.rowing.sanbaiteam.training.resources.add_training_import_csv
 import by.rowing.sanbaiteam.training.resources.add_training_import_notice_title
 import by.rowing.sanbaiteam.training.resources.add_training_pace_placeholder
-import by.rowing.sanbaiteam.training.resources.add_training_piece_avg_heart_rate_label
+import by.rowing.sanbaiteam.training.resources.add_training_piece_average_heart_rate_label
 import by.rowing.sanbaiteam.training.resources.add_training_piece_lactate_label
 import by.rowing.sanbaiteam.training.resources.add_training_piece_length_label
 import by.rowing.sanbaiteam.training.resources.add_training_piece_max_heart_rate_label
@@ -501,9 +501,9 @@ private fun HeartRateLactateBlock(
 ) {
     DataInputRow {
         TextField(
-            value = piece.avgHeartRate?.toString().orEmpty(),
+            value = piece.averageHeartRate?.toString().orEmpty(),
             onValueChange = onAvgHeartRateChange,
-            label = stringResource(Res.string.add_training_piece_avg_heart_rate_label),
+            label = stringResource(Res.string.add_training_piece_average_heart_rate_label),
             contentPadding = CompactFieldContentPadding,
             textStyle = TypographyPalette.Body1Regular,
             keyboardOptions = KeyboardOptions.number(),
