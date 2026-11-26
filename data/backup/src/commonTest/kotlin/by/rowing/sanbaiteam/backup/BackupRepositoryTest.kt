@@ -9,7 +9,6 @@ import by.rowing.sanbaiteam.backup.data.model.BackupWeight
 import by.rowing.sanbaiteam.backup.data.model.SanbaiBackup
 import by.rowing.sanbaiteam.backup.data.repository.BackupRepository
 import by.rowing.sanbaiteam.backup.data.serializer.BackupSerializer
-import by.rowing.sanbaiteam.backup.data.serializer.UnsupportedBackupFormatException
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
@@ -150,10 +149,10 @@ internal class BackupRepositoryTest {
     fun `import rejects old formats`() = runTest {
         val env = env()
 
-        assertFailsWith<UnsupportedBackupFormatException> {
+        assertFailsWith<IllegalArgumentException> {
             env.repository.import("""{"kind":"sanbai-athletes","formatVersion":1,"athletes":[]}""")
         }
-        assertFailsWith<UnsupportedBackupFormatException> {
+        assertFailsWith<IllegalArgumentException> {
             env.repository.import("""{"formatVersion":2,"athletes":[],"trainings":[]}""")
         }
     }
@@ -556,7 +555,7 @@ internal class BackupRepositoryTest {
         distanceMeters = distanceMeters,
         timeMillis = timeMillis,
         strokeRate = strokeRate,
-        avgHeartRate = avgHeartRate,
+        averageHeartRate = avgHeartRate,
         maxHeartRate = maxHeartRate,
         recoveryHeartRate = recoveryHeartRate,
         lactate = lactate,

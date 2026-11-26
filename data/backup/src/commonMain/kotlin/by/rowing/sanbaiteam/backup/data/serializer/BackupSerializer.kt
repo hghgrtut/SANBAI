@@ -20,20 +20,18 @@ class BackupSerializer(
 
     fun decode(text: String): SanbaiBackup {
         val element = runCatching { json.parseToJsonElement(text) }.getOrElse {
-            throw UnsupportedBackupFormatException("Backup is not a valid JSON")
+            throw IllegalArgumentException("Backup is not a valid JSON")
         }
-        val root = element as? JsonObject ?: throw UnsupportedBackupFormatException("Backup root must be a JSON object")
+        val root = element as? JsonObject ?: throw IllegalArgumentException("Backup root must be a JSON object")
 
         val kind = root[KIND_FIELD]?.jsonPrimitive?.contentOrNull
         val formatVersion = root[FORMAT_VERSION_FIELD]?.jsonPrimitive?.intOrNull
         if (kind != SanbaiBackup.KIND || formatVersion != SanbaiBackup.FORMAT_VERSION) {
-            throw UnsupportedBackupFormatException(
-                "Unsupported backup format: kind=$kind, formatVersion=$formatVersion"
-            )
+            throw IllegalArgumentException("Unsupported backup format: kind=$kind, formatVersion=$formatVersion")
         }
 
         return runCatching { json.decodeFromJsonElement(SanbaiBackup.serializer(), root) }
-            .getOrElse { throw UnsupportedBackupFormatException("Backup content is invalid") }
+            .getOrElse { throw IllegalArgumentException("Backup content is invalid") }
     }
 
     companion object {
@@ -42,6 +40,3 @@ class BackupSerializer(
         private const val FORMAT_VERSION_FIELD = "formatVersion"
     }
 }
-
-@AllowDetektPublic
-class UnsupportedBackupFormatException(message: String) : IllegalArgumentException(message)

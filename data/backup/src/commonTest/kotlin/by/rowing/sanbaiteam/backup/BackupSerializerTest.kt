@@ -6,7 +6,6 @@ import by.rowing.sanbaiteam.backup.data.model.BackupTraining
 import by.rowing.sanbaiteam.backup.data.model.BackupWeight
 import by.rowing.sanbaiteam.backup.data.model.SanbaiBackup
 import by.rowing.sanbaiteam.backup.data.serializer.BackupSerializer
-import by.rowing.sanbaiteam.backup.data.serializer.UnsupportedBackupFormatException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -76,7 +75,7 @@ internal class BackupSerializerTest {
             }
         """.trimIndent()
 
-        val error = assertFailsWith<UnsupportedBackupFormatException> {
+        val error = assertFailsWith<IllegalArgumentException> {
             serializer.decode(legacyAthleteJson)
         }
         assertTrue(error.message.orEmpty().contains("Unsupported backup format"))
@@ -92,7 +91,7 @@ internal class BackupSerializerTest {
             }
         """.trimIndent()
 
-        assertFailsWith<UnsupportedBackupFormatException> {
+        assertFailsWith<IllegalArgumentException> {
             serializer.decode(legacyTrainingJson)
         }
     }
@@ -106,7 +105,7 @@ internal class BackupSerializerTest {
             }
         """.trimIndent()
 
-        assertFailsWith<UnsupportedBackupFormatException> {
+        assertFailsWith<IllegalArgumentException> {
             serializer.decode(json)
         }
     }
@@ -122,14 +121,14 @@ internal class BackupSerializerTest {
             }
         """.trimIndent()
 
-        assertFailsWith<UnsupportedBackupFormatException> {
+        assertFailsWith<IllegalArgumentException> {
             serializer.decode(json)
         }
     }
 
     @Test
     fun `decode rejects invalid json`() {
-        assertFailsWith<UnsupportedBackupFormatException> {
+        assertFailsWith<IllegalArgumentException> {
             serializer.decode("not json")
         }
     }

@@ -10,7 +10,6 @@ import by.rowing.sanbaiteam.backup.data.model.BackupTraining
 import by.rowing.sanbaiteam.backup.data.model.BackupWeight
 import by.rowing.sanbaiteam.backup.data.model.SanbaiBackup
 import by.rowing.sanbaiteam.backup.data.serializer.BackupSerializer
-import by.rowing.sanbaiteam.backup.data.serializer.UnsupportedBackupFormatException
 import by.rowing.sanbaiteam.backup.domain.model.BackupImportResult
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.util.TimeUtils
@@ -119,7 +118,7 @@ class BackupRepository(
 
     suspend fun importBackup(backup: SanbaiBackup): BackupImportResult = withContext(Dispatchers.Default) {
         if (backup.kind != SanbaiBackup.KIND || backup.formatVersion != SanbaiBackup.FORMAT_VERSION) {
-            throw UnsupportedBackupFormatException(
+            throw IllegalArgumentException(
                 "Unsupported backup format: kind=${backup.kind}, formatVersion=${backup.formatVersion}"
             )
         }
@@ -327,7 +326,7 @@ class BackupRepository(
                 distanceMeters = it.distanceMeters,
                 timeMillis = it.timeMillis,
                 strokeRate = it.strokeRate,
-                avgHeartRate = it.avgHeartRate,
+                avgHeartRate = it.averageHeartRate,
                 maxHeartRate = it.maxHeartRate,
                 recoveryHeartRate = it.recoveryHeartRate,
                 lactate = it.lactate,
@@ -450,7 +449,7 @@ class BackupRepository(
         distanceMeters = distanceMeters,
         timeMillis = timeMillis,
         strokeRate = strokeRate,
-        avgHeartRate = avgHeartRate,
+        avgHeartRate = averageHeartRate,
         maxHeartRate = maxHeartRate,
         recoveryHeartRate = recoveryHeartRate,
         lactate = lactate,
@@ -500,7 +499,7 @@ class BackupRepository(
             distanceMeters = distanceMeters,
             timeMillis = timeMillis,
             strokeRate = strokeRate,
-            avgHeartRate = avgHeartRate,
+            averageHeartRate = avgHeartRate,
             maxHeartRate = maxHeartRate,
             recoveryHeartRate = recoveryHeartRate,
             lactate = lactate,
