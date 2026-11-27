@@ -16,6 +16,8 @@ import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.NavigationEvent
 import by.rowing.sanbaiteam.core.presentation.compose.composable
+import by.rowing.sanbaiteam.settings.data.model.AppThemeMode
+import by.rowing.sanbaiteam.settings.data.repository.AppThemeSettingsRepository
 import by.rowing.sanbaiteam.settings.presentation.navigation.SettingsNavGraphProvider
 import by.rowing.sanbaiteam.shared.fileimport.ExternalFileImport
 import by.rowing.sanbaiteam.shared.main.presentation.MainScreen
@@ -32,7 +34,9 @@ import org.koin.core.parameter.parametersOf
 @Composable
 @AllowDetektPublic
 fun App(importUri: String? = null) {
-    SANBAITeamTheme {
+    val themeSettingsRepository = koinInject<AppThemeSettingsRepository>()
+    val themeMode by themeSettingsRepository.mode.collectAsState()
+    SANBAITeamTheme(darkTheme = themeMode.toDarkThemeOrNull()) {
         val composeNavigator = koinInject<ComposeNavigator>()
         val clickableState = koinInject<ClickableState>()
         val navController = rememberNavController()
@@ -69,6 +73,12 @@ fun App(importUri: String? = null) {
             )
         }
     }
+}
+
+private fun AppThemeMode.toDarkThemeOrNull(): Boolean? = when (this) {
+    AppThemeMode.AUTO -> null
+    AppThemeMode.LIGHT -> false
+    AppThemeMode.DARK -> true
 }
 
 private val navigationBuilder: (ComposeNavigator) -> NavGraphBuilder.() -> Unit = { composeNavigator ->

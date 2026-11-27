@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Настройки</string>
+    <string name="settings_theme_section">Тема оформления</string>
+    <string name="settings_theme_hint">Авто — как в системе. Можно принудительно выбрать светлую или тёмную тему.</string>
+    <string name="settings_theme_label">Тема</string>
+    <string name="settings_theme_auto">Авто</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
     <string name="settings_work_display_section">Отображение объёма работы</string>
     <string name="settings_work_display_hint">Выбери единицы объёма работы для каждого типа тренировки.</string>
     <string name="settings_work_display_meters">Метры</string>

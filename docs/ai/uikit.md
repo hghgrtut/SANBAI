@@ -9,8 +9,8 @@
 
 ## 1. Тема
 
-`theme/Theme.kt` — `SANBAITeamTheme(useLightStatusBars?, useLightNavigationBars?, shapes?, content)`.
-Светлая/тёмная схема заданы вручную; используется `isSystemInDarkTheme()`. Формы: `extraSmall/small = 8.dp`, `medium/large = 12.dp`, `extraLarge = 24.dp`.
+`theme/Theme.kt` — `SANBAITeamTheme(darkTheme?, useLightStatusBars?, useLightNavigationBars?, shapes?, content)`.
+Светлая/тёмная схема заданы вручную; `darkTheme = null` (по умолчанию) — как в системе (`isSystemInDarkTheme()`), `true/false` — принудительно. Внутри темы доступен `isAppInDarkTheme()` — фактическая тема с учётом выбора пользователя (использовать вместо `isSystemInDarkTheme()` там, где важен реальный цвет). Формы: `extraSmall/small = 8.dp`, `medium/large = 12.dp`, `extraLarge = 24.dp`.
 
 | Файл | Что внутри |
 |---|---|

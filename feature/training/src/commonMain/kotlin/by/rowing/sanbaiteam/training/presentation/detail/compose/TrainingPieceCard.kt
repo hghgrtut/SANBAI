@@ -1,7 +1,6 @@
 package by.rowing.sanbaiteam.training.presentation.detail.compose
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -60,6 +59,7 @@ import by.rowing.sanbaiteam.training.resources.training_detail_stroke_rate
 import by.rowing.sanbaiteam.training.resources.training_detail_stroke_rate_label
 import by.rowing.sanbaiteam.training.resources.training_detail_time_label
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
+import by.rowing.sanbaiteam.uikit.theme.isAppInDarkTheme
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
 import by.rowing.sanbaiteam.uikit.theme.TypographyPaletteSp
@@ -477,7 +477,7 @@ private fun TrainingMetricRow(
 
 @Composable
 private fun comparisonTrendColor(trend: ComparisonTrend?): Color = when (trend) {
-    ComparisonTrend.BETTER -> if (isSystemInDarkTheme()) {
+    ComparisonTrend.BETTER -> if (isAppInDarkTheme()) {
         ColorPalette.Green50
     } else {
         ColorPalette.Green30

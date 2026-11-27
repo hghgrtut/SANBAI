@@ -7,28 +7,47 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
 
+private val LocalIsDarkTheme = staticCompositionLocalOf { false }
+
+/**
+ * Текущая тема приложения с учётом принудительного выбора в настройках.
+ * Использовать вместо `isSystemInDarkTheme()`, когда важен реально показанный цвет.
+ */
+@AllowDetektPublic
+@Composable
+fun isAppInDarkTheme(): Boolean = LocalIsDarkTheme.current
+
+/**
+ * @param darkTheme принудительно тёмная (`true`) или светлая (`false`) тема;
+ * `null` — как в системе.
+ */
 @AllowDetektPublic
 @Composable
 fun SANBAITeamTheme(
+    darkTheme: Boolean? = null,
     useLightStatusBars: Boolean? = null,
     useLightNavigationBars: Boolean? = null,
     shapes: Shapes = AppShapes,
     content: @Composable () -> Unit
 ) {
-    val darkTheme: Boolean = isSystemInDarkTheme()
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val isDarkTheme: Boolean = darkTheme ?: isSystemInDarkTheme()
+    val colorScheme = if (isDarkTheme) DarkColorScheme else LightColorScheme
 
     PlatformSystemBars(
-        useLightStatusBars = useLightStatusBars ?: !darkTheme,
-        useLightNavigationBars = useLightNavigationBars ?: !darkTheme,
+        useLightStatusBars = useLightStatusBars ?: !isDarkTheme,
+        useLightNavigationBars = useLightNavigationBars ?: !isDarkTheme,
     )
-    MaterialTheme(
-        colorScheme = colorScheme,
-        shapes = shapes,
-        content = content
-    )
+    CompositionLocalProvider(LocalIsDarkTheme provides isDarkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            shapes = shapes,
+            content = content
+        )
+    }
 }
 
 internal val AppShapes = Shapes(
