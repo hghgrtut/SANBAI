@@ -38,7 +38,10 @@ class BackupRepository(
         fromMillis: Long,
         toMillis: Long
     ): SanbaiBackup = withContext(Dispatchers.Default) {
-        val (rangeStart, rangeEnd) = normalizeDayRange(fromMillis = fromMillis, toMillis = toMillis)
+        val (rangeStart, rangeEnd) = normalizeDayRange(
+            fromMillis = fromMillis,
+            toMillis = toMillis
+        )
         val trainings = trainingDao.getTrainingEntitiesByDateRange(
             fromMillis = rangeStart,
             toMillis = rangeEnd,
@@ -111,8 +114,7 @@ class BackupRepository(
         }
 
     suspend fun import(text: String): BackupImportResult = withContext(Dispatchers.Default) {
-        val backup = backupSerializer.decode(text)
-        importBackup(backup = backup)
+        importBackup(backup = backupSerializer.decode(text))
     }
 
     suspend fun importBackup(backup: SanbaiBackup): BackupImportResult = withContext(Dispatchers.Default) {
@@ -360,8 +362,7 @@ class BackupRepository(
                 dateMillis = TimeUtils.noonOfDay(timeInMillis = dateMillis),
                 weightTenths = weight.weightTenths,
             ).takeIf {
-                dateMillis <= todayStartMillis &&
-                        weight.weightTenths in MIN_WEIGHT_TENTHS..MAX_WEIGHT_TENTHS
+                dateMillis <= todayStartMillis && weight.weightTenths in MIN_WEIGHT_TENTHS..MAX_WEIGHT_TENTHS
             }
         }.associateBy { it.dateMillis }.values.toList()
     }
@@ -545,11 +546,10 @@ class BackupRepository(
         val sourceBytes: ByteArray?,
     ) {
 
-        fun isDuplicateOf(other: TrainingSignature): Boolean =
-            type == other.type &&
-                    dayStartMillis == other.dayStartMillis &&
-                    pieces == other.pieces &&
-                    bytesEqual(sourceBytes, other.sourceBytes)
+        fun isDuplicateOf(other: TrainingSignature): Boolean = type == other.type &&
+                dayStartMillis == other.dayStartMillis &&
+                pieces == other.pieces &&
+                bytesEqual(sourceBytes, other.sourceBytes)
 
         private fun bytesEqual(first: ByteArray?, second: ByteArray?): Boolean = when {
             first == null && second == null -> true
