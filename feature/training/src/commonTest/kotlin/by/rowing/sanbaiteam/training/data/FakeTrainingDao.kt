@@ -46,6 +46,11 @@ internal class FakeTrainingDao(
     override suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity> =
         trainings.filter { it.id in trainingIds }
 
+    override suspend fun getTrainingEntitiesByDateRange(
+        fromMillis: Long,
+        toMillis: Long
+    ): List<TrainingEntity> = trainings.filter { it.dateMillis in fromMillis..toMillis }
+
     override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
         trainings.firstOrNull { it.id == trainingId }
 
