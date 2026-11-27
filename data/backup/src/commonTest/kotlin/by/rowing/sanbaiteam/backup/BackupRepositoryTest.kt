@@ -89,7 +89,10 @@ internal class BackupRepositoryTest {
             ),
         )
 
-        val backup = env.repository.exportUnifiedBackup(fromMillis = day1, toMillis = day3)
+        val backup = env.repository.exportUnifiedBackup(
+            fromMillis = day1,
+            toMillis = day3
+        )
 
         assertEquals(1, backup.trainings.size)
         assertEquals(day2 + 3_600_000L, backup.trainings.single().dateMillis)
@@ -101,7 +104,8 @@ internal class BackupRepositoryTest {
     @Test
     fun `export and import round trip restores training source file`() = runTest {
         val athlete = AthleteEntity(
-            id = 1, name = "Иванов Иван",
+            id = 1,
+            name = "Иванов Иван",
             dateOfBirth = day1,
             isMale = true,
             speedCoachSerial = null
@@ -488,7 +492,10 @@ internal class BackupRepositoryTest {
         assertEquals(750, athletesBackup.athletes.single().weights.single().weightTenths)
     }
 
-    private suspend fun assertImported(env: TestEnv, backup: SanbaiBackup) {
+    private suspend fun assertImported(
+        env: TestEnv,
+        backup: SanbaiBackup
+    ) {
         val result = env.repository.import(serializer.encode(backup))
         assertEquals(1, result.trainingsImported, "Expected import for $backup")
     }
@@ -526,14 +533,6 @@ internal class BackupRepositoryTest {
             ),
         )
     }
-
-    private data class TestEnv(
-        val trainingDao: FakeTrainingDao,
-        val athletesRepository: FakeAthletesRepository,
-        val weightDao: FakeAthleteWeightDao,
-        val storage: FakeTrainingImportStorage,
-        val repository: BackupRepository,
-    )
 
     private fun piece(
         trainingId: Long,
@@ -587,5 +586,13 @@ internal class BackupRepositoryTest {
         lactate = lactate,
         sourceFileIndex = sourceFileIndex,
         sourceIntervalIndex = sourceIntervalIndex,
+    )
+
+    private data class TestEnv(
+        val trainingDao: FakeTrainingDao,
+        val athletesRepository: FakeAthletesRepository,
+        val weightDao: FakeAthleteWeightDao,
+        val storage: FakeTrainingImportStorage,
+        val repository: BackupRepository,
     )
 }

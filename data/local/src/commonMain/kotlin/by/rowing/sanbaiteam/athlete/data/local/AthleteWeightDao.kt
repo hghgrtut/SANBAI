@@ -16,7 +16,10 @@ interface AthleteWeightDao {
     @Query(
         "SELECT * FROM $TABLE_NAME WHERE dateMillis >= :fromMillis AND dateMillis <= :toMillis ORDER BY athleteId, dateMillis ASC"
     )
-    suspend fun getByDateRange(fromMillis: Long, toMillis: Long): List<AthleteWeightEntity>
+    suspend fun getByDateRange(
+        fromMillis: Long,
+        toMillis: Long
+    ): List<AthleteWeightEntity>
 
     @Upsert
     suspend fun upsert(weight: AthleteWeightEntity)

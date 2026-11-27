@@ -10,8 +10,10 @@ internal class FakeAthleteWeightDao(
     override suspend fun getByAthlete(athleteId: Long): List<AthleteWeightEntity> =
         weights.filter { it.athleteId == athleteId }.sortedBy { it.dateMillis }
 
-    override suspend fun getByDateRange(fromMillis: Long, toMillis: Long): List<AthleteWeightEntity> =
-        weights.filter { it.dateMillis in fromMillis..toMillis }
+    override suspend fun getByDateRange(
+        fromMillis: Long,
+        toMillis: Long
+    ): List<AthleteWeightEntity> = weights.filter { it.dateMillis in fromMillis..toMillis }
             .sortedWith(compareBy({ it.athleteId }, { it.dateMillis }))
 
     override suspend fun upsert(weight: AthleteWeightEntity) {
@@ -25,7 +27,10 @@ internal class FakeAthleteWeightDao(
         }
     }
 
-    override suspend fun deleteByDate(athleteId: Long, dateMillis: Long) {
+    override suspend fun deleteByDate(
+        athleteId: Long,
+        dateMillis: Long
+    ) {
         weights.removeAll { it.athleteId == athleteId && it.dateMillis == dateMillis }
     }
 }

@@ -43,7 +43,10 @@ internal class FakeTrainingDao(
     override suspend fun getTrainingEntitiesByIds(trainingIds: List<Long>): List<TrainingEntity> =
         trainings.filter { it.id in trainingIds }
 
-    override suspend fun getTrainingEntitiesByDateRange(fromMillis: Long, toMillis: Long): List<TrainingEntity> =
+    override suspend fun getTrainingEntitiesByDateRange(
+        fromMillis: Long,
+        toMillis: Long
+    ): List<TrainingEntity> =
         trainings.filter { it.dateMillis in fromMillis..toMillis }
 
     override suspend fun getTrainingById(trainingId: Long): TrainingEntity? =
@@ -65,7 +68,10 @@ internal class FakeTrainingDao(
         return deletedTrainingsCount
     }
 
-    override suspend fun updateImportMetadata(trainingId: Long, relativePath: String?) {
+    override suspend fun updateImportMetadata(
+        trainingId: Long,
+        relativePath: String?
+    ) {
         updateTrainings(
             trainings.map { training ->
                 if (training.id == trainingId) training.copy(sourceFileRelativePath = relativePath) else training
