@@ -31,8 +31,7 @@ class BackupRepository(
     private val athletesRepository: AthletesRepository,
     private val athleteWeightDao: AthleteWeightDao,
     private val importStorage: TrainingImportStorage,
-    private val backupSerializer: BackupSerializer,
-    private val nowMillis: () -> Long = ::nowInMillis,
+    private val backupSerializer: BackupSerializer
 ) {
 
     suspend fun exportUnifiedBackup(
@@ -103,7 +102,7 @@ class BackupRepository(
             }
 
             SanbaiBackup(
-                exportedAtMillis = nowMillis(),
+                exportedAtMillis = nowInMillis(),
                 fromMillis = null,
                 toMillis = null,
                 athletes = backupAthletes,
@@ -228,7 +227,7 @@ class BackupRepository(
         }
 
         return SanbaiBackup(
-            exportedAtMillis = nowMillis(),
+            exportedAtMillis = nowInMillis(),
             fromMillis = fromMillis,
             toMillis = toMillis,
             athletes = backupAthletes,
@@ -353,7 +352,7 @@ class BackupRepository(
         athleteId: Long,
         weights: List<BackupWeight>,
     ): List<AthleteWeightEntity> {
-        val todayStartMillis = TimeUtils.startOfDayMillis(timeInMillis = nowMillis())
+        val todayStartMillis = TimeUtils.startOfDayMillis(timeInMillis = nowInMillis())
         return weights.mapNotNull { weight ->
             val dateMillis = TimeUtils.startOfDayMillis(timeInMillis = weight.dateMillis)
             AthleteWeightEntity(
