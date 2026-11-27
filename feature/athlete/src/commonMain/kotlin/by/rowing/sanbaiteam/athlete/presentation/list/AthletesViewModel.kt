@@ -2,17 +2,14 @@ package by.rowing.sanbaiteam.athlete.presentation.list
 
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
-import by.rowing.sanbaiteam.athlete.data.transfer.AthleteBackupSerializer
-import by.rowing.sanbaiteam.athlete.data.transfer.AthleteTransferRepository
-import by.rowing.sanbaiteam.athlete.data.transfer.AthleteTransferResult
 import by.rowing.sanbaiteam.athlete.domain.trainings.AthleteTrainingsCleaner
 import by.rowing.sanbaiteam.athlete.presentation.list.compose.AthletesListActions
 import by.rowing.sanbaiteam.athlete.presentation.navigation.AthletesNavigation
 import by.rowing.sanbaiteam.athlete.resources.Res
-import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_export_error
-import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_export_success
-import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_import_error
-import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_import_result
+import by.rowing.sanbaiteam.athlete.resources.athletes_export_error
+import by.rowing.sanbaiteam.athlete.resources.athletes_export_success
+import by.rowing.sanbaiteam.backup.data.repository.BackupRepository
+import by.rowing.sanbaiteam.backup.data.serializer.BackupSerializer
 import by.rowing.sanbaiteam.core.file.TextFileAccess
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
@@ -25,7 +22,8 @@ import kotlinx.coroutines.withContext
 
 internal class AthletesViewModel(
     private val repository: AthletesRepository,
-    private val transferRepository: AthleteTransferRepository,
+    private val backupRepository: BackupRepository,
+    private val backupSerializer: BackupSerializer,
     private val trainingsCleaner: AthleteTrainingsCleaner,
     private val textFileAccess: TextFileAccess,
     private val composeNavigator: ComposeNavigator,
@@ -149,30 +147,29 @@ internal class AthletesViewModel(
     }
 
     override fun onExportSelectedClick() {
-        if (state.isTransferring) return
-        val selectedIds = state.selectedAthleteIds
-        if (selectedIds.isEmpty()) return
-        changeState { copy(isTransferring = true) }
+        val selectedIds = state.selectedAthleteIds.takeIf { !state.isExporting && it.isNotEmpty() } ?: return
+        changeState { copy(isExporting = true) }
         viewModelScope.launch {
-            runCatching { transferRepository.exportBackup(athleteIds = selectedIds) }
-                .onSuccess { backup ->
-                    pendingExportJson = AthleteBackupSerializer.encode(backup = backup)
-                    changeState {
-                        copy(
-                            isTransferring = false,
-                            exportPromptRequested = true,
-                        )
-                    }
+            runCatching {
+                val backup = backupRepository.exportSelectedAthletes(athleteIds = selectedIds)
+                withContext(Dispatchers.Default) { backupSerializer.encode(backup = backup) }
+            }.onSuccess { json ->
+                pendingExportJson = json
+                changeState {
+                    copy(
+                        isExporting = false,
+                        exportPromptRequested = true,
+                    )
                 }
-                .onFailure {
-                    pendingExportJson = null
-                    changeState {
-                        copy(
-                            isTransferring = false,
-                            transferNotice = UiText.of(Res.string.athletes_transfer_export_error)
-                        )
-                    }
+            }.onFailure {
+                pendingExportJson = null
+                changeState {
+                    copy(
+                        isExporting = false,
+                        exportNotice = UiText.of(Res.string.athletes_export_error)
+                    )
                 }
+            }
         }
     }
 
@@ -192,40 +189,14 @@ internal class AthletesViewModel(
                 text = json,
             )
             val notice = UiText.of(
-                resource = if (success) {
-                    Res.string.athletes_transfer_export_success
-                } else {
-                    Res.string.athletes_transfer_export_error
-                }
+                resource = if (success) Res.string.athletes_export_success else Res.string.athletes_export_error
             )
-            changeState { copy(transferNotice = notice) }
+            changeState { copy(exportNotice = notice) }
         }
     }
 
-    override fun onImportFromHandle(handle: String) {
-        if (state.isTransferring) return
-        changeState { copy(isTransferring = true) }
-        viewModelScope.launch {
-            val result = withContext(Dispatchers.Default) {
-                textFileAccess.read(handle = handle)?.let { jsonText ->
-                    runCatching {
-                        transferRepository.importBackup(
-                            backup = AthleteBackupSerializer.decode(text = jsonText)
-                        )
-                    }.getOrNull()
-                }
-            }
-            changeState {
-                copy(
-                    isTransferring = false,
-                    transferNotice = buildImportNotice(result = result),
-                )
-            }
-        }
-    }
-
-    override fun onDismissTransferNotice() {
-        changeState { copy(transferNotice = null) }
+    override fun onDismissExportNotice() {
+        changeState { copy(exportNotice = null) }
     }
 
     private fun toggleSelection(athleteId: Long) {
@@ -239,14 +210,4 @@ internal class AthletesViewModel(
             )
         }
     }
-
-    private fun buildImportNotice(result: AthleteTransferResult?): UiText = result?.let {
-        UiText.of(
-            Res.string.athletes_transfer_import_result,
-            it.athletesCreated,
-            it.athletesUpdated,
-            it.personalBestsImported,
-            it.weightsImported,
-        )
-    } ?: UiText.of(Res.string.athletes_transfer_import_error)
 }

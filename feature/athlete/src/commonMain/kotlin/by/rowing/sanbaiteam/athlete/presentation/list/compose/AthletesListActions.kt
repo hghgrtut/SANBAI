@@ -30,9 +30,7 @@ internal interface AthletesListActions : NavigateBackAware {
 
     fun onExportToHandle(handle: String)
 
-    fun onImportFromHandle(handle: String)
-
-    fun onDismissTransferNotice()
+    fun onDismissExportNotice()
 
     companion object {
 
@@ -52,8 +50,7 @@ internal interface AthletesListActions : NavigateBackAware {
                 override fun onExportSelectedClick() {}
                 override fun onExportPromptLaunched() {}
                 override fun onExportToHandle(handle: String) {}
-                override fun onImportFromHandle(handle: String) {}
-                override fun onDismissTransferNotice() {}
+                override fun onDismissExportNotice() {}
             }
     }
 }

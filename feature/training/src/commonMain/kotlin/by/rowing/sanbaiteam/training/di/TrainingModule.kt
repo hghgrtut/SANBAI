@@ -8,7 +8,6 @@ import by.rowing.sanbaiteam.training.data.repository.SavedTrainingFiltersReposit
 import by.rowing.sanbaiteam.training.data.repository.TrainingAthleteTrainingsCleaner
 import by.rowing.sanbaiteam.training.data.repository.TrainingDetailSettingsRepository
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
-import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
 import by.rowing.sanbaiteam.training.presentation.add.AddTrainingViewModel
 import by.rowing.sanbaiteam.training.presentation.chart.TrainingChartViewModel
 import by.rowing.sanbaiteam.training.presentation.comparison.TrainingCompareViewModel
@@ -28,7 +27,6 @@ val trainingModule = module {
     singleOf(::TrainingRepository)
     singleOf(::SavedTrainingFiltersRepository)
     singleOf(::TrainingDetailSettingsRepository)
-    singleOf(::TrainingTransferRepository)
     singleOf(::TrainingComparisonSelectionStore)
     singleOf(::TrainingAthleteTrainingsCleaner) bind AthleteTrainingsCleaner::class
     single<TrainingDashboard> { TrainingDashboardImpl(repository = get()) }

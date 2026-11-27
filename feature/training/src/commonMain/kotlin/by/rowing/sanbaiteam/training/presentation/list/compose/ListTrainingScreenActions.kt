@@ -27,7 +27,5 @@ internal interface ListTrainingScreenActions : NavigateBackAware, TrainingFilter
 
     fun onExportToHandle(handle: String)
 
-    fun onImportFromHandle(handle: String)
-
-    fun onDismissTransferNotice()
+    fun onDismissExportNotice()
 }

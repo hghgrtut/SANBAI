@@ -9,12 +9,13 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
 @AllowDetektPublic
-class BackupSerializer(
+class BackupSerializer {
+
     private val json: Json = Json {
         ignoreUnknownKeys = true
         explicitNulls = false
-    },
-) {
+        encodeDefaults = true
+    }
 
     fun encode(backup: SanbaiBackup): String = json.encodeToString(backup)
 

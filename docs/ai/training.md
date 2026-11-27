@@ -8,39 +8,38 @@
 ## 1. Файлы по слоям
 
 ### Presentation
-| Пакет / файл | Что |
-|---|---|
-| `presentation/list/ListTrainingViewModel.kt` | Список: наблюдение, выделение/удаление, экспорт/импорт бэкапа, фильтры |
-| `presentation/list/models/ListTrainingState.kt`, `ListTrainingStateItem.kt`, `ListTrainingPieceItem.kt` | Состояние списка и элементы (элемент реализует `FilterableTraining`) |
-| `presentation/list/compose/ListTrainingScreen.kt`, `ListTrainingScreenActions.kt` | UI списка: топ-бар с выбором, фильтры, FAB, диалоги |
-| `presentation/add/AddTrainingViewModel.kt` (573 стр.) | Ручной ввод + импорт файлов + сохранение |
-| `presentation/add/AddTrainingState.kt`, `AddTrainingValidation.kt`, `AddTrainingScrollTarget.kt` | Черновики отрезков/экипажа, валидация (`validateAddTraining`), адреса автоскролла к ошибке |
-| `presentation/add/AddTrainingScreen.kt` (717 стр.) | UI добавления (дата, тип, экипаж, отрезки, импорт) |
-| `presentation/detail/TrainingDetailViewModel.kt` | Загрузка детали, сравнение, сплиты, скрытые поля |
-| `presentation/detail/models/TrainingDetailState.kt`, `TrainingDetailPiece.kt` | Состояние/модель отрезка (готовые строки форматирования + `chartData` + `comparison`) |
-| `presentation/detail/compose/TrainingDetailScreen.kt`, `TrainingPieceCard.kt`, `TrainingSplitTable.kt`, `TrainingDetailSettingsDialog.kt`, `ComparisonFormat.kt`, `TrainingDetailActions.kt` | UI детали и форматирование дельт (`formatSignedInt/Tenths/Seconds`) |
-| `presentation/comparison/*` | Экран выбора тренировок для сравнения (`TrainingCompareScreen`, `TrainingCompareViewModel`) и `TrainingComparisonSelectionStore` (сессионный стейт) |
-| `presentation/chart/*` | Экран графика отрезка (`TrainingChartViewModel`, `TrainingChartState`, `TrainingChartValueBounds`) |
-| `presentation/filter/*` | Движок фильтров: `TrainingFilter`, `TrainingFilterParameter`, `TrainingFilterMatcher`, `TrainingFilterTimeParser`, `TrainingFiltersController`, `FilterableTraining`, `models/*`, `compose/*` (панель, чипы, диалоги) |
-| `presentation/platform/TrainingPlatformComposables.kt` | `expect`-пикеры: `rememberTrainingImportPicker`, `rememberTrainingDatePicker` (+ actual в android/ios); файловые диалоги — из `core:file` |
-| `presentation/navigation/*` | `TrainingNavigation`, `TrainingNavGraphProvider` |
+| Пакет / файл                                                                                                                                                                                 | Что                                                                                                                                                                                                                   |
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `presentation/list/ListTrainingViewModel.kt`                                                                                                                                                 | Список: наблюдение, выделение/удаление, экспорт выбранного (`sanbai-backup`), фильтры                                                                                                                                 |
+| `presentation/list/models/ListTrainingState.kt`, `ListTrainingStateItem.kt`, `ListTrainingPieceItem.kt`                                                                                      | Состояние списка и элементы (элемент реализует `FilterableTraining`)                                                                                                                                                  |
+| `presentation/list/compose/ListTrainingScreen.kt`, `ListTrainingScreenActions.kt`                                                                                                            | UI списка: топ-бар с выбором, фильтры, FAB, диалоги                                                                                                                                                                   |
+| `presentation/add/AddTrainingViewModel.kt` (573 стр.)                                                                                                                                        | Ручной ввод + импорт файлов + сохранение                                                                                                                                                                              |
+| `presentation/add/AddTrainingState.kt`, `AddTrainingValidation.kt`, `AddTrainingScrollTarget.kt`                                                                                             | Черновики отрезков/экипажа, валидация (`validateAddTraining`), адреса автоскролла к ошибке                                                                                                                            |
+| `presentation/add/AddTrainingScreen.kt` (717 стр.)                                                                                                                                           | UI добавления (дата, тип, экипаж, отрезки, импорт)                                                                                                                                                                    |
+| `presentation/detail/TrainingDetailViewModel.kt`                                                                                                                                             | Загрузка детали, сравнение, сплиты, скрытые поля                                                                                                                                                                      |
+| `presentation/detail/models/TrainingDetailState.kt`, `TrainingDetailPiece.kt`                                                                                                                | Состояние/модель отрезка (готовые строки форматирования + `chartData` + `comparison`)                                                                                                                                 |
+| `presentation/detail/compose/TrainingDetailScreen.kt`, `TrainingPieceCard.kt`, `TrainingSplitTable.kt`, `TrainingDetailSettingsDialog.kt`, `ComparisonFormat.kt`, `TrainingDetailActions.kt` | UI детали и форматирование дельт (`formatSignedInt/Tenths/Seconds`)                                                                                                                                                   |
+| `presentation/comparison/*`                                                                                                                                                                  | Экран выбора тренировок для сравнения (`TrainingCompareScreen`, `TrainingCompareViewModel`) и `TrainingComparisonSelectionStore` (сессионный стейт)                                                                   |
+| `presentation/chart/*`                                                                                                                                                                       | Экран графика отрезка (`TrainingChartViewModel`, `TrainingChartState`, `TrainingChartValueBounds`)                                                                                                                    |
+| `presentation/filter/*`                                                                                                                                                                      | Движок фильтров: `TrainingFilter`, `TrainingFilterParameter`, `TrainingFilterMatcher`, `TrainingFilterTimeParser`, `TrainingFiltersController`, `FilterableTraining`, `models/*`, `compose/*` (панель, чипы, диалоги) |
+| `presentation/platform/TrainingPlatformComposables.kt`                                                                                                                                       | `expect`-пикеры: `rememberTrainingImportPicker`, `rememberTrainingDatePicker` (+ actual в android/ios); файловые диалоги — из `core:file`                                                                             |
+| `presentation/navigation/*`                                                                                                                                                                  | `TrainingNavigation`, `TrainingNavGraphProvider`                                                                                                                                                                      |
 
 ### Data
-| Файл | Что |
-|---|---|
-| `data/repository/TrainingRepository.kt` | Сохранение/удаление, наблюдение списка, деталь, данные графика; **маппинг в presentation-модели** |
-| `data/repository/SavedTrainingFiltersRepository.kt` | CRUD быстрых фильтров (payload = JSON) |
-| `data/repository/TrainingDetailSettingsRepository.kt` | Скрытые показатели детали (в БД — только скрытые) |
-| `data/chart/TrainingChartReader.kt` | Чтение точек графика из сохранённого файла (FIT/RP3) |
-| `data/chart/TrainingSplitCalculator.kt` | Расчёт сплитов по дистанции/времени из точек графика |
-| `data/chart/TrainingPower.kt` | Оценка мощности Concept2 по скорости (`2.8*v^3` RowErg, `0.35*v^3` BikeErg); fallback, когда мощности нет в файле |
-| `data/comparison/TrainingComparisonCalculator.kt` | Сравнение базового отрезка со средним по выбранным тренировкам |
-| `data/dashboard/TrainingDashboard.kt` | Дашборд: счётчик тренировок + 4 последних (`RECENT_TRAININGS_LIMIT = 4`) |
-| `data/filter/SavedTrainingFilter.kt`, `SavedTrainingFilterSerializer.kt` | Сериализация фильтра для быстрых фильтров |
-| `data/models/...` | `FitLap/FitRecord/FitWorkout`, `TrainingChart*`, `Comparison*`, `TrainingDetailField`, `TrainingTransferResult` |
-| `data/trainingimport/*` | Парсеры FIT/CSV, FIT-декодер, контейнер `.fitpack`, `CsvWriter`, интерфейсы storage/reader |
-| `data/trainingtransfer/*` | JSON-бэкап (`TrainingBackupSerializer`), импорт/экспорт (`TrainingTransferRepository`), матчинг атлетов |
-| `di/TrainingModule.kt` | Koin: репозитории + все VM (`AddTrainingViewModel` — вручную из-за `importUri`) |
+| Файл                                                                     | Что                                                                                                               |
+|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| `data/repository/TrainingRepository.kt`                                  | Сохранение/удаление, наблюдение списка, деталь, данные графика; **маппинг в presentation-модели**                 |
+| `data/repository/SavedTrainingFiltersRepository.kt`                      | CRUD быстрых фильтров (payload = JSON)                                                                            |
+| `data/repository/TrainingDetailSettingsRepository.kt`                    | Скрытые показатели детали (в БД — только скрытые)                                                                 |
+| `data/chart/TrainingChartReader.kt`                                      | Чтение точек графика из сохранённого файла (FIT/RP3)                                                              |
+| `data/chart/TrainingSplitCalculator.kt`                                  | Расчёт сплитов по дистанции/времени из точек графика                                                              |
+| `data/chart/TrainingPower.kt`                                            | Оценка мощности Concept2 по скорости (`2.8*v^3` RowErg, `0.35*v^3` BikeErg); fallback, когда мощности нет в файле |
+| `data/comparison/TrainingComparisonCalculator.kt`                        | Сравнение базового отрезка со средним по выбранным тренировкам                                                    |
+| `data/dashboard/TrainingDashboard.kt`                                    | Дашборд: счётчик тренировок + 4 последних (`RECENT_TRAININGS_LIMIT = 4`)                                          |
+| `data/filter/SavedTrainingFilter.kt`, `SavedTrainingFilterSerializer.kt` | Сериализация фильтра для быстрых фильтров                                                                         |
+| `data/models/...`                                                        | `FitLap/FitRecord/FitWorkout`, `TrainingChart*`, `Comparison*`, `TrainingDetailField`                             |
+| `data/trainingimport/*`                                                  | Парсеры FIT/CSV, FIT-декодер, контейнер `.fitpack`, `CsvWriter`, `TrainingFileReader`                             |
+| `di/TrainingModule.kt`                                                   | Koin: репозитории + все VM (`AddTrainingViewModel` — вручную из-за `importUri`)                                   |
 
 ---
 
@@ -153,35 +152,45 @@ UI: `TrainingChartScreen` использует `MetricLineChart` (см. [uikit.m
 
 ---
 
-## 8. Бэкап / перенос
+## 8. Бэкап / экспорт выбранного
 
-`TrainingBackupSerializer` (JSON, `ignoreUnknownKeys`, `explicitNulls = false`, `FORMAT_VERSION = 2`):
-`TrainingBackup(formatVersion, athletes: [name, dateOfBirthMillis, isMale], trainings: [dateMillis, type, source?, sourceFileBase64?, sourceFileExtension?, pieces])`.
-`TrainingTransferRepository.exportSelectedBackup(ids)` / `importBackup(backup)` → `TrainingTransferResult(trainingsImported, athletesCreated)`; исходные файлы кодируются base64 и восстанавливаются в storage.
-Атлеты сопоставляются `TrainingTransferAthleteMatcher.matchBackupAthletesToExisting` (совпадение по данным, не по id).
-UI: экспорт/импорт в `ListTrainingScreen` через `rememberCreateTextFileLauncher` / `rememberOpenTextFileLauncher` из `core:file`; запись/чтение — `TextFileAccess`; уведомления — `UiText`.
+Единый формат — `sanbai-backup` v1 в `data:backup`:
+`SanbaiBackup(kind="sanbai-backup", formatVersion=1, exportedAtMillis, fromMillis, toMillis, athletes[], trainings[])`.
+`BackupSerializer` (JSON, `ignoreUnknownKeys`, `explicitNulls = false`) бросает `UnsupportedBackupFormatException` для
+чужих/старых форматов.
+`BackupRepository`: `exportUnifiedBackup(from, to)` (главный экран), `exportSelectedTrainings(ids)`,
+`exportSelectedAthletes(ids)`, `import(text)` → `BackupImportResult`.
+Исходные файлы кодируются base64 и восстанавливаются через `TrainingImportStorage` (контракт в `data:local`); спортсмены
+сопоставляются по нормализованному имени + дате рождения.
+UI: на главном — диалог диапазона и импорт; в списках — только экспорт выделенного. Файлы —
+`rememberCreateTextFileLauncher` (`core:file`), запись — `TextFileAccess`, уведомления — `UiText`.
+Импорт доступен только на главном экране; в тулбарах списков его нет.
 
 ---
 
 ## 9. Строки и ресурсы
 
 `feature/training/src/commonMain/composeResources/values/strings.xml` (~220 строк), пакет `by.rowing.sanbaiteam.training.resources`.
-Префиксы: `training_*` (список/фильтры/деталь/график/сравнение), `add_training_*` (форма и импорт), `training_transfer_*` (бэкап), `training_quick_filter_*`.
+Префиксы: `training_*` (список/фильтры/деталь/график/сравнение), `add_training_*` (форма и импорт),
+`training_export_*` (экспорт выбранного), `training_quick_filter_*`.
 Подписи типов тренировок лежат в `data/local/src/commonMain/composeResources/values/strings.xml` (`TrainingPieceType.uiResId`).
 
 ---
 
 ## 10. Типовые задачи
 
-| Задача | Куда идти |
-|---|---|
-| Добавить показатель отрезка | `TrainingDetailField` (enum) → `TrainingAthletePieceEntity` (+миграция) → `TrainingDetailPiece` → `TrainingRepository.getTrainingDetail` → `TrainingPieceCard`/`TrainingDetailSettingsDialog` |
-| Изменить формат времени/темпа в детали | `TrainingRepository.buildDetailPieces` (строки) или `RowingTimeFormat` (общий формат) |
-| Новый формат импорта | `TrainingImportSource` + парсер (`TrainingImportParser`) → `TrainingImportParsers` → при необходимости `TrainingChartReader` (для графиков) |
-| Новый фильтр | `TrainingFilter` + `TrainingFilterParameter` (без параметра не активируется) → `TrainingFilterMatcher` → `TrainingFiltersPanel`/шитья → `TrainingFilterTimeParser`/сериализатор |
-| Новый экран в тренировках | `TrainingNavigation` → `TrainingNavGraphProvider` → `TrainingModule` → см. чек-лист в [PROJECT_MAP.md](PROJECT_MAP.md) |
-| Изменить расчёт сравнения | `TrainingComparisonCalculator` (+ `ComparisonMetric`, `TrainingComparisonCalculatorTest`) |
-| Изменить сплиты | `TrainingSplitCalculator` (+ `TrainingSplitCalculatorTest`) |
-| Дашборд | `TrainingDashboardImpl` (`data/dashboard/TrainingDashboard.kt`) |
+| Задача                                 | Куда идти                                                                                                                                                                                     |
+|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Добавить показатель отрезка            | `TrainingDetailField` (enum) → `TrainingAthletePieceEntity` (+миграция) → `TrainingDetailPiece` → `TrainingRepository.getTrainingDetail` → `TrainingPieceCard`/`TrainingDetailSettingsDialog` |
+| Изменить формат времени/темпа в детали | `TrainingRepository.buildDetailPieces` (строки) или `RowingTimeFormat` (общий формат)                                                                                                         |
+| Новый формат импорта                   | `TrainingImportSource` + парсер (`TrainingImportParser`) → `TrainingImportParsers` → при необходимости `TrainingChartReader` (для графиков)                                                   || Новый фильтр | `TrainingFilter` + `TrainingFilterParameter` (без параметра не активируется) → `TrainingFilterMatcher` → `TrainingFiltersPanel`/шитья → `TrainingFilterTimeParser`/сериализатор |
+| Новый экран в тренировках              | `TrainingNavigation` → `TrainingNavGraphProvider` → `TrainingModule` → см. чек-лист в [PROJECT_MAP.md](PROJECT_MAP.md)                                                                        |
+| Изменить расчёт сравнения              | `TrainingComparisonCalculator` (+ `ComparisonMetric`, `TrainingComparisonCalculatorTest`)                                                                                                     |
+| Изменить сплиты                        | `TrainingSplitCalculator` (+ `TrainingSplitCalculatorTest`)                                                                                                                                   |
+| Дашборд                                | `TrainingDashboardImpl` (`data/dashboard/TrainingDashboard.kt`)                                                                                                                               |
 
-Тесты: `feature/training/src/commonTest/kotlin/by/rowing/sanbaiteam/training/` — `data/repository/*Test.kt` (+ фейки DAO и `TrainingRepositoryTestFactory`), `data/trainingimport/*Test.kt` (+ `FitTestSupport`), `data/chart/`, `data/comparison/`, `data/trainingtransfer/`, `presentation/filter/`, `presentation/detail/compose/ComparisonFormatTest.kt`, `presentation/chart/models/TrainingChartValueBoundsTest.kt`, `presentation/add/AddTrainingValidationTest.kt`.
+Тесты: `feature/training/src/commonTest/kotlin/by/rowing/sanbaiteam/training/` — `data/repository/*Test.kt` (+ фейки DAO
+и `TrainingRepositoryTestFactory`), `data/trainingimport/*Test.kt` (+ `FitTestSupport`), `data/chart/`,
+`data/comparison/`, `presentation/filter/`, `presentation/detail/compose/ComparisonFormatTest.kt`,
+`presentation/chart/models/TrainingChartValueBoundsTest.kt`, `presentation/add/AddTrainingValidationTest.kt`. Бэкап —
+`data/backup/src/commonTest/...`.

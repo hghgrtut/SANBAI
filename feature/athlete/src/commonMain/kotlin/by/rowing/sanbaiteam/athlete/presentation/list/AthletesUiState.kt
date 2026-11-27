@@ -10,8 +10,8 @@ internal data class AthletesUiState(
     val selectedAthleteIds: Set<Long> = emptySet(),
     val deleteConfirmationRequested: Boolean = false,
     val relatedTrainingsCount: Int = 0,
-    val transferNotice: UiText? = null,
-    val isTransferring: Boolean = false,
+    val exportNotice: UiText? = null,
+    val isExporting: Boolean = false,
     val exportPromptRequested: Boolean = false,
     val isLoading: Boolean = true,
 ) {

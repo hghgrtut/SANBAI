@@ -2,15 +2,14 @@ package by.rowing.sanbaiteam.training.presentation.list
 
 import androidx.lifecycle.viewModelScope
 import by.rowing.sanbaiteam.athlete.data.repository.AthletesRepository
+import by.rowing.sanbaiteam.backup.data.repository.BackupRepository
+import by.rowing.sanbaiteam.backup.data.serializer.BackupSerializer
 import by.rowing.sanbaiteam.core.file.TextFileAccess
 import by.rowing.sanbaiteam.core.presentation.compose.ComposeNavigator
 import by.rowing.sanbaiteam.core.presentation.compose.getReturnToScreenNavOptions
 import by.rowing.sanbaiteam.core.presentation.screen.base.ComposeBaseViewModel
-import by.rowing.sanbaiteam.training.data.models.TrainingTransferResult
 import by.rowing.sanbaiteam.training.data.repository.SavedTrainingFiltersRepository
 import by.rowing.sanbaiteam.training.data.repository.TrainingRepository
-import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingBackupSerializer
-import by.rowing.sanbaiteam.training.data.trainingtransfer.TrainingTransferRepository
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFilterParameter
 import by.rowing.sanbaiteam.training.presentation.filter.TrainingFiltersController
@@ -18,10 +17,8 @@ import by.rowing.sanbaiteam.training.presentation.list.compose.ListTrainingScree
 import by.rowing.sanbaiteam.training.presentation.list.models.ListTrainingState
 import by.rowing.sanbaiteam.training.presentation.navigation.TrainingNavigation
 import by.rowing.sanbaiteam.training.resources.Res
-import by.rowing.sanbaiteam.training.resources.training_transfer_export_error
-import by.rowing.sanbaiteam.training.resources.training_transfer_export_success
-import by.rowing.sanbaiteam.training.resources.training_transfer_import_error
-import by.rowing.sanbaiteam.training.resources.training_transfer_import_result
+import by.rowing.sanbaiteam.training.resources.training_export_error
+import by.rowing.sanbaiteam.training.resources.training_export_success
 import by.rowing.sanbaiteam.uikit.component.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +26,8 @@ import kotlinx.coroutines.withContext
 
 internal class ListTrainingViewModel(
     private val repository: TrainingRepository,
-    private val trainingTransferRepository: TrainingTransferRepository,
+    private val backupRepository: BackupRepository,
+    private val backupSerializer: BackupSerializer,
     private val backupFileAccess: TextFileAccess,
     private val athletesRepository: AthletesRepository,
     private val composeNavigator: ComposeNavigator,
@@ -37,8 +35,8 @@ internal class ListTrainingViewModel(
 ) : ComposeBaseViewModel<ListTrainingState>(
     initialState = ListTrainingState(
         items = emptyList(),
-        transferNotice = null,
-        isTransferring = false,
+        exportNotice = null,
+        isExporting = false,
         exportPromptRequested = false,
     )
 ), ListTrainingScreenActions {
@@ -206,30 +204,31 @@ internal class ListTrainingViewModel(
     }
 
     override fun onExportSelectedClick() {
-        if (state.isTransferring) return
+        if (state.isExporting) return
         val selectedIds = state.selectedTrainingIds
         if (selectedIds.isEmpty()) return
-        changeState { copy(isTransferring = true) }
+        changeState { copy(isExporting = true) }
         viewModelScope.launch {
-            runCatching { trainingTransferRepository.exportSelectedBackup(selectedIds) }
-                .onSuccess { backup ->
-                    pendingExportJson = TrainingBackupSerializer.encode(backup)
-                    changeState {
-                        copy(
-                            isTransferring = false,
-                            exportPromptRequested = true
-                        )
-                    }
+            runCatching {
+                val backup = backupRepository.exportSelectedTrainings(trainingIds = selectedIds)
+                withContext(Dispatchers.Default) { backupSerializer.encode(backup = backup) }
+            }.onSuccess { json ->
+                pendingExportJson = json
+                changeState {
+                    copy(
+                        isExporting = false,
+                        exportPromptRequested = true
+                    )
                 }
-                .onFailure {
-                    pendingExportJson = null
-                    changeState {
-                        copy(
-                            isTransferring = false,
-                            transferNotice = UiText.of(Res.string.training_transfer_export_error)
-                        )
-                    }
+            }.onFailure {
+                pendingExportJson = null
+                changeState {
+                    copy(
+                        isExporting = false,
+                        exportNotice = UiText.of(Res.string.training_export_error)
+                    )
                 }
+            }
         }
     }
 
@@ -249,38 +248,14 @@ internal class ListTrainingViewModel(
                 text = json
             )
             val notice = UiText.of(
-                resource = if (success) {
-                    Res.string.training_transfer_export_success
-                } else {
-                    Res.string.training_transfer_export_error
-                }
+                resource = if (success) Res.string.training_export_success else Res.string.training_export_error
             )
-            changeState { copy(transferNotice = notice) }
+            changeState { copy(exportNotice = notice) }
         }
     }
 
-    override fun onImportFromHandle(handle: String) {
-        if (state.isTransferring) return
-        changeState { copy(isTransferring = true) }
-        viewModelScope.launch {
-            val result = withContext(Dispatchers.Default) {
-                backupFileAccess.read(handle)?.let { jsonText ->
-                    runCatching {
-                        trainingTransferRepository.importBackup(TrainingBackupSerializer.decode(text = jsonText))
-                    }.getOrNull()
-                }
-            }
-            changeState {
-                copy(
-                    isTransferring = false,
-                    transferNotice = buildImportNotice(result)
-                )
-            }
-        }
-    }
-
-    override fun onDismissTransferNotice() {
-        changeState { copy(transferNotice = null) }
+    override fun onDismissExportNotice() {
+        changeState { copy(exportNotice = null) }
     }
 
     private fun observeTrainings() {
@@ -315,12 +290,4 @@ internal class ListTrainingViewModel(
             )
         }
     }
-
-    private fun buildImportNotice(result: TrainingTransferResult?): UiText = result?.let {
-        UiText.of(
-            Res.string.training_transfer_import_result,
-            result.trainingsImported,
-            result.athletesCreated
-        )
-    } ?: UiText.of(Res.string.training_transfer_import_error)
 }

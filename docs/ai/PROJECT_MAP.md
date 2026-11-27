@@ -37,25 +37,27 @@ app (Android: MainActivity, RowingApp, manifest, res)
      ├─ core:file ───────── TextFileAccess, системные JSON-пикеры файлов (Android/iOS)
      ├─ core:util ───────── форматтеры времени/чисел/дат, расчёты PB
      ├─ core:annotation ─── @AllowDetektPublic
-     └─ data:local ──────── Room-БД, entity, DAO, AthletesRepository (интерфейс), DataModule
+     ├─ data:local ──────── Room-БД, entity, DAO, AthletesRepository (интерфейс), DataModule
+     └─ data:backup ─────── единый бэкап `sanbai-backup` v1: экспорт/импорт без UI
 iosApp (Xcode) → framework Shared (shared/src/iosMain/.../MainViewController.kt)
 ```
 
-| Модуль | Назначение | Особенности |
-|---|---|---|
-| `app` | Android-обёртка | `MainActivity.kt`, `RowingApp.kt` (startKoin), тема/strings для Android |
-| `shared` | Корневой экран, навигационный хост, DI приложения | `App.kt` — единственный NavHost; `publicResClass = true` |
-| `core/navigation` | Обёртка над navigation-compose | `composable<T, VM>` + авто-`BackHandler` для `NavigateBackAware` |
-| `core/base` | Базовая ViewModel | `ComposeBaseViewModel<T>` + `changeState {}` |
-| `core/file` | Общий файловый слой | `TextFileAccess` (Android URI / iOS путь), `rememberCreateTextFileLauncher`, `rememberOpenTextFileLauncher`, `rememberOpenFilesLauncher` |
-| `core/util` | Форматтеры и расчёты | Всё, что связано с `m:ss.t`, темпом, датами, % от PB |
-| `core/annotation` | `@AllowDetektPublic` | Пометка намеренно публичных top-level объявлений |
-| `data/local` | Room + DAO + entities + `AthletesRepository` | Версия БД = 6, миграции внутри `RowingDatabase` |
-| `uikit` | Дизайн-система | `Spacing`, `ColorPalette`, `TypographyPalette`, `Button`, `TextField`… |
-| `feature/training` | Самый большой домен | Импорт FIT/CSV, графики, сплиты, сравнение, фильтры, бэкап |
-| `feature/athlete` | Список/добавление/деталь спортсмена | PB-рекорды по типам лодок, история веса и график среднего веса |
-| `feature/settings` | Настройки отображения объёма | Режим метров/минут по типу тренировки |
-| `feature/calculator` | Калькулятор % от рекорда ↔ темп | Только одна вьюмодель, без `*Actions`-интерфейса (легаси) |
+| Модуль               | Назначение                                                                      | Особенности                                                                                                                              |
+|----------------------|---------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `app`                | Android-обёртка                                                                 | `MainActivity.kt`, `RowingApp.kt` (startKoin), тема/strings для Android                                                                  |
+| `shared`             | Корневой экран, навигационный хост, DI приложения                               | `App.kt` — единственный NavHost; `publicResClass = true`                                                                                 |
+| `core/navigation`    | Обёртка над navigation-compose                                                  | `composable<T, VM>` + авто-`BackHandler` для `NavigateBackAware`                                                                         |
+| `core/base`          | Базовая ViewModel                                                               | `ComposeBaseViewModel<T>` + `changeState {}`                                                                                             |
+| `core/file`          | Общий файловый слой                                                             | `TextFileAccess` (Android URI / iOS путь), `rememberCreateTextFileLauncher`, `rememberOpenTextFileLauncher`, `rememberOpenFilesLauncher` |
+| `core/util`          | Форматтеры и расчёты                                                            | Всё, что связано с `m:ss.t`, темпом, датами, % от PB                                                                                     |
+| `core/annotation`    | `@AllowDetektPublic`                                                            | Пометка намеренно публичных top-level объявлений                                                                                         |
+| `data/local`         | Room + DAO + entities + `AthletesRepository` + контракт `TrainingImportStorage` | Версия БД = 6, миграции внутри `RowingDatabase`                                                                                          |
+| `data/backup`        | Единый бэкап `sanbai-backup` v1                                                 | `BackupRepository`/`BackupSerializer`; зависит от `data:local`, обратной зависимости нет                                                 |
+| `uikit`              | Дизайн-система                                                                  | `Spacing`, `ColorPalette`, `TypographyPalette`, `Button`, `TextField`…                                                                   |
+| `feature/training`   | Самый большой домен                                                             | Импорт FIT/CSV, графики, сплиты, сравнение, фильтры, экспорт выбранного                                                                  |
+| `feature/athlete`    | Список/добавление/деталь спортсмена                                             | PB-рекорды по типам лодок, история веса и график среднего веса                                                                           |
+| `feature/settings`   | Настройки отображения объёма                                                    | Режим метров/минут по типу тренировки                                                                                                    |
+| `feature/calculator` | Калькулятор % от рекорда ↔ темп                                                 | Только одна вьюмодель, без `*Actions`-интерфейса (легаси)                                                                                |
 
 ### Новый KMP-модуль
 
@@ -86,7 +88,8 @@ kotlin {
 ## 3. Точки входа
 
 - Android: `app/src/main/java/by/rowing/sanbaiteam/MainActivity.kt` → `shared.App(importUri)`;
-  DI: `app/src/main/java/by/rowing/sanbaiteam/RowingApp.kt` (`sharedAppModule, athleteModule, calculatorModule, databaseModule, trainingModule, settingsModule`).
+  DI: `app/src/main/java/by/rowing/sanbaiteam/RowingApp.kt` (
+  `sharedAppModule, athleteModule, calculatorModule, databaseModule, trainingModule, settingsModule, backupModule`).
 - iOS: `shared/src/iosMain/kotlin/by/rowing/sanbaiteam/shared/MainViewController.kt` (`mainViewController()`, те же Koin-модули),
   `iosApp/iosApp/*.swift`; внешние файлы приходят через `shared/.../fileimport/ExternalFileImport.kt`.
 - Корневой UI: `shared/src/commonMain/kotlin/by/rowing/sanbaiteam/shared/App.kt`
@@ -183,8 +186,9 @@ DAO предоставляются Koin в `data/local/.../data/di/DataModule.kt
 - `AthletesRepository` — интерфейс в `data/local/.../athlete/data/repository/AthletesRepository.kt`, реализация `AthletesRepositoryImpl` в `feature/athlete/.../data/repository/`.
 - `TrainingRepository` (`feature/training/.../data/repository/TrainingRepository.kt`, `internal`) — сохранение/удаление/наблюдение списка, деталь, график; **строит presentation-модели** (`ListTrainingStateItem`, `TrainingDetailState`, `TrainingDetailPiece`).
 - `SavedTrainingFiltersRepository`, `TrainingDetailSettingsRepository` — там же; `WorkDisplaySettingsRepository` — `feature/settings/.../data/repository/`.
-- `TrainingTransferRepository` + `TrainingBackupSerializer` (JSON-бэкап, `FORMAT_VERSION = 2`) — `feature/training/.../data/trainingtransfer/`.
-- `AthleteTransferRepository` + `AthleteBackupSerializer` (JSON-бэкап спортсменов, `kind = "sanbai-athletes"`, `FORMAT_VERSION = 1`) — `feature/athlete/.../data/transfer/`; чистое слияние — `AthleteBackupMerge`.
+- `BackupRepository` + `BackupSerializer` (`data/backup/.../backup/data/`) — единый формат `sanbai-backup` v1:
+  диапазонный экспорт, экспорт выбранных тренировок/спортсменов, импорт; `UnsupportedBackupFormatException` для чужих
+  форматов.
 - `AthleteTrainingsCleaner` — интерфейс в `feature/athlete/.../domain/trainings/`, реализация `TrainingAthleteTrainingsCleaner` в `feature/training/.../data/repository/` (удаление связанных тренировок при удалении спортсменов).
 
 ---
@@ -239,19 +243,19 @@ DAO предоставляются Koin в `data/local/.../data/di/DataModule.kt
 
 `kotlin("test")` в `commonTest`. Быстрый поиск: `find . -path "*commonTest*" -name "*Test.kt"`.
 
-| Область | Где |
-|---|---|
-| Форматтеры/даты | `core/util/src/commonTest/.../RowingTimeFormatTests.kt`, `TimeUtilsTests.kt` |
-| График (математика) | `uikit/src/commonTest/.../component/chart/MetricChartMathTest.kt` |
-| Настройки объёма | `feature/settings/src/commonTest/.../WorkDisplaySettingsRepositoryTest.kt` |
-| Тренировки: репозиторий | `feature/training/src/commonTest/.../data/repository/TrainingRepository*Test.kt` (+ `Fake*Dao`, `TrainingRepositoryTestFactory`) |
-| Импорт FIT/CSV | `feature/training/src/commonTest/.../data/trainingimport/*Test.kt` (+ `FitTestSupport`, `FakeTrainingImportStorage`) |
-| Графики/сплиты/сравнение | `.../data/chart/`, `.../data/comparison/`, `.../presentation/chart/models/` |
-| Фильтры | `.../data/filter/SavedTrainingFilterSerializerTest.kt`, `.../presentation/filter/*Test.kt` |
-| Бэкап/перенос | `.../data/trainingtransfer/*Test.kt`, `.../data/serializer/TrainingBackupSerializerTest.kt` |
-| Деталь (формат сравнения) | `.../presentation/detail/compose/ComparisonFormatTest.kt` |
-| Detekt-правила | `detekt/src/test/kotlin/com/checker/detekt/rule/*Test.kt` |
-| PB-проценты | `app/src/test/java/by/rowing/sanbaiteam/core/util/PersonalBestPercentTest.kt` |
+| Область                   | Где                                                                                                                              |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| Форматтеры/даты           | `core/util/src/commonTest/.../RowingTimeFormatTests.kt`, `TimeUtilsTests.kt`                                                     |
+| График (математика)       | `uikit/src/commonTest/.../component/chart/MetricChartMathTest.kt`                                                                |
+| Настройки объёма          | `feature/settings/src/commonTest/.../WorkDisplaySettingsRepositoryTest.kt`                                                       |
+| Тренировки: репозиторий   | `feature/training/src/commonTest/.../data/repository/TrainingRepository*Test.kt` (+ `Fake*Dao`, `TrainingRepositoryTestFactory`) |
+| Импорт FIT/CSV            | `feature/training/src/commonTest/.../data/trainingimport/*Test.kt` (+ `FitTestSupport`, `FakeTrainingImportStorage`)             |
+| Графики/сплиты/сравнение  | `.../data/chart/`, `.../data/comparison/`, `.../presentation/chart/models/`                                                      |
+| Фильтры                   | `.../data/filter/SavedTrainingFilterSerializerTest.kt`, `.../presentation/filter/*Test.kt`                                       |
+| Бэкап                     | `data/backup/src/commonTest/.../BackupSerializerTest.kt`, `BackupRepositoryTest.kt`                                              |
+| Деталь (формат сравнения) | `.../presentation/detail/compose/ComparisonFormatTest.kt`                                                                        |
+| Detekt-правила            | `detekt/src/test/kotlin/com/checker/detekt/rule/*Test.kt`                                                                        |
+| PB-проценты               | `app/src/test/java/by/rowing/sanbaiteam/core/util/PersonalBestPercentTest.kt`                                                    |
 
 ---
 

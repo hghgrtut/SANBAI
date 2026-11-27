@@ -74,7 +74,7 @@ class BackupRepository(
             val piecesByTrainingId = trainingDao.getPiecesForTrainings(trainingIds = trainings.map { it.id })
                 .groupBy { it.trainingId }
             val referencedAthleteIds = piecesByTrainingId.values.flatten().map { it.athleteId }.toSet()
-            val (fromMillis, toMillis) = trainingsDateRangeOrNull(trainings) ?: (null to null)
+            val (fromMillis, toMillis) = trainingsDateRangeOrNull(trainings.map { it.dateMillis })
             val weightsByAthleteId = if (fromMillis != null && toMillis != null) {
                 athleteWeightDao.getByDateRange(
                     fromMillis = fromMillis,
@@ -244,12 +244,11 @@ class BackupRepository(
         trainings: List<BackupTraining>,
         athleteIdByIndex: Map<Int, Long>,
     ): TrainingImportCounts {
-        val (candidateStart, candidateEnd) = trainingsDateRangeOrNull(
-            trainings = trainings.map { TrainingDateHolder(it.dateMillis) }
-        ) ?: return TrainingImportCounts()
+        val (candidateStart, candidateEnd) =
+            trainingsDateRangeOrNull(trainingDatesMillis = trainings.map { it.dateMillis })
         val existingTrainings = trainingDao.getTrainingEntitiesByDateRange(
-            fromMillis = candidateStart,
-            toMillis = candidateEnd,
+            fromMillis = candidateStart ?: return TrainingImportCounts(),
+            toMillis = candidateEnd ?: return TrainingImportCounts(),
         )
         val existingPiecesByTrainingId = trainingDao.getPiecesForTrainings(existingTrainings.map { it.id })
             .groupBy { it.trainingId }
@@ -421,23 +420,10 @@ class BackupRepository(
         return fromDayStart to (toDayStart + TimeUtils.MILLIS_PER_DAY - 1)
     }
 
-    private fun trainingsDateRangeOrNull(trainings: List<TrainingEntity>): Pair<Long, Long>? {
-        val minDate = trainings.minOfOrNull { it.dateMillis } ?: return null
-        val maxDate = trainings.maxOfOrNull { it.dateMillis } ?: return null
-        return normalizeDayRange(
-            fromMillis = minDate,
-            toMillis = maxDate
-        )
-    }
-
-    private fun trainingsDateRangeOrNull(trainings: List<TrainingDateHolder>): Pair<Long, Long>? {
-        val minDate = trainings.minOfOrNull { it.dateMillis } ?: return null
-        val maxDate = trainings.maxOfOrNull { it.dateMillis } ?: return null
-        return normalizeDayRange(
-            fromMillis = minDate,
-            toMillis = maxDate
-        )
-    }
+    private fun trainingsDateRangeOrNull(trainingDatesMillis: List<Long>): Pair<Long?, Long?> = normalizeDayRange(
+        fromMillis = trainingDatesMillis.minOrNull() ?: return null to null,
+        toMillis = trainingDatesMillis.max()
+    )
 
     private fun normalizeName(name: String): String = name.trim().split(WHITESPACE_REGEX).joinToString(separator = " ")
 
@@ -473,8 +459,6 @@ class BackupRepository(
         private const val MAX_WEIGHT_TENTHS = 3000
         private val WHITESPACE_REGEX = Regex("\\s+")
     }
-
-    private data class TrainingDateHolder(val dateMillis: Long)
 
     private data class TrainingImportCounts(
         val imported: Int = 0,
