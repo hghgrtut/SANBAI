@@ -18,9 +18,7 @@ internal interface SettingsActions : NavigateBackAware {
 
         fun empty() = object : SettingsActions {
 
-            override fun onThemeModeChanged(mode: AppThemeMode) {
-            }
-
+            override fun onThemeModeChanged(mode: AppThemeMode) {}
             override fun onWorkDisplayModeChanged(
                 pieceType: TrainingPieceType,
                 mode: TrainingWorkDisplayMode,
