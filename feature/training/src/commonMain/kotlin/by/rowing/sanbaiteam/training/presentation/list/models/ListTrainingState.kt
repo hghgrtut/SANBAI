@@ -6,8 +6,8 @@ import by.rowing.sanbaiteam.uikit.component.UiText
 internal data class ListTrainingState(
     val items: List<ListTrainingStateItem>,
     val filters: TrainingFiltersState = TrainingFiltersState(),
-    val transferNotice: UiText?,
-    val isTransferring: Boolean,
+    val exportNotice: UiText?,
+    val isExporting: Boolean,
     val exportPromptRequested: Boolean,
     val selectedTrainingIds: Set<Long> = emptySet(),
     val deleteConfirmationRequested: Boolean = false,

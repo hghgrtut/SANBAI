@@ -75,13 +75,10 @@
     <string name="athletes_selection_cancel">Отменить выбор</string>
     <string name="athletes_selection_select_all">Выбрать все</string>
     <string name="athletes_selection_clear_all">Снять выбор со всех</string>
-    <string name="athletes_transfer_notice_title">Перенос данных</string>
-    <string name="athletes_transfer_import_action">Импорт спортсменов</string>
-    <string name="athletes_transfer_export_selected_action">Поделиться выбранными спортсменами</string>
-    <string name="athletes_transfer_export_success">Резервная копия сохранена.</string>
-    <string name="athletes_transfer_export_error">Не удалось создать резервную копию.</string>
-    <string name="athletes_transfer_import_result">Добавлено спортсменов: %1$d, обновлено: %2$d, импортировано рекордов: %3$d, записей веса: %4$d</string>
-    <string name="athletes_transfer_import_error">Не удалось импортировать файл.</string>
+    <string name="athletes_export_notice_title">Результат экспорта</string>
+    <string name="athletes_export_selected_action">Поделиться выбранными спортсменами</string>
+    <string name="athletes_export_success">Резервная копия сохранена.</string>
+    <string name="athletes_export_error">Не удалось создать резервную копию.</string>
     <string name="athletes_delete_action">Удалить</string>
     <string name="athletes_delete_confirm_title">Удаление спортсменов</string>
     <string name="athletes_delete_confirm_message">Удалить выбранных спортсменов (%1$d)?</string>

@@ -67,6 +67,17 @@ internal class BackupSerializerTest {
     }
 
     @Test
+    fun `encode always writes format header`() {
+        val backup = SanbaiBackup()
+
+        val encoded = serializer.encode(backup)
+
+        assertTrue(encoded.contains("\"kind\":\"sanbai-backup\""))
+        assertTrue(encoded.contains("\"formatVersion\":1"))
+        assertEquals(backup, serializer.decode(encoded))
+    }
+
+    @Test
     fun `decode rejects legacy athlete backup`() {
         val legacyAthleteJson = """
             {

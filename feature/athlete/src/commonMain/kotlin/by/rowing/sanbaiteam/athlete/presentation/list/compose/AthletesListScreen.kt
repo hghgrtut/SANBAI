@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Deselect
-import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PersonAdd
@@ -62,6 +61,8 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_delete_action
 import by.rowing.sanbaiteam.athlete.resources.athletes_delete_confirm_message
 import by.rowing.sanbaiteam.athlete.resources.athletes_delete_confirm_title
 import by.rowing.sanbaiteam.athlete.resources.athletes_delete_related_trainings
+import by.rowing.sanbaiteam.athlete.resources.athletes_export_notice_title
+import by.rowing.sanbaiteam.athlete.resources.athletes_export_selected_action
 import by.rowing.sanbaiteam.athlete.resources.athletes_filter_content_description
 import by.rowing.sanbaiteam.athlete.resources.athletes_filters_coming_soon
 import by.rowing.sanbaiteam.athlete.resources.athletes_filters_title
@@ -76,11 +77,7 @@ import by.rowing.sanbaiteam.athlete.resources.athletes_selection_cancel
 import by.rowing.sanbaiteam.athlete.resources.athletes_selection_clear_all
 import by.rowing.sanbaiteam.athlete.resources.athletes_selection_select_all
 import by.rowing.sanbaiteam.athlete.resources.athletes_selection_title
-import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_export_selected_action
-import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_import_action
-import by.rowing.sanbaiteam.athlete.resources.athletes_transfer_notice_title
 import by.rowing.sanbaiteam.core.file.rememberCreateTextFileLauncher
-import by.rowing.sanbaiteam.core.file.rememberOpenTextFileLauncher
 import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.uikit.component.DataCard
@@ -136,11 +133,10 @@ private fun AthleteListScreenContent(
     }
 
     val createBackupLauncher = rememberCreateTextFileLauncher(onCreated = actions::onExportToHandle)
-    val openBackupLauncher = rememberOpenTextFileLauncher(onOpened = actions::onImportFromHandle)
 
     LaunchedEffect(state.exportPromptRequested) {
         if (state.exportPromptRequested) {
-            createBackupLauncher("sanbai-athletes-backup-${TimeUtils.formatDateDigits(nowInMillis())}.json")
+            createBackupLauncher("sanbai-backup-${TimeUtils.formatDateDigits(nowInMillis())}.json")
             actions.onExportPromptLaunched()
         }
     }
@@ -151,7 +147,6 @@ private fun AthleteListScreenContent(
                 actions = actions,
                 state = state,
                 visibleAthleteIds = visibleAthleteIds,
-                openBackupLauncher = openBackupLauncher,
             )
         },
         floatingActionButton = {
@@ -183,8 +178,8 @@ private fun AthleteListScreenContent(
             actions = actions
         )
     }
-    state.transferNotice?.let { notice ->
-        AthletesTransferNotice(
+    state.exportNotice?.let { notice ->
+        AthletesExportNotice(
             notice = notice,
             actions = actions,
         )
@@ -342,7 +337,6 @@ private fun AthleteListTopBarWithSearch(
     actions: AthletesListActions,
     state: AthletesUiState,
     visibleAthleteIds: List<Long>,
-    openBackupLauncher: () -> Unit,
 ) {
     if (state.isSelectionMode) {
         AthleteSelectionTopBar(
@@ -354,7 +348,6 @@ private fun AthleteListTopBarWithSearch(
         AthleteListTopBarContent(
             actions = actions,
             state = state,
-            openBackupLauncher = openBackupLauncher,
         )
     }
 }
@@ -395,11 +388,11 @@ private fun AthleteSelectionTopBar(
             }
             IconButton(
                 onClick = actions::onExportSelectedClick,
-                enabled = !state.isTransferring
+                enabled = !state.isExporting
             ) {
                 Icon(
                     imageVector = Icons.Default.Share,
-                    contentDescription = stringResource(Res.string.athletes_transfer_export_selected_action)
+                    contentDescription = stringResource(Res.string.athletes_export_selected_action)
                 )
             }
             IconButton(onClick = actions::onDeleteClick) {
@@ -416,21 +409,11 @@ private fun AthleteSelectionTopBar(
 private fun AthleteListTopBarContent(
     actions: AthletesListActions,
     state: AthletesUiState,
-    openBackupLauncher: () -> Unit,
 ) {
     Column {
         TopAppBar(
             title = stringResource(Res.string.athletes_list_title),
             actions = {
-                IconButton(
-                    onClick = openBackupLauncher,
-                    enabled = !state.isTransferring
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FileOpen,
-                        contentDescription = stringResource(Res.string.athletes_transfer_import_action)
-                    )
-                }
                 IconButton(onClick = { actions.onShowFiltersChange(!state.showFilters) }) {
                     Icon(
                         Icons.Default.FilterList,
@@ -495,16 +478,16 @@ private fun AthleteFilters(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun AthletesTransferNotice(
+private fun AthletesExportNotice(
     notice: UiText,
     actions: AthletesListActions,
 ) {
     AlertDialog(
-        onDismissRequest = actions::onDismissTransferNotice,
-        title = { Text(text = stringResource(Res.string.athletes_transfer_notice_title)) },
+        onDismissRequest = actions::onDismissExportNotice,
+        title = { Text(text = stringResource(Res.string.athletes_export_notice_title)) },
         text = { Text(text = notice.resolve()) },
         confirmButton = {
-            TextButton(onClick = actions::onDismissTransferNotice) {
+            TextButton(onClick = actions::onDismissExportNotice) {
                 Text(text = stringResource(UikitRes.string.uikit_ok))
             }
         }

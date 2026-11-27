@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Deselect
-import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.SelectAll
@@ -48,7 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import by.rowing.sanbaiteam.athlete.presentation.common.ItemCard
 import by.rowing.sanbaiteam.core.file.rememberCreateTextFileLauncher
-import by.rowing.sanbaiteam.core.file.rememberOpenTextFileLauncher
+import by.rowing.sanbaiteam.core.util.TimeUtils
 import by.rowing.sanbaiteam.core.util.nowInMillis
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
 import by.rowing.sanbaiteam.training.presentation.filter.applyTrainingFilter
@@ -65,6 +64,8 @@ import by.rowing.sanbaiteam.training.resources.training_add_training
 import by.rowing.sanbaiteam.training.resources.training_delete_action
 import by.rowing.sanbaiteam.training.resources.training_delete_confirm_message
 import by.rowing.sanbaiteam.training.resources.training_delete_confirm_title
+import by.rowing.sanbaiteam.training.resources.training_export_notice_title
+import by.rowing.sanbaiteam.training.resources.training_export_selected_action
 import by.rowing.sanbaiteam.training.resources.training_filters_empty_action
 import by.rowing.sanbaiteam.training.resources.training_filters_empty_description
 import by.rowing.sanbaiteam.training.resources.training_filters_empty_title
@@ -74,9 +75,6 @@ import by.rowing.sanbaiteam.training.resources.training_selection_cancel
 import by.rowing.sanbaiteam.training.resources.training_selection_clear_all
 import by.rowing.sanbaiteam.training.resources.training_selection_select_all
 import by.rowing.sanbaiteam.training.resources.training_selection_title
-import by.rowing.sanbaiteam.training.resources.training_transfer_export_selected_action
-import by.rowing.sanbaiteam.training.resources.training_transfer_import_action
-import by.rowing.sanbaiteam.training.resources.training_transfer_notice_title
 import by.rowing.sanbaiteam.uikit.component.Badge
 import by.rowing.sanbaiteam.uikit.component.Checkbox
 import by.rowing.sanbaiteam.uikit.component.CheckedState
@@ -87,17 +85,13 @@ import by.rowing.sanbaiteam.uikit.component.UiText
 import by.rowing.sanbaiteam.uikit.component.button.Button
 import by.rowing.sanbaiteam.uikit.component.button.ButtonColors
 import by.rowing.sanbaiteam.uikit.modifier.scaffoldContentInsets
-import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
 import by.rowing.sanbaiteam.uikit.resources.uikit_cancel
 import by.rowing.sanbaiteam.uikit.resources.uikit_ok
 import by.rowing.sanbaiteam.uikit.theme.ColorPalette
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Instant
+import by.rowing.sanbaiteam.uikit.resources.Res as UikitRes
 
 private const val CONTENT_FADE_IN_MILLIS = 220
 private const val CONTENT_FADE_OUT_MILLIS = 140
@@ -131,11 +125,10 @@ private fun ListTrainingScreenContent(
     }
 
     val createBackupLauncher = rememberCreateTextFileLauncher(onCreated = actions::onExportToHandle)
-    val openBackupLauncher = rememberOpenTextFileLauncher(onOpened = actions::onImportFromHandle)
 
     LaunchedEffect(state.exportPromptRequested) {
         if (state.exportPromptRequested) {
-            createBackupLauncher(suggestedBackupFileName())
+            createBackupLauncher("sanbai-backup-${TimeUtils.formatDateDigits(nowInMillis())}.json")
             actions.onExportPromptLaunched()
         }
     }
@@ -144,7 +137,6 @@ private fun ListTrainingScreenContent(
         topBar = {
             ListTrainingTopBar(
                 actions = actions,
-                openBackupLauncher = openBackupLauncher,
                 state = state,
                 visibleTrainingIds = filteredTrainings.map { training -> training.trainingId },
             )
@@ -170,8 +162,8 @@ private fun ListTrainingScreenContent(
         filters = state.filters,
         actions = actions,
     )
-    state.transferNotice?.let { notice ->
-        TransferDataAlert(
+    state.exportNotice?.let { notice ->
+        ExportNotice(
             actions = actions,
             notice = notice
         )
@@ -189,7 +181,6 @@ private fun ListTrainingScreenContent(
 private fun ListTrainingTopBar(
     state: ListTrainingState,
     visibleTrainingIds: List<Long>,
-    openBackupLauncher: () -> Unit,
     actions: ListTrainingScreenActions
 ) {
     if (state.isSelectionMode) {
@@ -201,7 +192,6 @@ private fun ListTrainingTopBar(
     } else {
         ListTrainingTopBarContent(
             state = state,
-            openBackupLauncher = openBackupLauncher,
             actions = actions
         )
     }
@@ -248,11 +238,11 @@ private fun SelectionTopBar(
             }
             IconButton(
                 onClick = actions::onExportSelectedClick,
-                enabled = !state.isTransferring
+                enabled = !state.isExporting
             ) {
                 Icon(
                     imageVector = Icons.Default.Share,
-                    contentDescription = stringResource(Res.string.training_transfer_export_selected_action)
+                    contentDescription = stringResource(Res.string.training_export_selected_action)
                 )
             }
             IconButton(onClick = actions::onDeleteClick) {
@@ -268,21 +258,11 @@ private fun SelectionTopBar(
 @Composable
 private fun ListTrainingTopBarContent(
     state: ListTrainingState,
-    openBackupLauncher: () -> Unit,
     actions: ListTrainingScreenActions
 ) {
     TopAppBar(
         title = stringResource(Res.string.training_list_title),
         actions = {
-            IconButton(
-                onClick = openBackupLauncher,
-                enabled = !state.isTransferring
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FileOpen,
-                    contentDescription = stringResource(Res.string.training_transfer_import_action)
-                )
-            }
             TrainingFilterActionButton(
                 activeCount = state.filters.filter.activeParametersCount,
                 showFilters = state.filters.showFilters,
@@ -572,16 +552,18 @@ private fun AddTrainingFAB(onAddTraining: () -> Unit) {
 }
 
 @Composable
-private fun TransferDataAlert(
+private fun ExportNotice(
     actions: ListTrainingScreenActions,
     notice: UiText
 ) {
     AlertDialog(
-        onDismissRequest = actions::onDismissTransferNotice,
-        title = { Text(text = stringResource(Res.string.training_transfer_notice_title)) },
+        onDismissRequest = actions::onDismissExportNotice,
+        title = { Text(text = stringResource(Res.string.training_export_notice_title)) },
         text = { Text(text = notice.resolve()) },
         confirmButton = {
-            TextButton(onClick = actions::onDismissTransferNotice) { Text(text = stringResource(UikitRes.string.uikit_ok)) }
+            TextButton(onClick = actions::onDismissExportNotice) {
+                Text(text = stringResource(UikitRes.string.uikit_ok))
+            }
         }
     )
 }
@@ -627,11 +609,4 @@ private enum class TrainingListContentState {
     LOADING,
     EMPTY,
     CONTENT,
-}
-
-private fun suggestedBackupFileName(): String {
-    val date = Instant.fromEpochMilliseconds(nowInMillis()).toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val month = date.month.number.toString().padStart(2, '0')
-    val day = date.day.toString().padStart(2, '0')
-    return "sanbai-training-backup-${date.year}$month$day.json"
 }

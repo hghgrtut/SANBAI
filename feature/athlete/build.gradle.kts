@@ -15,6 +15,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":data:local"))
+            implementation(project(":data:backup"))
             implementation(project(":core:util"))
             implementation(project(":core:annotation"))
             implementation(project(":core:file"))

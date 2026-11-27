@@ -18,7 +18,6 @@ kotlin {
             implementation(project(":core:annotation"))
             implementation(project(":core:util"))
             implementation(project(":data:local"))
-            implementation(project(":feature:training"))
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)

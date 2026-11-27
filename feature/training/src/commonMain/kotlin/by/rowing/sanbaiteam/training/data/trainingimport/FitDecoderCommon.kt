@@ -1,9 +1,5 @@
 package by.rowing.sanbaiteam.training.data.trainingimport
 
-import by.rowing.sanbaiteam.core.annotation.AllowDetektPublic
-
-@AllowDetektPublic
-const val FIT_FILE_EXTENSION = "fit"
 internal const val CSV_FILE_EXTENSION = "csv"
 
 internal const val FIT_HEADER_MIN_SIZE = 12
