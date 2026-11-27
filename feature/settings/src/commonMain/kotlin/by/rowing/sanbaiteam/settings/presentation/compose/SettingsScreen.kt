@@ -19,11 +19,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import by.rowing.sanbaiteam.settings.data.model.AppThemeMode
 import by.rowing.sanbaiteam.settings.presentation.SettingsActions
 import by.rowing.sanbaiteam.settings.presentation.SettingsViewModel
 import by.rowing.sanbaiteam.settings.presentation.models.SettingsUiState
 import by.rowing.sanbaiteam.settings.presentation.models.WorkDisplaySettingItem
 import by.rowing.sanbaiteam.settings.resources.Res
+import by.rowing.sanbaiteam.settings.resources.settings_theme_auto
+import by.rowing.sanbaiteam.settings.resources.settings_theme_dark
+import by.rowing.sanbaiteam.settings.resources.settings_theme_hint
+import by.rowing.sanbaiteam.settings.resources.settings_theme_label
+import by.rowing.sanbaiteam.settings.resources.settings_theme_light
+import by.rowing.sanbaiteam.settings.resources.settings_theme_section
 import by.rowing.sanbaiteam.settings.resources.settings_title
 import by.rowing.sanbaiteam.settings.resources.settings_work_display_hint
 import by.rowing.sanbaiteam.settings.resources.settings_work_display_meters
@@ -34,6 +41,7 @@ import by.rowing.sanbaiteam.uikit.component.DataCard
 import by.rowing.sanbaiteam.uikit.component.TopAppBar
 import by.rowing.sanbaiteam.uikit.theme.Spacing
 import by.rowing.sanbaiteam.uikit.theme.TypographyPalette
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -92,7 +100,24 @@ private fun SettingsList(
         contentPadding = PaddingValues(all = Spacing.M),
         verticalArrangement = Arrangement.spacedBy(Spacing.S),
     ) {
-        item(key = "header") { WorkDisplaySectionHeader() }
+        item(key = "theme_header") {
+            SettingsSectionHeader(
+                title = stringResource(Res.string.settings_theme_section),
+                hint = stringResource(Res.string.settings_theme_hint),
+            )
+        }
+        item(key = "theme_setting") {
+            ThemeSettingRow(
+                mode = state.themeMode,
+                onModeChanged = actions::onThemeModeChanged,
+            )
+        }
+        item(key = "work_header") {
+            SettingsSectionHeader(
+                title = stringResource(Res.string.settings_work_display_section),
+                hint = stringResource(Res.string.settings_work_display_hint),
+            )
+        }
         items(
             items = state.items,
             key = { item -> item.pieceType.name },
@@ -106,7 +131,10 @@ private fun SettingsList(
 }
 
 @Composable
-private fun WorkDisplaySectionHeader() {
+private fun SettingsSectionHeader(
+    title: String,
+    hint: String,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,14 +142,40 @@ private fun WorkDisplaySectionHeader() {
         verticalArrangement = Arrangement.spacedBy(Spacing.XS),
     ) {
         Text(
-            text = stringResource(Res.string.settings_work_display_section),
+            text = title,
             style = TypographyPalette.H3,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = stringResource(Res.string.settings_work_display_hint),
+            text = hint,
             style = TypographyPalette.Body2Regular,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ThemeSettingRow(
+    mode: AppThemeMode,
+    onModeChanged: (AppThemeMode) -> Unit,
+) {
+    DataCard(
+        modifier = Modifier.fillMaxWidth(),
+        verticalSpacing = Spacing.SM,
+    ) {
+        Text(
+            text = stringResource(Res.string.settings_theme_label),
+            style = TypographyPalette.Body1Medium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        SettingsSegmentedSelector(
+            options = listOf(
+                AppThemeMode.AUTO to Res.string.settings_theme_auto,
+                AppThemeMode.LIGHT to Res.string.settings_theme_light,
+                AppThemeMode.DARK to Res.string.settings_theme_dark,
+            ),
+            selected = mode,
+            onSelected = onModeChanged,
         )
     }
 }
@@ -140,17 +194,22 @@ private fun WorkDisplaySettingRow(
             style = TypographyPalette.Body1Medium,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        WorkDisplayModeSelector(
-            mode = item.mode,
-            onModeChanged = onModeChanged,
+        SettingsSegmentedSelector(
+            options = listOf(
+                TrainingWorkDisplayMode.METERS to Res.string.settings_work_display_meters,
+                TrainingWorkDisplayMode.MINUTES to Res.string.settings_work_display_minutes,
+            ),
+            selected = item.mode,
+            onSelected = onModeChanged,
         )
     }
 }
 
 @Composable
-private fun WorkDisplayModeSelector(
-    mode: TrainingWorkDisplayMode,
-    onModeChanged: (TrainingWorkDisplayMode) -> Unit,
+private fun <T> SettingsSegmentedSelector(
+    options: List<Pair<T, StringResource>>,
+    selected: T,
+    onSelected: (T) -> Unit,
 ) {
     val colors = SegmentedButtonDefaults.colors(
         activeContainerColor = MaterialTheme.colorScheme.primary,
@@ -158,15 +217,11 @@ private fun WorkDisplayModeSelector(
         inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant,
         inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    val options = listOf(
-        TrainingWorkDisplayMode.METERS to Res.string.settings_work_display_meters,
-        TrainingWorkDisplayMode.MINUTES to Res.string.settings_work_display_minutes,
-    )
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         options.forEachIndexed { index, (option, titleRes) ->
             SegmentedButton(
-                selected = mode == option,
-                onClick = { onModeChanged(option) },
+                selected = option == selected,
+                onClick = { onSelected(option) },
                 shape = SegmentedButtonDefaults.itemShape(
                     index = index,
                     count = options.size,

@@ -12,6 +12,7 @@
 
 Kotlin Multiplatform + Compose Multiplatform (Android + iOS). UI на русском.
 Room (KMP) + Koin + JetBrains navigation-compose + kotlinx-serialization + kotlinx-datetime.
+Локальные настройки (тема) — `multiplatform-settings` (SharedPreferences / NSUserDefaults), не Room.
 
 Версии: Kotlin 2.4.21, Compose MP 1.10.0, AGP 9.4.1, Room 2.8.5, Koin 4.2.2, compileSdk 37, minSdk 25.
 Каталог версий — `gradle/libs.versions.toml` (там же `compileSdk`/`minSdk`/`targetSdk`/`jvmTarget`).
@@ -54,7 +55,7 @@ iosApp (Xcode) → framework Shared (shared/src/iosMain/.../MainViewController.k
 | `uikit` | Дизайн-система | `Spacing`, `ColorPalette`, `TypographyPalette`, `Button`, `TextField`… |
 | `feature/training` | Самый большой домен | Импорт FIT/CSV, графики, сплиты, сравнение, фильтры, бэкап |
 | `feature/athlete` | Список/добавление/деталь спортсмена | PB-рекорды по типам лодок, история веса и график среднего веса |
-| `feature/settings` | Настройки отображения объёма | Режим метров/минут по типу тренировки |
+| `feature/settings` | Настройки темы оформления и отображения объёма | Тема (`AUTO/LIGHT/DARK`) и режим метров/минут по типу тренировки |
 | `feature/calculator` | Калькулятор % от рекорда ↔ темп | Только одна вьюмодель, без `*Actions`-интерфейса (легаси) |
 
 ### Новый KMP-модуль
@@ -183,6 +184,7 @@ DAO предоставляются Koin в `data/local/.../data/di/DataModule.kt
 - `AthletesRepository` — интерфейс в `data/local/.../athlete/data/repository/AthletesRepository.kt`, реализация `AthletesRepositoryImpl` в `feature/athlete/.../data/repository/`.
 - `TrainingRepository` (`feature/training/.../data/repository/TrainingRepository.kt`, `internal`) — сохранение/удаление/наблюдение списка, деталь, график; **строит presentation-модели** (`ListTrainingStateItem`, `TrainingDetailState`, `TrainingDetailPiece`).
 - `SavedTrainingFiltersRepository`, `TrainingDetailSettingsRepository` — там же; `WorkDisplaySettingsRepository` — `feature/settings/.../data/repository/`.
+- `AppThemeSettingsRepository` (`feature/settings/.../data/repository/`) — тема приложения в системном key-value (`multiplatform-settings`: SharedPreferences / NSUserDefaults), не в Room; нет значения — `AUTO`.
 - `TrainingTransferRepository` + `TrainingBackupSerializer` (JSON-бэкап, `FORMAT_VERSION = 2`) — `feature/training/.../data/trainingtransfer/`.
 - `AthleteTransferRepository` + `AthleteBackupSerializer` (JSON-бэкап спортсменов, `kind = "sanbai-athletes"`, `FORMAT_VERSION = 1`) — `feature/athlete/.../data/transfer/`; чистое слияние — `AthleteBackupMerge`.
 - `AthleteTrainingsCleaner` — интерфейс в `feature/athlete/.../domain/trainings/`, реализация `TrainingAthleteTrainingsCleaner` в `feature/training/.../data/repository/` (удаление связанных тренировок при удалении спортсменов).
@@ -244,6 +246,7 @@ DAO предоставляются Koin в `data/local/.../data/di/DataModule.kt
 | Форматтеры/даты | `core/util/src/commonTest/.../RowingTimeFormatTests.kt`, `TimeUtilsTests.kt` |
 | График (математика) | `uikit/src/commonTest/.../component/chart/MetricChartMathTest.kt` |
 | Настройки объёма | `feature/settings/src/commonTest/.../WorkDisplaySettingsRepositoryTest.kt` |
+| Тема приложения | `feature/settings/src/commonTest/.../AppThemeSettingsRepositoryTest.kt` |
 | Тренировки: репозиторий | `feature/training/src/commonTest/.../data/repository/TrainingRepository*Test.kt` (+ `Fake*Dao`, `TrainingRepositoryTestFactory`) |
 | Импорт FIT/CSV | `feature/training/src/commonTest/.../data/trainingimport/*Test.kt` (+ `FitTestSupport`, `FakeTrainingImportStorage`) |
 | Графики/сплиты/сравнение | `.../data/chart/`, `.../data/comparison/`, `.../presentation/chart/models/` |

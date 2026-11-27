@@ -21,10 +21,12 @@ kotlin {
             implementation(project(":core:base"))
             implementation(project(":uikit"))
             implementation(compose.components.resources)
+            implementation(libs.multiplatform.settings)
         }
         commonTest.dependencies {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.multiplatform.settings.test)
         }
     }
 }
