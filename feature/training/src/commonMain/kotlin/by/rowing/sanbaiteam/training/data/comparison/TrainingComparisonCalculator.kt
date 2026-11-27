@@ -12,10 +12,6 @@ import by.rowing.sanbaiteam.training.data.models.comparison.PieceComparison
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-/**
- * Считает средние и дельты по отрезкам с одинаковым номером.
- * В среднее попадают только непустые значения метрик.
- */
 internal object TrainingComparisonCalculator {
 
     fun compare(

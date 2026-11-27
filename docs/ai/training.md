@@ -35,6 +35,7 @@
 | `data/chart/TrainingSplitCalculator.kt` | Расчёт сплитов по дистанции/времени из точек графика |
 | `data/chart/TrainingPower.kt` | Оценка мощности Concept2 по скорости (`2.8*v^3` RowErg, `0.35*v^3` BikeErg); fallback, когда мощности нет в файле |
 | `data/comparison/TrainingComparisonCalculator.kt` | Сравнение базового отрезка со средним по выбранным тренировкам |
+| `data/comparison/TrainingPieceMatcher.kt` | Сопоставление отрезков по длительности (время/дистанция, допуск), когда их количество различается |
 | `data/dashboard/TrainingDashboard.kt` | Дашборд: счётчик тренировок + 4 последних (`RECENT_TRAININGS_LIMIT = 4`) |
 | `data/filter/SavedTrainingFilter.kt`, `SavedTrainingFilterSerializer.kt` | Сериализация фильтра для быстрых фильтров |
 | `data/models/...` | `FitLap/FitRecord/FitWorkout`, `TrainingChart*`, `Comparison*`, `TrainingDetailField`, `TrainingTransferResult` |
@@ -83,7 +84,10 @@ FIT-декодер: `FitDecoderImpl.kt` (`ByteReader`, `FileHeader`, разбо�
 - средняя мощность отрезка: `chartData.average`PowerWatts` из файла (FIT `record.power`; RP3 — `avg_power`/
   `avg_calculated_power` последнего гребка, иначе среднее по `power`), иначе fallback `TrainingPower.estimatedWatts` для
   Concept2 Row/Bike; для RP3/воды/WattBike без мощности в файле — `null`;
-- `comparison` — `TrainingComparisonCalculator.compare(base, compared)` по тому же `order`;
+- `comparison` — `TrainingComparisonCalculator.compare(base, compared)`. Отрезки сравниваемой тренировки берутся
+  из того же `order`; если количество отрезков различается, они предварительно сопоставляются по длительности
+  (`TrainingPieceMatcher`: время ±5 с или дистанция ±5 м, с сохранением порядка, лишние отрезки отбрасываются).
+  Если полное сопоставление не удалось — откат к текущей логике по `order`;
 - строки форматируются здесь: `RowingTimeFormat.formatDuration/formatPace`, `formatTenths`, `PersonalBestPercent.format`.
 
 Состояние `TrainingDetailState`: `pieces`, `comparedTrainingIds`, `expandedComparisonOrders`, `splitLength`, `splitsByOrder`, `hiddenFields`, `showSettingsDialog`.
@@ -124,6 +128,10 @@ UI: `TrainingChartScreen` использует `MetricLineChart` (см. [uikit.m
 - `TrainingComparisonCalculator.compare(base: ComparablePiece, compared: List<ComparablePiece>)` → `PieceComparison(comparedTrainingsCount, metrics)`.
   `ComparisonMetric`: DISTANCE, TIME, PACE, AVG_POWER, STROKE_RATE, AVG/MAX/RECOVERY_HEART_RATE, LACTATE, PERCENT_OF_PB.
   Для каждого показателя — `MetricComparison` (база, среднее, дельта, тренд `ComparisonTrend`), проценты считаются по среднему.
+- Сопоставление отрезков — `TrainingPieceMatcher.match(base, compared)` в `TrainingRepository.getTrainingDetail`: при равном
+  количестве отрезков — по `order` (как раньше); при разном — LCS по длительности с сохранением порядка. Отрезки равны,
+  если время отличается не больше чем на 5 с или дистанция — не больше чем на 5 м. Если меньшую тренировку полностью
+  сопоставить не удалось, для неё используется откат к `order`. Лишние отрезки сравниваемой тренировки в среднее не попадают.
 - UI: `TrainingDetailPiece.comparison` → раскрывающиеся блоки в `TrainingPieceCard`/`TrainingSplitTable`; дельты — `ComparisonFormat.kt` (`formatSignedInt/Tenths/Seconds`).
 
 ---
@@ -180,7 +188,7 @@ UI: экспорт/импорт в `ListTrainingScreen` через `rememberCrea
 | Новый формат импорта | `TrainingImportSource` + парсер (`TrainingImportParser`) → `TrainingImportParsers` → при необходимости `TrainingChartReader` (для графиков) |
 | Новый фильтр | `TrainingFilter` + `TrainingFilterParameter` (без параметра не активируется) → `TrainingFilterMatcher` → `TrainingFiltersPanel`/шитья → `TrainingFilterTimeParser`/сериализатор |
 | Новый экран в тренировках | `TrainingNavigation` → `TrainingNavGraphProvider` → `TrainingModule` → см. чек-лист в [PROJECT_MAP.md](PROJECT_MAP.md) |
-| Изменить расчёт сравнения | `TrainingComparisonCalculator` (+ `ComparisonMetric`, `TrainingComparisonCalculatorTest`) |
+| Изменить расчёт сравнения | `TrainingComparisonCalculator`/`TrainingPieceMatcher` (+ `ComparisonMetric`, `TrainingComparisonCalculatorTest`, `TrainingPieceMatcherTest`) |
 | Изменить сплиты | `TrainingSplitCalculator` (+ `TrainingSplitCalculatorTest`) |
 | Дашборд | `TrainingDashboardImpl` (`data/dashboard/TrainingDashboard.kt`) |
 

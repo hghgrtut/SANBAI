@@ -10,7 +10,9 @@ import by.rowing.sanbaiteam.core.util.roundToTenths
 import by.rowing.sanbaiteam.settings.data.repository.WorkDisplaySettingsRepository
 import by.rowing.sanbaiteam.training.data.chart.TrainingChartReader
 import by.rowing.sanbaiteam.training.data.chart.TrainingPower
+import by.rowing.sanbaiteam.training.data.comparison.PieceDurationKey
 import by.rowing.sanbaiteam.training.data.comparison.TrainingComparisonCalculator
+import by.rowing.sanbaiteam.training.data.comparison.TrainingPieceMatcher
 import by.rowing.sanbaiteam.training.data.entity.TrainingAthletePieceEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingEntity
 import by.rowing.sanbaiteam.training.data.entity.TrainingPieceType
@@ -33,6 +35,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlin.text.get
+import kotlin.text.map
+import kotlin.text.orEmpty
 
 internal class TrainingRepository(
     private val dao: TrainingDao,
@@ -127,30 +132,24 @@ internal class TrainingRepository(
             distanceMeters = PersonalBestPercent.DEFAULT_PB_DISTANCE_METERS,
         )
         val nameMap = athletesRepository.getAthleteNameMap(baseAthleteIds)
+        val baseDurations = pieces
+            .distinctBy { it.order }
+            .sortedBy { it.order }
+            .map { piece ->
+                PieceDurationKey(
+                    order = piece.order,
+                    distanceMeters = piece.distanceMeters,
+                    timeMillis = piece.timeMillis,
+                )
+            }
         val comparedByOrder = comparedSources
             .flatMap { source ->
-                source.crewPieces.map { piece ->
-                    piece.order to ComparablePiece(
-                        distanceMeters = piece.distanceMeters,
-                        timeMillis = piece.timeMillis,
-                        strokeRate = piece.strokeRate,
-                        averagePowerWatts = source.chartDataByOrder[piece.order]?.averagePowerWatts
-                            ?: TrainingPower.estimatedWatts(
-                                pieceType = training.type,
-                                distanceMeters = piece.distanceMeters,
-                                timeMillis = piece.timeMillis,
-                            ),
-                        averageHeartRate = piece.averageHeartRate,
-                        maxHeartRate = piece.maxHeartRate,
-                        recoveryHeartRate = piece.recoveryHeartRate,
-                        lactate = piece.lactate,
-                        percentOfPb = personalBestPercent(
-                            piece = piece,
-                            athleteIds = source.athleteIds,
-                            personalBests = personalBests,
-                        ),
-                    )
-                }
+                comparablePiecesByBaseOrder(
+                    source = source,
+                    baseDurations = baseDurations,
+                    pieceType = training.type,
+                    personalBests = personalBests,
+                )
             }
             .groupBy(
                 keySelector = { it.first },
@@ -286,6 +285,73 @@ internal class TrainingRepository(
             ),
         )
     }
+
+    private fun comparablePiecesByBaseOrder(
+        source: ComparedTrainingSource,
+        baseDurations: List<PieceDurationKey>,
+        pieceType: TrainingPieceType,
+        personalBests: Map<Long, AthletePersonalBestEntity>,
+    ): List<Pair<Int, ComparablePiece>> {
+        val piecesByOrder = source.crewPieces.groupBy { it.order }
+        val comparedDurations = source.crewPieces
+            .distinctBy { it.order }
+            .sortedBy { it.order }
+            .map { piece ->
+                PieceDurationKey(
+                    order = piece.order,
+                    distanceMeters = piece.distanceMeters,
+                    timeMillis = piece.timeMillis,
+                )
+            }
+        return TrainingPieceMatcher.match(
+            base = baseDurations,
+            compared = comparedDurations
+        )?.flatMap { (baseOrder, comparedOrder) ->
+            piecesByOrder[comparedOrder].orEmpty().map { piece ->
+                baseOrder to toComparablePiece(
+                    piece = piece,
+                    source = source,
+                    pieceType = pieceType,
+                    personalBests = personalBests,
+                )
+            }
+        } ?: piecesByOrder.flatMap { (order, comparedPieces) ->
+            comparedPieces.map { piece ->
+                order to toComparablePiece(
+                    piece = piece,
+                    source = source,
+                    pieceType = pieceType,
+                    personalBests = personalBests,
+                )
+            }
+        }
+    }
+
+    private fun toComparablePiece(
+        piece: TrainingAthletePieceEntity,
+        source: ComparedTrainingSource,
+        pieceType: TrainingPieceType,
+        personalBests: Map<Long, AthletePersonalBestEntity>,
+    ): ComparablePiece = ComparablePiece(
+        distanceMeters = piece.distanceMeters,
+        timeMillis = piece.timeMillis,
+        strokeRate = piece.strokeRate,
+        averagePowerWatts = source.chartDataByOrder[piece.order]?.averagePowerWatts
+            ?: TrainingPower.estimatedWatts(
+                pieceType = pieceType,
+                distanceMeters = piece.distanceMeters,
+                timeMillis = piece.timeMillis,
+            ),
+        averageHeartRate = piece.averageHeartRate,
+        maxHeartRate = piece.maxHeartRate,
+        recoveryHeartRate = piece.recoveryHeartRate,
+        lactate = piece.lactate,
+        percentOfPb = personalBestPercent(
+            piece = piece,
+            athleteIds = source.athleteIds,
+            personalBests = personalBests,
+        ),
+    )
 
     private suspend fun loadComparedSources(
         base: TrainingEntity,
