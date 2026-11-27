@@ -265,7 +265,8 @@ internal class TrainingPieceMatcherTest {
         )
 
         assertEquals(
-            mapOf(0 to 0), TrainingPieceMatcher.match(
+            mapOf(0 to 0),
+            TrainingPieceMatcher.match(
                 base = base,
                 compared = compared
             )
